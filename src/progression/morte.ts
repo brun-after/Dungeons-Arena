@@ -46,6 +46,7 @@ import { concederXpDeProgressao, perderXp } from './nivel';
 import { ID_LIVRO_RARO } from './itens';
 import { familiaDaHabilidade } from './itens-progressao';
 import { sortearItem } from './sorteio';
+import { antesDeCair, aoCair } from '../entities/criaturas/morte';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -127,6 +128,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
         continue;
       }
     }
+    // Marco 45 (16/11/2026, D-181): o Arqueiro de Osso desmonta em vez de cair (uma vez).
+    if (antesDeCair(estado, ctx, e, saida)) continue;
     const porId = e.participacao.reduce<{ id: string; tick: number } | null>(
       // A participação é inserida na ordem dos golpes: o último do mesmo tick dá o abate.
       (ultimo, p) => (!ultimo || p.tick >= ultimo.tick ? p : ultimo),
@@ -188,12 +191,14 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       const matador = porId ? buscarEntidade(estado, porId.id) : undefined;
       if (matador?.invocacao && !e.invocacao) matador.invocacao.abates++;
       explodirSeIsca(estado, ctx, e, saida);
+      // Marco 45 (D-181): o estilhaço, a fome dos Famintos e os objetos de arena dos chefes.
+      aoCair(estado, ctx, e, saida);
       concederXp(estado, ctx, e, saida, quemAbateu);
       // Boss morto abre a passagem (§2.1, marco 10A-1).
       aoMorrerBoss(estado, ctx, e, saida);
       // Invocações não soltam nada nem voltam (§2.9). Marco 39 (12/11/2026, D-145): onde o modo manda (o Mundo), o
       // renascido também solta, com o ouro e os itens reduzidos pelo desgaste do XP.
-      if (!e.invocacao && (e.abates === 0 || ctx.modo.dropsDeRenascido)) largarDrops(estado, ctx, e, saida, quemAbateu);
+      if (!e.invocacao && !e.criatura?.donoId && (e.abates === 0 || ctx.modo.dropsDeRenascido)) largarDrops(estado, ctx, e, saida, quemAbateu);
       // Dominação (§2.9, marco 8A-2): volta do lado de quem a marcou, em vez de sair do mundo.
       if (tentarDominar(estado, ctx, e, saida)) {
         e.morto = false;

@@ -181,6 +181,7 @@ describe('arquétipos', () => {
   });
 
   it('boss reveza golpe com as habilidades (área e invocação)', () => {
+    // Marco 45 (D-181): o Arauto Caído chama os fiéis (antes, os lacaios).
     const ctx = ctxCom(SALA_ABERTA, { boss: { hesitacaoS: 0.1 } });
     const c = cena(ctx, [5, 5], [['boss', 6, 5]]);
     const j = c.ent('j');
@@ -188,7 +189,7 @@ describe('arquétipos', () => {
     j.hp = j.hpMax = 100_000;
     c.rodar(ticksDe(15_000), () => c.de('acaoIniciada').length >= 4);
     const usadas = c.de('acaoIniciada').map((e) => e.habilidadeId);
-    expect(usadas.slice(0, 4)).toEqual(['golpe_demoniaco', 'marca_de_area', 'golpe_demoniaco', 'invocar_lacaios']);
+    expect(usadas.slice(0, 4)).toEqual(['golpe_demoniaco', 'marca_de_area', 'golpe_demoniaco', 'chamar_fieis']);
   });
 
   it('o jogador ataca sozinho quem o persegue, sem selecionar alvo', () => {

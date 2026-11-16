@@ -93,6 +93,8 @@ export interface EstadoCriatura {
   inspiraAteTick?: number;
   proximoFoleTick?: number;
   rolouCelulas?: number;
+  /** Desde quando a matilha corre em roda (o Galgo do Vendaval). */
+  rolandoDesde?: number;
   rolando?: boolean;
   proximoTracoTick?: Record<string, number>;
   faixas?: { x: number; y: number; dx: number; dy: number; n: number; ateTick: number }[];
@@ -105,6 +107,19 @@ export interface EstadoCriatura {
   expostoAteTick?: number;
   arena?: Celula;
   marcados?: string[];
+  /** O último golpe que a criatura levou: em área ou sagrado (o Arqueiro de Osso não se remonta deles). */
+  golpeFinal?: { area: boolean; sagrado: boolean };
+  /** As marcas no chão do chefe (silêncio, bombardeio, colunas, mergulho), com o que fazem no fim. */
+  zonas?: { tipo: string; x: number; y: number; raio: number; ateTick: number }[];
+  /** O chefe dono do objeto de arena (a torre, o pilar, o casulo, o braseiro, a estátua do aliado). */
+  donoId?: string;
+  nascidoTick?: number;
+  /** O objeto que se desfaz sozinho (a pedra do Fundeiro) neste tick. */
+  someTick?: number;
+  /** Quantos raios o Para-raios já engoliu (devolve a cada N). */
+  raios?: number;
+  /** Os fios do Marionetista na névoa: não aparecem na tela. */
+  fiosOcultos?: boolean;
 }
 
 export function clonarCriatura(c: EstadoCriatura): EstadoCriatura {
@@ -116,7 +131,16 @@ export function clonarCriatura(c: EstadoCriatura): EstadoCriatura {
     ...(c.objetos ? { objetos: [...c.objetos] } : {}),
     ...(c.arena ? { arena: { ...c.arena } } : {}),
     ...(c.marcados ? { marcados: [...c.marcados] } : {}),
+    ...(c.golpeFinal ? { golpeFinal: { ...c.golpeFinal } } : {}),
+    ...(c.zonas ? { zonas: c.zonas.map((z) => ({ ...z })) } : {}),
   };
 }
 
 export const REACAO_NEUTRA: ReacaoNaFenda = { vidaPct: 0, danoPct: 0, velocidadePct: 0, curaPctPorS: 0, golpe: [], marcas: [] };
+
+/** As mecânicas de chefe que existem (uma função por id em chefes-mecanicas.ts; o conteúdo confere o preset). */
+export const MECANICAS_DE_CHEFE = [
+  'bandoArmadura', 'fornalhaFases', 'zonasSilencio', 'estatuasDeAliados', 'torresDeRecarga', 'refens', 'nevoaCrescente', 'casulos',
+  'roubarSombra', 'braseiros', 'sonho', 'mascaras', 'colunas', 'geodo', 'pecados', 'bombardeio', 'voo',
+] as const;
+export type IdMecanica = (typeof MECANICAS_DE_CHEFE)[number];

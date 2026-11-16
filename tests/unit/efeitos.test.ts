@@ -329,7 +329,7 @@ describe('orbe de efeito', () => {
 describe('conteúdo que exercita os efeitos', () => {
   it('as habilidades dos inimigos trazem os efeitos do 8A', () => {
     const efeitosDe = (id: string) => obter(CONTEUDO.habilidades.get(id), id).efeitos.map((e) => e.tipo);
-    expect(efeitosDe('teia')).toEqual(['sem_movimento']);
+    expect(efeitosDe('teia')).toEqual(['sem_movimento', 'puxao']);
     expect(efeitosDe('marca_de_area')).toEqual(['dano_periodico']);
     expect(efeitosDe('golpe_viscoso')).toEqual(['modificar_dano', 'rastro_efeito']);
     expect(efeitosDe('golpe_pesado')).toEqual(['empurrao']);

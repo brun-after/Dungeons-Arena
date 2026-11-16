@@ -3,6 +3,7 @@
 // (ou, sem nenhuma, a qualquer uma da lista da região que caiba). Puro.
 
 import { ehObjeto, Leitor } from '../../core/validar';
+import { MECANICAS_DE_CHEFE } from './tipos';
 import type { PresetInimigo } from '../presets';
 
 export interface Fenda {
@@ -71,6 +72,12 @@ export function presetNoNivel(presets: ReadonlyMap<string, PresetInimigo>, pedid
 export function conferirDimensoes(dimensoes: ReadonlyMap<string, Dimensao>, presets: ReadonlyMap<string, PresetInimigo>): string[] {
   const erros: string[] = [];
   for (const p of presets.values()) if (p.dimensao !== null && !dimensoes.has(p.dimensao)) erros.push(`preset ${p.id}: dimensão desconhecida "${p.dimensao}"`);
+  // Marco 45 (D-181): a mecânica do chefe existe e o objeto de arena dela também.
+  for (const p of presets.values()) {
+    if (!p.chefe) continue;
+    if (!(MECANICAS_DE_CHEFE as readonly string[]).includes(p.chefe.mecanica)) erros.push(`preset ${p.id}: mecânica de chefe desconhecida "${p.chefe.mecanica}"`);
+    if (p.chefe.ref && !presets.has(p.chefe.ref)) erros.push(`preset ${p.id}: objeto de arena desconhecido "${p.chefe.ref}"`);
+  }
   // Os conteúdos de teste sem criaturas de Filo não precisam das nove dimensões completas.
   if (dimensoes.size === 0 || ![...presets.values()].some((p) => p.dimensao !== null)) return erros;
   for (const d of dimensoes.values()) {

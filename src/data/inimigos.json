@@ -1691,7 +1691,9 @@
       "classe": "conjurador",
       "defesa": 0,
       "ataqueBasico": "cogumelo_bomba",
-      "habilidades": [],
+      "habilidades": [
+        "cogumelo_bomba_rapido"
+      ],
       "intervaloAtaqueMs": 2600,
       "resistencias": {
         "veneno": 75,

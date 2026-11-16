@@ -30,7 +30,9 @@ import { moverProjeteis } from '../combat/projeteis';
 import { processarSolos } from '../combat/solos';
 import { vivo } from '../entities/entidade';
 import { skinValida } from '../entities/skins';
-import { processarIa } from '../entities/ia';
+import { filtroDeAtivacao, processarIa } from '../entities/ia';
+import { processarTracos } from '../entities/criaturas/tracos';
+import { processarChefes } from '../entities/criaturas/chefes';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { aplicarAtualizacao } from '../progression/atualizacao-39';
 import { ehDificuldade } from '../modos/dificuldade';
@@ -79,6 +81,10 @@ export function simular(
   processarPassagens(estado, ctx);
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
+  // Marco 45 (16/11/2026, D-181): os traços das criaturas de Filo e as mecânicas de arena dos chefes.
+  const acordada = filtroDeAtivacao(estado, ctx.modo.iaRaioAtivacao);
+  processarTracos(estado, ctx, acordada, saida);
+  processarChefes(estado, ctx, acordada, saida);
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   // Marco 27 (D-126): o solo amaldiçoado e a runa pulsam.

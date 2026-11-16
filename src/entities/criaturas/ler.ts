@@ -51,7 +51,7 @@ export function lerTracos(l: Leitor, v: unknown): Traco[] {
   return l.lista({ tracos: v }, 'tracos').flatMap((item) => {
     const o = l.objeto(item, 'tracos');
     const tipo = l.opcao(o, 'tipo', TIPOS);
-    const numeros = Object.fromEntries((CAMPOS[tipo] ?? []).map((c) => [c, l.numero(o, c, { min: 0 })]));
+    const numeros = Object.fromEntries(CAMPOS[tipo].map((c) => [c, l.numero(o, c, { min: 0 })]));
     const base = { ...numeros, tipo };
     // Os campos de efeito e de texto de cada tipo (o resto já é número).
     if (tipo === 'aura') return [{ ...base, em: l.opcao(o, 'em', ['aliados', 'hostis'] as const), efeitos: efeitos(l, o, 'efeitos') } as Traco];

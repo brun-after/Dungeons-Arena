@@ -10997,7 +10997,7 @@
       "raioArea": 3,
       "custoRecurso": 0,
       "recargaMs": 0,
-      "conjuracaoMs": 300,
+      "conjuracaoMs": 600,
       "politicaAlvo": "proprio",
       "politicaImpacto": "area",
       "interrupcao": "interrompivel",
@@ -11227,6 +11227,52 @@
         "solo": {
           "pulsos": 1,
           "atrasoMs": 2000,
+          "raio": 1,
+          "pctPulso": 100
+        }
+      }
+    },
+    {
+      "id": "cogumelo_bomba_rapido",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Cogumelo-bomba de estouro rápido",
+      "icone": "veneno",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 4,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 3000,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "envenenado",
+          "valor": 2,
+          "pct": 50,
+          "duracaoMs": 4000
+        },
+        {
+          "tipo": "confuso",
+          "duracaoMs": 1500
+        }
+      ],
+      "visual": {
+        "cor": "#8fd16a",
+        "impacto": "bolhas",
+        "som": "projetil",
+        "assinatura": "campo_minado"
+      },
+      "variacao": {
+        "solo": {
+          "pulsos": 1,
+          "atrasoMs": 800,
           "raio": 1,
           "pctPulso": 100
         }

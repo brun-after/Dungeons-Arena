@@ -64,7 +64,7 @@ describe('Necromante: passiva e colheita', () => {
     c.matar(c.npc('a'), c.j);
     expect(c.meus()).toHaveLength(2);
     const a = obter(c.meus().find((e) => e.invocacao?.necromancia === 'reanimado'));
-    expect(a.invocacao?.modeloOriginal).toBe('goblin');
+    expect(a.invocacao?.modeloOriginal).toBe('fagulheiro');
     expect(a.invocacao?.expiraTick).toBe(Number.MAX_SAFE_INTEGER);
     const xp = c.j.xp; c.matar(c.npc('b'), c.servo());
     expect(c.meus()).toHaveLength(3); expect(c.j.xp).toBeGreaterThan(xp);
