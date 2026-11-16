@@ -59,7 +59,7 @@ export interface Balance {
      * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos
      * dele causam e levam.
      */
-    necromante: { protecaoMs: number; doisPct: number; grupoPct: number; danoProprioPct: number; vinculoCausadoPct: number; vinculoLevadoPct: number; lanca: { alcanceAlvo: number; perfuradoPct: number } };
+    necromante: { protecaoMs: number; doisPct: number; grupoPct: number; danoProprioPct: number; vinculoCausadoPct: number; vinculoLevadoPct: number; /** D-179. */ curaBasico: { pct: number; perdaPorServoPct: number }; lanca: { alcanceAlvo: number; perfuradoPct: number } };
   };
   necromancia: { ataquesPorInvocacao: number; resistenciaPorSabPct: number; resistenciaSabMaxPct: number; danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number; /** Marco 22 (D-090). */ distanciaRetorno: number; atributoPorInt: number; perdaPorQuantidade: number };
   tatica: { respostaPct: number; respostaMs: number; aparoJanelaMaxMs: number; veuJanelaMaxMs: number; muralhaMaxMs: number; campoMaxMs: number; janelaEtapaMs: number; janelaTotalMs: number; tetoCampos: number; escudoMaxHpPct: number; fluxoIntervaloMs: number; fluxoDuracaoMs: number; fluxoTeto: number; consumoTeto: number; consumoPct: number; colisaoDano: number; colisaoAtordoarMs: number; tenacidadeMaxPct: number; removiveis: string[] };
@@ -435,7 +435,7 @@ export interface Balance {
     /** 08/11/2026 (D-138): quanto tempo depois do último golpe entre os dois o refúgio ainda não protege. */
     refugio: { combateS: number };
     repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
-    exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
+    exercitoNecromante: { /** D-179. */ noNivelBase: number; nivelBase: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
     /**
      * Marco 44 (15/11/2026, D-178): a tocha que se leva. Atrai os monstros mais fortes (raio × `atraiMult`), afasta os

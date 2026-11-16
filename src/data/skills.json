@@ -9077,7 +9077,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_praga",
@@ -9121,7 +9121,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_foice",
@@ -9165,7 +9165,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_cova",
@@ -9209,7 +9209,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_lamento",
@@ -9254,7 +9254,7 @@
         "guiado": 30
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_sanguineo",
@@ -9298,7 +9298,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_espectro",
@@ -9342,7 +9342,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_colheita",
@@ -9386,7 +9386,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "basico_chakram",
@@ -9758,7 +9758,7 @@
         }
       },
       "basico": true,
-      "mobilidade": "lenta"
+      "mobilidade": "livre"
     },
     {
       "id": "bumerangue",
