@@ -52,6 +52,8 @@ import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 import { curaDoBasico, vinculoDosMortos } from './necromancia';
 import { penetracaoPct } from '../progression/vinculo';
 import { ESTADOS_DE_CONTROLE } from './eixos';
+import { aposEfeitosDaCriatura, aposGolpeDaCriatura, fatorCausadoDaCriatura, fatorRecebidoDaCriatura } from '../entities/criaturas/golpes';
+import { forcaDoChefe } from '../entities/criaturas/chefes';
 
 export interface Impacto {
   acaoId: number;
@@ -222,7 +224,9 @@ export function aplicarImpacto(
     const absorve = absorvido > 0 && hab.fracaoElemental === undefined ? Math.max(0, comPenetracao(100 + absorvido, pen) - 100) : 0;
     // Marco 25 (25/10/2026, D-102): entre personagens, as skills de classe batem menos no modo que pede (arena).
     const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
+    // Marco 45 (16/11/2026, D-182): os traços das criaturas de Filo e as mecânicas dos chefes, nos dois lados.
+    const criatura = fatorRecebidoDaCriatura(estado, ctx, alvo, atacante, hab, costas) * (atacante ? fatorCausadoDaCriatura(estado, ctx, atacante, alvo) * forcaDoChefe(estado, ctx, atacante) : 1);
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp * criatura;
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -268,6 +272,8 @@ export function aplicarImpacto(
       // D-173: a cura, o empurrão e a runa que os estilos do dono dão ao golpe do companheiro.
       if (atacante?.invocacao?.companheiro) aposGolpeDoCompanheiro(estado, ctx, atacante, alvo, hab, saida);
     }
+    // Marco 45 (D-182): a placa que cai, a fuga, a divisão, a cópia, a sangria e o golpe do terreno.
+    aposGolpeDaCriatura(estado, ctx, alvo, atacante, hab, dano, saida);
   }
   if (hab.formulaCura !== null) {
     const bruta = rolar(estado.rng, hab.formulaCura).total;
@@ -383,6 +389,7 @@ export function aplicarImpacto(
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     if (sobre) aplicarEfeito(estado, ctx, sobre, pronto, origem, mira, saida);
   }
+  aposEfeitosDaCriatura(estado, ctx, alvo, atacante, hab);
   // Marco 40 (D-157): a forma de controle passa os estados de controle ao vizinho hostil mais perto do alvo.
   if (hab.controleVizinho && conjurador && conjurador !== alvo) controleNoVizinho(estado, ctx, conjurador, alvo, hab, origem, mira, saida);
   if (conjurador) {

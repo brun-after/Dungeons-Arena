@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.5 · **Data:** 15/11/2026
+**Versão:** 1.6 · **Data:** 16/11/2026
 
 > **Histórico**
+> - **1.6 (16/11/2026)**: marco 45: as criaturas de Filo, as fendas, as reações aos terrenos e o monstruário.
 > - **1.5 (15/11/2026)**: marco 44: a noite, a tocha, a fogueira de acampamento, a caça noturna e a vila pela hora.
 > - **1.4 (15/11/2026)**: marco 43: relevo na geometria, geografia nova, cenário composto e tochas reais.
 > - **1.3 (15/11/2026)**: marco 42: cores por bioma, dia e noite, tocha, noite perigosa, matas fechadas, vento e relevo.
@@ -320,3 +321,18 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
   para os monstros.
 - **Os elementos.** Sombra e gelo ficam mais fortes à noite; luz e fogo, de dia.
 - **Ver sem servidor:** `?bench=mundo&regiao=campos_do_oeste&x=60&y=60&hora=N&tocha=1`.
+
+## As criaturas de Filo (marco 45, 16/11/2026)
+
+- **As fendas.** Todo monstro do Mundo vem de uma das nove dimensões e sobe por uma rachadura no chão, na cor dela. Isso
+  vale para a população da região, os reforços da noite e os lacaios dos chefes. Cada região pesa mais algumas
+  dimensões no sorteio (a tabela está no Monstruário).
+- **A faixa de nível.** Toda criatura tem um nível de entrada. Algumas também têm um pico: acima dele, a fenda traz
+  outra da mesma dimensão. As fofas vão até o nível 30.
+- **Os terrenos.** Brasas, gelo fino, campo elétrico, miasma, lama, névoa sombria, luz sagrada e água mudam algo em
+  cada criatura. O Tiçãozinho cresce nas brasas, o Floquinho rola mais rápido no gelo e a luz sagrada impede o
+  Arqueiro de Osso de se remontar. Os terrenos em si não mudaram.
+- **Os chefes.** Cada um tem a sua mecânica de arena, e a regra do momento aparece na tela (as máscaras do Rei, os
+  pecados do Hierofante).
+- **O monstruário.** Fica no fim do diário, na mochila. Ver de perto revela a criatura, derrotar revela o resto, e os
+  chefes contam as vitórias.

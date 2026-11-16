@@ -171,6 +171,12 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('invocou', (ev) => {
     hud.registrar(t('log.invocou', { dono: nome(ev.donoId), alvo: nome(ev.id) }));
   });
+  // Marco 45 (16/11/2026, D-182): a regra que o chefe de Filo põe na tela (a máscara do Rei, o pecado do Hierofante).
+  bus.on('regraDoChefe', (ev) => {
+    const texto = t(`chefe.regra.${ev.regra}` as ChaveTexto, { nome: nome(ev.id) });
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
   bus.on('dominou', (ev) => {
     hud.registrar(t('log.dominou', { alvo: nome(ev.id), dono: nome(ev.donoId) }));
   });

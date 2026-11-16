@@ -10,7 +10,7 @@ import { alturaDaTira, pose, TIRAS, type EntradaPose, type EstiloCaminhada } fro
 import { Camera } from '../../src/render/camera';
 import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
-import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
+import { ehModelo, MODELO_JOGADOR, MODELOS, modelo2d } from '../../src/render/modelos';
 import { ESPESSURA_PAREDE, paredesDaSala, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
 import { alfaDoTelhado, dentroDoTelhado } from '../../src/render/telhados-iso';
 import type { Telhado } from '../../src/world/fase';
@@ -301,9 +301,11 @@ describe('atlas dos modelos (gerado no build)', () => {
   it('todo modelo dos presets, das classes e o do jogador existem, nas duas vistas', () => {
     // Marco 14: os modelos das classes jogáveis também.
     const usados = new Set([...[...CONTEUDO.presets.values()].map((p) => p.modelo), ...[...CONTEUDO.classes.values()].map((c) => c.modelo)]);
-    for (const m of [...usados, MODELO_JOGADOR]) {
-      expect(ehModelo(m), m).toBe(true);
-      if (!ehModelo(m)) continue;
+    // Marco 45 (D-182): as criaturas de Filo usam o desenho 2D parecido (modelo2d).
+    for (const nome of [...usados, MODELO_JOGADOR]) {
+      const m = modelo2d(nome);
+      expect(m, nome).not.toBeNull();
+      if (!m) continue;
       for (const v of VISTAS) for (let q = 0; q < MODELOS[m].quadros; q++) expect(atlas.quadros[chaveQuadro(m, v, q)], `${m}/${v}/${q}`).toBeDefined();
     }
     // Os 11 da spec.

@@ -133,11 +133,14 @@ describe('inimigos novos (D-135)', () => {
     const r = criarInimigo(preset('runista_medroso'), 'r', 3, 6, ctx.balance);
     estado.entidades.push(j, r);
     const fases = new Set<string>();
+    // Marco 45 (D-182): com seis runas em volta do alvo, o anel do Riscador se fecha e as gasta; conta o máximo.
+    let runas = 0;
     for (let i = 0; i < 60 * 10; i++) {
       tick();
       if (r.ia?.especial) fases.add(r.ia.especial);
+      runas = Math.max(runas, estado.armadilhas.filter((a) => a.runa && a.donoId === 'r').length);
     }
-    expect(estado.armadilhas.filter((a) => a.runa && a.donoId === 'r').length).toBeGreaterThan(1);
+    expect(runas).toBeGreaterThan(1);
     expect(fases.has('fuga') && fases.has('descanso')).toBe(true);
   });
 

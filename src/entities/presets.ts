@@ -7,6 +7,8 @@ import { formulaValida } from '../combat/dados';
 import { ehElemento, type Elemento } from '../combat/elementos';
 import { lerPassiva, type Passiva } from '../combat/habilidades';
 import { ehTipoEfeito, type TipoEfeito } from '../combat/registro-efeitos';
+import { lerChefe, lerFaixa, lerNaFenda, lerTracos } from './criaturas/ler';
+import type { MecanicaDeChefe, NaFenda, Traco } from './criaturas/tipos';
 import { ATRIBUTOS_NEUTROS, type Arquetipo, type Atributos, type ClasseCombate, type ComportamentoInvocacao } from './entidade';
 
 const CLASSES: readonly ClasseCombate[] = ['corpo_a_corpo', 'conjurador', 'atirador'];
@@ -44,6 +46,16 @@ export interface PresetInimigo {
   soMundo: boolean;
   /** 06/11/2026 (D-135): só entra na geração pelos pesos do tema (as fases sem tema, já salvas, saem iguais). */
   soPorTema: boolean;
+  /**
+   * Marco 45 (16/11/2026, D-182): a dimensão de onde a criatura vem (data/dimensoes.json; null nas invocações), a faixa
+   * de nível (acima do pico a fenda não a traz mais), os traços, as reações aos terrenos e a mecânica do chefe.
+   */
+  dimensao: string | null;
+  nivelMin: number;
+  nivelPico: number | null;
+  tracos: readonly Traco[];
+  naFenda: NaFenda;
+  chefe: MecanicaDeChefe | null;
 }
 
 export interface HabilidadePorNivel {
@@ -51,8 +63,9 @@ export interface HabilidadePorNivel {
   id: string;
 }
 
-export type ComportamentoEspecial = 'saltador' | 'armadilheiro';
-const COMPORTAMENTOS_ESPECIAIS: readonly ComportamentoEspecial[] = ['saltador', 'armadilheiro'];
+// Marco 45 (D-182): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
+export const COMPORTAMENTOS_ESPECIAIS = ['saltador', 'armadilheiro', 'fole', 'rolante', 'torre', 'ladrao', 'circular', 'pousar', 'fixo', 'fujao', 'plantador'] as const;
+export type ComportamentoEspecial = (typeof COMPORTAMENTOS_ESPECIAIS)[number];
 
 export interface PresetInvocacao {
   comportamento: ComportamentoInvocacao;
@@ -165,6 +178,11 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
       soMundo: o.soMundo === undefined ? false : l.booleano(o, 'soMundo'),
       soPorTema: o.soPorTema === undefined ? false : l.booleano(o, 'soPorTema'),
       ...(o.tinta !== undefined && { tinta: l.texto(o, 'tinta') }),
+      dimensao: o.dimensao === undefined ? null : l.texto(o, 'dimensao'),
+      ...lerFaixa(l, o),
+      tracos: lerTracos(l, o.tracos),
+      naFenda: lerNaFenda(l, o.naFenda),
+      chefe: lerChefe(l, o.chefe),
     };
     if (presets.has(p.id)) l.erro('id repetido');
     erros.push(...l.erros);

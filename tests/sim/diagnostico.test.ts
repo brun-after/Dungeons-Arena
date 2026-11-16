@@ -177,8 +177,9 @@ describe('integridade da execução completa', () => {
     // (4 abates, só 3 ondas concluídas). Com os companheiros do Aventureiro (D-165), na semente 21 (5 abates, 4 ondas).
     // Com a caça marcada (D-166), o atrito não tem mais o caso nas sementes baixas; na pressão (várias por onda), o
     // aventureiro do nível 1 no Difícil, semente 5, cai com 2 abates e nenhuma onda concluída (14/11/2026: com o
-    // companheiro seguindo a skill, a semente 3 virou vitória).
-    const base = simularDiagnostico({ ...configuracao, cenario: 'pressao', classe: 'aventureiro', nivel: 1, dificuldade: 'dificil', semente: 5, intervencao: 'sem_pocoes' });
+    // companheiro seguindo a skill, a semente 3 virou vitória). Marco 45 (16/11/2026, D-182): com os traços das
+    // criaturas de Filo, o caso é o do Normal, semente 5 (2 abates, nenhuma onda concluída).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'pressao', classe: 'aventureiro', nivel: 1, dificuldade: 'normal', semente: 5, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
     expect(base.abates).toBe(2);
     expect(base.ondasConcluidas).toBe(0);

@@ -152,7 +152,7 @@ describe('clima elemental', () => {
 describe('inimigos afins', () => {
   it('gelo cura o inimigo de gelo, e o estado de gelo não pega nele', () => {
     const c = cenario(undefined, { elemento: 'gelo', extrema: false });
-    expect(c.alvo.nome).toBe('Goblin de Gelo');
+    expect(c.alvo.nome).toBe('Fagulheiro de Gelo');
     expect(c.alvo.habilidades).toContain('lanca_de_gelo');
     c.alvo.hp = Math.floor(c.alvo.hpMax / 2);
     const antes = c.alvo.hp;
@@ -177,7 +177,7 @@ describe('inimigos afins', () => {
   it('a variante extrema só cai pelo oposto (ou sem elemento), com mais vida e XP', () => {
     const comum = cenario(undefined, { elemento: 'gelo', extrema: false });
     const c = cenario(undefined, { elemento: 'gelo', extrema: true });
-    expect(c.alvo.nome).toBe('Goblin Primordial de Gelo');
+    expect(c.alvo.nome).toBe('Fagulheiro Primordial de Gelo');
     expect(c.alvo.hpMax).toBeGreaterThan(comum.alvo.hpMax);
     expect(c.alvo.xpBase).toBeGreaterThan(comum.alvo.xpBase);
     expect(resistenciaPct(c.ctx, c.alvo, 'raio')).toBe(100);

@@ -3584,3 +3584,18 @@ body.toque .painel-estatisticas {
 body:not(.toque) .botao-acao.centralizar.flutuante {
   left: calc(150px + var(--seguro-esq));
 }
+
+/* Marco 45 (16/11/2026, D-182): o monstruário de Filo, no fim do diário. */
+.grupo-monstruario { border-left: 3px solid var(--cor-fenda, #7d6aa0); }
+.grupo-monstruario .sotaque-dimensao { margin: 2px 8px 6px; color: var(--texto-suave); font-style: italic; }
+.paginas-monstro { list-style: none; margin: 0; padding: 0 6px 6px; display: grid; gap: 6px; }
+.pagina-monstro { display: flex; gap: 8px; align-items: flex-start; padding: 5px 7px; background: #1b1724; border-radius: 3px; }
+.pagina-monstro.silhueta { opacity: 0.7; }
+.desenho-monstro { flex: 0 0 72px; height: 72px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.desenho-monstro canvas { max-width: 72px; max-height: 72px; object-fit: contain; }
+.desenho-monstro.sombra { align-items: center; }
+.silhueta-monstro { width: 44px; height: 56px; border-radius: 50% 50% 18% 18%; background: #0c0a10; box-shadow: 0 0 8px var(--cor-fenda, #7d6aa0); }
+.textos-monstro { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lore-monstro { color: var(--texto); line-height: 1.35; }
+.marca-chefe { font-size: 0.75rem; font-weight: normal; color: #f0c674; border: 1px solid #8a6d2f; border-radius: 3px; padding: 0 4px; }
+.pagina-monstro .vitorias { color: #9ad8a8; }

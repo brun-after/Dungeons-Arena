@@ -27,6 +27,7 @@ import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCami
 import { emPerigo, naAreaAfim } from '../world/perigos';
 import type { PresetInimigo } from './presets';
 import { perseguirEspecial } from './ia-especiais';
+import { cacarComoCriatura, COM_SKILLS_PROPRIAS } from './criaturas/comportamentos';
 import { semLinha } from '../combat/linha-de-tiro';
 import { ehBasico } from '../combat/basico';
 import { fracaoHabilidadePct, intervaloDeAtaqueMs, vezDaHabilidade } from './ia-cadencia';
@@ -345,7 +346,8 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
  */
 function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo): string {
   // 06/11/2026 (D-135): quem tem comportamento próprio usa as habilidades dele por lá (o salto, a runa).
-  if (e.habilidades.length === 0 || preset.comportamento) return e.ataqueBasico;
+  // Marco 45 (D-182): só os comportamentos que usam as skills do jeito deles (a torre, o galgo e o vigia revezam).
+  if (e.habilidades.length === 0 || (preset.comportamento && COM_SKILLS_PROPRIAS.has(preset.comportamento))) return e.ataqueBasico;
   const vez = vezDaHabilidade(ia.ataquesFeitos, fracaoHabilidadePct(e, ctx.balance.ia.cadencia));
   if (!vez.habilidade) return e.ataqueBasico;
   const id = e.habilidades[vez.indice % e.habilidades.length];
@@ -404,6 +406,8 @@ function perseguir(
   }
 
   // 06/11/2026 (D-135): o saltador e o armadilheiro (entities/ia-especiais.ts).
+  // Marco 45 (16/11/2026, D-182): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
+  if (cacarComoCriatura(estado, ctx, e, ia, preset, alvo, saida)) return;
   if (preset.comportamento && perseguirEspecial(estado, ctx, e, ia, preset, alvo, saida)) return;
   const daVez = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia, preset));
   const basico = resolverHabilidade(ctx, e.ataqueBasico);

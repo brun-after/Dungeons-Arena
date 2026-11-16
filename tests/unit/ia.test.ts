@@ -181,6 +181,7 @@ describe('arquétipos', () => {
   });
 
   it('boss reveza golpe com as habilidades (área e invocação)', () => {
+    // Marco 45 (D-182): o Arauto Caído chama os fiéis (antes, os lacaios).
     const ctx = ctxCom(SALA_ABERTA, { boss: { hesitacaoS: 0.1 } });
     const c = cena(ctx, [5, 5], [['boss', 6, 5]]);
     const j = c.ent('j');

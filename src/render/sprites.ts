@@ -26,7 +26,7 @@ import { runaDoElemento } from './runas-elementos';
 import type { Runa } from './runas';
 import { CELULA_PX } from './camera-calculo';
 import type { PontoVisual } from './interpolacao';
-import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
+import { MODELO_JOGADOR, MODELOS, modelo2d } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
 import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
@@ -307,10 +307,12 @@ export class CamadaEntidades {
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
     const classe = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo;
     const nome = trocado ?? e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
-    if (!ehModelo(nome)) return null;
-    const m = MODELOS[nome];
+    // Marco 45 (16/11/2026, D-182): a criatura de Filo desenha o 2D parecido, mas segue com o nome dela (o atlas 3D).
+    const nome2d = modelo2d(nome);
+    if (!nome2d) return null;
+    const m = MODELOS[nome2d];
     const quadro = quadroDoToken(m, { ...momento, fase: faseDe(e.id) });
-    const fonte = biblioteca.fonte(nome, vista, quadro);
+    const fonte = biblioteca.fonte(nome2d, vista, quadro);
     return fonte ? { fonte, estilo: m.estilo, proprio: false, modelo: nome, quadro, membros: m.membros } : null;
   }
 

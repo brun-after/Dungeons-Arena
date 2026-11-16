@@ -7,10 +7,11 @@ interface Entrada {quadroL:number;quadroA:number;ancoraX:number;ancoraY:number;p
 test('atlas dos dragões não corta quadros e o porte cresce com o nível',async({page},info)=>{
  test.skip(info.project.name!=='desktop','O atlas é o mesmo no desktop e no celular.');
  const catalogo=JSON.parse(readFileSync('src/assets/personagens/catalogo.json','utf8')) as Record<string,Entrada>;
- const m=catalogo.dragao_fogo;if(!m)throw Error('atlas ausente');
+ const m=catalogo.dragao_da_fornalha;if(!m)throw Error('atlas ausente');
  const balance=JSON.parse(readFileSync('src/data/balance.json','utf8')) as Balance;
- const imagem=readFileSync('src/assets/personagens/dragao_fogo.webp').toString('base64');
- for(const elemento of ['gelo','raio','veneno'])expect(catalogo[`dragao_${elemento}`]).toEqual(m);
+ const imagem=readFileSync('src/assets/personagens/dragao_da_fornalha.webp').toString('base64');
+ // Marco 45 (D-182): os dragões de Filo dividem o quadro.
+ for(const nome of ['dragao_do_silencio','dragao_engrenado','dragao_fermentado','dragao_das_ruinas'])expect(catalogo[nome]).toEqual(m);
  await page.setViewportSize({width:1200,height:510});
  const limites=await page.evaluate(async({m,imagem,portes})=>{
   const img=new Image();img.src='data:image/webp;base64,'+imagem;await img.decode();

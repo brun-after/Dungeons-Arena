@@ -6,7 +6,7 @@
 // personagens a 10 ms por quadro e 40 a 23 ms com uma passada só (contra 32 ms para 20 com uma passada por personagem).
 // Enquanto o modelo carrega (ou se falhar), quem pede recebe null e o atlas pré-renderizado continua.
 
-import { assar, CLIPES_DA_FERA, FERAS_VIVAS } from './feras-vivas';
+import { assar, CLIPES_DA_FERA, FERAS_VIVAS, type Fera } from './feras-vivas';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -21,7 +21,8 @@ import { grauDe, GRAUS, PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '..
 import type { Equipamento3d } from '../adornos';
 import type { AparenciaEquipada } from '../../entities/entidade';
 import { definirDetalhe, KITS_SOMBRIOS, type PecaSombria } from './armaduras-sombrias';
-import { CHEFES } from './chefes-vivos';
+import { CHEFES, CHEFES_DE_GEOMETRIA } from './chefes-vivos';
+import { PROCS_FILO } from './filo';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
@@ -60,15 +61,13 @@ interface Classe {
 }
 const HUMANO: Classe['clipes'] = { parado: 'Idle_Loop', andar: 'Walk_Loop', golpe: 'Sword_Attack', conjurar: 'Spell_Simple_Shoot', morte: 'Death01' };
 const MAGIA: Classe['clipes'] = { ...HUMANO, golpe: 'Spell_Simple_Shoot' };
-/** Marco 40 (D-165): o lobo e o urso do Aventureiro, de geometria (feras-vivas.ts), com os clipes assados. */
-const FERAS: Record<string, Classe> = Object.fromEntries(Object.entries(FERAS_VIVAS).map(([nome, criar]) => [nome, {
-  glb: '', altura: nome === 'urso_companheiro' ? 1.2 : 0.95, largura: 1, veste: null, arma: null,
-  clipes: { parado: CLIPES_DA_FERA.parado, andar: CLIPES_DA_FERA.andar, golpe: CLIPES_DA_FERA.golpe, conjurar: CLIPES_DA_FERA.conjurar, morte: CLIPES_DA_FERA.morte },
-  proc: () => {
-    const fera = criar();
-    return { grupo: fera.grupo, animacoes: assar(fera) };
-  },
-} satisfies Classe]));
+/** Marco 40 (D-165): o lobo e o urso do Aventureiro, de geometria (feras-vivas.ts), com os clipes assados. Marco 45 (D-182):
+ * e os chefes de geometria de Filo. */
+const CLIPES_FERA: Classe['clipes'] = { parado: CLIPES_DA_FERA.parado, andar: CLIPES_DA_FERA.andar, golpe: CLIPES_DA_FERA.golpe, conjurar: CLIPES_DA_FERA.conjurar, morte: CLIPES_DA_FERA.morte };
+const deFera = (altura: number, criar: () => Fera): Classe => ({
+  glb: '', altura, largura: 1, veste: null, arma: null, clipes: CLIPES_FERA, proc: () => { const fera = criar(); return { grupo: fera.grupo, animacoes: assar(fera) }; },
+});
+const FERAS: Record<string, Classe> = Object.fromEntries(Object.entries(FERAS_VIVAS).map(([nome, criar]) => [nome, deFera(nome === 'urso_companheiro' ? 1.2 : 0.95, criar)]));
 /** As alturas e os clipes como nas receitas do atlas (tools/sprites/receitas.ts). */
 const classe = (glb: string, altura: number, clipes: Classe['clipes']): Classe => ({ glb, altura, largura: 1, clipes, veste: null, arma: null });
 const CLASSES: Record<string, Classe> = {
@@ -78,6 +77,8 @@ const CLASSES: Record<string, Classe> = {
   necromante: classe('necromante', 1.14, MAGIA),
   aventureiro: classe('aventureiro', 1.12, HUMANO),
   ...FERAS,
+  // Marco 45 (16/11/2026, D-182): os chefes de geometria de Filo (os dragões e a Mãe-Colmeia).
+  ...Object.fromEntries(Object.entries(CHEFES_DE_GEOMETRIA).flatMap(([preset, modelo]) => { const c = PROCS_FILO[modelo]; return c ? [[`chefe:${preset}`, deFera(c.altura, c.criar)]] : []; })),
   // Os chefes humanoides (chefes-vivos.ts), pela chave `chefe:<preset>`.
   ...Object.fromEntries(Object.entries(CHEFES).map(([preset, c]) => [`chefe:${preset}`, {
     glb: c.glb, altura: c.altura, largura: c.largura ?? 1, clipes: { ...HUMANO, parado: c.parado, golpe: c.golpe }, veste: c.veste, arma: c.arma, tingir: c.tingir,
@@ -106,7 +107,7 @@ export function chaveDaSkin(skin: string | null | undefined, classe: string): st
   return k?.classe === classe && skinPorId(skin)?.classe === classe ? `skin:${skin}` : null;
 }
 /** A chave do modelo em tempo real do chefe (o preset), se houver. */
-export const chaveDoChefe = (preset: string): string | null => (Object.hasOwn(CHEFES, preset) ? `chefe:${preset}` : null);
+export const chaveDoChefe = (preset: string): string | null => (Object.hasOwn(CHEFES, preset) || Object.hasOwn(CHEFES_DE_GEOMETRIA, preset) ? `chefe:${preset}` : null);
 /**
  * Os golpes de cada tipo de arma (o primeiro é o do atlas, tools/sprites/receitas.ts VARIANTES). Marco 37
  * (05/11/2026): golpes seguidos alternam entre as variações (corte da direita, corte da esquerda, golpe de cima), para

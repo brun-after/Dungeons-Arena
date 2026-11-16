@@ -4,6 +4,8 @@
 // Base Characters, `traje:` Modular Character Outfits – Fantasy, `ual1:`/`ual2:` Universal Animation Library 1 e 2,
 // `kes:` KayKit Skeletons, `q:` Fantasy Props MegaKit; licenças em src/assets/personagens/LICENCAS.md.
 
+import { HUMANOS_FILO, PROCS_FILO, type Jeito, type Traje } from '../../src/render/vivos/filo';
+
 /** Os estados com animação própria na receita. */
 export type EstadoBase = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte';
 /**
@@ -110,6 +112,8 @@ export interface Equipamento {
 
 export interface Receita {
   nome: string;
+  /** Marco 45 (D-182): a veste de peças próprias da criatura de Filo (src/render/vivos/filo/humanos.ts), pelo modelo. */
+  veste?: string;
   /** O corpo: o traje (com a cabeça de `cabeca`) ou o personagem inteiro. */
   corpo: string;
   cabeca?: string;
@@ -165,6 +169,7 @@ const ZUMBI = { ...HUMANO, parado: 'ual2:Zombie_Idle_Loop', andar: 'ual2:Zombie_
 const ESQUELETO = { parado: 'kes:General:Idle_B', andar: 'kes:Movement:Walking_C', golpe: 'kes:General:Throw', conjurar: 'kes:General:Use_Item', morte: 'kes:General:Death_A' } as const;
 
 const RANGER_M = 'traje:Outfits/Male_Ranger';
+const PEASANT_F = 'traje:Outfits/Female_Peasant';
 const RANGER_F = 'traje:Outfits/Female_Ranger';
 const CAMPONES_M = 'traje:Outfits/Male_Peasant';
 const CABECA_M = 'base:Superhero_Male_FullBody';
@@ -280,27 +285,15 @@ export const RECEITAS: Receita[] = [
   // Marco 40 (13/11/2026, D-165): o lobo e o urso do Aventureiro (src/render/vivos/feras-vivas.ts), reserva do 3D em tempo real.
   { nome: 'lobo_companheiro', corpo: 'proc:lobo_companheiro', altura: 0.95, animacoes: null, exposicao: 1.3, quadro: { largura: 2, altura: 1.8, baixo: 0.6 } },
   { nome: 'urso_companheiro', corpo: 'proc:urso_companheiro', altura: 1.2, animacoes: null, exposicao: 1.3, quadro: { largura: 2.4, altura: 2.2, baixo: 0.7 } },
-  { nome: 'aranha', corpo: 'proc:aranha', altura: 0.55, animacoes: null, exposicao: 1.8, quadro: { largura: 1.8, altura: 1.4, baixo: 0.5 } },
   { nome: 'falcao', corpo: 'proc:falcao', altura: 0.216, animacoes: null, exposicao: 1.5 },
   // 06/11/2026: o falcão da skin Mágico (tools/sprites/magico3d.ts): a cartola, a cartola virada com a varinha e o pombo.
   { nome: 'cartola', corpo: 'proc:cartola', altura: 0.22, animacoes: null, exposicao: 1.6 },
   { nome: 'cartola_magica', corpo: 'proc:cartola_magica', altura: 0.362, animacoes: null, exposicao: 1.6 },
   { nome: 'pombo', corpo: 'proc:pombo', altura: 0.2, animacoes: null, exposicao: 1.4 },
-  // O slime: geometria feita na ferramenta (criaturas3d.ts), animada por deformação.
-  { nome: 'slime', corpo: 'proc:slime', altura: 0.62, animacoes: null, exposicao: 1.4 },
   // O boneco de treino (o único que usa `generico`) e o espantalho: o boneco da Quaternius, parado.
   { nome: 'generico', corpo: 'q:Dummy', altura: 1.1, animacoes: null },
   { nome: 'espantalho', corpo: 'q:Dummy', altura: 1.1, cores: { '': 0xd8c080 }, animacoes: null },
-  {
-    nome: 'goblin',
-    corpo: CAMPONES_M,
-    cabeca: CABECA_M,
-    altura: 0.82,
-    cores: { Peasant: 0x9a8058, Superhero: 0x8fb070, Regular: 0x8fb070, Hair: 0x2a2a1a },
-    exposicao: 1.8,
-    armas: [{ m: 'kes:assets/gltf/Skeleton_Blade.gltf', osso: 'hand_r', tamanho: 0.38, giro: [0, 0, 90] }],
-    animacoes: ESPADA,
-  },
+
   {
     nome: 'orc',
     corpo: CAMPONES_M,
@@ -313,18 +306,7 @@ export const RECEITAS: Receita[] = [
     animacoes: ESPADA,
     quadro: { largura: 1.7, altura: 1.9, baixo: 0.4 },
   },
-  {
-    nome: 'troll',
-    corpo: CAMPONES_M,
-    cabeca: CABECA_M,
-    altura: 1.5,
-    largura: 1.4,
-    cores: { Peasant: 0x7a7a6a, Superhero: 0x8a9aaa, Regular: 0x8a9aaa, Hair: 0x2a2a2a },
-    exposicao: 1.8,
-    armas: [{ m: 'kes:assets/gltf/Skeleton_Axe.gltf', osso: 'hand_r', tamanho: 0.9, giro: [0, 0, 90], cor: 0x6a5a4a }],
-    animacoes: ESPADA,
-    quadro: { largura: 1.85, altura: 2.2, baixo: 0.45 },
-  },
+
   {
     nome: 'vampiro',
     corpo: RANGER_M,
@@ -375,10 +357,46 @@ export const RECEITAS: Receita[] = [
   },
 ];
 
-// 02/11/2026: dragão CC0 de Cethiel/Drummyfish, textura negra e anatomia detalhada.
-// A cor elemental vem da energia em volta do corpo, não das escamas.
-for (const elemento of ['fogo', 'gelo', 'raio', 'veneno'] as const) {
-  RECEITAS.push({ nome: `dragao_${elemento}`, corpo: 'cethiel:dragon.dae', altura: 3.3, pxCelula: 21, apoiarNoChao: true,
-    exposicao: 2, cores: { '': 0xd9dbe2 }, quadro: { largura: 9, altura: 7.2, baixo: 2.7 },
-    animacoes: { parado: 'cethiel_idle:padrao', andar: 'cethiel_walk:padrao', golpe: 'cethiel_attack:padrao', conjurar: 'cethiel_attack:padrao', morte: 'cethiel_die:padrao' } });
+// Marco 45 (16/11/2026, D-182): as criaturas de Filo, todas feitas do zero. Os humanoides vestem as peças próprias no
+// rig dos jogadores (a mesma luz sombria das classes); as outras são geometria (src/render/vivos/filo). Nenhum modelo de
+// criatura de pacote: os dragões CC0, o goblin, o troll, o slime e a aranha saíram.
+const TRAJES: Readonly<Record<Traje, { corpo: string; cabeca?: string }>> = {
+  ranger_m: { corpo: RANGER_M, cabeca: CABECA_M },
+  ranger_f: { corpo: RANGER_F, cabeca: CABECA_F },
+  campones_m: { corpo: CAMPONES_M, cabeca: CABECA_M },
+  campones_f: { corpo: PEASANT_F, cabeca: CABECA_F },
+  nu_m: { corpo: CABECA_M },
+};
+const DO_JEITO: Readonly<Record<Jeito, Record<EstadoBase, string>>> = {
+  espada: ESPADA,
+  magia: MAGIA,
+  zumbi: ZUMBI,
+  soco: { ...ESPADA, golpe: 'ual1:Punch_Cross' },
+  arco: { ...HUMANO, golpe: 'ual1:Pistol_Shoot' },
+  arremesso: { ...HUMANO, golpe: 'ual2:OverhandThrow' },
+};
+/**
+ * Marco 45 (16/11/2026, D-182): o atlas dos inimigos não passa de 4096 px de lado (o limite de textura de muitos
+ * celulares); os quadros grandes (dragões, Mãe-Colmeia, os enormes) baixam os pixels por célula para caber.
+ */
+const pxQueCabe = (q?: { largura: number; altura: number }): { pxCelula: number } | object => {
+  if (!q) return {};
+  const px = Math.min(72, Math.floor(4096 / (21 * q.largura)), Math.floor(4096 / (16 * q.altura)));
+  return px < 72 ? { pxCelula: px } : {};
+};
+for (const [nome, h] of Object.entries(HUMANOS_FILO)) {
+  const t = TRAJES[h.traje];
+  RECEITAS.push({
+    nome, veste: nome, corpo: t.corpo, ...(t.cabeca ? { cabeca: t.cabeca } : {}), altura: h.altura, ...(h.largura ? { largura: h.largura } : {}),
+    sombrio: true, semCapuz: true,
+    cores: { Ranger: h.roupa, Peasant: h.roupa, Superhero: h.pele, Regular: h.pele, Hair: 0x1a1a1a },
+    ...(h.emissao ? { emissao: { Eye: h.emissao } } : {}),
+    animacoes: DO_JEITO[h.jeito], ...(h.quadro ? { quadro: h.quadro } : {}), ...pxQueCabe(h.quadro),
+  });
+}
+// O Necromante Ancestral (governante de Umbrália): o kit do necromante no grau 5 com a coroa de osso (chefes-vivos.ts).
+RECEITAS.push({ nome: 'necromante_ancestral', veste: 'necromante_ancestral', corpo: RANGER_M, cabeca: CABECA_M, altura: 1.2, sombrio: true, semCapuz: true,
+  cores: { Ranger: 0x3e3446, Superhero: 0xc4c0c8, Regular: 0xc4c0c8, Hair: 0x9c96a4 }, animacoes: MAGIA });
+for (const [nome, c] of Object.entries(PROCS_FILO)) {
+  RECEITAS.push({ nome, corpo: `proc:${nome}`, altura: c.altura, animacoes: null, exposicao: 1.5, ...(c.quadro ? { quadro: c.quadro } : {}), ...pxQueCabe(c.quadro) });
 }

@@ -102,7 +102,7 @@ describe('inimigo em alcance ataca sem parar', () => {
   it('as skills ganham espaço com o nível', () => {
     const fracao = (nivel: number) => {
       const acoes = duelo('vampiro', { nivel });
-      return acoes.filter((a) => a.habilidadeId !== 'raio_vampirico').length / acoes.length;
+      return acoes.filter((a) => a.habilidadeId !== obter(CONTEUDO.presets.get('vampiro'), 'vampiro').ataqueBasico).length / acoes.length;
     };
     expect(fracao(1)).toBe(0);
     expect(fracao(60)).toBeGreaterThan(0.25);

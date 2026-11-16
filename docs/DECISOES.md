@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.30 · **Data:** 16/11/2026
+**Versão:** 1.31 · **Data:** 16/11/2026
 
 > **Histórico**
+> - **1.31 (16/11/2026)**: D-182: marco 45, as criaturas de Filo (nove dimensões, 36 comuns e 18 chefes com mecânica própria, modelos 3D próprios pré-renderizados, a fenda e o monstruário no diário).
 > - **1.30 (16/11/2026)**: D-181: a nuvem da Forma de névoa vira uma massa sem forma que cresce com os mortos, sem os anéis em volta de cada um, e o rastro se desfaz em cinzas na mistura das afinidades.
 > - **1.29 (16/11/2026)**: D-179, adendo: os mortos do Necromante jogador num vermelho só (filtro de cor); a skin escolhida nas telas de seleção de personagem, fora do menu de pausa; a gadanha do Ceifador apontando para a frente.
 > - **1.28 (15/11/2026)**: D-180: o Salto de Guerra parado cobre 5 células e a Marcha ou a Arremetida o estendem; painel de estatísticas do personagem no computador.
@@ -5723,3 +5724,61 @@ giravam em anel em volta de cada um, parecendo o anel de duração dos mortos.
   que sobem e se espalham. O rastro continua depois que a névoa acaba.
 - **A cor das cinzas**: a média das cores das pontas do eneágono, cada uma pesando pelo vínculo (o grau de
   participação). Sem afinidade nenhuma, cinza. Só apresentação.
+
+## D-182 — Marco 45: as criaturas de Filo (16/11/2026)
+
+O desenho completo está no documento "Monstruário de Filo". Aqui ficam o que foi feito e onde o código se afastou dele.
+
+**Dados e simulação**
+- `data/dimensoes.json` traz as 9 dimensões (cor, fenda e jeito da rachadura). Os presets ganharam `dimensao`,
+  `nivelMin`, `nivelPico`, `tracos`, `naFenda` e `chefe` (`entities/presets.ts`). Os 21 de antes mantêm o id; os 33
+  novos entram em `inimigos.json`. Acima do pico, a fenda troca a criatura por outra da mesma dimensão
+  (`criaturas/dimensoes.ts → presetNoNivel`).
+- Os traços (`criaturas/tracos.ts`), os jeitos de caçar (`criaturas/comportamentos.ts`) e as mecânicas de chefe
+  (`criaturas/chefes*.ts`) rodam como etapas do tick, só nas entidades acordadas. As reações aos terrenos saem de
+  `naFenda` (marcas em dados), sem `if` por criatura.
+
+**Onde o código diverge do documento**
+- A Bobinadora usa `cadeia_raio` (o raio que salta) no lugar de uma skill nova.
+- Os braseiros do Apagador acendem com qualquer golpe, não só com tocha ou skill de fogo. Com só a tocha, a luta
+  travava para quem não tem fogo.
+- A estátua da Imperatriz traz o aliado de volta se for quebrada em até 10 s. Depois disso ele cai de vez.
+- O Esporeiro usa `cogumelo_bomba_rapido` (estoura em 0,8 s) na lama, em vez de mudar o atraso da mesma skill.
+- A fenda é desenhada pelo cliente quando uma criatura de Filo aparece ou volta da morte (`render/marcas-de-filo.ts`).
+  Não existe evento de nascer na simulação, e a primeira leva da cena não racha.
+- O Arauto Caído, o primeiro chefe das masmorras, luta sem mecânica de arena e chama lacaios de fora da dimensão dele.
+- O Silente é novo e não substitui nenhum inimigo antigo.
+
+**Balanceamento**
+- O Gosminho se divide em duas metades com 25% da vida cada. Antes eram 40% cada, o que somava 130% da vida e passava
+  da meta de tempo do comum.
+- O aviso útil mínimo (250 ms) vale para os chefes de Filo. Eles trocaram as skills de jogador curtas demais:
+  - Imperatriz das Estátuas: `chuva_gelo` no lugar de `nova_gelo`.
+  - Maquinista Voltaico: `chuva_raio` no lugar de `nova_raio`.
+  - Monarca de Geodo: `pedra_arremessada` no lugar de `nova_terra` e `prisao_terra`.
+  - Rei das Máscaras: perdeu `prisao_psiquico`.
+  - Harpia Soberana: perdeu `investida_fisico`; o mergulho dela é a mecânica.
+- `cogumelo_bomba` passa a conjurar em 600 ms.
+- O Arqueiro de Osso se remonta em 2,5 s com 30% da vida, não nos 4 s com 40% do documento. Desmontado, ele fica imune, e o jogador gasta as
+  recargas nele. Com 4 s, isso atrasava as lutas seguintes e o Aventureiro passava da meta no nível 5 (7,9 s contra 7 s).
+- O Arauto Caído chama Fagulheiros com `invocar_lacaios`, como chamava os goblins antes do marco. A versão com o
+  Pregador (`chamar_fieis`, que saiu) deixava a luta em dupla mais lenta que a solo: 123% do tempo, com meta de até 110%.
+
+**Modelos**
+- As 54 criaturas têm modelo próprio, sem pacote CC0 de criatura. Os humanoides usam o rig e as animações da Quaternius
+  dos jogadores, com veste própria (`render/vivos/filo/humanos*.ts`). Os outros são de geometria
+  (`render/vivos/filo/*.ts`). Todos são pré-renderizados em 8 direções (`tools/sprites`), e os chefes também vivem
+  em 3D em tempo real (`chefes-vivos.ts`).
+- O Espelhante virou humanoide: figura de porcelana com o espelho no lugar do rosto. A versão de geometria (núcleo e
+  cacos) não lia como a "figura de porcelana" do documento.
+- Os atlas antigos (goblin, troll, slime, aranha e os 4 dragões) saíram. Na vista 2D, cada criatura nova usa o desenho
+  vetorial mais parecido (`render/modelos → modelo2d`) para não sumir da tela.
+
+**Diário**
+- Novo tipo de entrada: `criatura`.
+  - Ver de perto (até 9 células) grava `criatura:<preset>`, que conta no x/y do diário.
+  - Derrotar grava `criatura:<preset>:caiu`, que fica fora da contagem e revela o resto da página.
+  - Os chefes contam as vitórias em `bolsa.vitorias`.
+- O monstruário (`ui/mochila-monstruario.ts`) fecha o diário, agrupado por dimensão. A página mostra o quadro parado de
+  frente, não o desenho girando nas 8 direções.
+- A regra que o chefe põe na tela (máscara ou pecado) sai como aviso (`ui/feedback.ts`, `chefe.regra.*`).

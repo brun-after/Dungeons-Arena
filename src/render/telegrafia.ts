@@ -12,6 +12,7 @@
 // partículas e o projétil é um núcleo de luz. As formas desenhadas ficam só para a qualidade sem partículas.
 
 import { naRunaDaSkill } from './vfx/transmutacao';
+import { MarcasDeFilo } from './marcas-de-filo';
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -53,6 +54,8 @@ export class CamadaTelegrafia {
   private readonly contornos = new Map<number, Contorno>();
   /** Marco 11A: última emissão de partículas por ação (telegrafia em partículas). */
   private readonly ultimaEmissao = new Map<number, number>();
+  /** Marco 45 (16/11/2026, D-182): a fenda de Filo e as marcas dos chefes no chão. */
+  private readonly filo = new MarcasDeFilo();
 
   constructor(
     camadaChao: Container,
@@ -73,6 +76,7 @@ export class CamadaTelegrafia {
     const local = estado.entidades.find((e) => e.id === idLocal);
     const tickVisual = estado.tick + alpha;
     const agora = performance.now();
+    this.filo.desenhar(chao, estado, ctx, agora);
     const p = this.particulas && this.particulas.limite > 0 ? this.particulas : null;
     const vez = (id: number, intervalo: number) => {
       if (agora - (this.ultimaEmissao.get(id) ?? -Infinity) < intervalo) return false;

@@ -11,7 +11,9 @@ import { bonusAtivos } from './conjuntos';
 import { variacoesDeItem } from './gerar-item-base';
 
 // Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
-export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
+export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento', 'criatura'] as const;
+// Marco 45 (16/11/2026, D-182): o monstruário — `criatura:<preset>` (vista) e, fora da contagem, `criatura:<preset>:caiu`.
+export const RAIO_DE_AVISTAR = 9;
 export type TipoDeEntrada = (typeof TIPOS_DE_ENTRADA)[number];
 
 export interface EntradaDoDiario {
@@ -47,6 +49,7 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   for (const id of c.missoes.keys()) saida.push(e('missao', id));
   for (const id of c.origens.keys()) saida.push(e('origem', id));
   for (const id of EVENTOS_DE_FASE) saida.push(e('evento', id));
+  for (const p of c.presets.values()) if (p.dimensao) saida.push(e('criatura', p.id));
   return saida;
 }
 
@@ -112,11 +115,25 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
         if (quem) anotar(estado, quem, `origem:${ev.origem}`, saida);
         break;
       }
+      case 'morreu': {
+        // Marco 45 (D-182): derrotar uma criatura de Filo revela a página inteira; os chefes contam as vitórias.
+        const morto = estado.entidades.find((x) => x.id === ev.id);
+        const preset = morto ? ctx.conteudo.presets.get(morto.preset) : undefined;
+        if (!preset?.dimensao || !ev.porId) break;
+        const fonte = estado.entidades.find((x) => x.id === ev.porId);
+        const quem = fonte?.bolsa ? fonte : porId(fonte?.invocacao?.donoId ?? '');
+        if (!quem?.bolsa) break;
+        anotar(estado, quem, `criatura:${preset.id}`, saida);
+        anotar(estado, quem, `criatura:${preset.id}:caiu`, saida);
+        if (preset.arquetipo === 'boss') quem.bolsa.vitorias = { ...quem.bolsa.vitorias, [preset.id]: (quem.bolsa.vitorias?.[preset.id] ?? 0) + 1 };
+        break;
+      }
       default:
         break;
     }
   }
   if (estado.tick % INTERVALO_INVENTARIO !== 0) return;
+  avistar(estado, ctx, saida);
   for (const e of estado.entidades) {
     const bolsa = e.bolsa;
     if (!bolsa) continue;
@@ -127,6 +144,18 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
     }
     for (const a of bonusAtivos(ctx.conteudo.conjuntos, bolsa, ctx.conteudo.itens)) {
       for (const n of Object.keys(a.conjunto.bonus)) if (Number(n) <= a.pecas) anotar(estado, e, `conjunto:${a.conjunto.id}:${n}`, saida);
+    }
+  }
+}
+
+/** Marco 45 (D-182): ver uma criatura de Filo de perto revela o nome e o desenho dela no monstruário. */
+function avistar(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  const r2 = RAIO_DE_AVISTAR * RAIO_DE_AVISTAR;
+  for (const j of estado.entidades) {
+    if (!j.bolsa || j.morto) continue;
+    for (const c of estado.entidades) {
+      if (c.morto || (c.x - j.x) ** 2 + (c.y - j.y) ** 2 > r2) continue;
+      if (ctx.conteudo.presets.get(c.preset)?.dimensao) anotar(estado, j, `criatura:${c.preset}`, saida);
     }
   }
 }

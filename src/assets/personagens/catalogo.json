@@ -1,9 +1,9 @@
 {
-  "aranha": {
-    "quadroL": 130,
-    "quadroA": 101,
-    "ancoraX": 65,
-    "ancoraY": 64.92857142857142,
+  "almirante_dos_ventos": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -37,7 +37,47 @@
         "n": 6
       }
     },
-    "altura": 0.55
+    "altura": 1.2
+  },
+  "arauto_caido": {
+    "quadroL": 158,
+    "quadroA": 180,
+    "ancoraX": 79,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.4
   },
   "arqueiro": {
     "quadroL": 108,
@@ -8292,6 +8332,46 @@
         1
       ]
     }
+  },
+  "arqueiro_de_osso": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.1
   },
   "arqueiro~cabeca-0": {
     "quadroL": 108,
@@ -21299,6 +21379,286 @@
     },
     "altura": 1.12
   },
+  "bebedor": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.16
+  },
+  "bobinadora": {
+    "quadroL": 137,
+    "quadroA": 108,
+    "ancoraX": 68.5,
+    "ancoraY": 72,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.6
+  },
+  "braseiro": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.95
+  },
+  "breuzinho": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.6
+  },
+  "bruxa_dos_sonhos": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.12
+  },
+  "cabo_voltaico": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.1
+  },
+  "candelinha": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.62
+  },
   "cartola": {
     "quadroL": 108,
     "quadroA": 126,
@@ -21378,6 +21738,206 @@
       }
     },
     "altura": 0.362
+  },
+  "casulo": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.7
+  },
+  "ciclonista": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.05
+  },
+  "cogumelo_pulmao": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.75
+  },
+  "colosso_de_geodo": {
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.5
+  },
+  "coluna_antiga": {
+    "quadroL": 115,
+    "quadroA": 166,
+    "ancoraX": 57.5,
+    "ancoraY": 137.1304347826087,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.7
   },
   "cultista": {
     "quadroL": 108,
@@ -21459,12 +22019,12 @@
     },
     "altura": 1.4
   },
-  "dragao_fogo": {
-    "quadroL": 189,
-    "quadroA": 151,
-    "ancoraX": 94.5,
-    "ancoraY": 94.375,
-    "pxCelula": 21,
+  "dragao_da_fornalha": {
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -21497,14 +22057,14 @@
         "n": 6
       }
     },
-    "altura": 3.3
+    "altura": 2.6
   },
-  "dragao_gelo": {
-    "quadroL": 189,
-    "quadroA": 151,
-    "ancoraX": 94.5,
-    "ancoraY": 94.375,
-    "pxCelula": 21,
+  "dragao_das_ruinas": {
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -21537,14 +22097,14 @@
         "n": 6
       }
     },
-    "altura": 3.3
+    "altura": 2.6
   },
-  "dragao_raio": {
-    "quadroL": 189,
-    "quadroA": 151,
-    "ancoraX": 94.5,
-    "ancoraY": 94.375,
-    "pxCelula": 21,
+  "dragao_do_silencio": {
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -21577,14 +22137,14 @@
         "n": 6
       }
     },
-    "altura": 3.3
+    "altura": 2.6
   },
-  "dragao_veneno": {
-    "quadroL": 189,
-    "quadroA": 151,
-    "ancoraX": 94.5,
-    "ancoraY": 94.375,
-    "pxCelula": 21,
+  "dragao_engrenado": {
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -21617,7 +22177,127 @@
         "n": 6
       }
     },
-    "altura": 3.3
+    "altura": 2.6
+  },
+  "dragao_fermentado": {
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 2.6
+  },
+  "enxame_putrido": {
+    "quadroL": 187,
+    "quadroA": 187,
+    "ancoraX": 93.5,
+    "ancoraY": 129.46153846153845,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.95
+  },
+  "escultor_de_geada": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.08
   },
   "espantalho": {
     "quadroL": 108,
@@ -21659,6 +22339,86 @@
     },
     "altura": 1.1
   },
+  "espelhante": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.05
+  },
+  "esporeiro": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1
+  },
   "esqueleto": {
     "quadroL": 108,
     "quadroA": 126,
@@ -21698,6 +22458,46 @@
       }
     },
     "altura": 1.1
+  },
+  "estatua_de_gelo": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.2
   },
   "fada": {
     "quadroL": 108,
@@ -21739,6 +22539,46 @@
     },
     "altura": 0.62
   },
+  "fagulheiro": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.82
+  },
   "falcao": {
     "quadroL": 108,
     "quadroA": 126,
@@ -21778,6 +22618,206 @@
       }
     },
     "altura": 0.216
+  },
+  "faminto": {
+    "quadroL": 137,
+    "quadroA": 122,
+    "ancoraX": 68.5,
+    "ancoraY": 86.11764705882354,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.85
+  },
+  "floquinho": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.72
+  },
+  "fornalheiro": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.32
+  },
+  "fundeiro": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1
+  },
+  "galgo_do_vendaval": {
+    "quadroL": 137,
+    "quadroA": 122,
+    "ancoraX": 68.5,
+    "ancoraY": 86.11764705882354,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.85
   },
   "generico": {
     "quadroL": 108,
@@ -21819,7 +22859,7 @@
     },
     "altura": 1.1
   },
-  "goblin": {
+  "gosminho": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -21857,7 +22897,47 @@
         "n": 6
       }
     },
-    "altura": 0.82
+    "altura": 0.55
+  },
+  "guardiao_de_marmore": {
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.3
   },
   "guerreiro": {
     "quadroL": 108,
@@ -32489,6 +33569,126 @@
     },
     "altura": 1.14
   },
+  "harpia_soberana": {
+    "quadroL": 158,
+    "quadroA": 180,
+    "ancoraX": 79,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.2
+  },
+  "hierofante": {
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.3
+  },
+  "imperatriz_das_estatuas": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.25
+  },
   "lobo": {
     "quadroL": 130,
     "quadroA": 115,
@@ -32568,6 +33768,46 @@
       }
     },
     "altura": 0.95
+  },
+  "mae_colmeia": {
+    "quadroL": 192,
+    "quadroA": 173,
+    "ancoraX": 96,
+    "ancoraY": 110.52777777777777,
+    "pxCelula": 48,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.6
   },
   "mago": {
     "quadroL": 108,
@@ -43199,6 +44439,126 @@
     },
     "altura": 1.12
   },
+  "maquinista_voltaico": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.15
+  },
+  "marionetista": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.12
+  },
+  "monarca_de_geodo": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.3
+  },
   "necromante": {
     "quadroL": 108,
     "quadroA": 126,
@@ -51453,6 +52813,46 @@
       ]
     }
   },
+  "necromante_ancestral": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.2
+  },
   "necromante~cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
@@ -53829,6 +55229,86 @@
     },
     "altura": 1.14
   },
+  "o_apagador": {
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.5
+  },
+  "obelisco_vigia": {
+    "quadroL": 115,
+    "quadroA": 151,
+    "ancoraX": 57.5,
+    "ancoraY": 122.23809523809524,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.5
+  },
   "orc": {
     "quadroL": 122,
     "quadroA": 137,
@@ -53868,6 +55348,246 @@
       }
     },
     "altura": 1.28
+  },
+  "para_raios": {
+    "quadroL": 137,
+    "quadroA": 158,
+    "ancoraX": 68.5,
+    "ancoraY": 125.68181818181819,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.3
+  },
+  "pedregulho": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.55
+  },
+  "pedrico": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.45
+  },
+  "penitente": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.08
+  },
+  "pilar_de_cristal": {
+    "quadroL": 115,
+    "quadroA": 144,
+    "ancoraX": 57.5,
+    "ancoraY": 115.2,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.4
+  },
+  "pluminha": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.55
   },
   "pombo": {
     "quadroL": 108,
@@ -53909,6 +55629,286 @@
     },
     "altura": 0.2
   },
+  "pregador": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.1
+  },
+  "quebra_gelo": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.3
+  },
+  "reflexo_do_sonho": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.1
+  },
+  "rei_das_fagulhas": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1
+  },
+  "rei_das_mascaras": {
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.2
+  },
+  "riscador": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.95
+  },
+  "saltafaisca": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.75
+  },
   "sentinela": {
     "quadroL": 108,
     "quadroA": 126,
@@ -53949,7 +55949,7 @@
     },
     "altura": 1.16
   },
-  "slime": {
+  "silente": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53987,7 +55987,7 @@
         "n": 6
       }
     },
-    "altura": 0.62
+    "altura": 1.25
   },
   "sombra": {
     "quadroL": 108,
@@ -54029,11 +56029,171 @@
     },
     "altura": 1.12
   },
-  "troll": {
-    "quadroL": 133,
-    "quadroA": 158,
-    "ancoraX": 66.5,
-    "ancoraY": 125.68181818181819,
+  "sombra_roubada": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.12
+  },
+  "sonequinha": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.55
+  },
+  "tecela_do_vazio": {
+    "quadroL": 144,
+    "quadroA": 115,
+    "ancoraX": 72,
+    "ancoraY": 75.46875,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.7
+  },
+  "ticaozinho": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.6
+  },
+  "torre_engrenada": {
+    "quadroL": 115,
+    "quadroA": 151,
+    "ancoraX": 57.5,
+    "ancoraY": 122.23809523809524,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -54149,6 +56309,46 @@
     },
     "altura": 1.16
   },
+  "velejador": {
+    "quadroL": 137,
+    "quadroA": 158,
+    "ancoraX": 68.5,
+    "ancoraY": 125.68181818181819,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.08
+  },
   "vendedor": {
     "quadroL": 108,
     "quadroA": 126,
@@ -54188,5 +56388,85 @@
       }
     },
     "altura": 1.1
+  },
+  "vidraceiro": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.02
+  },
+  "zunzum": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.62
   }
 }
