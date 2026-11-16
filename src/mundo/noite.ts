@@ -21,7 +21,8 @@ import { passavel } from '../world/fase';
 import { emPassagem } from '../world/passagem';
 import { emRefugio } from '../world/refugio';
 import { ehDragao } from '../world/porte-dragoes';
-import { escuroBaseEm, escuroDoLugar, horaDoMundo } from './ciclo';
+import { escuroDoLugar, horaDoMundo } from './ciclo';
+import { naSombra, type RegrasDaCamuflagem } from '../world/camuflagem';
 import { acenderFoco, apagarFoco, focoAceso } from './focos';
 import type { RegiaoDoMundo } from './reino';
 
@@ -59,6 +60,15 @@ export interface RegrasDaNoite {
   chefes: readonly string[];
   /** Ao clarear, o extra só vai embora se ninguém estiver a menos destas células. */
   someLongeDe: number;
+  /** Marco 44 (D-178): a zona de fácil camuflagem (world/camuflagem.ts). */
+  camuflagem: RegrasDaCamuflagem;
+  /**
+   * Marco 44 (D-178): a calma perto da vila e das entradas da região. Até `raioVila` células além do muro da vila e
+   * `raioEntrada` da boca de cada passagem, a horda da noite tende aos níveis baixos da faixa (do piso até
+   * `nivelBaixoAte` acima dele); os de nível normal da noite ainda vêm, com `fortePct`% de chance bem junto, e a chance
+   * cresce com a distância até o normal.
+   */
+  calma: { raioVila: number; raioEntrada: number; nivelBaixoAte: number; fortePct: number };
 }
 
 const chebyshev = (a: Celula, b: Celula) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
@@ -74,17 +84,52 @@ export function morteSemTumulo(ctx: ContextoSimulacao): boolean {
   return (ctx.modo.noite ?? 0) >= ctx.balance.mundo.noite.semTumuloDesde;
 }
 
-/** O escuro da noite na região inteira (0 a 1) vai no modo; a mata soma pela posição. */
-export function escuroEm(ctx: ContextoSimulacao, x: number, y: number): number {
-  return Math.max(ctx.modo.escuro ?? 0, escuroBaseEm(ctx.fase, x, y));
+/**
+ * O quanto o ponto esconde quem está nele (0 a 1): o escuro da noite (no modo, o mesmo na região inteira) ou a sombra
+ * de uma árvore (world/camuflagem.ts), de dia também. Marco 44 (D-178): pelo lugar de quem é visto, não de quem vê.
+ */
+export function escondeEm(ctx: ContextoSimulacao, x: number, y: number): number {
+  const sombra = ctx.fase.exterior && naSombra(ctx.fase, x, y, ctx.balance.mundo.noite.camuflagem) ? 1 : 0;
+  return Math.max(ctx.modo.escuro ?? 0, sombra);
+}
+
+/** O fator (0 a 1) que a noite tira da percepção: 1 de dia, `1 - percepcaoMenosPct` na noite fechada. */
+export function fatorDaNoite(ctx: ContextoSimulacao, escuro = ctx.modo.escuro ?? 0): number {
+  return 1 - (ctx.balance.mundo.noite.percepcaoMenosPct / 100) * escuro;
 }
 
 /**
- * Marco 44 (15/11/2026, D-178): no escuro o monstro também enxerga pouco: o raio de atenção encolhe até
- * `percepcaoMenosPct` na noite fechada (antes crescia). Quem está iluminado (a tocha, o fogo perto) não ganha o desconto.
+ * Marco 44 (15/11/2026, D-178): no escuro o monstro também enxerga pouco: o raio de atenção contra `alvo` encolhe até
+ * `percepcaoMenosPct` na noite fechada ou com o alvo na sombra de uma árvore. Quem está iluminado (a tocha, o fogo
+ * perto) não ganha o desconto (quem chama, raioContra, já confere).
  */
-export function percepcaoNoEscuro(ctx: ContextoSimulacao, e: Entidade, base: number): number {
-  return base * (1 - (ctx.balance.mundo.noite.percepcaoMenosPct / 100) * escuroEm(ctx, e.x, e.y));
+export function percepcaoNoEscuro(ctx: ContextoSimulacao, alvo: Entidade, base: number): number {
+  return base * fatorDaNoite(ctx, escondeEm(ctx, alvo.x, alvo.y));
+}
+
+/** Marco 44 (D-178): o quanto o ponto está na calma da vila ou de uma entrada (1 junto, 0 longe). */
+export function calmaEm(ctx: ContextoSimulacao, regiao: RegiaoDoMundo, c: Celula): number {
+  const r = ctx.balance.mundo.noite.calma;
+  let calma = 0;
+  const v = regiao.vila;
+  if (v) calma = Math.max(calma, 1 - Math.max(0, Math.hypot(c.x - v.x, c.y - v.y) - v.raio) / Math.max(1, r.raioVila));
+  for (const a of ctx.fase.passagens ?? []) {
+    const d = Math.hypot(c.x - Math.max(a.x0, Math.min(a.x1, c.x)), c.y - Math.max(a.y0, Math.min(a.y1, c.y)));
+    calma = Math.max(calma, 1 - d / Math.max(1, r.raioEntrada));
+  }
+  return Math.max(0, Math.min(1, calma));
+}
+
+/**
+ * Marco 44 (D-178): o nível de quem a noite traz em `c`. Na calma, tende ao piso da faixa da região; longe dela, o da
+ * noite (acima do topo da faixa), como antes. Os fortes ainda podem vir junto da vila, com chance menor.
+ */
+export function nivelDaNoite(ctx: ContextoSimulacao, regiao: RegiaoDoMundo, c: Celula, sorte: () => number): number {
+  const r = ctx.balance.mundo.noite;
+  const forte = regiao.nivel[1] + r.niveisExtra[0] + Math.floor(sorte() * (r.niveisExtra[1] - r.niveisExtra[0] + 1));
+  const calma = calmaEm(ctx, regiao, c);
+  if (sorte() >= calma * (1 - r.calma.fortePct / 100)) return forte;
+  return Math.min(regiao.nivel[1], regiao.nivel[0] + Math.floor(sorte() * (r.calma.nivelBaixoAte + 1)));
 }
 
 function lugarLivre(ctx: ContextoSimulacao, c: Celula): boolean {
@@ -120,7 +165,7 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
   const sorte = () => aleatorio(rng);
   const jogadores = estado.entidades.filter((e) => vivo(e) && e.arquetipo === 'jogador' && !e.invocacao && !emRefugio(ctx.fase, e.x, e.y));
   const presets = regiao.inimigos.length > 0 ? regiao.inimigos : r.presetsDaMata;
-  const nivel = () => regiao.nivel[1] + inteiro(rng, r.niveisExtra[0], r.niveisExtra[1]);
+  const nivel = (c: Celula) => nivelDaNoite(ctx, regiao, c, sorte);
   const vivos = estado.entidades.filter((e) => vivo(e) && e.id.startsWith(PREFIXO_NOITE));
   const limite = ctx.modo.limites.npcs;
   let nasceram = 0;
@@ -133,7 +178,7 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
       const id = `${PREFIXO_NOITE}mata${String(i)}:${String(k)}`;
       if (estado.entidades.some((e) => e.id === id)) continue;
       const c = sortearPerto(ctx, m, 0, m.raio, sorte);
-      if (c && !jogadores.some((j) => chebyshev(j, c) < 8) && nascer(estado, ctx, id, presets[Math.floor(sorte() * presets.length)] ?? 'lobo', c, nivel())) nasceram++;
+      if (c && !jogadores.some((j) => chebyshev(j, c) < 8) && nascer(estado, ctx, id, presets[Math.floor(sorte() * presets.length)] ?? 'lobo', c, nivel(c))) nasceram++;
     }
   }
 
@@ -148,7 +193,7 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
       // Marco 44 (15/11/2026, D-178): a caça noturna: parte da horda é dos que só saem à noite.
       const noturno = sorte() * 100 < r.noturnosPct ? r.noturnos[Math.floor(sorte() * r.noturnos.length)] : undefined;
       const preset = noturno ?? regiao.inimigos[Math.floor(sorte() * regiao.inimigos.length)];
-      if (c && preset && nascer(estado, ctx, `${PREFIXO_NOITE}${String(estado.tick)}:${String(k)}`, preset, c, nivel())) nasceram++;
+      if (c && preset && nascer(estado, ctx, `${PREFIXO_NOITE}${String(estado.tick)}:${String(k)}`, preset, c, nivel(c))) nasceram++;
     }
   }
 
@@ -159,7 +204,8 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
     const quem = jogadores[Math.floor(sorte() * jogadores.length)];
     const c = quem ? sortearPerto(ctx, quem, r.distancia[0] + 4, r.distancia[1] + 6, sorte) : null;
     const preset = lista[Math.floor(sorte() * lista.length)];
-    if (c && preset && nascer(estado, ctx, ID_CHEFE, preset, c, regiao.nivel[1] + r.niveisExtra[1])) nasceram++;
+    // Marco 44 (D-178): na calma da vila e das entradas, o chefe da noite quase não vem.
+    if (c && preset && sorte() >= calmaEm(ctx, regiao, c) * (1 - r.calma.fortePct / 100) && nascer(estado, ctx, ID_CHEFE, preset, c, regiao.nivel[1] + r.niveisExtra[1])) nasceram++;
   }
 
   // Ao clarear: vão embora os extras da horda e o chefe que ninguém feriu e que estão longe de todos.
@@ -181,7 +227,7 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
     else apagarFoco(estado, foco);
   }
   const hora = horaDoMundo(agoraMs, ctx.balance.mundo.ciclo);
-  // Marco 44 (D-178): o escuro da região é o da hora; a mata fechada escurece pela posição, no meio das árvores (escuroEm).
+  // Marco 44 (D-178): o escuro da região é o da hora; a mata fechada esconde pela sombra das árvores (escondeEm).
   const escuro = escuroDoLugar(hora, 0, false);
   const novo = (ctx.modo.escuro ?? 0) === escuro && (ctx.modo.noite ?? 0) === hora.noite ? ctx : { ...ctx, modo: { ...ctx.modo, escuro, noite: hora.noite } };
   conferirVilaANoite(estado, novo, regiao);

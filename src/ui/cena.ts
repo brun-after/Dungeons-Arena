@@ -319,7 +319,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     terreno,
     tema: temaDaFase(ctx),
     quebraveis,
-    paredeIso: ctx.balance.visual.paredeIso,
+    paredeIso: ctx.balance.visual.paredeIso, camuflagem: ctx.balance.mundo.noite.camuflagem,
     pintor: o.tileset ? null : pintor,
     modelos3d: o.tileset ? null : modelos3d,
     ...(solo && { pedraParede: solo.texturas.then((t) => t.get(solo.tema.parede) ?? null) }),

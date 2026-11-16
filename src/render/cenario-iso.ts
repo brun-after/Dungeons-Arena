@@ -11,6 +11,7 @@ import CATALOGO from '../assets/cenario/catalogo.json';
 import CENARIO from '../data/mundo/cenario.json';
 import type { Fase } from '../world/fase';
 import { OBSTACULO } from '../world/geografia';
+import { raioDaSombra, type RegrasDaCamuflagem } from '../world/camuflagem';
 import type { PecaDoCenario } from '../world/composicao-cenario';
 import { CELULA_PX } from './camera-calculo';
 import type { Projecao } from './projecao';
@@ -135,7 +136,7 @@ export interface CenarioIso {
   destruir: () => void;
 }
 
-export function criarCenarioIso(camada: Container, chao: Container, fase: Fase, p: Projecao, pecas: readonly PecaDoCenario[] = []): CenarioIso | null {
+export function criarCenarioIso(camada: Container, chao: Container, fase: Fase, p: Projecao, pecas: readonly PecaDoCenario[] = [], camuflagem?: RegrasDaCamuflagem): CenarioIso | null {
   const itens = itensDoCenario(fase, pecas);
   if (itens.length === 0) return null;
   const porLinha = Math.ceil(fase.largura / BLOCO);
@@ -175,8 +176,14 @@ export function criarCenarioIso(camada: Container, chao: Container, fase: Fase, 
       const cx = (it.x + 0.5) * CELULA_PX;
       const cy = (it.y + 0.5) * CELULA_PX;
       const d = deslocamentoNoPlano(p.alturaDoChao(cx, cy));
-      const raio = (CATALOGO[it.nome].largura / RESOLUCAO) * it.escala * 0.42;
+      // Marco 44 (15/11/2026, D-178): na mata fechada, a sombra da árvore tem `areaNaMata` vezes a área (a zona de
+      // fácil camuflagem, world/camuflagem.ts), mais clara para as sombras emendadas não virarem breu.
+      const ix = Math.round(it.x);
+      const iy = Math.round(it.y);
+      const mata = camuflagem && fase.obstaculos?.[iy * fase.largura + ix] === OBSTACULO.arvore ? raioDaSombra(fase, ix, iy, camuflagem) / camuflagem.raioSombra : 1;
+      const raio = (CATALOGO[it.nome].largura / RESOLUCAO) * it.escala * 0.42 * mata;
       const sb = new Sprite(sombra());
+      if (mata > 1) sb.alpha = 0.7;
       sb.anchor.set(0.5);
       sb.position.set(cx - d, cy - d);
       sb.width = raio * 2;
