@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.27 · **Data:** 15/11/2026
+**Versão:** 1.28 · **Data:** 15/11/2026
 
 > **Histórico**
-> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10); os mortos do jogador num vermelho só; a skin escolhida nas telas de seleção de personagem; a gadanha do Ceifador apontando para a frente.
+> - **1.28 (15/11/2026)**: D-179: os mortos do Necromante jogador num vermelho só (filtro de cor); a skin escolhida nas telas de seleção de personagem, fora do menu de pausa; a gadanha do Ceifador apontando para a frente.
+> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10).
 > - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
