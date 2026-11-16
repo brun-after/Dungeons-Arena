@@ -619,7 +619,7 @@
     "resgate": {"mortesDesconto": 5, "mortesGratis": 10},
     "refugio": { "combateS": 8 },
     "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
-    "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
+    "exercitoNecromante": {"noNivelBase": 4, "nivelBase": 8, "maximo": 10, "niveisPorVaga": 7, "recargaMs": 6000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
     "tocha": { "atraiMult": 1.6, "afastaRaio": 5, "iguaisAvancamPct": 50, "janelaIguaisMs": 20000, "raioDoFogo": 4, "visaoSemTocha": 3, "visaoComTocha": 10, "visaoDesdeEscuro": 0.45, "manaPct": 2, "manaMin": 1 },
     "elementosPelaHora": { "noite": ["trevas", "gelo"], "dia": ["sagrado", "fogo"], "pct": 15 },

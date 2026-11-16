@@ -6,7 +6,7 @@ import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { clonarEstado, criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import type { Entidade } from '../../src/entities/entidade';
-import { chaveServo, colherMorto, processarServosNecromantes } from '../../src/combat/necromancia';
+import { chaveDoExercito, chaveServo, colherMorto, processarServosNecromantes } from '../../src/combat/necromancia';
 import { processarMortes } from '../../src/progression/morte';
 import { ticksDe } from '../../src/core/tempo';
 import { aplicarEfeito, multiplicadorCuraRecebida, multiplicadorDanoCausado } from '../../src/combat/efeitos';
@@ -97,6 +97,23 @@ describe('Necromante: passiva e colheita', () => {
     const c = cena(); c.passiva(); const servo = c.servo(); c.matar(servo, c.j);
     colherMorto(c.estado, c.ctx, servo, c.j, c.eventos);
     expect(c.meus()).toHaveLength(0);
+  });
+  it('15/11/2026 (D-179): os necromantes roubam os mortos uns dos outros', () => {
+    const c = cena();
+    const boss = criarInimigo(obter(CONTEUDO.presets.get('necromante_ancestral')), 'boss', 9, 5, c.ctx.balance);
+    boss.equipe = 'monstros'; c.estado.entidades.push(boss);
+    const lacaio = criarInimigo(obter(CONTEUDO.presets.get('cavaleiro_profano')), 'l', 7, 5, c.ctx.balance);
+    lacaio.equipe = 'monstros';
+    lacaio.invocacao = { donoId: 'boss', expiraTick: 1e9, dominado: false, exercitoBoss: true } as Entidade['invocacao'];
+    c.estado.entidades.push(lacaio);
+    // O Necromante que abate o morto do necromante inimigo o ergue para si.
+    c.matar(lacaio, c.j);
+    expect(c.meus().filter((e) => e.invocacao?.necromancia === 'reanimado')).toHaveLength(1);
+    // O necromante inimigo que abate um morto do jogador adianta a próxima invocação do exército.
+    c.passiva();
+    c.estado.recargas[chaveDoExercito('boss')] = c.estado.tick + 1000;
+    c.matar(c.servo(), boss);
+    expect(c.estado.recargas[chaveDoExercito('boss')]).toBe(c.estado.tick);
   });
   it('uma morte não cria cópias para dois Necromantes e dono morto não reanima abates', () => {
     const c = cena();

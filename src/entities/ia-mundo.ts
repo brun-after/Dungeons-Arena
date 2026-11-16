@@ -8,6 +8,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { invocar } from '../combat/efeitos-fluxo';
+import { chaveDoExercito } from '../combat/necromancia';
 import { construirEfeito } from '../combat/registro-efeitos';
 import { alvoOfensivoValido } from '../combat/acao';
 import { chebyshev } from '../combat/geometria';
@@ -15,31 +16,33 @@ import { podeAjudar } from '../modos/relacao';
 import { criarInimigo } from './fabrica';
 import { vivo, type Entidade } from './entidade';
 
+/**
+ * 15/11/2026 (D-179): quantos mortos o necromante inimigo mantém de pé, pelo nível: `noNivelBase` no `nivelBase` e uma
+ * vaga a cada `niveisPorVaga` níveis (para cima e para baixo), entre 1 e `maximo` (nível 8: 4; nível 50: 10).
+ */
 export function limiteDoExercito(ctx: ContextoSimulacao, nivel: number): number {
   const r = ctx.balance.mundo.exercitoNecromante;
-  return Math.min(r.maximo,r.minimo + Math.floor(Math.max(0,nivel-1)/r.niveisPorVaga));
+  return Math.max(1, Math.min(r.maximo, r.noNivelBase + Math.floor((nivel - r.nivelBase) / r.niveisPorVaga)));
 }
 
 export function processarExercitoNecromante(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, saida: EventoSimulacao[]): void {
   if (dono.preset !== 'necromante_ancestral' || dono.invocacao || !vivo(dono)) return;
   const alvo = estado.entidades.find(e=>e.id===dono.ia?.alvoId);
   if (!alvo || !alvoOfensivoValido(estado,ctx,dono,alvo)) return;
-  const chave = `exercito-boss:${dono.id}`;
+  const chave = chaveDoExercito(dono.id);
   if ((estado.recargas[chave] ?? 0) > estado.tick) return;
   const r = ctx.balance.mundo.exercitoNecromante;
   const vivos = estado.entidades.filter(e=>vivo(e)&&e.invocacao?.donoId===dono.id);
-  const vagas = limiteDoExercito(ctx,dono.nivel)-vivos.length;
-  if(vagas<=0) return;
-  for(let i=0;i<vagas;i++) {
-    if(estado.entidades.filter(e=>vivo(e)&&e.controlador==='ia').length>=ctx.modo.limites.npcs) break;
-    const ref = r.presets[(vivos.length+i)%r.presets.length];
-    if(!ref) continue;
-    const preset=ctx.conteudo.presets.get(ref);
-    if(!preset) continue;
-    const indice=estado.entidades.length;
-    invocar(estado,ctx,dono,construirEfeito('invocar',{ref,valor:1,duracaoMs:r.duracaoMs}),saida);
-    const e=estado.entidades[indice];
-    if(!e?.invocacao) continue;
+  if(vivos.length>=limiteDoExercito(ctx,dono.nivel)) return;
+  // 15/11/2026 (D-179): um de cada vez, a cada `recargaMs` (antes, todas as vagas de uma vez).
+  if(estado.entidades.filter(e=>vivo(e)&&e.controlador==='ia').length>=ctx.modo.limites.npcs) return;
+  const ref = r.presets[vivos.length%r.presets.length];
+  const preset=ref?ctx.conteudo.presets.get(ref):undefined;
+  if(!ref||!preset) return;
+  const indice=estado.entidades.length;
+  invocar(estado,ctx,dono,construirEfeito('invocar',{ref,valor:1,duracaoMs:r.duracaoMs}),saida);
+  const e=estado.entidades[indice];
+  if(e?.invocacao){
     const inv=e.invocacao;
     inv.exercitoBoss=true;
     const escalado=criarInimigo(preset,e.id,e.x,e.y,ctx.balance,{nivel:dono.nivel});

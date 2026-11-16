@@ -435,7 +435,7 @@ export interface Balance {
     /** 08/11/2026 (D-138): quanto tempo depois do último golpe entre os dois o refúgio ainda não protege. */
     refugio: { combateS: number };
     repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
-    exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
+    exercitoNecromante: { /** D-179. */ noNivelBase: number; nivelBase: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
     /**
      * Marco 44 (15/11/2026, D-178): a tocha que se leva. Atrai os monstros mais fortes (raio × `atraiMult`), afasta os

@@ -18,6 +18,9 @@ import { fatorDeDominio, marcoDe } from '../progression/dominio';
 
 const necromante = (e: Entidade) => vivo(e) && (e.classeId ?? e.bolsa?.classeId) === 'necromante';
 export const chaveServo = (id: string) => `necromante:servo:${id}`;
+/** A recarga do exército do necromante inimigo (entities/ia-mundo.ts). */
+export const chaveDoExercito = (id: string) => `exercito-boss:${id}`;
+const NECROMANTE_INIMIGO = 'necromante_ancestral';
 
 /** Uma célula livre a 1 ou 2 células do dono (para erguer um morto ou trazê-lo de volta). */
 function lugarPerto(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade): { x: number; y: number } | null {
@@ -116,6 +119,7 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     const dono = buscarEntidade(estado, morto.invocacao.donoId);
     const retorno = tempoDeRetorno(ctx, dono, retornoDoServo(ctx, dono, estado.tick) ?? ctx.balance.necromancia.retornoServoMs);
     if (morto.invocacao.necromancia === 'servo') estado.recargas[chaveServo(morto.invocacao.donoId)] = estado.tick + ticksDe(retorno);
+    roubarMorto(estado, ctx, morto, matador, saida);
     return;
   }
   const r = ctx.balance.necromancia;
@@ -136,6 +140,22 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     estado.recargas[chave] = estado.tick + ticksDe(r.ecoRecargaMs);
     break;
   }
+}
+
+/**
+ * 15/11/2026 (D-179): os necromantes roubam os mortos uns dos outros. O morto de um necromante (o servo, um reanimado,
+ * um eco ou o exército do necromante inimigo) abatido por um necromante hostil, ou por um morto dele, a até
+ * `raioColheita` células, se ergue como reanimado de quem o abateu. O necromante inimigo não ergue reanimados: o roubo
+ * dele adianta a próxima invocação do exército (dentro do limite pelo nível).
+ */
+function roubarMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, matador: Entidade | undefined, saida: EventoSimulacao[]): void {
+  const inv = morto.invocacao;
+  if (!inv || inv.companheiro || (!inv.necromancia && !inv.exercitoBoss)) return;
+  const ladrao = matador?.invocacao ? buscarEntidade(estado, matador.invocacao.donoId) : matador;
+  if (!ladrao || !vivo(ladrao) || ladrao.invocacao || ladrao.id === inv.donoId || !podeFerir(ladrao, morto, ctx.modo)) return;
+  if (chebyshev(ladrao, morto) > ctx.balance.necromancia.raioColheita) return;
+  if (necromante(ladrao)) erguer(estado, ctx, ladrao, 'reanimado', morto, saida);
+  else if (ladrao.preset === NECROMANTE_INIMIGO) estado.recargas[chaveDoExercito(ladrao.id)] = estado.tick;
 }
 
 /**
