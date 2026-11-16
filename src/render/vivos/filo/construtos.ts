@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os construtos de Filo (o Obelisco Vigia; o Espelhante virou humanoide, humanos-b.ts) e os objetos que os chefes põem
+// Marco 45 (16/11/2026, D-182): os construtos de Filo (o Obelisco Vigia; o Espelhante virou humanoide, humanos-b.ts) e os objetos que os chefes põem
 // na arena (a estátua de gelo, a torre engrenada, o cabo voltaico, o cogumelo-pulmão, o casulo, o braseiro, a coluna
 // antiga, o pilar de cristal e o pedregulho), feitos do zero. Os objetos só pulsam, disparam e desmoronam.
 

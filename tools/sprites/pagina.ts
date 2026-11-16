@@ -521,7 +521,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     peito(mt.ossos, peitoral, acento);
   }
   if (r.asas !== undefined) asas(mt.ossos, r.asas);
-  // Marco 45 (16/11/2026, D-181): a veste de peças próprias da criatura de Filo, presa nos ossos (segue cada pose); o que
+  // Marco 45 (16/11/2026, D-182): a veste de peças próprias da criatura de Filo, presa nos ossos (segue cada pose); o que
   // ela esconde do traje some e o tecido dela entra no lugar do pano do traje.
   if (r.veste) vestir(mt, VESTES_DO_ATLAS[r.veste]?.(mt.ossos) ?? null);
   const corpo = malhas(mt.grupo);

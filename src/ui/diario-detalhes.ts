@@ -143,7 +143,7 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
       const nomeItem = !item ? undefined : 'id' in item ? conteudo.itens.get(item.id)?.nome : conteudo.itensComFormas.bases.get(item.base)?.formas[item.forma].nome;
       return { nome: o?.nome ?? a, como: o ? [o.texto] : [], efeito: nomeItem ? t('diario.origemDa', { item: nomeItem }) : '' };
     }
-    // Marco 45 (16/11/2026, D-181): a criatura de Filo (a página inteira fica no monstruário).
+    // Marco 45 (16/11/2026, D-182): a criatura de Filo (a página inteira fica no monstruário).
     case 'criatura': {
       const p = conteudo.presets.get(a.replace(/:caiu$/, ''));
       return { nome: p?.nome ?? a, como: [], efeito: p ? t(`monstro.${p.id}.dica` as ChaveTexto) : '' };

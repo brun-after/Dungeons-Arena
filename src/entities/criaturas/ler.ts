@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): a leitura dos campos das criaturas nos presets (dimensão, faixa de nível, traços,
+// Marco 45 (16/11/2026, D-182): a leitura dos campos das criaturas nos presets (dimensão, faixa de nível, traços,
 // reações às fendas e a mecânica do chefe). Os números de cada traço vêm do JSON; o que falta é erro.
 
 import { ehObjeto, type Leitor, type Objeto } from '../../core/validar';

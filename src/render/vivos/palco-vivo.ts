@@ -61,7 +61,7 @@ interface Classe {
 }
 const HUMANO: Classe['clipes'] = { parado: 'Idle_Loop', andar: 'Walk_Loop', golpe: 'Sword_Attack', conjurar: 'Spell_Simple_Shoot', morte: 'Death01' };
 const MAGIA: Classe['clipes'] = { ...HUMANO, golpe: 'Spell_Simple_Shoot' };
-/** Marco 40 (D-165): o lobo e o urso do Aventureiro, de geometria (feras-vivas.ts), com os clipes assados. Marco 45 (D-181):
+/** Marco 40 (D-165): o lobo e o urso do Aventureiro, de geometria (feras-vivas.ts), com os clipes assados. Marco 45 (D-182):
  * e os chefes de geometria de Filo. */
 const CLIPES_FERA: Classe['clipes'] = { parado: CLIPES_DA_FERA.parado, andar: CLIPES_DA_FERA.andar, golpe: CLIPES_DA_FERA.golpe, conjurar: CLIPES_DA_FERA.conjurar, morte: CLIPES_DA_FERA.morte };
 const deFera = (altura: number, criar: () => Fera): Classe => ({
@@ -77,7 +77,7 @@ const CLASSES: Record<string, Classe> = {
   necromante: classe('necromante', 1.14, MAGIA),
   aventureiro: classe('aventureiro', 1.12, HUMANO),
   ...FERAS,
-  // Marco 45 (16/11/2026, D-181): os chefes de geometria de Filo (os dragões e a Mãe-Colmeia).
+  // Marco 45 (16/11/2026, D-182): os chefes de geometria de Filo (os dragões e a Mãe-Colmeia).
   ...Object.fromEntries(Object.entries(CHEFES_DE_GEOMETRIA).flatMap(([preset, modelo]) => { const c = PROCS_FILO[modelo]; return c ? [[`chefe:${preset}`, deFera(c.altura, c.criar)]] : []; })),
   // Os chefes humanoides (chefes-vivos.ts), pela chave `chefe:<preset>`.
   ...Object.fromEntries(Object.entries(CHEFES).map(([preset, c]) => [`chefe:${preset}`, {

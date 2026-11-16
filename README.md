@@ -4,7 +4,7 @@
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
-> - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-181).
+> - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-182).
 > - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
 > - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
 > - **3.51 (15/11/2026)**: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo (D-176).
@@ -369,7 +369,7 @@ rig, com veste própria; os outros são de geometria. Todos são pré-renderizad
 diário: ver uma criatura revela o nome e o desenho, e derrotá-la revela a lore, a dica de luta e o que ela faz em cada
 terreno.
 
-Detalhes em D-181.
+Detalhes em D-182.
 
 ### Marco 44 — a noite, a tocha e as fogueiras (15/11/2026)
 

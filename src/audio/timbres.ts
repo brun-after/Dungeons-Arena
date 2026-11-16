@@ -34,7 +34,7 @@ const POR_ARMA: Readonly<Record<string, SomId>> = {
 
 /** O corpo da criatura sem arma de classe, pelo modelo (o prefixo vale: `dragao` cobre os quatro dragões). */
 const POR_MODELO: readonly (readonly [string, SomId])[] = [
-  // Marco 45 (16/11/2026, D-181): as criaturas de Filo, pelos modelos novos.
+  // Marco 45 (16/11/2026, D-182): as criaturas de Filo, pelos modelos novos.
   ['fagulheiro', 'golpe_faca'],
   ['ticaozinho', 'golpe_garra'],
   ['fornalheiro', 'golpe_maca'],

@@ -48,7 +48,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   projeção, nunca o `y` erguido (marco 43, D-177).
 - **Hora em dados** (marco 44, D-178): o que muda com a noite lê `modo.escuro` e `modo.noite` (postos pela sala do
   Mundo); o cliente usa `horaDoMundo(agoraDoMundo())`. Fora do Mundo os dois ficam ausentes e nada muda.
-- **Criaturas de Filo** (marco 45, D-181): traço, jeito de caçar e mecânica de chefe vêm de `inimigos.json`
+- **Criaturas de Filo** (marco 45, D-182): traço, jeito de caçar e mecânica de chefe vêm de `inimigos.json`
   (`tracos`, `comportamento`, `chefe`) e rodam em `entities/criaturas/`; reação a terreno é `naFenda`, nunca `if` por
   criatura. Modelo novo de inimigo leva receita em `tools/sprites` e um parecido 2D em `render/modelos → modelo2d`.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.

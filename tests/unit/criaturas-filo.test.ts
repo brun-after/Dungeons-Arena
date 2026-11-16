@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as criaturas de Filo — as nove dimensões nos dados, os traços (placas, remontar,
+// Marco 45 (16/11/2026, D-182): as criaturas de Filo — as nove dimensões nos dados, os traços (placas, remontar,
 // divisão, estilhaço, fome, bando, furtividade), os jeitos de caçar (fole, bola de neve, torre, vigia fixo) e as
 // mecânicas de arena dos chefes (torres, geodo, máscaras, bombardeio, voo, bando, silêncio, pecados).
 import { describe, expect, it } from 'vitest';

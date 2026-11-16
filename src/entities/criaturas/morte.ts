@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): a morte das criaturas de Filo. Antes de cair, o Arqueiro de Osso desmonta e se
+// Marco 45 (16/11/2026, D-182): a morte das criaturas de Filo. Antes de cair, o Arqueiro de Osso desmonta e se
 // remonta (a menos que o golpe final seja em área ou sagrado, ou que ele esteja na luz sagrada). Ao cair, o Vidraceiro
 // estilhaça e o Penitente explode em luz; o Faminto em volta come o morto e cresce.
 

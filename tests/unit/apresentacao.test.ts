@@ -169,7 +169,7 @@ describe('efeitos visuais como dado (D-055)', () => {
     // Marco 40 (D-161): mais as 14 etapas das leituras de estilo e a da fusão perfuração + invocação.
     // Marco 40 (D-163): mais as 3 etapas dos combos assinados (saraivada central, míssil e pulso do orbe).
     // D-173: mais a borda que prende (fusão área + controle) e as 9 etapas que trocam a invocação nas classes que não invocam.
-    expect(CONTEUDO.habilidades.size).toBe(121 + 21 + 7 + 42 + 3 + 89 + 15 + 3 + 1 + 10 + 1 + 30); // Marco 40 (D-165): a Troca de companheiro. Marco 42 (D-176): a Rajada. Marco 45 (D-181): as 30 das criaturas de Filo.
+    expect(CONTEUDO.habilidades.size).toBe(121 + 21 + 7 + 42 + 3 + 89 + 15 + 3 + 1 + 10 + 1 + 30); // Marco 40 (D-165): a Troca de companheiro. Marco 42 (D-176): a Rajada. Marco 45 (D-182): as 30 das criaturas de Filo.
     for (const h of CONTEUDO.habilidades.values()) {
       if (h.passiva) continue;
       expect(h.visual).not.toBeNull();

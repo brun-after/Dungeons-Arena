@@ -81,7 +81,7 @@ export function simular(
   processarPassagens(estado, ctx);
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
-  // Marco 45 (16/11/2026, D-181): os traços das criaturas de Filo e as mecânicas de arena dos chefes.
+  // Marco 45 (16/11/2026, D-182): os traços das criaturas de Filo e as mecânicas de arena dos chefes.
   const acordada = filtroDeAtivacao(estado, ctx.modo.iaRaioAtivacao);
   processarTracos(estado, ctx, acordada, saida);
   processarChefes(estado, ctx, acordada, saida);

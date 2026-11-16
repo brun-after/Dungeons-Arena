@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as criaturas das nove dimensões que invadem Filo. Cada preset de monstro pode trazer
+// Marco 45 (16/11/2026, D-182): as criaturas das nove dimensões que invadem Filo. Cada preset de monstro pode trazer
 // `dimensao`, a faixa de nível (`nivelMin` e `nivelPico`), os traços (o jeito próprio de lutar, em dados), as reações
 // aos terrenos elementais (`naFenda`) e, nos chefes, a mecânica de arena (`chefe`). Só tipos e o clone do estado.
 

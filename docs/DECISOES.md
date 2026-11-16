@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.30 · **Data:** 16/11/2026
+**Versão:** 1.31 · **Data:** 16/11/2026
 
 > **Histórico**
-> - **1.30 (16/11/2026)**: D-181: marco 45, as criaturas de Filo (nove dimensões, 36 comuns e 18 chefes com mecânica própria, modelos 3D próprios pré-renderizados, a fenda e o monstruário no diário).
+> - **1.31 (16/11/2026)**: D-182: marco 45, as criaturas de Filo (nove dimensões, 36 comuns e 18 chefes com mecânica própria, modelos 3D próprios pré-renderizados, a fenda e o monstruário no diário).
+> - **1.30 (16/11/2026)**: D-181: a nuvem da Forma de névoa vira uma massa sem forma que cresce com os mortos, sem os anéis em volta de cada um, e o rastro se desfaz em cinzas na mistura das afinidades.
 > - **1.29 (16/11/2026)**: D-179, adendo: os mortos do Necromante jogador num vermelho só (filtro de cor); a skin escolhida nas telas de seleção de personagem, fora do menu de pausa; a gadanha do Ceifador apontando para a frente.
 > - **1.28 (15/11/2026)**: D-180: o Salto de Guerra parado cobre 5 células e a Marcha ou a Arremetida o estendem; painel de estatísticas do personagem no computador.
 > - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10).
@@ -5709,7 +5710,22 @@ código), e a gadanha vista de lado apontando para a frente.
   ataques por segundo e células por segundo, no canto inferior esquerdo da tela do jogo e da aba Visão geral da mochila.
   A conta espelha a do motor (recarga do básico com Destreza, estilos, buffs e arma; velocidade sem o arranque).
 
-## D-181 — Marco 45: as criaturas de Filo (16/11/2026)
+## D-181 — A nuvem da Forma de névoa sem forma, e o rastro em cinzas (16/11/2026)
+
+Revê o visual da névoa da D-170. A nuvem era feita de bolas certinhas em volta de cada membro, e os fiapos da ponta
+giravam em anel em volta de cada um, parecendo o anel de duração dos mortos.
+
+- **A massa** (`render/movimento/nuvem-nevoa.ts`): uma nuvem só, homogênea e sem forma. O contorno ondula devagar,
+  em três camadas, e passa por um desfoque (`BlurFilter`) que funde tudo. Não há anéis nem fiapos em volta dos mortos.
+  Os olhos pálidos do Necromante continuam no meio.
+- **O tamanho**: cresce com a quantidade de mortos dentro dela (raio de 22 px, mais 9 × √(mortos)) e sempre cobre o
+  mais afastado.
+- **O rastro**: ao andar, a nuvem deixa pedaços para trás. Cada um encolhe e se apaga em 1,3 s, enquanto vira cinzas
+  que sobem e se espalham. O rastro continua depois que a névoa acaba.
+- **A cor das cinzas**: a média das cores das pontas do eneágono, cada uma pesando pelo vínculo (o grau de
+  participação). Sem afinidade nenhuma, cinza. Só apresentação.
+
+## D-182 — Marco 45: as criaturas de Filo (16/11/2026)
 
 O desenho completo está no documento "Monstruário de Filo". Aqui ficam o que foi feito e onde o código se afastou dele.
 

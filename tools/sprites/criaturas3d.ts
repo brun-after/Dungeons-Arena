@@ -14,7 +14,7 @@ export interface Criatura {
 }
 
 // Marco 40 (13/11/2026, D-165): o lobo e o urso do Aventureiro saem das mesmas peças do 3D em tempo real.
-// Marco 45 (16/11/2026, D-181): as criaturas de Filo de geometria (src/render/vivos/filo); o slime e a aranha antigos saíram.
+// Marco 45 (16/11/2026, D-182): as criaturas de Filo de geometria (src/render/vivos/filo); o slime e a aranha antigos saíram.
 const CRIATURAS: Readonly<Record<string, () => Criatura>> = { lobo, falcao, cartola, cartola_magica: cartolaMagica, pombo, ...FERAS_VIVAS, ...CRIATURAS_FILO };
 
 export function criatura(tipo: string): Criatura | null {

@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): a base dos humanoides de Filo. O corpo é o mesmo rig dos jogadores (o traje e a cabeça
+// Marco 45 (16/11/2026, D-182): a base dos humanoides de Filo. O corpo é o mesmo rig dos jogadores (o traje e a cabeça
 // da Quaternius, com as animações da UAL) e tudo o que faz a criatura é nosso: a veste de peças sombrias (as mesmas
 // dos kits das classes) com o sotaque da dimensão, e a arma do jogo (armas3d.ts) presa na mão. A veste serve ao atlas
 // (tools/sprites) e ao 3D em tempo real (os chefes, palco-vivo.ts).

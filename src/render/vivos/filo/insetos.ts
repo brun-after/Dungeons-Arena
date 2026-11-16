@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os insetos e as aranhas de Filo, feitos do zero: o Zunzum (o fofo de Fulgúria), a
+// Marco 45 (16/11/2026, D-182): os insetos e as aranhas de Filo, feitos do zero: o Zunzum (o fofo de Fulgúria), a
 // Bobinadora (a aranha-bobina), a Tecelã do Vazio, o Enxame Pútrido e a Mãe-Colmeia (a governante de Putrévia).
 
 import * as THREE from 'three';

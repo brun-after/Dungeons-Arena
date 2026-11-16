@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o que os traços das criaturas de Filo mudam no golpe — quanto entra (o casco do
+// Marco 45 (16/11/2026, D-182): o que os traços das criaturas de Filo mudam no golpe — quanto entra (o casco do
 // Pedrico, as placas do Quebra-gelo, o escudo frontal do Guardião, a nuvem do Enxame, a sombra roubada fora da luz, a
 // estase do Obelisco, as costas do Colosso), quanto sai (o bando, a penitência, a fome, o terreno) e o que acontece
 // depois (a placa que cai, a fuga do Tiçãozinho, a divisão do Gosminho, a cópia do Espelhante, a sangria do Bebedor).

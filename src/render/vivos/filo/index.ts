@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o catálogo das criaturas de Filo de geometria (sem rig), pelo modelo de inimigos.json,
+// Marco 45 (16/11/2026, D-182): o catálogo das criaturas de Filo de geometria (sem rig), pelo modelo de inimigos.json,
 // com a altura e o quadro do atlas. Os humanoides ficam em humanos.ts.
 
 import type { Fera } from './kit';

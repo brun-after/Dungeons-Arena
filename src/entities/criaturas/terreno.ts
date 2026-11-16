@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o terreno elemental sob a criatura e o que ela ganha nele (`naFenda` do preset).
+// Marco 45 (16/11/2026, D-182): o terreno elemental sob a criatura e o que ela ganha nele (`naFenda` do preset).
 // Os terrenos não mudam: a criatura só os lê. Puro.
 
 import type { ContextoSimulacao } from '../../core/contexto';

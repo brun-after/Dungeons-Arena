@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as vestes dos humanoides de Ignárea, Hiemália e Fulgúria (peças sombrias com o sotaque
+// Marco 45 (16/11/2026, D-182): as vestes dos humanoides de Ignárea, Hiemália e Fulgúria (peças sombrias com o sotaque
 // da dimensão; o rig é o dos jogadores). Os chefes desta parte: o Rei das Fagulhas, a Imperatriz das Estátuas e o
 // Maquinista Voltaico.
 

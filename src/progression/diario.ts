@@ -12,7 +12,7 @@ import { variacoesDeItem } from './gerar-item-base';
 
 // Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
 export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento', 'criatura'] as const;
-// Marco 45 (16/11/2026, D-181): o monstruário — `criatura:<preset>` (vista) e, fora da contagem, `criatura:<preset>:caiu`.
+// Marco 45 (16/11/2026, D-182): o monstruário — `criatura:<preset>` (vista) e, fora da contagem, `criatura:<preset>:caiu`.
 export const RAIO_DE_AVISTAR = 9;
 export type TipoDeEntrada = (typeof TIPOS_DE_ENTRADA)[number];
 
@@ -116,7 +116,7 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
         break;
       }
       case 'morreu': {
-        // Marco 45 (D-181): derrotar uma criatura de Filo revela a página inteira; os chefes contam as vitórias.
+        // Marco 45 (D-182): derrotar uma criatura de Filo revela a página inteira; os chefes contam as vitórias.
         const morto = estado.entidades.find((x) => x.id === ev.id);
         const preset = morto ? ctx.conteudo.presets.get(morto.preset) : undefined;
         if (!preset?.dimensao || !ev.porId) break;
@@ -148,7 +148,7 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
   }
 }
 
-/** Marco 45 (D-181): ver uma criatura de Filo de perto revela o nome e o desenho dela no monstruário. */
+/** Marco 45 (D-182): ver uma criatura de Filo de perto revela o nome e o desenho dela no monstruário. */
 function avistar(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const r2 = RAIO_DE_AVISTAR * RAIO_DE_AVISTAR;
   for (const j of estado.entidades) {

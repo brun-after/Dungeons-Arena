@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as mecânicas dos chefes de Filo, uma por id (`chefe.mecanica` no preset). Cada uma
+// Marco 45 (16/11/2026, D-182): as mecânicas dos chefes de Filo, uma por id (`chefe.mecanica` no preset). Cada uma
 // diz o que acontece no começo da luta, a cada tick, no dano que o chefe leva ou causa, quando cai um objeto dele ou
 // alguém perto, e quando uma marca no chão vence. Os números vêm de `chefe.numeros` (o padrão fica ao lado).
 

@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o que os traços das criaturas de Filo fazem a cada tick — as auras, o elo do Zunzum,
+// Marco 45 (16/11/2026, D-182): o que os traços das criaturas de Filo fazem a cada tick — as auras, o elo do Zunzum,
 // os fios do Marionetista, a furtividade do Silente, o sono do Sonequinha, o casco do Pedrico, o voo da Pluminha, o
 // olhar lento do Guardião, a estase do Obelisco, as correntes de vento, a remontagem do Arqueiro de Osso e as reações
 // aos terrenos elementais. Uma função pequena por traço; os números vêm do preset. Hostilidade só por `relacao()`.

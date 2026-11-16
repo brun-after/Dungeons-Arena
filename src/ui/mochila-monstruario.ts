@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o monstruário de Filo, a última parte do diário. Agrupa as 54 criaturas pelas nove
+// Marco 45 (16/11/2026, D-182): o monstruário de Filo, a última parte do diário. Agrupa as 54 criaturas pelas nove
 // dimensões (cada grupo com a cor da fenda e a contagem "x/6"). A criatura que ainda não foi vista é sombra; vista,
 // mostra o nome e o desenho pré-renderizado; derrotada, a lore, a faixa de nível, a dica de luta, o que faz no terreno
 // e, nos chefes, quantas vezes você venceu. Só lê o estado; todo texto entra por textContent.

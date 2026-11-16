@@ -289,7 +289,7 @@ export type EventoSimulacao =
   | { t: 'subiuNivel'; tick: number; id: EntidadeId; nivel: number }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   /**
-   * Marco 45 (16/11/2026, D-181): a marca no chão de uma mecânica de chefe (a zona de silêncio, o ponto do bombardeio,
+   * Marco 45 (16/11/2026, D-182): a marca no chão de uma mecânica de chefe (a zona de silêncio, o ponto do bombardeio,
    * a coluna que vai cair, o mergulho) e a regra que o chefe declara (o pecado, a máscara). `tipo` escolhe o desenho e o
    * texto (i18n); a criatura nascendo pela fenda sai em `fenda`.
    */

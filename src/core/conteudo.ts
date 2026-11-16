@@ -133,7 +133,7 @@ export interface Conteudo {
   legadoDeSkills: ReadonlyMap<string, string>;
   /** Marco 40 (D-159): as skills de classe que saíram do kit (saem do personagem sem devolver ponto). */
   skillsQueSairam: ReadonlySet<string>;
-  /** Marco 45 (D-181): as nove dimensões que invadem Filo (data/dimensoes.json). */
+  /** Marco 45 (D-182): as nove dimensões que invadem Filo (data/dimensoes.json). */
   dimensoes: Catalogo<Dimensao>;
 }
 

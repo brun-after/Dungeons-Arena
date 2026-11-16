@@ -336,7 +336,7 @@ export interface Bolsa {
   missoesConcluidas: string[];
   /** Marco 18 (D-070): as entradas do diário de descobertas. */
   diario: string[];
-  vitorias?: Record<string, number>; // Marco 45 (16/11/2026, D-181): as vitórias sobre cada chefe de Filo.
+  vitorias?: Record<string, number>; // Marco 45 (16/11/2026, D-182): as vitórias sobre cada chefe de Filo.
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -485,7 +485,7 @@ export interface Entidade {
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
-  /** Marco 45 (D-181): o estado dos traços da criatura de Filo (entities/criaturas). */
+  /** Marco 45 (D-182): o estado dos traços da criatura de Filo (entities/criaturas). */
   criatura?: EstadoCriatura;
   /**
    * Marco 40 (13/11/2026, D-163): a última skill (sem o básico) para os combos de papel: o papel dela, o alvo, quantos

@@ -47,7 +47,7 @@ export interface PresetInimigo {
   /** 06/11/2026 (D-135): só entra na geração pelos pesos do tema (as fases sem tema, já salvas, saem iguais). */
   soPorTema: boolean;
   /**
-   * Marco 45 (16/11/2026, D-181): a dimensão de onde a criatura vem (data/dimensoes.json; null nas invocações), a faixa
+   * Marco 45 (16/11/2026, D-182): a dimensão de onde a criatura vem (data/dimensoes.json; null nas invocações), a faixa
    * de nível (acima do pico a fenda não a traz mais), os traços, as reações aos terrenos e a mecânica do chefe.
    */
   dimensao: string | null;
@@ -63,7 +63,7 @@ export interface HabilidadePorNivel {
   id: string;
 }
 
-// Marco 45 (D-181): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
+// Marco 45 (D-182): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
 export const COMPORTAMENTOS_ESPECIAIS = ['saltador', 'armadilheiro', 'fole', 'rolante', 'torre', 'ladrao', 'circular', 'pousar', 'fixo', 'fujao', 'plantador'] as const;
 export type ComportamentoEspecial = (typeof COMPORTAMENTOS_ESPECIAIS)[number];
 

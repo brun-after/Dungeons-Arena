@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as dimensões (data/dimensoes.json) e a faixa de nível das criaturas. A fenda de uma
+// Marco 45 (16/11/2026, D-182): as dimensões (data/dimensoes.json) e a faixa de nível das criaturas. A fenda de uma
 // região só traz quem cabe no nível sorteado: acima do pico, a vez passa a outra criatura da mesma dimensão que caiba
 // (ou, sem nenhuma, a qualquer uma da lista da região que caiba). Puro.
 
@@ -72,7 +72,7 @@ export function presetNoNivel(presets: ReadonlyMap<string, PresetInimigo>, pedid
 export function conferirDimensoes(dimensoes: ReadonlyMap<string, Dimensao>, presets: ReadonlyMap<string, PresetInimigo>): string[] {
   const erros: string[] = [];
   for (const p of presets.values()) if (p.dimensao !== null && !dimensoes.has(p.dimensao)) erros.push(`preset ${p.id}: dimensão desconhecida "${p.dimensao}"`);
-  // Marco 45 (D-181): a mecânica do chefe existe e o objeto de arena dela também.
+  // Marco 45 (D-182): a mecânica do chefe existe e o objeto de arena dela também.
   for (const p of presets.values()) {
     if (!p.chefe) continue;
     if (!(MECANICAS_DE_CHEFE as readonly string[]).includes(p.chefe.mecanica)) erros.push(`preset ${p.id}: mecânica de chefe desconhecida "${p.chefe.mecanica}"`);

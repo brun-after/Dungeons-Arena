@@ -54,7 +54,7 @@ export class CamadaTelegrafia {
   private readonly contornos = new Map<number, Contorno>();
   /** Marco 11A: última emissão de partículas por ação (telegrafia em partículas). */
   private readonly ultimaEmissao = new Map<number, number>();
-  /** Marco 45 (16/11/2026, D-181): a fenda de Filo e as marcas dos chefes no chão. */
+  /** Marco 45 (16/11/2026, D-182): a fenda de Filo e as marcas dos chefes no chão. */
   private readonly filo = new MarcasDeFilo();
 
   constructor(

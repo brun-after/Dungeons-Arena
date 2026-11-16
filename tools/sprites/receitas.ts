@@ -112,7 +112,7 @@ export interface Equipamento {
 
 export interface Receita {
   nome: string;
-  /** Marco 45 (D-181): a veste de peças próprias da criatura de Filo (src/render/vivos/filo/humanos.ts), pelo modelo. */
+  /** Marco 45 (D-182): a veste de peças próprias da criatura de Filo (src/render/vivos/filo/humanos.ts), pelo modelo. */
   veste?: string;
   /** O corpo: o traje (com a cabeça de `cabeca`) ou o personagem inteiro. */
   corpo: string;
@@ -357,7 +357,7 @@ export const RECEITAS: Receita[] = [
   },
 ];
 
-// Marco 45 (16/11/2026, D-181): as criaturas de Filo, todas feitas do zero. Os humanoides vestem as peças próprias no
+// Marco 45 (16/11/2026, D-182): as criaturas de Filo, todas feitas do zero. Os humanoides vestem as peças próprias no
 // rig dos jogadores (a mesma luz sombria das classes); as outras são geometria (src/render/vivos/filo). Nenhum modelo de
 // criatura de pacote: os dragões CC0, o goblin, o troll, o slime e a aranha saíram.
 const TRAJES: Readonly<Record<Traje, { corpo: string; cabeca?: string }>> = {
@@ -376,7 +376,7 @@ const DO_JEITO: Readonly<Record<Jeito, Record<EstadoBase, string>>> = {
   arremesso: { ...HUMANO, golpe: 'ual2:OverhandThrow' },
 };
 /**
- * Marco 45 (16/11/2026, D-181): o atlas dos inimigos não passa de 4096 px de lado (o limite de textura de muitos
+ * Marco 45 (16/11/2026, D-182): o atlas dos inimigos não passa de 4096 px de lado (o limite de textura de muitos
  * celulares); os quadros grandes (dragões, Mãe-Colmeia, os enormes) baixam os pixels por célula para caber.
  */
 const pxQueCabe = (q?: { largura: number; altura: number }): { pxCelula: number } | object => {

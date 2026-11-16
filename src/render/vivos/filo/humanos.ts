@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os humanoides de Filo pelo modelo (o `modelo` de inimigos.json): o traje do rig, a
+// Marco 45 (16/11/2026, D-182): os humanoides de Filo pelo modelo (o `modelo` de inimigos.json): o traje do rig, a
 // altura em células, a largura, as cores do traje e da pele (multiplicam o material pelo nome, como nas receitas), o
 // jeito de golpear e a veste. O atlas sai disto (tools/sprites/receitas.ts) e os chefes em tempo real também
 // (chefes-vivos.ts).

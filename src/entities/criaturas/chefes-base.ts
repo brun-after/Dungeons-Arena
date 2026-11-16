@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o que as mecânicas de chefe partilham — os números com padrão, os objetos que o chefe
+// Marco 45 (16/11/2026, D-182): o que as mecânicas de chefe partilham — os números com padrão, os objetos que o chefe
 // põe na arena, as marcas no chão, a regra declarada e o dano direto. Puro.
 
 import type { Celula } from '../../core/comandos';

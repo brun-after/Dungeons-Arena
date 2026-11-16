@@ -150,7 +150,7 @@ function sortearPerto(ctx: ContextoSimulacao, centro: Celula, de: number, ate: n
 
 function nascer(estado: EstadoJogo, ctx: ContextoSimulacao, id: string, preset: string, c: Celula, nivel: number): boolean {
   if (estado.entidades.length >= ctx.modo.limites.npcs) return false;
-  // Marco 45 (D-181): a fenda da noite também respeita o pico de nível.
+  // Marco 45 (D-182): a fenda da noite também respeita o pico de nível.
   const p = presetNaFenda(ctx, preset, Math.min(100, nivel), c.x, c.y);
   if (!p || estado.entidades.some((e) => e.id === id)) return false;
   estado.entidades.push(criarInimigo(p, id, c.x, c.y, ctx.balance, { nivel: Math.min(100, nivel) }));

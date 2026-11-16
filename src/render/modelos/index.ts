@@ -152,7 +152,7 @@ export function ehModelo(nome: string): nome is NomeModelo {
 }
 
 /**
- * Marco 45 (16/11/2026, D-181): as criaturas de Filo só têm o desenho 3D pré-renderizado; na vista 2D (sem o atlas
+ * Marco 45 (16/11/2026, D-182): as criaturas de Filo só têm o desenho 3D pré-renderizado; na vista 2D (sem o atlas
  * 3D, ou a de cima) cada uma usa o desenho vetorial mais parecido, para nunca sumir da tela.
  */
 const MODELO_2D: Readonly<Record<string, NomeModelo>> = {

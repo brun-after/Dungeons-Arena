@@ -93,6 +93,6 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
     grupo.append(ul);
     corpo.append(grupo);
   }
-  // Marco 45 (16/11/2026, D-181): o monstruário de Filo fecha o diário.
+  // Marco 45 (16/11/2026, D-182): o monstruário de Filo fecha o diário.
   desenharMonstruario(corpo, j, ctx);
 }

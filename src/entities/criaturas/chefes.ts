@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as mecânicas de arena dos governantes das dimensões. Cada chefe tem uma (`chefe.mecanica`
+// Marco 45 (16/11/2026, D-182): as mecânicas de arena dos governantes das dimensões. Cada chefe tem uma (`chefe.mecanica`
 // no preset, com os números dele) — o plano de escravidão vira a regra da luta. Este arquivo tem o que todas
 // partilham (a arena que começa no primeiro encontro, os objetos que o chefe põe nela, as marcas no chão e a proteção);
 // as mecânicas ficam em chefes-mecanicas.ts, uma função pequena por id. Hostilidade só por `relacao()`.

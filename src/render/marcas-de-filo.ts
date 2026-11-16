@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as marcas de Filo no chão. Só lê o estado (como a telegrafia, que a desenha):
+// Marco 45 (16/11/2026, D-182): as marcas de Filo no chão. Só lê o estado (como a telegrafia, que a desenha):
 // - a fenda: quando uma criatura de Filo aparece (nasce na noite, renasce, é posta pelo chefe), o chão racha por um
 //   instante na cor da fenda da dimensão dela, no jeito dela (os cacos de vidro de Ignárea, os espinhos de Hiemália,
 //   os pulsos de Fulgúria...); a primeira leva que já estava lá ao abrir a cena não racha;

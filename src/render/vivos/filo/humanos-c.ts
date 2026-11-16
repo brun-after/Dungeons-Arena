@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as vestes dos humanoides de Lítia, Halônia e Zefíria. Os chefes desta parte: o Monarca
+// Marco 45 (16/11/2026, D-182): as vestes dos humanoides de Lítia, Halônia e Zefíria. Os chefes desta parte: o Monarca
 // de Geodo, o Arauto Caído, o Hierofante, o Almirante dos Ventos e a Harpia Soberana.
 
 import * as THREE from 'three';

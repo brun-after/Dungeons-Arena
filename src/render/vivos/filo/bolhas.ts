@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os fofos de Filo sem pernas de verdade (bolhas que pulam), feitos do zero. Os olhos
+// Marco 45 (16/11/2026, D-182): os fofos de Filo sem pernas de verdade (bolhas que pulam), feitos do zero. Os olhos
 // grandes de criança e a cor da dimensão no que brilha (a brasa, o gelo, o lodo, a vela), nunca no corpo todo.
 
 import * as THREE from 'three';

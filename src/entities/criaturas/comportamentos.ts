@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os jeitos de caçar das criaturas de Filo, pelo `comportamento` do preset (os dois
+// Marco 45 (16/11/2026, D-182): os jeitos de caçar das criaturas de Filo, pelo `comportamento` do preset (os dois
 // antigos, o saltador e o armadilheiro, seguem em ia-especiais.ts). Agem pelas mesmas funções dos comandos
 // (iniciarAcao, planejarCaminho, aplicarEfeito), nunca por atalho (D-025):
 // - fole (Fornalheiro): perto do alvo, inspira (puxa quem está em volta por 1,5 s) e sopra (empurra e queima);

@@ -17,7 +17,7 @@ import { temaDaFase } from '../combat/clima';
 import { decoracoesDaFase } from './decoracao';
 
 /**
- * Marco 45 (16/11/2026, D-181): a fenda só traz quem cabe no nível (acima do pico, outra criatura da mesma dimensão).
+ * Marco 45 (16/11/2026, D-182): a fenda só traz quem cabe no nível (acima do pico, outra criatura da mesma dimensão).
  * A escolha sai da célula, sem gastar o PRNG da fase (a mesma semente dá a mesma fase).
  */
 export function presetNaFenda(ctx: ContextoSimulacao, id: string, nivel: number, x: number, y: number): PresetInimigo | undefined {

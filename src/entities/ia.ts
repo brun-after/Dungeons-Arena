@@ -346,7 +346,7 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
  */
 function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo): string {
   // 06/11/2026 (D-135): quem tem comportamento próprio usa as habilidades dele por lá (o salto, a runa).
-  // Marco 45 (D-181): só os comportamentos que usam as skills do jeito deles (a torre, o galgo e o vigia revezam).
+  // Marco 45 (D-182): só os comportamentos que usam as skills do jeito deles (a torre, o galgo e o vigia revezam).
   if (e.habilidades.length === 0 || (preset.comportamento && COM_SKILLS_PROPRIAS.has(preset.comportamento))) return e.ataqueBasico;
   const vez = vezDaHabilidade(ia.ataquesFeitos, fracaoHabilidadePct(e, ctx.balance.ia.cadencia));
   if (!vez.habilidade) return e.ataqueBasico;
@@ -406,7 +406,7 @@ function perseguir(
   }
 
   // 06/11/2026 (D-135): o saltador e o armadilheiro (entities/ia-especiais.ts).
-  // Marco 45 (16/11/2026, D-181): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
+  // Marco 45 (16/11/2026, D-182): os jeitos de caçar das criaturas de Filo (entities/criaturas/comportamentos.ts).
   if (cacarComoCriatura(estado, ctx, e, ia, preset, alvo, saida)) return;
   if (preset.comportamento && perseguirEspecial(estado, ctx, e, ia, preset, alvo, saida)) return;
   const daVez = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia, preset));

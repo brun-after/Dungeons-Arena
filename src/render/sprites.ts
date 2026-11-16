@@ -307,7 +307,7 @@ export class CamadaEntidades {
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
     const classe = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo;
     const nome = trocado ?? e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
-    // Marco 45 (16/11/2026, D-181): a criatura de Filo desenha o 2D parecido, mas segue com o nome dela (o atlas 3D).
+    // Marco 45 (16/11/2026, D-182): a criatura de Filo desenha o 2D parecido, mas segue com o nome dela (o atlas 3D).
     const nome2d = modelo2d(nome);
     if (!nome2d) return null;
     const m = MODELOS[nome2d];

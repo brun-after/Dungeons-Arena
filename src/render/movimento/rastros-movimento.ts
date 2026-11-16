@@ -1,7 +1,7 @@
 // Marco 40 (13/11/2026, D-164): o que o movimento da classe deixa no mundo, desenhado à mão (sem brilho aditivo nem
 // tremor de tela):
-// - a Forma de névoa (D-170): o Necromante e os servos viram uma nuvem etérea só, de blocos grandes que se fundem, com
-//   os olhos pálidos dele no meio e um rastro de trevas mesclado com a cor da ponta;
+// - a Forma de névoa (D-170; D-181 em 16/11/2026): o Necromante e os servos viram uma nuvem só, sem forma, que se
+//   desfaz em cinzas da cor das afinidades (nuvem-nevoa.ts);
 // - a Âncora Rúnica (D-168): o totem rúnico no ponto de volta e, para o Mago e os aliados, a linha azul fina do alcance
 //   (D-170); na volta, o símbolo de conjuração nas duas pontas e o rastro da ponta entre elas;
 // - o Acelerar (D-170): o círculo à frente do Mago, que se forma traçado e depois gira as divisas da pressa;
@@ -22,6 +22,7 @@ import type { Entidade, PontoVisual } from '../../entities/entidade';
 import type { PontaElemental } from '../../progression/vinculo';
 import { centroDaCelula, type Projecao } from '../projecao';
 import { anelDePoeira, baseDoTotem, circuloAcelerar, COR_ARCANA, linhaDeAlcance, marcaDoPosto, rachaduras, sigilo } from './chao-movimento';
+import { NuvemDaNevoa, type NuvemNoQuadro } from './nuvem-nevoa';
 import { ARCO_DO_BALANCO, balancoDaCorda, MAOS_PX, naNevoa, pendulo, PIVO_PX, type CorpoEmMovimento } from './corpo-movimento';
 
 type Efemero =
@@ -37,9 +38,9 @@ type Ponto = { x: number; y: number };
 
 const TREVA = 0x050407;
 const POEIRA = 0x8a7a66;
+/** D-181: as cinzas de quem não tem afinidade nenhuma. */
+const CINZA = 0x77707e;
 const LIMITE = 160;
-/** Quanto dura o rastro da névoa (ms). */
-const TRILHA_MS = 900;
 
 export interface OpcoesRastros {
   projecao: () => Projecao;
@@ -48,6 +49,8 @@ export interface OpcoesRastros {
   /** D-168: a cor de cada ponta do eneágono e quem o jogador local vê como aliado (ele mesmo incluído). */
   corDaPonta: (p: PontaElemental) => number;
   aliadoDoLocal: (e: Entidade) => boolean;
+  /** D-181: a cor da mistura das afinidades de quem tem ficha (null: nenhuma), para as cinzas da névoa. */
+  corDasAfinidades?: (e: Entidade) => number | null;
   /** D-170: quanto o círculo do Acelerar leva para se formar e o limite do Posto dos Mortos (células). */
   formarAcelerarMs: number;
   limitePosto: number;
@@ -57,13 +60,13 @@ export class RastrosDeMovimento {
   private readonly chao = new Graphics();
   private readonly ar = new Graphics();
   private efemeros: Efemero[] = [];
-  /** Por onde a névoa passou (o rastro que se arrasta), por membro da nuvem. */
-  private readonly trilhas = new Map<string, { x: number; y: number; ms: number }[]>();
+  private readonly nevoa: NuvemDaNevoa;
   private readonly ultimaPoeira = new Map<string, { x: number; y: number; ms: number }>();
 
   constructor(camadaChao: Container, camadaAr: Container, private readonly corpo: CorpoEmMovimento, private readonly o: OpcoesRastros) {
     camadaChao.addChild(this.chao);
     camadaAr.addChild(this.ar);
+    this.nevoa = new NuvemDaNevoa(camadaAr);
   }
 
   ligar(bus: Barramento<EventosDaSimulacao>, estado: () => EstadoJogo, agora: () => number): void {
@@ -102,7 +105,6 @@ export class RastrosDeMovimento {
         this.por({ t: 'pouso', x: quem.px, y: quem.py, inicio: ms, dur: 1400, semente: (ms % 997) / 997 });
         for (let i = 0; i < 5; i++) this.por({ t: 'poeira', x: quem.px, y: quem.py, inicio: ms, dur: 700, dx: (i - 2) * 0.35 });
       }
-      if (ev.fase === 'inicio' && l?.tipo === 'nevoa') for (const k of [...this.trilhas.keys()]) if (k.startsWith(`${ev.id}|`)) this.trilhas.delete(k);
     });
   }
 
@@ -122,6 +124,7 @@ export class RastrosDeMovimento {
     const ar = this.ar.clear();
     const reduzido = this.o.reduzido();
     const giro = reduzido ? 0 : agoraMs;
+    const nuvens: NuvemNoQuadro[] = [];
     for (const e of estado.entidades) {
       if (e.morto) continue;
       const mc = e.movimentoClasse;
@@ -146,7 +149,8 @@ export class RastrosDeMovimento {
       const pos = this.o.posicao(e);
       if (m.tipo === 'nevoa') {
         const membros = [e, ...estado.entidades.filter((s) => !s.morto && s.invocacao?.donoId === e.id && naNevoa(s, estado))];
-        this.nuvem(ar, e.id, membros.map((s) => this.o.posicao(s)), m.ponta ? this.o.corDaPonta(m.ponta) : 0x4a3a5e, agoraMs, reduzido);
+        const cor = this.o.corDasAfinidades?.(e) ?? (m.ponta ? this.o.corDaPonta(m.ponta) : CINZA);
+        nuvens.push({ id: e.id, membros: membros.map((s) => { const q = this.o.posicao(s); return this.tela(q.x, q.y); }), cor });
       } else if (m.tipo === 'tirolesa') {
         this.cordaDoBalanco(ar, e, pos, m);
       } else if (!reduzido && (m.tipo === 'marcha' || m.tipo === 'montado' || m.tipo === 'camuflado')) {
@@ -154,6 +158,7 @@ export class RastrosDeMovimento {
         this.levantar(e, pos, agoraMs, m.tipo === 'camuflado' ? 'folha' : 'poeira', m.tipo === 'montado' && m.pesada ? 70 : 110, ultima);
       }
     }
+    this.nevoa.quadro(nuvens, agoraMs, reduzido);
     this.efemeros = this.efemeros.filter((f) => agoraMs - f.inicio < f.dur);
     for (const f of this.efemeros) {
       const u = Math.max(0, (agoraMs - f.inicio) / f.dur);
@@ -183,65 +188,6 @@ export class RastrosDeMovimento {
     }
     this.ultimaPoeira.set(e.id, { x: pos.x, y: pos.y, ms: agoraMs });
     this.por({ t, x: pos.x, y: pos.y, inicio: agoraMs, dur: t === 'folha' ? 900 : 560, dx: (Math.random() - 0.5) * 0.4 });
-  }
-
-  /**
-   * D-170: a nuvem etérea da névoa, uma só para o Necromante e os servos. Cada membro é um bloco grande e translúcido;
-   * entre o Necromante e cada servo, mais blocos ligam os dois, e a nuvem vira uma massa só. Atrás, o rastro mescla as
-   * trevas com a cor da ponta; na borda, fiapos da cor da ponta giram; no meio, os olhos pálidos do Necromante.
-   */
-  private nuvem(g: Graphics, id: string, membros: PontoVisual[], cor: number, agoraMs: number, reduzido: boolean): void {
-    const pts = membros.map((m) => this.tela(m.x, m.y));
-    const centro = pts[0];
-    if (!centro) return;
-    const t = reduzido ? 0 : agoraMs / 1000;
-    // O rastro: um por membro, as trevas e a cor da ponta alternadas, se apagando.
-    pts.forEach((p, i) => {
-      const chave = `${id}|${i}`;
-      const trilha = this.trilhas.get(chave) ?? [];
-      const ultimo = trilha.at(-1);
-      if (!ultimo || agoraMs - ultimo.ms > 60) trilha.push({ x: p.x, y: p.y, ms: agoraMs });
-      while (trilha.length > 0 && agoraMs - (trilha[0]?.ms ?? 0) > TRILHA_MS) trilha.shift();
-      this.trilhas.set(chave, trilha);
-      trilha.forEach((q, k) => {
-        const v = 1 - (agoraMs - q.ms) / TRILHA_MS;
-        const daPonta = k % 3 === 1;
-        g.circle(q.x + Math.sin(k * 1.7) * 4, q.y - 14 - (1 - v) * 10, 9 + 12 * v).fill({ color: daPonta ? cor : TREVA, alpha: (daPonta ? 0.16 : 0.24) * v });
-      });
-    });
-    // Os blocos que ligam o Necromante a cada servo (a nuvem não se parte).
-    const blocos: { x: number; y: number; r: number }[] = [];
-    for (const p of pts.slice(1)) {
-      const n = Math.max(1, Math.ceil(Math.hypot(p.x - centro.x, p.y - centro.y) / 16));
-      for (let k = 1; k < n; k++) blocos.push({ x: centro.x + ((p.x - centro.x) * k) / n, y: centro.y - 18 + ((p.y - centro.y) * k) / n, r: 22 });
-    }
-    for (const [i, p] of pts.entries()) {
-      for (let k = 0; k < 6; k++) {
-        const ang = k * 1.05 + i * 0.9 + t * (k % 2 ? 0.7 : -0.5);
-        const r = 12 + 4 * Math.sin(t * 1.3 + k + i);
-        blocos.push({ x: p.x + Math.cos(ang) * r * 1.3, y: p.y - 18 + Math.sin(ang) * r * 0.75, r: (i === 0 ? 20 : 17) + 4 * Math.sin(t * 2 + k * 1.7 + i) });
-      }
-    }
-    // A sombra no chão, depois a massa (em duas passadas: a de fora, mais clara e larga; a de dentro, densa).
-    for (const p of pts) g.ellipse(p.x, p.y + 1, 26, 10).fill({ color: 0x000000, alpha: 0.3 });
-    for (const b of blocos) g.circle(b.x, b.y, b.r * 1.25).fill({ color: 0x14101c, alpha: 0.16 });
-    for (const b of blocos) g.circle(b.x, b.y, b.r).fill({ color: TREVA, alpha: 0.3 });
-    for (const p of pts) g.ellipse(p.x, p.y - 18, 16, 19).fill({ color: 0x020203, alpha: 0.45 });
-    // Os fiapos da ponta girando na borda (cada um abre o próprio traço: sem a linha solta do `arc`).
-    for (const [i, p] of pts.entries()) {
-      for (let k = 0; k < 3; k++) {
-        const ini = t * 0.9 + k * 2.1 + i;
-        const r = 24 + k * 3;
-        g.moveTo(p.x + Math.cos(ini) * r, p.y - 18 + Math.sin(ini) * r * 0.75);
-        for (let s = 1; s <= 6; s++) {
-          const a = ini + (s / 6) * 1.1;
-          g.lineTo(p.x + Math.cos(a) * r, p.y - 18 + Math.sin(a) * r * 0.75);
-        }
-        g.stroke({ color: cor, width: 1.6, alpha: 0.4 });
-      }
-    }
-    const pisca = Math.sin(t * 0.7) > 0.97 ? 0.15 : 1;
-    for (const lado of [-1, 1]) g.ellipse(centro.x + lado * 3.6, centro.y - 24, 1.7, 1.1 * pisca).fill({ color: 0xd7e0cf, alpha: 0.75 });
   }
 
   /**
@@ -350,12 +296,13 @@ export class RastrosDeMovimento {
 
   limpar(): void {
     this.efemeros = [];
-    this.trilhas.clear();
+    this.nevoa.limpar();
     this.ultimaPoeira.clear();
   }
 
   destruir(): void {
     this.chao.destroy();
     this.ar.destroy();
+    this.nevoa.destruir();
   }
 }

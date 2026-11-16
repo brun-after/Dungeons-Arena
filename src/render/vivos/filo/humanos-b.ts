@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): as vestes dos humanoides de Putrévia, Umbrália e Oníria. Os chefes desta parte: o
+// Marco 45 (16/11/2026, D-182): as vestes dos humanoides de Putrévia, Umbrália e Oníria. Os chefes desta parte: o
 // Necromante Ancestral (o kit do necromante, chefes-vivos.ts), o Apagador, a Bruxa dos Sonhos e o Rei das Máscaras;
 // e as duas cópias que os chefes põem na arena (a sombra roubada e o reflexo do sonho).
 

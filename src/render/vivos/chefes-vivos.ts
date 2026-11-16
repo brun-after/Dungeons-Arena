@@ -2,7 +2,7 @@
 // receita) com uma veste fixa no estilo sombrio e a arma dele, para que a luta contra o chefe tenha a mesma presença
 // dos jogadores. Os monstros comuns continuam no atlas pré-renderizado; só o arquétipo boss usa a chave `chefe:<preset>`.
 // - necromante_ancestral: o kit do necromante no grau 5 com a coroa de osso e a gadanha.
-// Marco 45 (16/11/2026, D-181): os governantes das dimensões de Filo (filo/humanos-*.ts) e os chefes de geometria.
+// Marco 45 (16/11/2026, D-182): os governantes das dimensões de Filo (filo/humanos-*.ts) e os chefes de geometria.
 
 import * as THREE from 'three';
 import { aceso, Corpo, liso, type Ossos, type PecaSombria } from './sombrio-base';
@@ -42,7 +42,7 @@ function necromanteAncestral(ossos: Ossos): PecaSombria {
   return juntar([...pecas, { extras }]);
 }
 
-/** Marco 45 (16/11/2026, D-181): o rig de cada traje (os GLB exportados das classes, src/assets/modelos). */
+/** Marco 45 (16/11/2026, D-182): o rig de cada traje (os GLB exportados das classes, src/assets/modelos). */
 const RIG: Readonly<Record<Traje, string>> = { ranger_m: 'necromante', ranger_f: 'arqueiro', campones_m: 'mago', campones_f: 'arqueiro', nu_m: 'demonio' };
 
 /** Um chefe de Filo humanoide pelo modelo (filo/humanos.ts): o rig do traje, a veste, as cores e o jeito de golpear. */
@@ -56,7 +56,7 @@ function deFilo(modelo: string): Chefe {
   };
 }
 
-/** Os chefes humanoides com modelo em tempo real, pelo preset (inimigos.json). Marco 45 (D-181): os governantes das
+/** Os chefes humanoides com modelo em tempo real, pelo preset (inimigos.json). Marco 45 (D-182): os governantes das
  * dimensões de Filo vestem as peças próprias (filo/humanos-*.ts); a arma vai na veste. */
 export const CHEFES: Readonly<Record<string, Chefe>> = {
   // 08/11/2026 (D-137): o Servo do ossuário (a passiva do Necromante), o vulto encapuzado; sem arma, golpeia com as mãos.
@@ -75,7 +75,7 @@ export const CHEFES: Readonly<Record<string, Chefe>> = {
   harpia_soberana: deFilo('harpia_soberana'),
 };
 
-/** Marco 45 (D-181): os chefes de geometria (os dragões e a Mãe-Colmeia), pelo preset: o modelo em filo/index.ts. */
+/** Marco 45 (D-182): os chefes de geometria (os dragões e a Mãe-Colmeia), pelo preset: o modelo em filo/index.ts. */
 export const CHEFES_DE_GEOMETRIA: Readonly<Record<string, string>> = {
   dragao_fogo: 'dragao_da_fornalha', dragao_gelo: 'dragao_do_silencio', dragao_raio: 'dragao_engrenado',
   dragao_veneno: 'dragao_fermentado', dragao_das_ruinas: 'dragao_das_ruinas', mae_colmeia: 'mae_colmeia',

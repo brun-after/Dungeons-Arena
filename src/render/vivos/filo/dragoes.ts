@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os dragões de Filo, feitos do zero (no lugar do dragão CC0): um corpo só, de pescoço e
+// Marco 45 (16/11/2026, D-182): os dragões de Filo, feitos do zero (no lugar do dragão CC0): um corpo só, de pescoço e
 // cauda em segmentos, asas de membrana, quatro patas com garras e a cabeça com chifres, vestido por dimensão:
 // - da Fornalha (Ignárea): escamas negras rachadas de brasa, a fornalha acesa no peito e a fumaça nos chifres;
 // - do Silêncio (Hiemália): pálido de geada, a crista de cristais de gelo e a boca costurada de gelo (o silêncio);

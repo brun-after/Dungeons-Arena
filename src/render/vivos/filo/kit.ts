@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): o kit das criaturas de Filo, feitas do zero em geometria (nenhum modelo de pacote).
+// Marco 45 (16/11/2026, D-182): o kit das criaturas de Filo, feitas do zero em geometria (nenhum modelo de pacote).
 // Como as feras do Aventureiro (feras-vivas.ts): peças rígidas em pivôs com nome (`f_…`, para o palco assar os clipes)
 // e uma pose por estado (`animar`). Aqui ficam os materiais (a paleta sombria com o sotaque da dimensão: o brilho
 // discreto da cor dela, nunca o corpo inteiro), as peças que se repetem (olhos, cristais, chamas, flocos, faíscas,

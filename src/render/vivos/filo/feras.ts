@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os bichos de pernas de Filo, feitos do zero: o Faminto (Umbrália), o Pedrico (o fofo
+// Marco 45 (16/11/2026, D-182): os bichos de pernas de Filo, feitos do zero: o Faminto (Umbrália), o Pedrico (o fofo
 // de Lítia), o Galgo do Vendaval (Zefíria) e a Pluminha (o fofo de Zefíria).
 
 import * as THREE from 'three';

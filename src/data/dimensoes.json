@@ -1,6 +1,6 @@
 {
   "versao": 1,
-  "_doc": "Marco 45 (16/11/2026, D-181): as nove dimensões que invadem Filo pelas fendas. `sotaque` é o elemento que aparece só no visual (cor, material e som); o poder das criaturas não o segue. `fenda` é a cor da rachadura em que as criaturas nascem e o jeito dela na tela. `regioes` diz onde as fendas da dimensão pesam mais no sorteio.",
+  "_doc": "Marco 45 (16/11/2026, D-182): as nove dimensões que invadem Filo pelas fendas. `sotaque` é o elemento que aparece só no visual (cor, material e som); o poder das criaturas não o segue. `fenda` é a cor da rachadura em que as criaturas nascem e o jeito dela na tela. `regioes` diz onde as fendas da dimensão pesam mais no sorteio.",
   "dimensoes": [
     { "id": "ignarea", "nome": "Ignárea", "epiteto": "a Fornalha", "sotaque": "fogo", "cor": "#ff7a2f", "fenda": { "cor": "#ffb347", "borda": "#5a1a05", "jeito": "vidro" },
       "regioes": ["ruinas_do_norte", "dunas_do_poente", "mar_de_areia", "garganta_do_sol", "eclipse_obsidiana", "eclipse_cinza", "eclipse_trono"] },

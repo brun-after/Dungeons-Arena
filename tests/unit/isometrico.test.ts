@@ -301,7 +301,7 @@ describe('atlas dos modelos (gerado no build)', () => {
   it('todo modelo dos presets, das classes e o do jogador existem, nas duas vistas', () => {
     // Marco 14: os modelos das classes jogáveis também.
     const usados = new Set([...[...CONTEUDO.presets.values()].map((p) => p.modelo), ...[...CONTEUDO.classes.values()].map((c) => c.modelo)]);
-    // Marco 45 (D-181): as criaturas de Filo usam o desenho 2D parecido (modelo2d).
+    // Marco 45 (D-182): as criaturas de Filo usam o desenho 2D parecido (modelo2d).
     for (const nome of [...usados, MODELO_JOGADOR]) {
       const m = modelo2d(nome);
       expect(m, nome).not.toBeNull();

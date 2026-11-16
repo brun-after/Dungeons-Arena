@@ -1,4 +1,4 @@
-// Marco 45 (16/11/2026, D-181): os textos do monstruário de Filo (a última parte do diário) e os avisos das regras dos
+// Marco 45 (16/11/2026, D-182): os textos do monstruário de Filo (a última parte do diário) e os avisos das regras dos
 // chefes. A lore é a aparência (e, nos chefes, o plano de escravidão); a dica é o desafio; a fenda, o que muda no
 // terreno. Entram no dicionário principal (pt-BR.ts) por espalhamento.
 
