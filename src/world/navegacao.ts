@@ -1,6 +1,8 @@
 // Navegação por busca em largura (§2.3): 4 direções, só terreno, com mapa `veioDe`
 // (nunca copiando o caminho a cada expansão).
 
+// Marco 44 (15/11/2026, D-178): a navegação contorna os troncos das árvores (world/troncos.ts).
+import { temTronco } from './troncos';
 import type { Celula } from '../core/comandos';
 import { passavel, type Fase } from './fase';
 import { andavelEntre, subidaEntre } from './relevo';
@@ -47,7 +49,7 @@ export function caminho(fase: Fase, origem: Celula, destino: Celula, maxPassos =
     for (const [dx, dy] of VIZINHOS) {
       const nx = cx + dx;
       const ny = cy + dy;
-      if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false || !andavelEntre(fase, cx, cy, nx, ny))) continue;
+      if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false || !andavelEntre(fase, cx, cy, nx, ny) || (temTronco(fase, nx, ny) && (nx !== destino.x || ny !== destino.y)))) continue;
       const vizinho = indice(nx, ny);
       if (veioDe[vizinho] !== -1) continue;
       veioDe[vizinho] = atual;
@@ -93,7 +95,7 @@ export function alcancavelMaisPerto(fase: Fase, origem: Celula, ponto: { x: numb
     for (const [dx, dy] of VIZINHOS) {
       const nx = cx + dx;
       const ny = cy + dy;
-      if (!passavel(fase, nx, ny) || !andavelEntre(fase, cx, cy, nx, ny)) continue;
+      if (!passavel(fase, nx, ny) || !andavelEntre(fase, cx, cy, nx, ny) || temTronco(fase, nx, ny)) continue;
       const vizinho = indice(nx, ny);
       if (visto[vizinho]) continue;
       visto[vizinho] = 1;
@@ -191,7 +193,7 @@ export function caminhoComCusto(fase: Fase, origem: Celula, destino: Celula, max
       for (const [dx, dy] of VIZINHOS) {
         const nx = cx + dx;
         const ny = cy + dy;
-        if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false || !andavelEntre(fase, cx, cy, nx, ny))) continue;
+        if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false || !andavelEntre(fase, cx, cy, nx, ny) || (temTronco(fase, nx, ny) && (nx !== destino.x || ny !== destino.y)))) continue;
         const vizinho = ny * largura + nx;
         // Marco 42 (D-176): subir custa um passo a mais por nível (a IA prefere contornar o morro).
         const novo = c + 1 + (perigo[vizinho] === 1 ? custoPerigo : 0) + subidaEntre(fase, cx, cy, nx, ny);

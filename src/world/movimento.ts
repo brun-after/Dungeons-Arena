@@ -1,4 +1,5 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
+import { troncoBarra } from './troncos';
 import { alturaEm, barraPorAltura, fatorDeSubida } from './relevo';
 import { apagarLuz } from '../combat/luz-propria';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
@@ -522,6 +523,8 @@ function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: Contex
   // Marco 42 (15/11/2026, D-176): o relevo barra pelo desnível desde onde o corpo está (a pé ou voando).
   const relevo = barraPorAltura(ctx.fase, ctx.balance.relevo, alturaEm(ctx.fase, e.px, e.py), noAr(e) ? 'voar' : naTirolesa(e) ? 'saltar' : 'andar');
   if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined || (relevo?.(i, j) ?? false), noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null)) return false;
+  // Marco 44 (15/11/2026, D-178): só o tronco fino da árvore barra (quem voa passa por cima).
+  if (!noAr(e) && troncoBarra(ctx.fase, e.px, e.py, x, y, r, ctx.balance.movimento.raioTronco)) return false;
   // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo). D-138: salvo atrás de quem
   // luta com ele; e quem já está dentro sai livre.
   if (!podePisarNoRefugio(estado, ctx, e, x, y)) return false;

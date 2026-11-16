@@ -22,7 +22,7 @@ function cena(escuro: number) {
   const lugar = lerLugar(reino, 'regiao:campos_do_oeste');
   if (!lugar) throw new Error('lugar');
   const m = montarLugar(CONTEUDO, reino, lugar, modoPorId(CONTEUDO, MODO_MUNDO));
-  const ctx: ContextoSimulacao = { ...m.ctx, modo: { ...m.ctx.modo, escuro } };
+  const ctx: ContextoSimulacao = { ...m.ctx, modo: { ...m.ctx.modo, escuro, noite: escuro } };
   const estado = m.estado;
   estado.entidades = [];
   estado.objetos = [];

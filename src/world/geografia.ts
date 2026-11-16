@@ -189,6 +189,16 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
       }
     }
   }
+  // Marco 44 (15/11/2026, D-178): as árvores nunca encostam uma na outra (sempre uma célula livre entre elas): a mata
+  // fica atravessável, e o tronco é o único obstáculo (world/troncos.ts).
+  for (let y = 1; y < n - 1; y++) {
+    for (let x = 1; x < n - 1; x++) {
+      const k = y * n + x;
+      if (obstaculos[k] !== OBSTACULO.arvore) continue;
+      const antes = [k - 1, k - n - 1, k - n, k - n + 1];
+      if (antes.some((j) => obstaculos[j] === OBSTACULO.arvore)) obstaculos[k] = OBSTACULO.nenhum;
+    }
+  }
   // Os rochedos têm motivo: a pedra que cai do penhasco junta no pé dele (o lado de baixo do desnível), a da serra junta
   // no sopé, e a encosta íngreme solta umas poucas; no plano aberto, quase nenhuma (a pedra errática, rara).
   for (let y = 1; y < n - 1; y++) {
