@@ -84,8 +84,8 @@
       "tracos": [
         {
           "tipo": "remontar",
-          "ms": 4000,
-          "vidaPct": 40
+          "ms": 2500,
+          "vidaPct": 30
         }
       ],
       "naFenda": {
@@ -419,7 +419,7 @@
       "ataqueBasico": "golpe_demoniaco",
       "habilidades": [
         "marca_de_area",
-        "chamar_fieis"
+        "invocar_lacaios"
       ],
       "intervaloAtaqueMs": 3400,
       "resistencias": {

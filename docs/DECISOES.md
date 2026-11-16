@@ -5746,7 +5746,7 @@ O desenho completo está no documento "Monstruário de Filo". Aqui ficam o que f
 - O Esporeiro usa `cogumelo_bomba_rapido` (estoura em 0,8 s) na lama, em vez de mudar o atraso da mesma skill.
 - A fenda é desenhada pelo cliente quando uma criatura de Filo aparece ou volta da morte (`render/marcas-de-filo.ts`).
   Não existe evento de nascer na simulação, e a primeira leva da cena não racha.
-- O Arauto Caído, o primeiro chefe das masmorras, luta sem mecânica de arena.
+- O Arauto Caído, o primeiro chefe das masmorras, luta sem mecânica de arena e chama lacaios de fora da dimensão dele.
 - O Silente é novo e não substitui nenhum inimigo antigo.
 
 **Balanceamento**
@@ -5759,6 +5759,10 @@ O desenho completo está no documento "Monstruário de Filo". Aqui ficam o que f
   - Rei das Máscaras: perdeu `prisao_psiquico`.
   - Harpia Soberana: perdeu `investida_fisico`; o mergulho dela é a mecânica.
 - `cogumelo_bomba` passa a conjurar em 600 ms.
+- O Arqueiro de Osso se remonta em 2,5 s com 30% da vida, não nos 4 s com 40% do documento. Desmontado, ele fica imune, e o jogador gasta as
+  recargas nele. Com 4 s, isso atrasava as lutas seguintes e o Aventureiro passava da meta no nível 5 (7,9 s contra 7 s).
+- O Arauto Caído chama Fagulheiros com `invocar_lacaios`, como chamava os goblins antes do marco. A versão com o
+  Pregador (`chamar_fieis`, que saiu) deixava a luta em dupla mais lenta que a solo: 123% do tempo, com meta de até 110%.
 
 **Modelos**
 - As 54 criaturas têm modelo próprio, sem pacote CC0 de criatura. Os humanoides usam o rig e as animações da Quaternius

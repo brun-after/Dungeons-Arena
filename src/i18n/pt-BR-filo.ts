@@ -109,7 +109,7 @@ export const textosFilo = {
   'monstro.aranha.dica': 'As teias só aparecem na luz: no escuro, você pisa sem ver. A teia prende e puxa o alvo até ela.',
   'monstro.aranha.fenda': 'Na névoa sombria, as teias duram o dobro.',
   'monstro.esqueleto.lore': 'Sombra vestindo ossos de bichos diferentes, um arco de costela.',
-  'monstro.esqueleto.dica': 'Caça à noite. Ao cair, desmonta e se remonta em 4 s, a menos que o golpe final seja em área ou sagrado. Imune a veneno.',
+  'monstro.esqueleto.dica': 'Caça à noite. Ao cair, desmonta e se remonta em 2,5 s, a menos que o golpe final seja em área ou sagrado. Imune a veneno.',
   'monstro.esqueleto.fenda': 'Na luz sagrada, não consegue se remontar.',
   'monstro.faminto.lore': 'Bocarra de sombra num corpo de pano rasgado.',
   'monstro.faminto.dica': 'Come os mortos: cada criatura que cai a até 4 células (das duas partes) o deixa 10% maior e mais forte. Tem que morrer primeiro.',

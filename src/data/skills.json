@@ -11761,40 +11761,6 @@
       }
     },
     {
-      "id": "chamar_fieis",
-      "familiaEvolucao": "arcana",
-      "grau": "B",
-      "nome": "Chamar fiéis",
-      "icone": "invocar",
-      "tipoAtaque": "magico",
-      "formulaDano": null,
-      "formulaCura": null,
-      "alcanceCelulas": 0,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 0,
-      "recargaMs": 15000,
-      "conjuracaoMs": 900,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "interrupcao": "interrompivel",
-      "velocidadeProjetil": 0,
-      "efeitos": [
-        {
-          "tipo": "invocar",
-          "valor": 1,
-          "duracaoMs": 20000,
-          "ref": "cultista"
-        }
-      ],
-      "visual": {
-        "cor": "#ffd86b",
-        "impacto": "sagrado",
-        "som": "invocacao",
-        "assinatura": "invocacao"
-      }
-    },
-    {
       "id": "chamar_pedras",
       "familiaEvolucao": "arcana",
       "grau": "B",
