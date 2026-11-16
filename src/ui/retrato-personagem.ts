@@ -7,6 +7,7 @@ import type { Entidade } from '../entities/entidade';
 import classes from '../data/classes.json';
 import { NOMES_ATRIBUTOS } from '../progression/itens';
 import { nomeDoAtributo } from './dica-atributo';
+import { seletorDeSkin } from './seletor-skin';
 
 export function retratoPersonagem(classeId: string, personagem?: Pick<Entidade, 'aparencia'>): HTMLElement {
   const host = document.createElement('figure');
@@ -92,9 +93,30 @@ export function resumoPersonagem(classeId: string, personagem?: DadosResumoPerso
   return bloco;
 }
 
-export function painelPersonagem(classeId: string, personagem?: DadosResumoPersonagem & Pick<Entidade, 'aparencia'>): HTMLElement {
+/** 15/11/2026 (D-179): como redesenhar cada painel com a escolha de skin (a troca vale para a classe inteira). */
+const redesenhos = new WeakMap<Element, () => void>();
+
+/**
+ * O retrato e o resumo. `escolherSkin` (telas de seleção de personagem, D-179) põe a escolha da skin sob o retrato;
+ * a troca redesenha todos os painéis da mesma classe na tela.
+ */
+export function painelPersonagem(classeId: string, personagem?: DadosResumoPersonagem & Pick<Entidade, 'aparencia'>, opcoes: { escolherSkin?: boolean } = {}): HTMLElement {
   const painel = document.createElement('div');
   painel.className = 'painel-personagem';
-  painel.append(retratoPersonagem(classeId, personagem), resumoPersonagem(classeId, personagem));
+  painel.dataset.classe = classeId;
+  if (!opcoes.escolherSkin) {
+    painel.append(retratoPersonagem(classeId, personagem), resumoPersonagem(classeId, personagem));
+    return painel;
+  }
+  const coluna = document.createElement('div');
+  coluna.className = 'coluna-retrato';
+  const desenhar = () => {
+    coluna.replaceChildren(retratoPersonagem(classeId, personagem), seletorDeSkin(classeId, () => {
+      for (const outro of document.querySelectorAll(`.painel-personagem[data-classe="${CSS.escape(classeId)}"]`)) redesenhos.get(outro)?.();
+    }));
+  };
+  redesenhos.set(painel, desenhar);
+  desenhar();
+  painel.append(coluna, resumoPersonagem(classeId, personagem));
   return painel;
 }

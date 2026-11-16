@@ -151,7 +151,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     if (s.tipo === 'ok') {
       const registro = await carregarSlot(s.slot);
       const personagem = registro && registro !== 'invalido' ? jogadorDoSave(registro.estado) : undefined;
-      if (personagem?.bolsa) cartao.append(painelPersonagem(personagem.bolsa.classeId, personagem));
+      if (personagem?.bolsa) cartao.append(painelPersonagem(personagem.bolsa.classeId, personagem, { escolherSkin: true }));
       cartao.append(
         el(
           'p',
