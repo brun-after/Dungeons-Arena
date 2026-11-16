@@ -10,6 +10,7 @@
 import CENARIO from '../data/mundo/cenario.json';
 import type { Celula } from '../core/comandos';
 import type { Telhado } from './fase';
+import { PASSA_POR_CIMA } from './cenario-baixo';
 
 export interface PecaDoCenario {
   /** A série de src/assets/cenario (render/cenario-iso.ts escolhe a variante). */
@@ -77,10 +78,12 @@ export function comporCenario(e: EntradaComposicao): PecaDoCenario[] {
   };
   const por = (serie: string | undefined, x: number, y: number, solido: boolean, escala?: number): boolean => {
     if (!serie || !livre(x, y)) return false;
-    if (solido && !naoCorta(x, y)) return false;
+    // 16/11/2026: o que se passa por cima (o saco, o feno, a placa, o toco...) não ocupa a célula (world/cenario-baixo.ts).
+    const ocupa = solido && !PASSA_POR_CIMA.has(serie);
+    if (ocupa && !naoCorta(x, y)) return false;
     usadas.add(y * e.n + x);
-    if (solido) e.ocupar(x, y);
-    pecas.push({ nome: serie, x, y, solido, ...(escala !== undefined && { escala }) });
+    if (ocupa) e.ocupar(x, y);
+    pecas.push({ nome: serie, x, y, solido: ocupa, ...(escala !== undefined && { escala }) });
     return true;
   };
   /** O anel em volta de um retângulo (fora dele, a `d` células), em ordem fixa. */
@@ -190,7 +193,7 @@ export function comporCenario(e: EntradaComposicao): PecaDoCenario[] {
         if (!ANDA.has(e.em(x, y)) || hash(x, y, 700) > C.margemPorCelula) continue;
         if (![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx = 0, dy = 0]) => e.em(x + dx, y + dy) === '~')) continue;
         const nome = escolher(margem, hash(x, y, 710));
-        por(nome, x, y, nome !== 'juncos');
+        por(nome, x, y, true);
       }
     }
   }

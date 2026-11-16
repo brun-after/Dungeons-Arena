@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.31 · **Data:** 16/11/2026
+**Versão:** 1.32 · **Data:** 16/11/2026
 
 > **Histórico**
+> - **1.32 (16/11/2026)**: D-183: o jogador não trava (o cenário baixo se atravessa, o corpo escorrega na parede, na quina e no tronco, e sai do degrau que passou a barrar) a tocha diante dos mais fracos e a noite 15% menos escura.
 > - **1.31 (16/11/2026)**: D-182: marco 45, as criaturas de Filo (nove dimensões, 36 comuns e 18 chefes com mecânica própria, modelos 3D próprios pré-renderizados, a fenda e o monstruário no diário).
 > - **1.30 (16/11/2026)**: D-181: a nuvem da Forma de névoa vira uma massa sem forma que cresce com os mortos, sem os anéis em volta de cada um, e o rastro se desfaz em cinzas na mistura das afinidades.
 > - **1.29 (16/11/2026)**: D-179, adendo: os mortos do Necromante jogador num vermelho só (filtro de cor); a skin escolhida nas telas de seleção de personagem, fora do menu de pausa; a gadanha do Ceifador apontando para a frente.
@@ -5782,3 +5783,44 @@ O desenho completo está no documento "Monstruário de Filo". Aqui ficam o que f
 - O monstruário (`ui/mochila-monstruario.ts`) fecha o diário, agrupado por dimensão. A página mostra o quadro parado de
   frente, não o desenho girando nas 8 direções.
 - A regra que o chefe põe na tela (máscara ou pecado) sai como aviso (`ui/feedback.ts`, `chefe.regra.*`).
+
+## D-183 — O jogador não trava, e a tocha diante dos mais fracos (16/11/2026)
+
+**Contexto.** Os arbustos pequenos barravam o jogador, o corpo parava de frente contra paredes e quinas, e na entrada
+de Campos do Oeste (o degrau do relevo junto às árvores, em torno de 22..24 × 140..145) o personagem ficava preso para
+sempre. À noite, os monstros mais fracos nunca atacavam quem levava a tocha, e a reação a uma batalha por perto ficava
+bem abaixo da metade da do dia.
+
+**Decisão.**
+- **O cenário baixo se atravessa** (`world/cenario-baixo.ts`).
+  - O arbusto da borda da mata ganhou código próprio (`OBSTACULO.arbusto`): o gerador marca, o desenho só lê. Ele não
+    tem tronco.
+  - A pedra miúda do plano (o rochedo fora do pé do penhasco e da serra) vira chão por baixo dela.
+  - As peças compostas da lista `passaPorCima` (`cenario.json`) não ocupam a célula: arbusto, juncos, pedras, toco,
+    tora, entulho, saco, feno, colheita, marco de pedra, placa e a árvore morta. Barril, caixote, cerca, poço, banco,
+    poste e as peças de ofício continuam barrando.
+- **O corpo escorrega** (`world/movimento.ts`).
+  - Primeiro tenta o passo inteiro, depois um eixo de cada vez.
+  - Se andou menos da metade do passo, conta como parado: gira o rumo 30° e 60° para cada lado; de frente para a
+    quina, vai de lado (até meia célula) para onde a frente abre.
+  - Encaixado entre o tronco e a parede, o tronco cede.
+  - Contra outro corpo, segue valendo o `contornar` (de frente, os dois param).
+- **Quem já encosta numa célula que barra sai livre** (`world/corpo.ts`, `corpoCabe` com a origem). A barreira do
+  relevo é medida a partir da célula do centro do corpo: ao descer um degrau, o centro passa para a célula de baixo e o
+  corpo ainda encosta na de cima, que passa a barrar. Antes, todo passo que seguia encostando nela era recusado,
+  inclusive o que se afastava. Agora a célula só barra o passo que chega mais perto dela.
+  - Varredura: em todas as regiões, de todo ponto em que o corpo pode estar, ele sai andando para algum lado. Antes,
+    eram 138 pontos presos só em Campos do Oeste. O teste `travas-movimento` guarda Campos do Oeste.
+- **A tocha diante dos mais fracos** (`entities/ia-mundo.ts`).
+  - O mais fraco ataca quem leva a tocha com 50% de chance (`tocha.fracosAvancamPct`), sorteada por par e por janela
+    de 20 s; quando ataca, percebe a 50% do alcance do dia (`tocha.fracosAlcancePct`). Na outra metade, evita como
+    antes.
+- **A batalha por perto à noite.** O raio inteiro (o base e o bônus da batalha) cai à metade uma vez só, contra quem
+  não tem luz. Antes o bônus caía duas vezes (cerca de 32% do dia). O raio em que a batalha é notada também cai pela
+  noite.
+
+- **A noite 15% menos escura**, para ver um pouco mais do cenário: o quadro da noite (`mundo.ciclo.quadros.noite`) passa
+  de 0,99 a 0,84.
+
+**Observação.** A percepção dos monstros no escuro já era 50% da do dia. Como a maioria dos presets percebe a 4
+células (distância em passos), à noite isso dá 2.

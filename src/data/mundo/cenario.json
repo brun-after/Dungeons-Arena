@@ -1,5 +1,5 @@
 {
-  "versao": "1.1 (15/11/2026, marco 43, D-177): o que cada bioma põe em pé no exterior do Mundo (render/cenario-iso.ts). Cada nome é a série de src/assets/cenario (carvalho = carvalho_1, carvalho_2...). As árvores crescem em talhões de uma espécie (talhaoCelulas), as coníferas acima de altitudeAlta, os arbustos na borda da mata; as rochas soltas são pequenas e os rochedos grandes ficam no pé do penhasco e da serra.",
+  "versao": "1.2 (16/11/2026): passaPorCima, as séries baixas que não barram o corpo (world/cenario-baixo.ts). 1.1 (15/11/2026, marco 43, D-177): o que cada bioma põe em pé no exterior do Mundo (render/cenario-iso.ts). Cada nome é a série de src/assets/cenario (carvalho = carvalho_1, carvalho_2...). As árvores crescem em talhões de uma espécie (talhaoCelulas), as coníferas acima de altitudeAlta, os arbustos na borda da mata; as rochas soltas são pequenas e os rochedos grandes ficam no pé do penhasco e da serra.",
   "arvores": {
     "campo": [
       "carvalho",
@@ -85,6 +85,7 @@
       "arbusto_seco"
     ]
   },
+  "passaPorCima": ["arbusto", "arbusto_seco", "juncos", "rocha_cinza", "rocha_musgo", "rocha_neve", "rocha_arenito", "toco", "tora", "escombros", "sacos", "feno", "colheita", "marco_pedra", "placa", "morta"],
   "talhaoCelulas": 9,
   "altitudeAlta": 6,
   "matas": {

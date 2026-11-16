@@ -5,7 +5,7 @@ import { modoPorId } from '../../src/core/conteudo';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import { aleatorio, criarRng } from '../../src/core/rng';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
-import { raioDeAtencao } from '../../src/entities/ia-mundo';
+import { raioContra, raioDeAtencao } from '../../src/entities/ia-mundo';
 import { lerLugar, montarLugar } from '../../src/mundo/lugares';
 import { calmaEm, nivelDaNoite } from '../../src/mundo/noite';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
@@ -89,7 +89,7 @@ describe('a calma da noite (D-178)', () => {
 });
 
 describe('a batalha por perto à noite (D-178)', () => {
-  it('é notada de mais perto e chama menos: 50% na noite fechada', () => {
+  it('é notada de mais perto e chama a 50% do dia na noite fechada', () => {
     const m = regiao('campos_do_oeste');
     const classe = CONTEUDO.classes.get('guerreiro');
     const lobo = CONTEUDO.presets.get('lobo');
@@ -106,9 +106,10 @@ describe('a batalha por perto à noite (D-178)', () => {
     // A 11 células: de dia ouve a batalha (raio 16); à noite (raio 8), não.
     expect(raioDeAtencao(m.estado, dia, vigia, 5)).toBe(5 + b.bonus);
     expect(raioDeAtencao(m.estado, noite, vigia, 5)).toBe(5);
-    // Perto, à noite, ouve, mas o bônus é a metade.
+    // Perto, à noite, ouve; o raio inteiro (o base e o bônus) cai à metade uma vez só, contra quem não tem luz.
     vigia.y = 64;
     vigia.py = 64;
-    expect(raioDeAtencao(m.estado, noite, vigia, 5)).toBeCloseTo(5 + b.bonus * 0.5);
+    expect(raioDeAtencao(m.estado, noite, vigia, 5)).toBe(5 + b.bonus);
+    expect(raioContra(m.estado, noite, vigia, eu, raioDeAtencao(m.estado, noite, vigia, 5))).toBeCloseTo((5 + b.bonus) * 0.5);
   });
 });

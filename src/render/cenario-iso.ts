@@ -12,6 +12,7 @@ import CENARIO from '../data/mundo/cenario.json';
 import type { Fase } from '../world/fase';
 import { OBSTACULO } from '../world/geografia';
 import { raioDaSombra, type RegrasDaCamuflagem } from '../world/camuflagem';
+import { rochaDoPenhasco } from '../world/cenario-baixo';
 import type { PecaDoCenario } from '../world/composicao-cenario';
 import { CELULA_PX } from './camera-calculo';
 import type { Projecao } from './projecao';
@@ -73,21 +74,18 @@ export function itensDoCenario(fase: Fase, pecas: readonly PecaDoCenario[] = [])
   const naMata = (x: number, y: number) => (fase.matas ?? []).some((m) => Math.hypot(x - m.x, y - m.y) <= m.raio);
   const altura = (x: number, y: number) => fase.alturas?.[y * fase.largura + x] ?? 0;
   const obstaculoEm = (x: number, y: number) => (x < 0 || y < 0 || x >= fase.largura || y >= fase.altura ? 0 : (obst?.[y * fase.largura + x] ?? 0));
-  const VIZ8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as const;
   /**
    * A espécie da árvore tem motivo: o talhão (uma mancha de ~9 células, de borda irregular) é de uma espécie só, com
    * um pouco de mistura; acima da altitude alta, as coníferas; na borda da mata (poucas árvores em volta), o arbusto.
    */
   const especie = (x: number, y: number): string | undefined => {
-    const vizinhas = VIZ8.filter(([dx, dy]) => obstaculoEm(x + dx, y + dy) === OBSTACULO.arvore).length;
-    if (vizinhas <= 2 && hash(x, y, 15) < 0.45) return escolher(CENARIO.subosque[bioma], hash(x, y, 16));
     const t = CENARIO.talhaoCelulas;
     const talhao = hash(Math.floor((x + (hash(x, y, 17) - 0.5) * 4) / t), Math.floor((y + (hash(x, y, 18) - 0.5) * 4) / t), 19);
     const lista = naMata(x, y) ? CENARIO.matas[bioma] : altura(x, y) >= CENARIO.altitudeAlta ? CENARIO.arvoresAltas[bioma] : CENARIO.arvores[bioma];
     return escolher(lista, hash(x, y, 21) < 0.15 ? hash(x, y, 22) : talhao);
   };
   /** O rochedo grande só no pé do penhasco (o vizinho bem mais alto) ou da serra. */
-  const pePenhasco = (x: number, y: number) => VIZ8.some(([dx, dy]) => obstaculoEm(x + dx, y + dy) === OBSTACULO.montanha || altura(x + dx, y + dy) - altura(x, y) >= 3);
+  const pePenhasco = (x: number, y: number) => rochaDoPenhasco(obstaculoEm, altura, x, y);
   const por = (serie: string | undefined, x: number, y: number, s: number, jitter: number, escala: [number, number]) => {
     const nome = serie ? escolher(VARIANTES.get(serie) ?? [], hash(x, y, s + 1)) : undefined;
     if (!nome) return;
@@ -98,6 +96,8 @@ export function itensDoCenario(fase: Fase, pecas: readonly PecaDoCenario[] = [])
       for (let x = 0; x < fase.largura; x++) {
         const o = obst[y * fase.largura + x] ?? 0;
         if (o === OBSTACULO.arvore) por(especie(x, y), x, y, 20, 0.45, [0.85, 1.15]);
+        // 16/11/2026: o arbusto da borda da mata (o gerador marca, world/cenario-baixo.ts).
+        else if (o === OBSTACULO.arbusto) por(escolher(CENARIO.subosque[bioma], hash(x, y, 16)), x, y, 20, 0.45, [0.85, 1.15]);
         else if (o === OBSTACULO.rochedo) por(escolher(pePenhasco(x, y) ? CENARIO.pePenhasco[bioma] : CENARIO.rochedos[bioma], hash(x, y, 12)), x, y, 30, 0.3, [0.8, 1.15]);
         else if (o === OBSTACULO.montanha && hash(x, y, 13) * 100 < CENARIO.montanha.densidadePct) por(escolher(CENARIO.montanha[bioma], hash(x, y, 14)), x, y, 40, 0.6, [0.9, 1.35]);
       }
