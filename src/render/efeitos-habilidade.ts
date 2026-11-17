@@ -478,7 +478,7 @@ export class EfeitosDeHabilidade {
     // Marco 46 (16/11/2026, D-185): a camada elemental da armadura (o vínculo e as reações aos estados).
     for (const e of estado.entidades) {
       const pos = this.posicoes.get(e.id);
-      if (pos) particulasDaVeste(e, estado.tick, agoraMs, this.ultimaAura, (preset, dx, dy, cor) => this.o.particulas.emitir(preset, pos.x + dx, pos.y + dy, cor));
+      if (pos) particulasDaVeste(e, estado.tick, agoraMs, this.ultimaAura, (preset, dx, dy, cor) => { this.o.particulas.emitir(preset, pos.x + dx, pos.y + dy, cor); });
     }
   }
 }
