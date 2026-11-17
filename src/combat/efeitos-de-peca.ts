@@ -1,6 +1,6 @@
 // O motor dos efeitos de peça (marco 46, 16/11/2026, D-185). Puro e determinístico.
 //
-// Cada peça de armadura vestida traz efeitos `gatilho → condição → efeito` (progression/pecas.ts, data/pecas.json).
+// Cada peça de armadura vestida traz efeitos `gatilho > condição > efeito` (progression/pecas.ts, data/pecas.json).
 // Aqui eles rodam, sem código por peça: cada gatilho é um momento do combate e cada efeito é uma função pequena.
 // - `pisar`: o chão sob os pés é lido a cada `pisarCadaTicks` (as áreas do elemento, world/terrenos-vivos.ts);
 // - `usar`: a skill usada (combat/acao.ts);

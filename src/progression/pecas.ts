@@ -2,7 +2,7 @@
 //
 // O visual sai da classe: cada peça tem um PROPÓSITO (a silhueta: baluarte, batedor, arcano, espreita, ossuário) e um
 // ESTILO (só visual, a persona: simples, medieval, colorida, arcana, meme), além do GRAU (0 a 5) que já existia.
-// Cada peça também tem EFEITOS no modelo único `gatilho → condição → efeito`, tudo em data/pecas.json, medido em
+// Cada peça também tem EFEITOS no modelo único `gatilho > condição > efeito`, tudo em data/pecas.json, medido em
 // ticks. O que cada tipo de peça aceita está em `aceita` (sem código por peça).
 //
 // O perfil é fixo na peça e nasce do id (como o resto do item gerado): a semente do id sorteia o propósito, o estilo,
@@ -175,7 +175,7 @@ export function lerPecas(json: unknown): { pecas: RegrasDePecas; erros: string[]
     const ataque = se.ataque === undefined ? 'qualquer' : l.opcao(se, 'ataque', ATAQUES_DE_PECA);
     const efeito = lerEfeito(l, l.objeto(r.efeito, `receita "${id}".efeito`));
     if (!efeito) continue;
-    if (!aceita.get(peca)?.has(par(gatilho, efeito.tipo))) l.erro(`receita "${id}": a peça "${peca}" não aceita ${gatilho} → ${efeito.tipo}`);
+    if (!aceita.get(peca)?.has(par(gatilho, efeito.tipo))) l.erro(`receita "${id}": a peça "${peca}" não aceita ${gatilho} > ${efeito.tipo}`);
     // Os efeitos que dependem do elemento precisam dele na condição.
     if ((efeito.tipo === 'poderElemento' || efeito.tipo === 'absorver' || efeito.tipo === 'rastro' || efeito.tipo === 'resistencia') && elemento === null) l.erro(`receita "${id}": ${efeito.tipo} precisa de "se.elemento"`);
     receitas.push({
