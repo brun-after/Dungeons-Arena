@@ -17,7 +17,7 @@ import { idItemGerado } from '../../src/progression/gerar-item';
 import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
 import { ATRIBUTOS_TIPICOS, BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
-import { pontosAteONivel, tetoDoAtributo } from '../../src/progression/nivel';
+import { concederXpDeProgressao, pontosAteONivel, tetoDoAtributo } from '../../src/progression/nivel';
 import type { Atributos } from '../../src/entities/entidade';
 
 // Marco 22 (23/10/2026, D-090): o Necromante entra nas metas (antes só no diagnóstico).
@@ -275,9 +275,12 @@ export function economiaPorMinuto(classe: string, nivel: number, semente: number
     const m = mundo(ctx, semente + i, [j, inimigo(ctx, preset, nivel)], dificuldade);
     m.bots.push(new BotDeDuelo('j1'));
     m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1')));
-    for (const e of m.eventos) if (e.t === 'xpGanho' && e.id === 'j1') xp += e.xp;
-    // 16/11/2026 (D-184): onde o modo põe o XP no chão, conta a luz que o jogador deixou de recolher.
-    xp += m.estado.objetos.filter((o) => o.tipo === 'orbe_xp' && o.ref === 'j1').reduce((total, o) => total + o.valor, 0);
+    // 16/11/2026 (D-184): onde o modo põe o XP no chão, o jogador recolhe a luz que ficou (pela mesma conta de antes,
+    // com o arredondamento e a fração guardada; somar o valor cru da luz inflava o XP dos níveis baixos).
+    const dono = m.estado.entidades.find((e) => e.id === 'j1');
+    const recolhidos: EventoSimulacao[] = [];
+    if (dono) for (const o of m.estado.objetos) if (o.tipo === 'orbe_xp' && o.ref === 'j1') concederXpDeProgressao(dono, ctx, o.valor, m.estado.tick, recolhidos);
+    for (const e of [...m.eventos, ...recolhidos]) if (e.t === 'xpGanho' && e.id === 'j1') xp += e.xp;
     ouro += m.estado.objetos.filter((o) => o.tipo === 'ouro').reduce((total, o) => total + o.valor, 0);
     tempo += segundos(m.estado.tick);
   });
