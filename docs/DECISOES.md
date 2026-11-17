@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.32 · **Data:** 16/11/2026
+**Versão:** 1.34 · **Data:** 16/11/2026
 
 > **Histórico**
+> - **1.34 (16/11/2026)**: D-185: os outros dois movimentos da classe saem do T e do G para o V e o Espaço; travar o alvo volta ao T e o Espaço deixa de atacar.
+> - **1.33 (16/11/2026)**: D-184: o XP do abate deixa de entrar sozinho e fica no chão como uma luz que só o dono vê e pega de perto, com o brilho pela quantidade; contra os mais fracos, 5% de chance de 3× e 1% de 5×.
 > - **1.32 (16/11/2026)**: D-183: o jogador não trava (o cenário baixo se atravessa, o corpo escorrega na parede, na quina e no tronco, e sai do degrau que passou a barrar) a tocha diante dos mais fracos e a noite 15% menos escura.
 > - **1.31 (16/11/2026)**: D-182: marco 45, as criaturas de Filo (nove dimensões, 36 comuns e 18 chefes com mecânica própria, modelos 3D próprios pré-renderizados, a fenda e o monstruário no diário).
 > - **1.30 (16/11/2026)**: D-181: a nuvem da Forma de névoa vira uma massa sem forma que cresce com os mortos, sem os anéis em volta de cada um, e o rastro se desfaz em cinzas na mistura das afinidades.
@@ -5824,3 +5826,41 @@ bem abaixo da metade da do dia.
 
 **Observação.** A percepção dos monstros no escuro já era 50% da do dia. Como a maioria dos presets percebe a 4
 células (distância em passos), à noite isso dá 2.
+
+## D-184 — A luz de XP (16/11/2026)
+
+**Contexto.** O XP entrava sozinho no abate. O pedido: o inimigo deixa uma luzinha, mais forte quanto mais XP leva, e o
+XP só entra quando ela é recolhida; contra quem está abaixo do nível do jogador, às vezes o XP vem 3× a 5× maior.
+
+**Decisão.**
+- **O XP vai ao chão** onde o modo manda (`xpNoChao` com `objetosDeFase`: campanha, cooperativo, livre e Mundo) e só no
+  abate de criatura. Derrubar jogador (a recompensa da arena) segue pagando direto.
+- **Uma luz por dono** (`orbe_xp`, `ref` = id do dono). A conta do XP não mudou (partilha do grupo, antifarm, faixa
+  avançada, fadiga, chefe da masmorra): ela só decide o valor de cada luz. Quem abateu e os aliados da partilha ganham
+  cada um a sua, no lugar da morte; duas luzes do mesmo dono na mesma célula se juntam.
+- **Só o dono vê e pega.**
+  - Pega de perto: Chebyshev até `xp.orbe.raioColeta` (1 célula), sem precisar pisar em cima como nos itens.
+  - Ninguém pega por outro: nem o aliado, nem o falcão do Aventureiro.
+  - A área de interesse só envia a luz ao dono (`arena/interesse.ts`), e o render só a desenha para o jogador local.
+  - A luz não ocupa a célula: os outros drops caem junto dela.
+- **O brilho pela quantidade** (`brilhoDoOrbeXp`): de 0,15 a 1, na raiz do XP sobre `brilhoRefPct` (20%) do XP do nível
+  do dono. O tamanho, a opacidade e a luz que ela joga no escuro crescem juntos.
+- **A sorte contra os mais fracos** (`xp.orbe.sorte`). Com o inimigo abaixo do nível do dono: 1% de chance de 5× e 5%
+  de 3×. O sorteio é por dono, num RNG próprio da morte (não desloca o do combate nem o do loot). A luz da sorte ganha
+  um anel de faíscas.
+- **Prazo no chão** de 3 min (`xp.orbe.prazoMs`): a luz não recolhida some com o XP.
+
+**Observação.** Os testes da conta do XP recolhem a luz pelo `tests/apoio/xp.ts`; a coleta de verdade tem o próprio
+teste (`orbe-xp.test.ts`).
+
+## D-185 — Movimentos no V e no Espaço (16/11/2026)
+
+**Contexto.** O T e o G (D-172) ficavam longe da mão que anda no WASD. O Ctrl foi descartado: no navegador, Ctrl+W
+fecha a aba e a página não consegue impedir, e quem aperta o W ainda segurando o Ctrl perderia o jogo.
+
+**Decisão.**
+- O movimento principal segue no Shift; o segundo vai para o **V** e o terceiro para o **Espaço** (`input/teclado.ts`,
+  os rótulos do HUD em `ui/movimento-toque.ts`).
+- Travar ou destravar o alvo volta ao **T** (o V é do movimento).
+- O Espaço **deixa de atacar**: o ataque básico fica sem tecla, no automático (`F` liga ou desliga) e no clique no
+  inimigo. O celular não muda.

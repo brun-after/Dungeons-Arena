@@ -15,6 +15,7 @@ import { fatorDoGolpe, fatoresDoMundo, tamanhoDoGrupo, type Dificuldade } from '
 import { comandoAceitoEmRede } from '../../src/modos/regras';
 import { MIGRACOES } from '../../src/save/esquema';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { recolherXp } from '../apoio/xp';
 
 function obter<T>(v: T | undefined | null, nome: string): T {
   if (v === undefined || v === null) throw new Error(`${nome} ausente`);
@@ -108,6 +109,7 @@ describe('as alavancas da dificuldade', () => {
       g.hp = 0;
       g.participacao.push({ id: 'j', tick: s.estado.tick });
       s.tick();
+      recolherXp(s.estado, c);
       return s.ent('j').xp;
     };
     expect(xp('facil')).toBeLessThan(xp('normal'));

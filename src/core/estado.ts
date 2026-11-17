@@ -80,7 +80,9 @@ export type TipoObjeto =
   // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (acendem a tocha de quem interage; iluminam em volta).
   | 'poste_tocha' | 'fogueira'
   // Marco 44 (15/11/2026, D-178): a caixa do acampamento (`ref`: `acampamento:<dono>`; o conteúdo fica na ficha).
-  | 'caixa_acampamento';
+  | 'caixa_acampamento'
+  // 16/11/2026 (D-184): a luz de XP do abate (`ref`: o dono, único que vê e pega; `valor`: o XP).
+  | 'orbe_xp';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -119,6 +121,8 @@ export interface ObjetoNoMundo {
   largadoTick?: number;
   /** Marco 30 (30/10/2026, D-129): o render não desenha (a porta da estrutura escondida do Mundo; o prompt mostra). */
   escondido?: boolean;
+  /** 16/11/2026 (D-184): o multiplicador da sorte na luz de XP (3 ou 5); ausente sem sorte. */
+  xpSorte?: number;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */

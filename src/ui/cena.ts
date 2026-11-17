@@ -292,9 +292,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     temaDaFase(ctx)?.paleta ?? null,
     pintor,
     o.tileset ? null : modelos3d,
-    ctx.balance.visual.ouroMontes,
-    personagens,
+    ctx.balance.visual.ouroMontes, personagens,
     ref => [...ctx.conteudo.reinos.values()].flatMap(r => r.regioes).flatMap(r => r.estruturas).find(e => e.id === ref)?.nome,
+    idLocal,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
@@ -558,9 +558,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoMudarDirecao: (rumo) => {
       emitir(comandoMover(rumo));
-    },
-    aoAtacar: () => {
-      emitir({ t: 'ataqueBasico' });
     },
     // 1–6: habilidades; 7–9 e 0: consumíveis na ordem da mochila (D-050, marco 24).
     aoAtalho: (indice) => {

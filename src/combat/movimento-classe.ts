@@ -148,7 +148,7 @@ export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDa
 }
 
 /**
- * D-172: os movimentos nos botões, na ordem: o principal (Shift) e os outros da recarga menor para a maior (T e G). Quem
+ * D-172: os movimentos nos botões, na ordem: o principal (Shift) e os outros da recarga menor para a maior (V e Espaço, D-185). Quem
  * tem companheiros tem um botão só, o do companheiro ativo.
  */
 export function movimentosDosBotoes(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse[] {

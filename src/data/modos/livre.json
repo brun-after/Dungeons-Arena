@@ -34,6 +34,7 @@
   "fasesPermitidas": ["arena-01", "arena-02"],
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
+  "xpNoChao": true,
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "qualquer",

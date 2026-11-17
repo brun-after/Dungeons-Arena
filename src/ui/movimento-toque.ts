@@ -1,6 +1,6 @@
 // Marco 40 (14/11/2026, D-168): o movimento da classe pela interface.
 // D-172 (14/11/2026): um botão por movimento, em vez de um só que o G trocava.
-// - Teclado: o Shift usa o movimento principal da classe (o mais usado); o T e o G, os outros dois, da recarga menor
+// - Teclado: o Shift usa o movimento principal da classe (o mais usado); o V e o Espaço (D-185; antes, o T e o G), os outros dois, da recarga menor
 //   para a maior. Os que miram (o Acelerar, a Arremetida, o Posto dos Mortos) vão para o ponteiro; os outros, no rumo
 //   das teclas (ou no de agora).
 // - Celular: os botões lado a lado junto do direcional, o principal primeiro. Tocar usa o movimento no rumo do joystick;
@@ -8,7 +8,7 @@
 // - O Aventureiro tem um botão só: o do companheiro ativo (a montaria muda com o companheiro).
 // Cada botão mostra o ícone e a cor do seu movimento e escurece enquanto ele recarrega.
 // D-173 (14/11/2026): no computador, os mesmos botões ficam no HUD, ao lado da ultimate, com a tecla de cada um (Shift,
-// T, G) e os segundos que faltam da recarga; clicar também usa.
+// T, G; D-185: V, Espaço) e os segundos que faltam da recarga; clicar também usa.
 
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -36,7 +36,7 @@ export interface OpcoesMovimentoToque {
 export interface MovimentoToque {
   /** Os botões do celular, lado a lado (vão junto do direcional). */
   botoes: HTMLElement;
-  /** Shift (0), T (1) e G (2). */
+  /** Shift (0), V (1) e Espaço (2) (D-185; antes, T e G). */
   doTeclado: (rumo: Rumo, botao: number) => void;
   /** O rumo do joystick (o toque nos botões usa o último). */
   rumo: (r: Rumo) => void;
@@ -47,7 +47,7 @@ export interface MovimentoToque {
 
 const ATUALIZAR_MS = 200;
 const MAX_BOTOES = 3;
-const TECLAS = ['Shift', 'T', 'G'] as const;
+const TECLAS = ['Shift', 'V', 'Espaço'] as const;
 
 export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
   let rumo: Rumo = PARADO;

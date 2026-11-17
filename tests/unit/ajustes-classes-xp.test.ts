@@ -20,6 +20,7 @@ import { lerRegistro } from '../../src/save/esquema';
 import { ticksDe } from '../../src/core/tempo';
 import { personagemNoInicio } from '../../src/save/transicao';
 import { aplicarRetratoNoSave, atualizarPersonagemNoSave, conferirPersonagem, pedidoDoPersonagem } from '../../src/coop/personagem';
+import { recolherXp } from '../apoio/xp';
 
 function obter<T>(v: T | undefined | null): T { if (v == null) throw Error('ausente'); return v; }
 function cena(classe = 'guerreiro', nivel = 30) {
@@ -186,7 +187,7 @@ describe('XP de criaturas inferiores', () => {
     expect(xpDeCriatura(c.estado, c.ctx, c.j, c.alvo, 0)).toBe(0);
     expect(c.j.bolsa?.xpPorFase).toBeUndefined();
     c.j.xp = 100; c.j.hp = 0;
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     expect(c.j.xp).toBe(50);
     expect(c.eventos.find(e => e.t === 'penalidadeMorte')).toMatchObject({ xp: 50 });
   });
@@ -256,7 +257,7 @@ describe('XP de criaturas inferiores', () => {
   it('abate inferior concede no mínimo 1 XP mesmo com cota fracionária e A soma a cota base', () => {
     const c = cena('aventureiro', 30); c.alvo.xpBase = 1;
     c.alvo.hp = 0; c.alvo.participacao = [{ id: c.j.id, tick: 0 }];
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     expect(c.j.xp).toBe(1); expect(c.j.bolsa?.xpFracao ?? 0).toBe(0);
     expect(c.j.bolsa?.xpPorFase?.['fase-02']?.xpBaseAcumulado).toBeCloseTo(.1);
   });
@@ -264,7 +265,7 @@ describe('XP de criaturas inferiores', () => {
     const c = cena('aventureiro', 10); c.alvo.nivel = 1;
     obter(c.j.bolsa).xpPorFase = { 'fase-02': { xpBaseAcumulado: 100000, meiaVidaXp: 30 } };
     c.alvo.abates = 1000; c.alvo.hp = 0; c.alvo.participacao = [{ id: c.j.id, tick: 0 }];
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     expect(c.j.xp).toBe(1);
     expect(c.j.bolsa?.xpPorFase?.['fase-02']?.xpBaseAcumulado).toBe(100100);
   });
@@ -286,7 +287,7 @@ describe('XP de criaturas inferiores', () => {
     const c = cena('aventureiro', 10);
     obter(c.j.bolsa).xpPorFase = { 'fase-02': { xpBaseAcumulado: 1000, meiaVidaXp: 820 } };
     c.j.hp = 0;
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     expect(c.j.bolsa?.xpPorFase?.['fase-02']).toEqual({ xpBaseAcumulado: 1000, meiaVidaXp: 820 });
     const r = lerRegistro({ versaoSchema: 21, slot: 1, faseRef: { tipo: 'oficial', id: 'fase-02' }, estado: c.estado, fasesVisitadas: {} });
     expect(r.ok).toBe(true);
