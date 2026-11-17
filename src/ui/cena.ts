@@ -292,8 +292,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     temaDaFase(ctx)?.paleta ?? null,
     pintor,
     o.tileset ? null : modelos3d,
-    ctx.balance.visual.ouroMontes,
-    personagens,
+    ctx.balance.visual.ouroMontes, personagens,
     ref => [...ctx.conteudo.reinos.values()].flatMap(r => r.regioes).flatMap(r => r.estruturas).find(e => e.id === ref)?.nome,
     idLocal,
   );
