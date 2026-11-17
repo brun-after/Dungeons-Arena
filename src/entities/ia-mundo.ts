@@ -56,9 +56,9 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   // Marco 44 (D-178): o escuro entra por alvo (raioContra), porque quem está iluminado é visto de longe.
   const base=base0;
   const r=ctx.balance.mundo.atencaoBatalha, desde=estado.tick-ticksDe(r.memoriaMs);
-  // Marco 44 (15/11/2026, D-178): à noite, a batalha por perto também é notada de mais perto e chama menos (50% na noite
-  // fechada): antes o raio e o bônus eram os do dia.
-  const noite=fatorDaNoite(ctx), raioBatalha=r.raio*noite;
+  // Marco 44 (15/11/2026, D-178): à noite, a batalha por perto é notada de mais perto (50% na noite fechada). O bônus
+  // fica inteiro aqui: o raio todo já cai pela noite em raioContra (16/11/2026: antes caía duas vezes, ~32% do dia).
+  const raioBatalha=r.raio*fatorDaNoite(ctx);
   const porId=new Map(estado.entidades.map(a=>[a.id,a]));
   const batalha=estado.entidades.some(a=>{
     if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>raioBatalha)return false;
@@ -67,7 +67,7 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     const atacou=alvo&&alvoOfensivoValido(estado,ctx,e,alvo)&&alvo.participacao.some(p=>p.id===a.id&&p.tick>=desde);
     return recebeu||!!atacou;
   });
-  return base+(batalha?r.bonus*noite:0);
+  return base+(batalha?r.bonus:0);
 }
 
 /**
@@ -80,17 +80,22 @@ export function iluminado(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidad
   return estado.objetos.some((o) => fogoAceso(o, estado.tick) && chebyshev(o, e) <= r);
 }
 
-/** Como o monstro reage a quem leva a tocha: o mais forte é atraído, o mais fraco evita, o igual decide na sorte. */
-export type ReacaoAoFogo = 'normal' | 'atraido' | 'evita';
+/**
+ * Como o monstro reage a quem leva a tocha: o mais forte é atraído; o igual decide na sorte entre ir atraído e evitar;
+ * o mais fraco (16/11/2026) também decide na sorte: ataca com cautela (percebe a `fracosAlcancePct`% do alcance do dia)
+ * ou evita.
+ */
+export type ReacaoAoFogo = 'normal' | 'atraido' | 'cauteloso' | 'evita';
 
 export function reacaoAoFogo(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: Entidade, alvo: Entidade): ReacaoAoFogo {
   if (!ctx.fase.exterior || !temLuzPropria(alvo)) return 'normal';
   if (monstro.nivel > alvo.nivel) return 'atraido';
-  if (monstro.nivel < alvo.nivel) return 'evita';
   const t = ctx.balance.mundo.tocha;
   // O sorteio é por par e por janela de tempo (o mesmo resultado no mesmo estado, sem guardar nada).
   const janela = Math.floor(estado.tick / Math.max(1, ticksDe(t.janelaIguaisMs)));
-  return (hashTexto(`${monstro.id}|${alvo.id}|${janela}`) % 100) < t.iguaisAvancamPct ? 'atraido' : 'evita';
+  const sorte = hashTexto(`${monstro.id}|${alvo.id}|${janela}`) % 100;
+  if (monstro.nivel < alvo.nivel) return sorte < t.fracosAvancamPct ? 'cauteloso' : 'evita';
+  return sorte < t.iguaisAvancamPct ? 'atraido' : 'evita';
 }
 
 /** Quem atacou o monstro (ele sempre persegue quem o feriu, com ou sem fogo). */
@@ -107,6 +112,7 @@ export function raioContra(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: 
   const reacao = reacaoAoFogo(estado, ctx, monstro, alvo);
   if (reacao === 'evita' && !provocou(monstro, alvo)) return -1;
   const visto = iluminado(estado, ctx, alvo) ? raio : percepcaoNoEscuro(ctx, alvo, raio);
+  if (reacao === 'cauteloso') return visto * (ctx.balance.mundo.tocha.fracosAlcancePct / 100);
   return reacao === 'atraido' ? visto * ctx.balance.mundo.tocha.atraiMult : visto;
 }
 

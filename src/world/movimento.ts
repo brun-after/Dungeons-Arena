@@ -450,9 +450,19 @@ function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: Con
   for (let k = 0; k < n; k++) {
     const x0 = e.px;
     const y0 = e.py;
-    avancarEixo(e, sx, 0, estado, ctx, grade);
-    avancarEixo(e, 0, sy, estado, ctx, grade);
-    if (e.px === x0 && e.py === y0) contornar(e, sx, sy, estado, ctx, grade);
+    // 16/11/2026: o passo inteiro primeiro (entre um tronco e uma quina, só a diagonal sai: cada eixo sozinho chega
+    // mais perto de um dos dois); depois um eixo de cada vez; parado, contorna o corpo ou escorrega na parede.
+    if (cabe(e, e.px + sx, e.py + sy, estado, ctx, grade)) {
+      e.px += sx;
+      e.py += sy;
+    } else {
+      avancarEixo(e, sx, 0, estado, ctx, grade);
+      avancarEixo(e, 0, sy, estado, ctx, grade);
+    }
+    // Andou menos da metade do passo (encostou rente): conta como parado, e o corpo contorna ou escorrega.
+    const parado = () => (e.px - x0) ** 2 + (e.py - y0) ** 2 < 0.25 * (sx * sx + sy * sy);
+    if (parado()) contornar(e, sx, sy, estado, ctx, grade);
+    if (parado()) escorregar(e, sx, sy, estado, ctx, grade);
     const mx = e.px - x0;
     const my = e.py - y0;
     if (mx === 0 && my === 0) break;
@@ -516,15 +526,63 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
   avancarEixo(e, 0, ty, estado, ctx, grade);
 }
 
+/** Os desvios do rumo (graus) que o corpo tenta, parado de frente contra a parede, a quina ou o tronco. */
+const DESVIOS = [30, -30, 60, -60] as const;
+/** De frente para a quina: até quanto de lado (células) o corpo procura o caminho aberto à frente. */
+const FOLGA_DA_QUINA = 0.5;
+
+/**
+ * 16/11/2026: parado de frente contra o que não é corpo (a parede, a quina, o tronco, o degrau), o corpo escorrega: gira
+ * o rumo um pouco para cada lado e anda a parte do passo que segue o rumo (o cosseno). Nunca volta para trás.
+ */
+function escorregar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): void {
+  // Contra outro corpo, quem decide é `contornar` (de frente, os dois param).
+  if (bloqueadoPorEntidade(e, e.px + sx, e.py + sy, estado, ctx, grade)) return;
+  for (const graus of DESVIOS) {
+    const a = (graus * Math.PI) / 180;
+    const c = Math.cos(a);
+    const s = Math.sin(a);
+    const tx = (sx * c - sy * s) * c;
+    const ty = (sx * s + sy * c) * c;
+    if (cabe(e, e.px + tx, e.py + ty, estado, ctx, grade)) {
+      e.px += tx;
+      e.py += ty;
+      return;
+    }
+  }
+  // De frente para a quina: se, de lado até `FOLGA_DA_QUINA`, a frente abre, vai de lado (o lado que abre mais perto).
+  const s = Math.sqrt(sx * sx + sy * sy);
+  if (s > EPS) {
+    const px = -sy / s;
+    const py = sx / s;
+    for (let d = s; d <= FOLGA_DA_QUINA + EPS; d += s) {
+      for (const lado of [1, -1]) {
+        const lx = px * lado * s;
+        const ly = py * lado * s;
+        if (cabe(e, e.px + px * lado * d + sx, e.py + py * lado * d + sy, estado, ctx, grade) && cabe(e, e.px + lx, e.py + ly, estado, ctx, grade)) {
+          e.px += lx;
+          e.py += ly;
+          return;
+        }
+      }
+    }
+  }
+  // Encaixado entre o tronco e a parede (nada anda): o tronco, fino, cede.
+  if (cabe(e, e.px + sx, e.py + sy, estado, ctx, grade, true)) {
+    e.px += sx;
+    e.py += sy;
+  }
+}
+
 /** O corpo da entidade cabe em (x, y): terreno, muralhas e quem a bloqueia (só barra quem se aproxima). */
-function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
+function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos, semTronco = false): boolean {
   const r = raioNoTerreno(e,ctx);
   // Marco 40 (D-164): quem voa passa por cima dos telhados das casas.
   // Marco 42 (15/11/2026, D-176): o relevo barra pelo desnível desde onde o corpo está (a pé ou voando).
   const relevo = barraPorAltura(ctx.fase, ctx.balance.relevo, alturaEm(ctx.fase, e.px, e.py), noAr(e) ? 'voar' : naTirolesa(e) ? 'saltar' : 'andar');
-  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined || (relevo?.(i, j) ?? false), noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null)) return false;
+  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined || (relevo?.(i, j) ?? false), noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null, { x: e.px, y: e.py })) return false;
   // Marco 44 (15/11/2026, D-178): só o tronco fino da árvore barra (quem voa passa por cima).
-  if (!noAr(e) && troncoBarra(ctx.fase, e.px, e.py, x, y, r, ctx.balance.movimento.raioTronco)) return false;
+  if (!noAr(e) && !semTronco && troncoBarra(ctx.fase, e.px, e.py, x, y, r, ctx.balance.movimento.raioTronco)) return false;
   // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo). D-138: salvo atrás de quem
   // luta com ele; e quem já está dentro sai livre.
   if (!podePisarNoRefugio(estado, ctx, e, x, y)) return false;

@@ -18,19 +18,26 @@ export type Barreira = (x: number, y: number) => boolean;
 
 /** O círculo de raio `r` em (x, y) encosta na célula (i, j)? (Distância ao quadrado até o ponto mais próximo.) */
 function encosta(x: number, y: number, r: number, i: number, j: number): boolean {
+  return distancia2(x, y, i, j) < r * r;
+}
+
+/** A distância ao quadrado de (x, y) até o ponto mais próximo da célula (i, j). */
+function distancia2(x: number, y: number, i: number, j: number): number {
   const qx = Math.max(i - 0.5, Math.min(x, i + 0.5));
   const qy = Math.max(j - 0.5, Math.min(y, j + 0.5));
-  const dx = x - qx;
-  const dy = y - qy;
-  return dx * dx + dy * dy < r * r;
+  return (x - qx) * (x - qx) + (y - qy) * (y - qy);
 }
 
 /** O corpo de raio `r` cabe em (x, y): não encosta em célula intransitável nem barrada. */
-export function corpoCabe(fase: Fase, x: number, y: number, r: number, barreira: Barreira | null = null, liberada: Barreira | null = null): boolean {
+export function corpoCabe(fase: Fase, x: number, y: number, r: number, barreira: Barreira | null = null, liberada: Barreira | null = null, origem: Celula | null = null): boolean {
   for (let j = Math.round(y - r); j <= Math.round(y + r); j++) {
     for (let i = Math.round(x - r); i <= Math.round(x + r); i++) {
       // Marco 40 (13/11/2026, D-164): `liberada` abre células fechadas (o telhado, para quem voa).
-      if (((!passavel(fase, i, j) && !liberada?.(i, j)) || barreira?.(i, j)) && encosta(x, y, r, i, j)) return false;
+      if (!(((!passavel(fase, i, j) && !liberada?.(i, j)) || barreira?.(i, j)) && encosta(x, y, r, i, j))) continue;
+      // 16/11/2026: quem já encosta na célula (a barreira do relevo mudou com a célula do centro, o empurrão, o pouso)
+      // sai livre: ela só barra o passo que chega mais perto dela. Antes o corpo ficava preso para sempre.
+      if (origem && encosta(origem.x, origem.y, r, i, j) && distancia2(x, y, i, j) >= distancia2(origem.x, origem.y, i, j)) continue;
+      return false;
     }
   }
   return true;

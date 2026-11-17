@@ -52,14 +52,28 @@ describe('a tocha à noite (D-178)', () => {
     expect([-1, 10 * ctx.balance.mundo.tocha.atraiMult]).toContain(r);
   });
 
-  it('a tocha atrai os mais fortes e afasta os mais fracos (até serem atacados)', () => {
+  it('a tocha atrai os mais fortes; dos mais fracos, metade ataca com cautela e metade evita (até serem atacados)', () => {
     const { ctx, estado, eu, monstro, acender } = cena(1);
     const forte = monstro('forte', 14, 6);
-    const fraco = monstro('fraco', 6, 3);
     acender();
     expect(reacaoAoFogo(estado, ctx, forte, eu)).toBe('atraido');
     expect(raioContra(estado, ctx, forte, eu, 10)).toBeCloseTo(10 * ctx.balance.mundo.tocha.atraiMult);
-    expect(reacaoAoFogo(estado, ctx, fraco, eu)).toBe('evita');
+    // 16/11/2026: o mais fraco ataca com 50% de chance, percebendo a 50% do alcance do dia.
+    let cautelosos = 0;
+    for (let i = 0; i < 200; i++) {
+      const f = monstro(`fraco${i}`, 6, 3);
+      if (reacaoAoFogo(estado, ctx, f, eu) !== 'cauteloso') continue;
+      cautelosos++;
+      expect(raioContra(estado, ctx, f, eu, 10)).toBeCloseTo(10 * ctx.balance.mundo.tocha.fracosAlcancePct / 100);
+    }
+    expect(cautelosos).toBeGreaterThan(70);
+    expect(cautelosos).toBeLessThan(130);
+    estado.entidades = estado.entidades.filter((e) => !e.id.startsWith('fraco'));
+    let fraco = monstro('fraco', 6, 3);
+    for (let i = 0; reacaoAoFogo(estado, ctx, fraco, eu) !== 'evita'; i++) {
+      estado.entidades.pop();
+      fraco = monstro(`fraco_evita${i}`, 6, 3);
+    }
     expect(raioContra(estado, ctx, fraco, eu, 10)).toBe(-1);
     expect(fogoQueAfasta(estado, ctx, fraco)?.id).toBe(eu.id);
     fraco.participacao.push({ id: eu.id, tick: estado.tick });
