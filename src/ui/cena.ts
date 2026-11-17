@@ -559,9 +559,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoMudarDirecao: (rumo) => {
       emitir(comandoMover(rumo));
     },
-    aoAtacar: () => {
-      emitir({ t: 'ataqueBasico' });
-    },
     // 1–6: habilidades; 7–9 e 0: consumíveis na ordem da mochila (D-050, marco 24).
     aoAtalho: (indice) => {
       if (indice >= ATALHOS_DE_HABILIDADE) {

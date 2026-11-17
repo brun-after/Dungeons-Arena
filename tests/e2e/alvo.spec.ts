@@ -20,7 +20,7 @@ test('desktop: Q trava o boneco, T destrava e Esc limpa antes de pausar', async 
   await page.keyboard.press('KeyQ');
   await expect(quadro).toBeVisible();
   await expect(quadro).toHaveAttribute('data-travado', 'true');
-  await page.keyboard.press('KeyV');
+  await page.keyboard.press('KeyT');
   await expect(quadro).toHaveAttribute('data-travado', 'false');
   await page.keyboard.press('Escape');
   await expect(quadro).toBeHidden();

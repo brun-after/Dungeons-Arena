@@ -193,7 +193,7 @@ test.describe('desktop', () => {
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?pesquisa=1&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    await page.keyboard.press('Space');
+    await page.keyboard.press('KeyQ');
     await page.getByRole('button', { name: 'Terminar teste' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Como foi?' });
     await dialogo.getByRole('button', { name: 'Enviar relatório' }).click();
@@ -565,8 +565,9 @@ test.describe('desktop', () => {
     // 07/11/2026 (D-136): Numpad1 = tecla 1 do necromante (o Dardo funesto): sai uma carga, a outra fica pronta.
     await page.keyboard.press('Numpad1');
     await expect(page.getByTestId('habilidade-dardo_funesto').locator('.cargas')).toHaveText('1', { timeout: 10_000 });
-    // O dardo básico no boneco rola o d20: o dado ao lado da barra mostra o número.
-    await page.keyboard.press('Space');
+    // O dardo básico no boneco rola o d20: o dado ao lado da barra mostra o número (D-185: o Espaço não ataca mais;
+    // o Q seleciona o boneco e o básico automático o ataca).
+    await page.keyboard.press('KeyQ');
     await expect(page.locator('.dado-d20')).toHaveAttribute('data-valor', /^\d+$/, { timeout: 10_000 });
     await expect(page.locator('.chip-d20')).toHaveCount(0);
     expect(erros).toEqual([]);
