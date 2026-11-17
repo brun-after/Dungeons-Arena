@@ -357,3 +357,18 @@ describe('elmo: resistência passiva pela ponte dos ganchos', () => {
     expect(r?.pct).toBeGreaterThan(0);
   });
 });
+
+describe('o texto da peça (mochila e loja)', () => {
+  it('cada receita, em cada elemento, vira uma linha completa do dicionário', async () => {
+    const { textoDaPeca, textoDoEfeito } = await import('../../src/ui/texto-da-peca');
+    for (const r of CONTEUDO.pecas.receitas) {
+      for (const el of ['fogo', 'gelo', 'psiquico'] as const) {
+        const linha = textoDoEfeito({ receita: r.id, gatilho: r.gatilho, se: { elemento: r.se.elemento === '*' ? el : r.se.elemento, ataque: r.se.ataque }, efeito: r.efeito });
+        expect(linha, r.id).not.toMatch(/[{}]|peca\.efeito|undefined/);
+        expect(linha.length, r.id).toBeGreaterThan(8);
+      }
+    }
+    const perfil = obter(CONTEUDO.itens.get(idItemGerado('capa', 9, 'lendario', 3))?.peca, 'capa');
+    expect(textoDaPeca(perfil).split(' · ')).toHaveLength(1 + perfil.efeitos.length);
+  });
+});
