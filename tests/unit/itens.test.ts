@@ -204,6 +204,8 @@ describe('nível e pontos (§2.12)', () => {
     c.j().xp = xpParaProximo(1, BALANCE_PADRAO.xp) - 1;
     c.estado.entidades.push(goblin);
     c.tick();
+    // D-184: o XP fica na luz, a uma célula (`raioColeta`): o jogador a pega no tick seguinte.
+    c.tick();
     expect(c.j().nivel).toBe(2);
   });
 });

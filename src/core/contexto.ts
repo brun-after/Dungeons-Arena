@@ -197,6 +197,13 @@ export interface Balance {
     /** Aumento automático de HP base por nível acima do 1º. */
     hpPorNivel: number;
     faixaAvancada: { nivelInicio: number; percentuais: Record<Dificuldade, number> };
+    /**
+     * 16/11/2026 (D-184): o XP do abate fica no chão como uma luz só do dono (progression/orbe-xp.ts). `raioColeta`:
+     * a distância (Chebyshev, células) em que ele a pega; `prazoMs`: quanto ela fica; `brilhoRefPct`: a % do XP do
+     * nível do dono que acende a luz por inteiro; `sorte`: as chances (da menor para a maior) de o inimigo abaixo do
+     * nível de quem pega render o multiplicador.
+     */
+    orbe: { raioColeta: number; prazoMs: number; brilhoRefPct: number; sorte: { chancePct: number; multiplicador: number }[] };
   };
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
   /**

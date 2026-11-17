@@ -15,6 +15,7 @@ import { novoObjeto } from '../../src/world/objetos';
 import { avaliarCrescimento } from '../../src/integridade/certificado';
 import type { Dificuldade } from '../../src/modos/dificuldade';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { recolherXp } from '../apoio/xp';
 
 function obter<T>(v: T | undefined | null): T { if (v === undefined || v === null) throw new Error('Dado de teste ausente'); return v; }
 
@@ -168,7 +169,7 @@ describe('nível 30 e faixa avançada', () => {
     i.hp = 0; i.xpBase = xp; i.abates = abates;
     i.participacao = [{ id: c.j.id, tick: 0 }];
     c.estado.entidades.push(i);
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     return c;
   }
   it.each([['facil', 5], ['normal', 10], ['dificil', 35], ['pesadelo', 170]] as const)('%s concede %i XP na faixa avançada', (d, xp) => {
@@ -196,7 +197,7 @@ describe('nível 30 e faixa avançada', () => {
     i.hp = 0; i.xpBase = 100;
     i.participacao = [{ id: c.j.id, tick: 0 }, { id: baixo.id, tick: 0 }];
     c.estado.entidades.push(baixo, i);
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     // Marco 24 (D-097): o último a bater (baixo) abate e leva tudo; o aliado perto leva 75%, cada um na sua faixa.
     expect(baixo.xp).toBe(110);
     expect(c.j.xp + (c.b.xpFracao ?? 0)).toBeCloseTo(8.25);

@@ -202,6 +202,8 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   });
   const nomeItem = (id: string | null) => (id ? (o.itens.get(id)?.nome ?? id) : '?');
   bus.on('coletou', (ev) => {
+    // 16/11/2026 (D-184): a luz de XP já aparece no registro pelo `xpGanho`.
+    if (ev.tipo === 'orbe_xp') return;
     if (ev.tipo === 'orbe_efeito') {
       if (ev.id === idLocal) hud.registrar(t('log.orbeEfeito'));
       return;

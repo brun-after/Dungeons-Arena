@@ -47,6 +47,7 @@ import { ID_LIVRO_RARO } from './itens';
 import { familiaDaHabilidade } from './itens-progressao';
 import { sortearItem } from './sorteio';
 import { antesDeCair, aoCair } from '../entities/criaturas/morte';
+import { largarOrbeXp, sorteDoXp, xpVaiAoChao } from './orbe-xp';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -109,7 +110,12 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
       : p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
         ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa * parte(p) : cota(p);
     // D-138: o chefe da masmorra do Mundo rende menos a cada repetição e pela diferença de nível.
-    concederXpDeProgressao(p, ctx, xpDoChefeDaDungeon(ctx, p, morto, xpDeCriatura(estado, ctx, p, morto, bruto * fator)), estado.tick, saida);
+    const xp = xpDoChefeDaDungeon(ctx, p, morto, xpDeCriatura(estado, ctx, p, morto, bruto * fator));
+    // 16/11/2026 (D-184): onde o modo manda, o XP fica no chão como a luz do dono (com a sorte contra os mais fracos).
+    if (xpVaiAoChao(ctx, morto) && p.controlador !== 'ia') {
+      const sorte = sorteDoXp(estado, ctx, p, morto);
+      largarOrbeXp(estado, p, xp * sorte, sorte, morto.x, morto.y, saida);
+    } else concederXpDeProgressao(p, ctx, xp, estado.tick, saida);
   }
 }
 

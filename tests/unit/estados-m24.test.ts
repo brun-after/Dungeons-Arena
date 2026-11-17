@@ -14,6 +14,7 @@ import { criarJogador } from '../../src/entities/fabrica';
 import { processarIa } from '../../src/entities/ia';
 import { processarMortes } from '../../src/progression/morte';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { recolherXp } from '../apoio/xp';
 
 function obter<T>(v: T | undefined | null): T {
   if (v == null) throw Error('ausente');
@@ -128,7 +129,7 @@ describe('XP de grupo (D-097)', () => {
     c.alvo.hp = 0;
     c.alvo.xpBase = 8;
     c.alvo.participacao = [{ id: 'j', tick: 0 }];
-    processarMortes(c.estado, c.ctx, c.eventos);
+    processarMortes(c.estado, c.ctx, c.eventos); recolherXp(c.estado, c.ctx);
     const xp = (e: typeof c.j) => e.xp + (e.bolsa?.xpFracao ?? 0);
     expect(xp(c.j)).toBeGreaterThan(0);
     expect(xp(perto) / xp(c.j)).toBeCloseTo(0.75, 1);

@@ -192,7 +192,13 @@
     "curvaLonga": { "aPartirDe": 30, "crescimentoPct": 4 },
     "nivelPlenoDasClasses": 30,
     "hpPorNivel": 5,
-    "faixaAvancada": { "nivelInicio": 20, "percentuais": { "facil": 5, "normal": 10, "dificil": 35, "pesadelo": 170 } }
+    "faixaAvancada": { "nivelInicio": 20, "percentuais": { "facil": 5, "normal": 10, "dificil": 35, "pesadelo": 170 } },
+    "orbe": {
+      "raioColeta": 1,
+      "prazoMs": 180000,
+      "brilhoRefPct": 20,
+      "sorte": [{ "chancePct": 1, "multiplicador": 5 }, { "chancePct": 5, "multiplicador": 3 }]
+    }
   },
   "efeitos": {
     "intervaloPeriodicoMs": 1000,

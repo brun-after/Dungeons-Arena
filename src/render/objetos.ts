@@ -41,6 +41,8 @@ import { desenharAviso, desenharBalcao, desenharMochila, direcaoDoPasso, figuraD
 import { desenharCirculoDeRetorno, progressoDoCirculo } from './circulo-retorno';
 import { BALANCE_PADRAO } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
+import { brilhoDoOrbeXp } from '../progression/orbe-xp';
+import { desenharOrbeXp } from './orbe-xp';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -68,7 +70,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
 // Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira', 'caixa_acampamento']);
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira', 'caixa_acampamento', 'orbe_xp']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -94,6 +96,9 @@ export class CamadaObjetos {
   private readonly modelos3d = new Map<string, Sprite>();
   /** Marco 38 (D-142): onde a figura do NPC está desenhada (o errante desliza entre as células) e para onde olha. */
   private readonly posicoesDeFigura = new Map<string, { x: number; y: number; direcao: number }>();
+  /** O nível do jogador local neste quadro (o brilho da luz de XP é pela fração do nível dele). */
+  private nivelLocal = 1;
+  private tMs = 0;
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -111,6 +116,8 @@ export class CamadaObjetos {
     private readonly ouroMontes: readonly number[] = [],
     private readonly personagens: AtlasDePersonagens | null = null,
     private readonly tituloDaEstrutura: (ref: string) => string | undefined = () => undefined,
+    /** 16/11/2026 (D-184): quem joga aqui; a luz de XP só aparece para o dono. */
+    private readonly idLocal: string | null = null,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -387,6 +394,10 @@ export class CamadaObjetos {
 
   /** Os orbes (vida, recurso, efeito e refúgio), com o brilho em volta. */
   private orbe(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number, pulso: number): void {
+    if (o.tipo === 'orbe_xp') {
+      desenharOrbeXp(g, cx, cy, brilhoDoOrbeXp(o, this.nivelLocal, BALANCE_PADRAO), o.xpSorte ?? 1, pulso, this.tMs);
+      return;
+    }
     if (o.tipo === 'orbe_efeito') {
       const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
       g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
@@ -414,10 +425,13 @@ export class CamadaObjetos {
     const proj = this.emPe?.projecao();
     const iso = proj?.visao === 'iso';
     const vistos = new Set<string>();
+    this.nivelLocal = estado.entidades.find((e) => e.id === this.idLocal)?.nivel ?? 1;
+    this.tMs = movimentoReduzido ? 0 : agoraMs;
     for (const o of estado.objetos) {
       const cx = (o.x + 0.5) * CELULA_PX;
       const cy = (o.y + 0.5) * CELULA_PX;
-      const visivel = naVista(cx, cy);
+      // D-184: a luz de XP de outro jogador não aparece (some como se estivesse fora da vista).
+      const visivel = naVista(cx, cy) && (o.tipo !== 'orbe_xp' || o.ref === this.idLocal);
       this.mostrarProprios(o.objetoId, visivel);
       if (!visivel) {
         vistos.add(o.objetoId);

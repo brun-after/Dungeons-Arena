@@ -276,6 +276,8 @@ export function economiaPorMinuto(classe: string, nivel: number, semente: number
     m.bots.push(new BotDeDuelo('j1'));
     m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1')));
     for (const e of m.eventos) if (e.t === 'xpGanho' && e.id === 'j1') xp += e.xp;
+    // 16/11/2026 (D-184): onde o modo põe o XP no chão, conta a luz que o jogador deixou de recolher.
+    xp += m.estado.objetos.filter((o) => o.tipo === 'orbe_xp' && o.ref === 'j1').reduce((total, o) => total + o.valor, 0);
     ouro += m.estado.objetos.filter((o) => o.tipo === 'ouro').reduce((total, o) => total + o.valor, 0);
     tempo += segundos(m.estado.tick);
   });

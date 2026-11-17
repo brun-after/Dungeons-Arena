@@ -21,6 +21,7 @@
   "fasesPermitidas": "qualquer",
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
+  "xpNoChao": true,
   "spawnerDinamico": false,
   "portas": { "inimigosCruzamChance": 0 },
   "saida": "qualquer",
