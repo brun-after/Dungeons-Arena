@@ -8373,7 +8373,7 @@
     },
     "altura": 1.1
   },
-  "arqueiro~cabeca-0": {
+  "arqueiro~espreita.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8461,7 +8461,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~cabeca-1": {
+  "arqueiro~espreita.cabeca-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8549,7 +8549,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~cabeca-2": {
+  "arqueiro~espreita.cabeca-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8637,7 +8637,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~cabeca-3": {
+  "arqueiro~espreita.cabeca-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8725,7 +8725,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~cabeca-4": {
+  "arqueiro~espreita.cabeca-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8813,7 +8813,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~cabeca-5": {
+  "arqueiro~espreita.cabeca-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8901,7 +8901,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-0": {
+  "arqueiro~espreita.capa-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -8989,7 +8989,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-1": {
+  "arqueiro~espreita.capa-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9077,7 +9077,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-2": {
+  "arqueiro~espreita.capa-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9165,7 +9165,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-3": {
+  "arqueiro~espreita.capa-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9253,7 +9253,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-4": {
+  "arqueiro~espreita.capa-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9341,7 +9341,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~capa-5": {
+  "arqueiro~espreita.capa-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9429,7 +9429,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-0": {
+  "arqueiro~espreita.corpo-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9517,7 +9517,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-1": {
+  "arqueiro~espreita.corpo-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9605,7 +9605,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-2": {
+  "arqueiro~espreita.corpo-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9693,7 +9693,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-3": {
+  "arqueiro~espreita.corpo-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9781,7 +9781,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-4": {
+  "arqueiro~espreita.corpo-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9869,7 +9869,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~corpo-5": {
+  "arqueiro~espreita.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -9957,7 +9957,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~maos-0": {
+  "arqueiro~espreita.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10045,7 +10045,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~maos-2": {
+  "arqueiro~espreita.maos-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10133,7 +10133,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~maos-4": {
+  "arqueiro~espreita.maos-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10221,7 +10221,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pernas-0": {
+  "arqueiro~espreita.pernas-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10309,7 +10309,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pernas-2": {
+  "arqueiro~espreita.pernas-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10397,7 +10397,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pernas-4": {
+  "arqueiro~espreita.pernas-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10485,7 +10485,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pes-0": {
+  "arqueiro~espreita.pes-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10573,7 +10573,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pes-2": {
+  "arqueiro~espreita.pes-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -10661,7 +10661,7 @@
     },
     "altura": 1.08
   },
-  "arqueiro~pes-4": {
+  "arqueiro~espreita.pes-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19003,7 +19003,7 @@
       ]
     }
   },
-  "aventureiro~cabeca-0": {
+  "aventureiro~batedor.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19091,7 +19091,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~cabeca-1": {
+  "aventureiro~batedor.cabeca-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19179,7 +19179,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~cabeca-2": {
+  "aventureiro~batedor.cabeca-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19267,7 +19267,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~cabeca-3": {
+  "aventureiro~batedor.cabeca-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19355,7 +19355,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~cabeca-4": {
+  "aventureiro~batedor.cabeca-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19443,7 +19443,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~cabeca-5": {
+  "aventureiro~batedor.cabeca-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19531,7 +19531,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-0": {
+  "aventureiro~batedor.capa-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19619,7 +19619,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-1": {
+  "aventureiro~batedor.capa-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19707,7 +19707,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-2": {
+  "aventureiro~batedor.capa-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19795,7 +19795,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-3": {
+  "aventureiro~batedor.capa-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19883,7 +19883,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-4": {
+  "aventureiro~batedor.capa-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -19971,7 +19971,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~capa-5": {
+  "aventureiro~batedor.capa-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20059,7 +20059,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-0": {
+  "aventureiro~batedor.corpo-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20147,7 +20147,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-1": {
+  "aventureiro~batedor.corpo-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20235,7 +20235,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-2": {
+  "aventureiro~batedor.corpo-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20323,7 +20323,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-3": {
+  "aventureiro~batedor.corpo-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20411,7 +20411,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-4": {
+  "aventureiro~batedor.corpo-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20499,7 +20499,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~corpo-5": {
+  "aventureiro~batedor.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20587,7 +20587,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~maos-0": {
+  "aventureiro~batedor.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20675,7 +20675,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~maos-2": {
+  "aventureiro~batedor.maos-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20763,7 +20763,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~maos-4": {
+  "aventureiro~batedor.maos-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20851,7 +20851,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pernas-0": {
+  "aventureiro~batedor.pernas-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -20939,7 +20939,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pernas-2": {
+  "aventureiro~batedor.pernas-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -21027,7 +21027,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pernas-4": {
+  "aventureiro~batedor.pernas-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -21115,7 +21115,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pes-0": {
+  "aventureiro~batedor.pes-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -21203,7 +21203,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pes-2": {
+  "aventureiro~batedor.pes-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -21291,7 +21291,7 @@
     },
     "altura": 1.12
   },
-  "aventureiro~pes-4": {
+  "aventureiro~batedor.pes-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31193,7 +31193,7 @@
       ]
     }
   },
-  "guerreiro~cabeca-0": {
+  "guerreiro~baluarte.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31281,7 +31281,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~cabeca-1": {
+  "guerreiro~baluarte.cabeca-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31369,7 +31369,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~cabeca-2": {
+  "guerreiro~baluarte.cabeca-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31457,7 +31457,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~cabeca-3": {
+  "guerreiro~baluarte.cabeca-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31545,7 +31545,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~cabeca-4": {
+  "guerreiro~baluarte.cabeca-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31633,7 +31633,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~cabeca-5": {
+  "guerreiro~baluarte.cabeca-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31721,7 +31721,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-0": {
+  "guerreiro~baluarte.capa-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31809,7 +31809,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-1": {
+  "guerreiro~baluarte.capa-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31897,7 +31897,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-2": {
+  "guerreiro~baluarte.capa-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -31985,7 +31985,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-3": {
+  "guerreiro~baluarte.capa-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32073,7 +32073,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-4": {
+  "guerreiro~baluarte.capa-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32161,7 +32161,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~capa-5": {
+  "guerreiro~baluarte.capa-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32249,7 +32249,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-0": {
+  "guerreiro~baluarte.corpo-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32337,7 +32337,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-1": {
+  "guerreiro~baluarte.corpo-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32425,7 +32425,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-2": {
+  "guerreiro~baluarte.corpo-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32513,7 +32513,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-3": {
+  "guerreiro~baluarte.corpo-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32601,7 +32601,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-4": {
+  "guerreiro~baluarte.corpo-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32689,7 +32689,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~corpo-5": {
+  "guerreiro~baluarte.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32777,7 +32777,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~maos-0": {
+  "guerreiro~baluarte.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32865,7 +32865,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~maos-2": {
+  "guerreiro~baluarte.maos-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -32953,7 +32953,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~maos-4": {
+  "guerreiro~baluarte.maos-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33041,7 +33041,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pernas-0": {
+  "guerreiro~baluarte.pernas-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33129,7 +33129,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pernas-2": {
+  "guerreiro~baluarte.pernas-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33217,7 +33217,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pernas-4": {
+  "guerreiro~baluarte.pernas-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33305,7 +33305,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pes-0": {
+  "guerreiro~baluarte.pes-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33393,7 +33393,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pes-2": {
+  "guerreiro~baluarte.pes-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -33481,7 +33481,7 @@
     },
     "altura": 1.14
   },
-  "guerreiro~pes-4": {
+  "guerreiro~baluarte.pes-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42063,7 +42063,7 @@
       ]
     }
   },
-  "mago~cabeca-0": {
+  "mago~arcano.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42151,7 +42151,7 @@
     },
     "altura": 1.12
   },
-  "mago~cabeca-1": {
+  "mago~arcano.cabeca-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42239,7 +42239,7 @@
     },
     "altura": 1.12
   },
-  "mago~cabeca-2": {
+  "mago~arcano.cabeca-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42327,7 +42327,7 @@
     },
     "altura": 1.12
   },
-  "mago~cabeca-3": {
+  "mago~arcano.cabeca-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42415,7 +42415,7 @@
     },
     "altura": 1.12
   },
-  "mago~cabeca-4": {
+  "mago~arcano.cabeca-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42503,7 +42503,7 @@
     },
     "altura": 1.12
   },
-  "mago~cabeca-5": {
+  "mago~arcano.cabeca-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42591,7 +42591,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-0": {
+  "mago~arcano.capa-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42679,7 +42679,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-1": {
+  "mago~arcano.capa-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42767,7 +42767,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-2": {
+  "mago~arcano.capa-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42855,7 +42855,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-3": {
+  "mago~arcano.capa-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -42943,7 +42943,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-4": {
+  "mago~arcano.capa-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43031,7 +43031,7 @@
     },
     "altura": 1.12
   },
-  "mago~capa-5": {
+  "mago~arcano.capa-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43119,7 +43119,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-0": {
+  "mago~arcano.corpo-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43207,7 +43207,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-1": {
+  "mago~arcano.corpo-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43295,7 +43295,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-2": {
+  "mago~arcano.corpo-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43383,7 +43383,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-3": {
+  "mago~arcano.corpo-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43471,7 +43471,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-4": {
+  "mago~arcano.corpo-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43559,7 +43559,7 @@
     },
     "altura": 1.12
   },
-  "mago~corpo-5": {
+  "mago~arcano.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43647,7 +43647,7 @@
     },
     "altura": 1.12
   },
-  "mago~maos-0": {
+  "mago~arcano.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43735,7 +43735,7 @@
     },
     "altura": 1.12
   },
-  "mago~maos-2": {
+  "mago~arcano.maos-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43823,7 +43823,7 @@
     },
     "altura": 1.12
   },
-  "mago~maos-4": {
+  "mago~arcano.maos-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43911,7 +43911,7 @@
     },
     "altura": 1.12
   },
-  "mago~pernas-0": {
+  "mago~arcano.pernas-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -43999,7 +43999,7 @@
     },
     "altura": 1.12
   },
-  "mago~pernas-2": {
+  "mago~arcano.pernas-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -44087,7 +44087,7 @@
     },
     "altura": 1.12
   },
-  "mago~pernas-4": {
+  "mago~arcano.pernas-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -44175,7 +44175,7 @@
     },
     "altura": 1.12
   },
-  "mago~pes-0": {
+  "mago~arcano.pes-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -44263,7 +44263,7 @@
     },
     "altura": 1.12
   },
-  "mago~pes-2": {
+  "mago~arcano.pes-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -44351,7 +44351,7 @@
     },
     "altura": 1.12
   },
-  "mago~pes-4": {
+  "mago~arcano.pes-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -52853,7 +52853,7 @@
     },
     "altura": 1.2
   },
-  "necromante~cabeca-0": {
+  "necromante~ossuario.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -52941,7 +52941,7 @@
     },
     "altura": 1.14
   },
-  "necromante~cabeca-1": {
+  "necromante~ossuario.cabeca-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53029,7 +53029,7 @@
     },
     "altura": 1.14
   },
-  "necromante~cabeca-2": {
+  "necromante~ossuario.cabeca-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53117,7 +53117,7 @@
     },
     "altura": 1.14
   },
-  "necromante~cabeca-3": {
+  "necromante~ossuario.cabeca-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53205,7 +53205,7 @@
     },
     "altura": 1.14
   },
-  "necromante~cabeca-4": {
+  "necromante~ossuario.cabeca-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53293,7 +53293,7 @@
     },
     "altura": 1.14
   },
-  "necromante~cabeca-5": {
+  "necromante~ossuario.cabeca-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53381,7 +53381,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-0": {
+  "necromante~ossuario.capa-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53469,7 +53469,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-1": {
+  "necromante~ossuario.capa-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53557,7 +53557,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-2": {
+  "necromante~ossuario.capa-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53645,7 +53645,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-3": {
+  "necromante~ossuario.capa-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53733,7 +53733,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-4": {
+  "necromante~ossuario.capa-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53821,7 +53821,7 @@
     },
     "altura": 1.14
   },
-  "necromante~capa-5": {
+  "necromante~ossuario.capa-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53909,7 +53909,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-0": {
+  "necromante~ossuario.corpo-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -53997,7 +53997,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-1": {
+  "necromante~ossuario.corpo-1": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54085,7 +54085,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-2": {
+  "necromante~ossuario.corpo-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54173,7 +54173,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-3": {
+  "necromante~ossuario.corpo-3": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54261,7 +54261,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-4": {
+  "necromante~ossuario.corpo-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54349,7 +54349,7 @@
     },
     "altura": 1.14
   },
-  "necromante~corpo-5": {
+  "necromante~ossuario.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54437,7 +54437,7 @@
     },
     "altura": 1.14
   },
-  "necromante~maos-0": {
+  "necromante~ossuario.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54525,7 +54525,7 @@
     },
     "altura": 1.14
   },
-  "necromante~maos-2": {
+  "necromante~ossuario.maos-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54613,7 +54613,7 @@
     },
     "altura": 1.14
   },
-  "necromante~maos-4": {
+  "necromante~ossuario.maos-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54701,7 +54701,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pernas-0": {
+  "necromante~ossuario.pernas-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54789,7 +54789,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pernas-2": {
+  "necromante~ossuario.pernas-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54877,7 +54877,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pernas-4": {
+  "necromante~ossuario.pernas-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -54965,7 +54965,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pes-0": {
+  "necromante~ossuario.pes-0": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -55053,7 +55053,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pes-2": {
+  "necromante~ossuario.pes-2": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -55141,7 +55141,7 @@
     },
     "altura": 1.14
   },
-  "necromante~pes-4": {
+  "necromante~ossuario.pes-4": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,

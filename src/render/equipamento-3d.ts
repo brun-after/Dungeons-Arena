@@ -6,20 +6,8 @@
 // - O capuz/elmo, o peito e a capa são camadas do tamanho do atlas da classe, uma por grau (`<classe>~<peça>-<grau>`),
 //   já recortadas pelo corpo: vão por cima dele.
 
-export const GRAUS = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'ultima'] as const;
-export const PECAS_DE_ARMADURA = ['capa', 'corpo', 'pernas', 'pes', 'maos', 'cabeca'] as const;
-export type PecaDeArmadura = (typeof PECAS_DE_ARMADURA)[number];
-export const pecaDeMembro = (peca: PecaDeArmadura): boolean => peca === 'maos' || peca === 'pernas' || peca === 'pes';
-
-/** As formas (D-069) contam como raridade: a épica, a lendária e a última puxam o grau para cima. */
-const GRAU_DA_FORMA: Readonly<Record<string, number>> = { epica: 3, lendaria: 4, ultima: 5 };
-
-/** O grau (0 a 5) pela raridade e pela forma, o maior dos dois. */
-export function grauDe(raridade: string | null | undefined, forma: string | null | undefined = null): number {
-  const r = raridade ? (GRAUS as readonly string[]).indexOf(raridade) : -1;
-  const f = forma ? (GRAU_DA_FORMA[forma] ?? -1) : -1;
-  return Math.max(0, r, f);
-}
+// Marco 46 (16/11/2026, D-185): os graus e as peças moram no núcleo (progression/graus.ts); daqui só reexportamos.
+export { GRAUS, PECAS_DE_ARMADURA, grauDe, grauVisual, pecaDeMembro, type PecaDeArmadura } from '../progression/graus';
 
 /** Os desenhos sem modelo próprio (armas.json `modelo`), como nos tokens. */
 const MODELO_DO_DESENHO: Readonly<Record<string, string>> = {

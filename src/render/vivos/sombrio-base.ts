@@ -32,7 +32,7 @@ export function esfera(r: number, ls: number, as: number, ...resto: number[]): T
 const pos = (o: THREE.Object3D) => o.getWorldPosition(new THREE.Vector3());
 const TRONCO_M = 0.5714;
 /** O nível do grau (0–1, 2–3, 4–5): o material e a silhueta da peça. */
-export const nivelDe = (grau: number) => (grau <= 1 ? 0 : grau <= 3 ? 1 : 2);
+export { nivelDoGrau as nivelDe } from '../../progression/graus';
 
 // ---------- texturas procedurais (geradas uma vez por página) ----------
 export function sorteio(semente: number): () => number {
@@ -235,7 +235,15 @@ export function liso(cor: number, roughness = 0.8, metalness = 0): THREE.MeshSta
 }
 /** O que brilha sozinho: a brasa, a pedra de feitiço, os olhos. */
 export function aceso(cor: number, forca = 2.2): THREE.MeshStandardMaterial {
-  return guardado(`aceso:${String(cor)}:${String(forca)}`, () => new THREE.MeshStandardMaterial({ color: cor, emissive: cor, emissiveIntensity: forca, roughness: 0.3 }));
+  return destacar(guardado(`aceso:${String(cor)}:${String(forca)}`, () => new THREE.MeshStandardMaterial({ color: cor, emissive: cor, emissiveIntensity: forca, roughness: 0.3 })));
+}
+/**
+ * Marco 46 (16/11/2026, D-185): o material de destaque (a pedra acesa, o latão, o ouro, a prata): o que acende com o
+ * grau e leva os veios do elemento (vivos/vestes-vivas.ts `realcar`).
+ */
+export function destacar<T extends THREE.Material>(m: T): T {
+  m.userData.destaque = true;
+  return m;
 }
 /** O negro das fendas (visor, olhos da máscara). */
 export function fenda(): THREE.MeshBasicMaterial {
@@ -247,9 +255,9 @@ export const comuns = () => ({
   aco: metal('#8a8d94', 3, 0.95, 0.32),
   placa: metal('#4a4a50', 7, 0.85, 0.55),
   ferro: metal('#2e2c30', 47, 0.8, 0.6),
-  latao: metal('#7e6236', 19, 0.9, 0.45),
-  ouro: metal('#9a7a3e', 11, 1, 0.3),
-  prata: metal('#a8acb4', 53, 0.95, 0.28),
+  latao: destacar(metal('#7e6236', 19, 0.9, 0.45)),
+  ouro: destacar(metal('#9a7a3e', 11, 1, 0.3)),
+  prata: destacar(metal('#a8acb4', 53, 0.95, 0.28)),
   couro: pano('#3a2618', 5, { aspereza: 0.78 }),
   couroClaro: pano('#5a3d26', 23, { aspereza: 0.72 }),
   couroNegro: pano('#1e1814', 59, { aspereza: 0.7 }),

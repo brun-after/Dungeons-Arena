@@ -14,6 +14,7 @@ import { NOMES_ATRIBUTOS, type Bonus, type Item, type NomeAtributo } from './ite
 import type { DefinicaoElemento, Elemento } from '../combat/elementos';
 import { ehIdItemBase, gerarItemBase, type ItensComFormas } from './gerar-item-base';
 import { ehIdFundido, gerarItemFundido, type RegrasDeFusao } from './fusao-elemental';
+import { perfilDaPeca, type RegrasDePecas } from './pecas';
 
 export interface BaseDeItem {
   base: string;
@@ -178,9 +179,19 @@ export class CatalogoDeItens extends Map<string, Item> {
     private readonly elementos: ReadonlyMap<Elemento, DefinicaoElemento> = new Map(),
     /** Marco 38 (08/11/2026, D-142): as peças fundidas (`fu_`) com um troféu elemental. */
     private readonly fusao: RegrasDeFusao | null = null,
+    /** Marco 46 (16/11/2026, D-185): o perfil das peças de armadura (propósito, estilo e efeitos), fixo pelo id. */
+    private readonly pecas: RegrasDePecas | null = null,
   ) {
     super(fixos);
     this.gerados = new Map();
+    if (pecas) for (const [id, item] of fixos) if (this.comPeca(item) !== item) super.set(id, this.comPeca(item));
+  }
+
+  /** O item com o perfil de peça (o mesmo objeto se não for armadura ou se já tiver). */
+  private comPeca(item: Item): Item {
+    if (!this.pecas || item.peca || item.tipo !== 'equipamento') return item;
+    const peca = perfilDaPeca(this.pecas, item);
+    return peca ? { ...item, peca } : item;
   }
 
   private readonly gerados: Map<string, Item>;
@@ -194,11 +205,13 @@ export class CatalogoDeItens extends Map<string, Item> {
     const pronto = this.gerados.get(id);
     if (pronto) return pronto;
     if (fundido) {
-      const item = gerarItemFundido(id, (b) => this.get(b), this.elementos, this.fusao);
+      const bruto = gerarItemFundido(id, (b) => this.get(b), this.elementos, this.fusao);
+      const item = bruto ? this.comPeca({ ...bruto, peca: undefined }) : null;
       if (item) this.gerados.set(id, item);
       return item ?? undefined;
     }
-    const item = comForma ? (this.comFormas ? gerarItemBase(id, this.comFormas, this.regras, this.elementos) : null) : gerarItem(id, this.bases, this.regras);
+    const bruto = comForma ? (this.comFormas ? gerarItemBase(id, this.comFormas, this.regras, this.elementos) : null) : gerarItem(id, this.bases, this.regras);
+    const item = bruto ? this.comPeca(bruto) : null;
     if (item) this.gerados.set(id, item);
     return item ?? undefined;
   }

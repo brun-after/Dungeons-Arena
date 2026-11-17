@@ -4,7 +4,7 @@
 // rebites, gorjal); o grau 5 troca o latão por ouro e acende a brasa. As peças são torneadas (LatheGeometry), presas
 // nos ossos do traje (seguem a animação) e usam materiais PBR com texturas procedurais (sombrio-base.ts). Os membros e
 // a capa são os de uso geral (pecas-sombrias.ts) com os materiais do guerreiro; as outras classes ficam em
-// kits-classes.ts e todas se registram em KITS_SOMBRIOS.
+// kits-classes.ts e todas se registram em KITS_POR_PROPOSITO (marco 46: um kit por propósito, não por classe).
 
 import * as THREE from 'three';
 import type { PecaDeArmadura } from '../equipamento-3d';
@@ -256,8 +256,12 @@ export function pecaDoGuerreiro(ossos: Ossos, peca: PecaDeArmadura, grau: number
   return { extras: membros(c, peca, grau, { leve: m.couro, placa: m.placa, junta: m.aco, luva: [m.malha, m.placa], borda }) };
 }
 
-/** As classes com o kit sombrio. */
-export const KITS_SOMBRIOS: Readonly<Record<string, (ossos: Ossos, peca: PecaDeArmadura, grau: number) => PecaSombria>> = {
-  guerreiro: pecaDoGuerreiro,
+/**
+ * Marco 46 (16/11/2026, D-185): os kits por PROPÓSITO (a silhueta), não mais pela classe de quem veste. Cada kit de
+ * classe virou o primeiro propósito dele (data/pecas.json diz, em `classe`, qual propósito o corpo de cada classe usa
+ * sem peça vestida e no atlas antigo).
+ */
+export const KITS_POR_PROPOSITO: Readonly<Record<string, (ossos: Ossos, peca: PecaDeArmadura, grau: number) => PecaSombria>> = {
+  baluarte: pecaDoGuerreiro,
   ...KITS_DAS_CLASSES,
 };

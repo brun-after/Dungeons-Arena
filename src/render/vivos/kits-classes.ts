@@ -187,9 +187,10 @@ const pecaDoAventureiro: Kit = (ossos, peca, grau) => {
   return { extras: membros(c, peca, grau, { leve: k.couro, placa: k.couroNegro, junta: k.ferro, luva: [k.couro, k.ferro], borda }) };
 };
 
+/** Marco 46 (D-185): os kits viraram propósitos (o do mago é o arcano, o do arqueiro a espreita, e assim por diante). */
 export const KITS_DAS_CLASSES: Readonly<Record<string, Kit>> = {
-  mago: pecaDoMago,
-  arqueiro: pecaDoArqueiro,
-  necromante: pecaDoNecromante,
-  aventureiro: pecaDoAventureiro,
+  arcano: pecaDoMago,
+  espreita: pecaDoArqueiro,
+  ossuario: pecaDoNecromante,
+  batedor: pecaDoAventureiro,
 };

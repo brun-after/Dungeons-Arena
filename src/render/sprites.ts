@@ -30,7 +30,7 @@ import { MODELO_JOGADOR, MODELOS, modelo2d } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
 import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
-import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
+import { existeArma3d, existeAtlas, type AtlasDePersonagens } from './personagens-3d';
 import { Figura3d } from './figura-3d';
 import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
@@ -552,7 +552,7 @@ export class CamadaEntidades {
       return false;
     };
     // A arma na mão vale também de cima (o projétil das armas de arremesso tem a forma dela).
-    const equipamento = equipamento3d(escolha.modelo, e.aparencia, existeArma3d);
+    const equipamento = equipamento3d(escolha.modelo, e.aparencia, existeArma3d, existeAtlas);
     m.dono3d = { modelo: escolha.modelo, arma: equipamento?.arma ?? null };
     if (!q.iso || escolha.proprio) return esconder();
     // Marco 37 (05/11/2026): o golpe em três tempos (carga na conjuração, impacto no lançamento e volta), para todos os

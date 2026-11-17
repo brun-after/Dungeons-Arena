@@ -1,0 +1,67 @@
+{
+  "versao": 1,
+  "propositos": {
+    "baluarte": { "classe": "guerreiro", "peso": 1 },
+    "batedor": { "classe": "aventureiro", "peso": 1 },
+    "arcano": { "classe": "mago", "peso": 1 },
+    "espreita": { "classe": "arqueiro", "peso": 1 },
+    "ossuario": { "classe": "necromante", "peso": 1 }
+  },
+  "estilos": {
+    "simples": { "peso": 3 },
+    "medieval": { "peso": 3 },
+    "colorida": { "peso": 2 },
+    "arcana": { "peso": 2 },
+    "meme": { "peso": 1 }
+  },
+  "efeitosPorGrau": [1, 1, 2, 2, 3, 3],
+  "escalaPorGrau": [1, 1.15, 1.35, 1.55, 1.8, 2.1],
+  "elementosSorteaveis": ["fogo", "gelo", "raio", "veneno", "psiquico", "terra", "trevas", "sagrado"],
+  "tetos": {
+    "velocidadePct": 45,
+    "danoPct": 40,
+    "refletirPct": 40,
+    "recargaMovimentoPct": 35,
+    "poderElementoPct": 30,
+    "absorverPct": 45,
+    "resistenciaPct": 30
+  },
+  "pisarCadaTicks": 6,
+  "aceita": {
+    "pes": [["pisar", "velocidade"], ["usar", "velocidade"], ["atingido", "velocidade"]],
+    "maos": [["atacar", "dano"]],
+    "corpo": [["atingido", "refletir"]],
+    "pernas": [["movimento", "recargaMovimento"], ["movimento", "rastro"], ["chegada", "chegadaDano"], ["chegada", "chegadaEscudo"]],
+    "capa": [["passivo", "poderElemento"], ["atingido", "absorver"]],
+    "cabeca": [["passivo", "resistencia"]]
+  },
+  "receitas": [
+    { "id": "passo_elemental", "peca": "pes", "gatilho": "pisar", "se": { "elemento": "*" }, "efeito": { "tipo": "velocidade", "pct": 18, "ticks": 120 }, "marca": "penas" },
+    { "id": "impeto_elemental", "peca": "pes", "gatilho": "usar", "se": { "elemento": "*" }, "efeito": { "tipo": "velocidade", "pct": 12, "ticks": 90 }, "marca": "penas" },
+    { "id": "fuga_elemental", "peca": "pes", "gatilho": "atingido", "se": { "elemento": "*" }, "efeito": { "tipo": "velocidade", "pct": 20, "ticks": 72 }, "marca": "garras" },
+    { "id": "fuga_do_golpe", "peca": "pes", "gatilho": "atingido", "se": { "elemento": "fisico" }, "efeito": { "tipo": "velocidade", "pct": 14, "ticks": 72 }, "marca": "garras" },
+    { "id": "passo_arcano", "peca": "pes", "gatilho": "usar", "se": { "ataque": "magia" }, "efeito": { "tipo": "velocidade", "pct": 8, "ticks": 60 }, "marca": "filigrana", "grauMinimo": 2 },
+
+    { "id": "punho", "peca": "maos", "gatilho": "atacar", "se": { "ataque": "corpoACorpo" }, "efeito": { "tipo": "dano", "pct": 8 }, "marca": "garras" },
+    { "id": "mira", "peca": "maos", "gatilho": "atacar", "se": { "ataque": "distancia" }, "efeito": { "tipo": "dano", "pct": 8 }, "marca": "penas" },
+    { "id": "foco_elemental", "peca": "maos", "gatilho": "atacar", "se": { "ataque": "magia", "elemento": "*" }, "efeito": { "tipo": "dano", "pct": 11 }, "marca": "filigrana" },
+    { "id": "foco_arcano", "peca": "maos", "gatilho": "atacar", "se": { "ataque": "magia" }, "efeito": { "tipo": "dano", "pct": 6 }, "marca": "filigrana" },
+    { "id": "garra_cruel", "peca": "maos", "gatilho": "atacar", "se": { "ataque": "corpoACorpo" }, "efeito": { "tipo": "dano", "pct": 7 }, "marca": "garras", "grauMinimo": 4 },
+
+    { "id": "espinhos", "peca": "corpo", "gatilho": "atingido", "se": { "elemento": "fisico" }, "efeito": { "tipo": "refletir", "pct": 10 }, "marca": "espinhos" },
+    { "id": "espelho_elemental", "peca": "corpo", "gatilho": "atingido", "se": { "elemento": "*" }, "efeito": { "tipo": "refletir", "pct": 15 }, "marca": "espinhos" },
+    { "id": "carapaca", "peca": "corpo", "gatilho": "atingido", "se": {}, "efeito": { "tipo": "refletir", "pct": 6 }, "marca": "espinhos", "grauMinimo": 2 },
+
+    { "id": "passada", "peca": "pernas", "gatilho": "movimento", "se": {}, "efeito": { "tipo": "recargaMovimento", "pct": 10 }, "marca": "penas" },
+    { "id": "rastro_elemental", "peca": "pernas", "gatilho": "movimento", "se": { "elemento": "*" }, "efeito": { "tipo": "rastro", "ticks": 150 }, "marca": "brasa" },
+    { "id": "queda", "peca": "pernas", "gatilho": "chegada", "se": {}, "efeito": { "tipo": "chegadaDano", "pctDoPoder": 60, "raio": 2 }, "marca": "espinhos" },
+    { "id": "guarda_da_chegada", "peca": "pernas", "gatilho": "chegada", "se": {}, "efeito": { "tipo": "chegadaEscudo", "pctDaVida": 6, "ticks": 240 }, "marca": "placas" },
+
+    { "id": "manto_elemental", "peca": "capa", "gatilho": "passivo", "se": { "elemento": "*" }, "efeito": { "tipo": "poderElemento", "pct": 8 }, "marca": "filigrana" },
+    { "id": "absorver_em_poder", "peca": "capa", "gatilho": "atingido", "se": { "elemento": "*" }, "efeito": { "tipo": "absorver", "pct": 18, "em": "poder", "ticks": 240 }, "marca": "brasa" },
+    { "id": "absorver_em_sintonia", "peca": "capa", "gatilho": "atingido", "se": { "elemento": "*" }, "efeito": { "tipo": "absorver", "pct": 14, "em": "sintonia", "ticks": 0 }, "marca": "filigrana" },
+
+    { "id": "elmo_elemental", "peca": "cabeca", "gatilho": "passivo", "se": { "elemento": "*" }, "efeito": { "tipo": "resistencia", "pct": 8 }, "marca": "placas" },
+    { "id": "elmo_do_golpe", "peca": "cabeca", "gatilho": "passivo", "se": { "elemento": "fisico" }, "efeito": { "tipo": "resistencia", "pct": 5 }, "marca": "placas" }
+  ]
+}

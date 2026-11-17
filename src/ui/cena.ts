@@ -1,5 +1,5 @@
 import { equipamento3d } from '../render/adornos';
-import { existeArma3d } from '../render/personagens-3d';
+import { existeArma3d, existeAtlas } from '../render/personagens-3d';
 import { criarPaineisParty } from './party-paineis';
 import { agruparParty, enquadrarGrupoParty } from '../render/party-visao';
 // Cena de jogo no navegador, compartilhada pela campanha e pela arena: palco, câmera, camadas do
@@ -247,7 +247,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       const modelo = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo ?? ctx.conteudo.presets.get(e.preset)?.modelo;
       if (!modelo) continue;
       modelos.push(modelo);
-      const eq = equipamento3d(modelo, e.aparencia, existeArma3d);
+      const eq = equipamento3d(modelo, e.aparencia, existeArma3d, existeAtlas);
       modelos.push(...(eq?.camadas.map(c => c.nome) ?? []));
       if (eq?.arma) armas.push(eq.arma.modelo);
       if (eq?.secundaria) armas.push(eq.secundaria.modelo);
