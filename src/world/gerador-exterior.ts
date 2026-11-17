@@ -17,6 +17,7 @@ import { armadilhaDeFase } from './armadilhas-de-fase';
 import type { AreaAmbiente, TipoAmbiente } from './ambiente-tipos';
 import { erguerPredios, PREDIO_DO_PAPEL } from './vila-predios';
 import { entradaDoLado, escavarPassagens, type PassagemDoExterior } from './passagens-exterior';
+import { marcarArbustos, rochaDoPenhasco } from './cenario-baixo';
 import type { Decoracao } from './decoracao';
 import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
 import { luzesDoExterior } from './luzes-exterior';
@@ -531,6 +532,16 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     if (o !== OBSTACULO.nenhum && !protegidas.has(k) && g.em(x, y) === '#') obstaculos[k] = o;
     if (doCenario.has(k) && g.em(x, y) === '#') obstaculos[k] = OBSTACULO.objeto;
     if (obstaculos[k] === OBSTACULO.arvore && !construida(x, y)) g.por(x, y, perfil.chao);
+  }
+  // 16/11/2026: o cenário baixo não barra (world/cenario-baixo.ts): o arbusto da borda da mata perde o tronco, e a pedra
+  // miúda do plano (fora do pé do penhasco e da serra) vira chão por baixo dela.
+  marcarArbustos(obstaculos, n);
+  const obstaculoEm = (x: number, y: number) => (x < 0 || y < 0 || x >= n || y >= n ? 0 : (obstaculos[y * n + x] ?? 0));
+  const alturaAqui = (x: number, y: number) => (x < 0 || y < 0 || x >= n || y >= n ? 0 : (alturas[y * n + x] ?? 0));
+  for (let k = 0; k < n * n; k++) {
+    const x = k % n;
+    const y = Math.floor(k / n);
+    if (obstaculos[k] === OBSTACULO.rochedo && !construida(x, y) && !rochaDoPenhasco(obstaculoEm, alturaAqui, x, y)) g.por(x, y, perfil.chao);
   }
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,

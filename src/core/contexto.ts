@@ -451,6 +451,8 @@ export interface Balance {
      */
     tocha: {
       atraiMult: number; afastaRaio: number; iguaisAvancamPct: number; janelaIguaisMs: number; raioDoFogo: number;
+      /** 16/11/2026: o mais fraco ataca quem leva a tocha com esta chance, e então percebe a esta % do alcance do dia. */
+      fracosAvancamPct: number; fracosAlcancePct: number;
       /** A visão do jogador no escuro (células): sem luz, com luz, e a partir de que escuro ela vale. */
       visaoSemTocha: number; visaoComTocha: number; visaoDesdeEscuro: number;
       /** Marco 44 (D-178): acabado o tempo, a tocha queima `manaPct`% da mana máxima (no mínimo `manaMin`) por segundo. */

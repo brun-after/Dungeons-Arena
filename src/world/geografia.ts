@@ -14,7 +14,8 @@ import { aleatorio, criarRng, type EstadoRng } from '../core/rng';
 import type { Bioma } from '../mundo/reino';
 
 /** O código do obstáculo natural de cada célula (0 = nenhum; as paredes construídas também ficam 0). */
-export const OBSTACULO = { nenhum: 0, montanha: 1, rochedo: 2, arvore: 3, objeto: 4 } as const;
+// 16/11/2026: o arbusto (5) é a árvore baixa da borda da mata: desenhado, mas sem tronco (world/cenario-baixo.ts).
+export const OBSTACULO = { nenhum: 0, montanha: 1, rochedo: 2, arvore: 3, objeto: 4, arbusto: 5 } as const;
 export type CodigoObstaculo = (typeof OBSTACULO)[keyof typeof OBSTACULO];
 
 const SEMENTE_GEOGRAFIA = 51_437;

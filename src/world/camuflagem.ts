@@ -34,7 +34,7 @@ function mapaDeCopas(o: Uint8Array, largura: number, altura: number): Uint8Array
     for (let x = 0; x < largura; x++) {
       let n = 0;
       for (let j = Math.max(0, y - RAIO_COPA); j <= Math.min(altura - 1, y + RAIO_COPA); j++) {
-        for (let i = Math.max(0, x - RAIO_COPA); i <= Math.min(largura - 1, x + RAIO_COPA); i++) if (o[j * largura + i] === OBSTACULO.arvore) n++;
+        for (let i = Math.max(0, x - RAIO_COPA); i <= Math.min(largura - 1, x + RAIO_COPA); i++) if (o[j * largura + i] === OBSTACULO.arvore || o[j * largura + i] === OBSTACULO.arbusto) n++;
       }
       m[y * largura + x] = Math.round(255 * Math.max(0, Math.min(1, (n - COPA_ABRE) / (COPA_FECHA - COPA_ABRE))));
     }
