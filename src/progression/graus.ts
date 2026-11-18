@@ -1,4 +1,4 @@
-// Os graus e as peças de armadura (marco 46, 16/11/2026, D-185). Saíram de render/equipamento-3d.ts para o núcleo: o
+// Os graus e as peças de armadura (marco 46, 16/11/2026, D-186). Saíram de render/equipamento-3d.ts para o núcleo: o
 // motor dos efeitos de peça (combat/efeitos-de-peca.ts) e o perfil da peça (progression/pecas.ts) também leem o grau.
 // O render e tools/sprites reexportam daqui; nenhuma lista fica duplicada. Puro.
 

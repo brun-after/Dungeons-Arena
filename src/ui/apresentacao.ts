@@ -71,6 +71,8 @@ import { classeDaHabilidade } from './runa-dom';
 import { DiretorVfx } from '../render/vfx/diretor';
 import { CorpoEmMovimento } from '../render/movimento/corpo-movimento';
 import { RastrosDeMovimento } from '../render/movimento/rastros-movimento';
+import { brilhoDoOrbeXp } from '../progression/orbe-xp';
+import { COR_ORBE_XP } from '../render/orbe-xp';
 
 export interface OpcoesApresentacao {
   destinoMapa?: (() => { x: number; y: number } | null) | undefined;
@@ -399,7 +401,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     }
     // Marco 44 (15/11/2026, D-178): a magia ilumina onde está e por onde passa, na cor do elemento (ui/luzes-magia.ts).
     pontos.push(...luzesDeMagia.pontos(estado, performance.now()));
+    const nivelLocal = estado.entidades.find((e) => e.id === idLocal)?.nivel ?? 1;
     for (const obj of estado.objetos) {
+      // 16/11/2026 (D-184): a luz de XP do jogador local brilha no escuro, mais forte quanto mais XP leva.
+      if (obj.tipo === 'orbe_xp') {
+        if (obj.ref === idLocal) pontos.push({ x: obj.x, y: obj.y, cor: COR_ORBE_XP, semente: obj.x * 19 + obj.y, intensidade: 0.25 + 0.55 * brilhoDoOrbeXp(obj, nivelLocal, ctx.balance), raio: 0.8 + 1.4 * brilhoDoOrbeXp(obj, nivelLocal, ctx.balance) });
+        continue;
+      }
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto, ...(ctx.fase.exterior && { intensidade: vis.intensidadeJanela }) });
       // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta (marco 43: do alto do poste).
       // Marco 44 (D-178): a fogueira de acampamento só ilumina acesa.

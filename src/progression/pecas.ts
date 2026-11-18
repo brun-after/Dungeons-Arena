@@ -1,4 +1,4 @@
-// As peças de armadura por propósito, estilo, grau e efeito (marco 46, 16/11/2026, D-185). Puro.
+// As peças de armadura por propósito, estilo, grau e efeito (marco 46, 16/11/2026, D-186). Puro.
 //
 // O visual sai da classe: cada peça tem um PROPÓSITO (a silhueta: baluarte, batedor, arcano, espreita, ossuário) e um
 // ESTILO (só visual, a persona: simples, medieval, colorida, arcana, meme), além do GRAU (0 a 5) que já existia.

@@ -1,4 +1,4 @@
-// As peças vestidas no 3D em tempo real (marco 46, 16/11/2026, D-185). O pedido de cada ator leva, por peça, o
+// As peças vestidas no 3D em tempo real (marco 46, 16/11/2026, D-186). O pedido de cada ator leva, por peça, o
 // propósito, o estilo, a marca e o grau (`<propósito>.<estilo>.<marca>.<grau>`); a peça é montada uma vez por base
 // (o kit do propósito, o estilo e a marca, vivos/enfeites-de-peca.ts) e o realce é por ator:
 // - o destaque emissivo cresce com o grau (nada nos graus 0–1, fraco no 2, forte no 5) e o conjunto completo (as 6

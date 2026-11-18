@@ -1,4 +1,4 @@
-// Os enfeites do estilo e da marca nas peças 3D (marco 46, 16/11/2026, D-185). O propósito dá a silhueta (o kit,
+// Os enfeites do estilo e da marca nas peças 3D (marco 46, 16/11/2026, D-186). O propósito dá a silhueta (o kit,
 // armaduras-sombrias.ts); por cima dele:
 // - o ESTILO, a persona (só visual): simples (sem enfeite, tons apagados), medieval (cravos de latão e o pano em cor
 //   heráldica), colorida (o pano numa cor viva da semente), arcana (runas acesas nas bordas) e meme (um enfeite absurdo

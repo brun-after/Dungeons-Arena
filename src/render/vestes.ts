@@ -1,4 +1,4 @@
-// O visual das peças vestidas (marco 46, 16/11/2026, D-185): o propósito, o estilo e a marca de cada peça saem da
+// O visual das peças vestidas (marco 46, 16/11/2026, D-186): o propósito, o estilo e a marca de cada peça saem da
 // aparência pública (`vestes`, `<propósito>.<estilo>.<marca>`). Sem eles (a aparência de antes, o inimigo, o retrato
 // sem ficha), a peça usa o propósito que veio do kit da classe do corpo, no estilo simples. As listas vêm de
 // data/pecas.json (as mesmas do núcleo); nada é repetido aqui.

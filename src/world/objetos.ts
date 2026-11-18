@@ -16,6 +16,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { guardarItem } from '../progression/inventario';
 import { ordemRotativa } from './colisao';
 import { passavel } from './fase';
+import { coletarOrbesXp } from '../progression/orbe-xp';
 
 // 25/10/2026: `novoObjeto` mora em objeto-novo.ts (só tipos), para o e2e importar sem puxar o núcleo inteiro.
 import { novoObjeto } from './objeto-novo';
@@ -37,8 +38,9 @@ export function interagivel(o: ObjetoNoMundo): boolean {
 }
 
 /** Ninguém coleta: interagíveis e a porta temporária do boss (marco 10A-1, world/portas.ts). */
+// 16/11/2026 (D-184): a luz de XP tem coleta própria (só o dono, de perto; progression/orbe-xp.ts).
 function coletavel(o: ObjetoNoMundo): boolean {
-  return !interagivel(o) && o.tipo !== 'saida' && o.tipo !== 'quebravel';
+  return !interagivel(o) && o.tipo !== 'saida' && o.tipo !== 'quebravel' && o.tipo !== 'orbe_xp';
 }
 
 /**
@@ -46,7 +48,7 @@ function coletavel(o: ObjetoNoMundo): boolean {
  * nasce onde ele estava.
  */
 function ocupada(estado: EstadoJogo, x: number, y: number): boolean {
-  return estado.objetos.some((o) => o.x === x && o.y === y && o.tipo !== 'quebravel');
+  return estado.objetos.some((o) => o.x === x && o.y === y && o.tipo !== 'quebravel' && o.tipo !== 'orbe_xp');
 }
 
 /** O que o falcão do Aventureiro recolhe para o dono (itens e refúgio ficam para o jogador). */
@@ -59,6 +61,7 @@ function coletor(e: Entidade): boolean {
 
 export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.objetos.length === 0 || !ctx.modo.objetosDeFase) return;
+  coletarOrbesXp(estado, ctx, saida);
   const consumidos = new Set<string>();
   for (const o of estado.objetos) {
     if (!o.aguardaSaidaDe) continue;
@@ -209,6 +212,8 @@ function prazoNoChaoMs(ctx: ContextoSimulacao, o: ObjetoNoMundo): number | null 
       return p.orbeMs;
     case 'ouro':
       return p.ouroMs;
+    case 'orbe_xp':
+      return ctx.balance.xp.orbe.prazoMs;
     case 'item': {
       const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;
       if (!item || o.ref || item.tipo === 'livro' || item.progressao || RARIDADES.indexOf(item.raridade) >= RARIDADES.indexOf('raro')) return null;

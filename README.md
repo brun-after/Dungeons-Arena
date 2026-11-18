@@ -142,8 +142,8 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
 | Selecionar e travar alvo | Clique no inimigo (de novo no travado, destrava; `Esc` limpa) | Toque no inimigo |
-| Trocar de alvo | `Q` (`Shift+Q` volta); `T` trava ou destrava | Botão de alvo: tocar troca, segurar trava ou destrava |
-| Ataque básico | Espaço; ataca sozinho o alvo selecionado (travado, só ele) ou quem estiver te perseguindo | Botão de ataque (funciona junto com o joystick) |
+| Trocar de alvo | `Q` (`Z` volta); `T` trava ou destrava | Botão de alvo: tocar troca, segurar trava ou destrava |
+| Ataque básico | Automático (`F` liga ou desliga); ataca sozinho o alvo selecionado (travado, só ele) ou quem estiver te perseguindo | Botão de ataque (funciona junto com o joystick) |
 | Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ataque |
 | Pôr uma habilidade na tecla | Clique direito no botão da barra (ou `+` na tecla livre); na mochila, os botões 1–4 de cada carta | Segure o botão da roda |
 | Consumíveis (poções e pergaminhos) | Coluna à direita: clique, ou as teclas 5–9 e 0 | Lista à direita, no alto: toque |

@@ -564,7 +564,7 @@ function lancar(
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
     // Marco 39 (D-150): usar a skill alimenta o vínculo com o elemento dela (o básico não conta).
     if (ator.bolsa && !ehBasico(ator, hab.id)) registrarUso(ctx, ator.bolsa, hab.elemento, estado.tick);
-    // Marco 46 (D-185): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
+    // Marco 46 (D-186): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
     if (ator.bolsa && !ehBasico(ator, hab.id)) aoUsarHabilidadeDasPecas(estado, ctx, ator, hab, saida);
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };

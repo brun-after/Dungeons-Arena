@@ -18,6 +18,7 @@ import { lerRegistro, MIGRACOES, VERSAO_SCHEMA } from '../../src/save/esquema';
 import { lerIdItemBase } from '../../src/progression/gerar-item-base';
 import { estadoPublico } from '../../src/arena/estado-publico';
 import { GeradorDePatches, aplicarPatch } from '../../src/arena/patches';
+import { recolherXp } from '../apoio/xp';
 
 function obter<T>(v: T | null | undefined): T { if (v == null) throw Error('ausente'); return v; }
 function cena() {
@@ -34,7 +35,7 @@ function cena() {
     const e = criarInimigo(obter(CONTEUDO.presets.get('goblin')), id, 7, 5, ctx.balance);
     e.equipe = 'monstros'; estado.entidades.push(e); return e;
   };
-  const matar = (e: Entidade, por?: Entidade) => { e.hp = 0; e.participacao = por ? [{ id: por.id, tick: estado.tick }] : []; processarMortes(estado, ctx, eventos); };
+  const matar = (e: Entidade, por?: Entidade) => { e.hp = 0; e.participacao = por ? [{ id: por.id, tick: estado.tick }] : []; processarMortes(estado, ctx, eventos); recolherXp(estado, ctx); };
   const aplicar = (e: Entidade, tipo: Parameters<typeof construirEfeito>[0], campos: Parameters<typeof construirEfeito>[1] = {}) => { aplicarEfeito(estado, ctx, e, construirEfeito(tipo, campos), j, null, eventos); };
   return { ctx, estado, j, eventos, passiva, meus, servo, npc, matar, aplicar };
 }

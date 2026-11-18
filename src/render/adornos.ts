@@ -151,7 +151,7 @@ export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | nul
   for (const peca of PECAS_DE_ARMADURA) {
     const raridade = eq?.[peca] ?? null;
     if (!raridade) continue;
-    // Marco 46 (16/11/2026, D-185): a camada é do propósito da peça; sem o atlas dele neste corpo, a do kit da classe.
+    // Marco 46 (16/11/2026, D-186): a camada é do propósito da peça; sem o atlas dele neste corpo, a do kit da classe.
     const v = vesteDe(eq, peca, grauDe(raridade), modelo);
     const nome = nomeDaCamada(modelo, camadaDaPeca(peca, v));
     camadas.push({ nome: existeCamada(nome) ? nome : nomeDaCamada(modelo, camadaDaPeca(peca, { ...v, proposito: propositoDoModelo(modelo) })) });

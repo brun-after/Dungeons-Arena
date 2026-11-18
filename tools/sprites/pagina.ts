@@ -387,7 +387,7 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   const mats = new Map<THREE.Mesh, Mats>();
   const pinta = new Set<THREE.Mesh>();
   // 04/11/2026 (marco 37): a classe com kit sombrio troca o pano tingido pela raridade pelo material do nível.
-  // Marco 46 (D-185): o kit é o do propósito da peça (no corpo da classe).
+  // Marco 46 (D-186): o kit é o do propósito da peça (no corpo da classe).
   const kit = p.armadura ? KITS_POR_PROPOSITO[p.armadura.proposito] : undefined;
   const sombria: PecaSombria | null = kit && p.armadura ? kit(mt.ossos, p.armadura.peca, p.armadura.grau) : null;
   const tecido = sombria?.tecido ? sombria.tecido.clone() : null;

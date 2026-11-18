@@ -24,7 +24,8 @@ export function recortarPorInteresse(publico: EstadoJogo, propriaId: string, rai
   return {
     ...publico,
     entidades: publico.entidades.filter((e) => e.id === propriaId || ve(e)),
-    objetos: publico.objetos.filter(ve),
+    // 16/11/2026 (D-184): a luz de XP só vai ao dono.
+    objetos: publico.objetos.filter((o) => ve(o) && (o.tipo !== 'orbe_xp' || o.ref === propriaId)),
     projeteis: publico.projeteis.filter(ve),
     rastros: publico.rastros.filter(ve),
     respawns: publico.respawns.filter(ve),

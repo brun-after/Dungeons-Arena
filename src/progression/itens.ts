@@ -68,7 +68,7 @@ export interface Item {
   monta?: 'acampamento';
   /** Marco 27 (29/10/2026, D-126): o desenho da arma (data/armas.json), que diz a família e o básico dela. */
   arma?: string;
-  /** Marco 46 (16/11/2026, D-185): o perfil da peça de armadura (propósito, estilo, grau e efeitos), pelo id. */
+  /** Marco 46 (16/11/2026, D-186): o perfil da peça de armadura (propósito, estilo, grau e efeitos), pelo id. */
   peca?: PerfilDePeca | undefined;
   /** Marco 46: o item fixo pode escolher o propósito e o estilo da peça (sem eles, a semente do id escolhe). */
   proposito?: string;

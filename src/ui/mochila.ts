@@ -112,7 +112,7 @@ export function resumoDoItem(item: Item, arma?: { familia: string; basico: strin
   // Marco 18 (D-069): a forma e o que a Lendária/Última faz.
   if (item.forma) partes.unshift(t(`forma.${item.forma}` as ChaveTexto));
   if (item.forma && item.descricao) partes.push(item.descricao);
-  // Marco 46 (D-185): o propósito, o estilo e os efeitos da peça de armadura.
+  // Marco 46 (D-186): o propósito, o estilo e os efeitos da peça de armadura.
   if (item.peca) partes.push(textoDaPeca(item.peca));
   return partes.join(' · ');
 }

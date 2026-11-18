@@ -8,7 +8,6 @@ import { ehTeclaDeMovimento, rumoDasTeclas, teclaInteragir, type TeclasMovimento
 
 export interface OpcoesTeclado {
   aoMudarDirecao: (rumo: Rumo) => void;
-  aoAtacar: () => void;
   /** Teclas 1–9 e 0 (§2.10): índice 0 a 9. */
   aoAtalho: (indice: number) => void;
   /** `Esc` é contextual (§2.15): cancela a mira antes de pausar. */
@@ -26,13 +25,13 @@ export interface OpcoesTeclado {
   aoCentralizar?: () => void;
   /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; `Z` (marco 40, D-164; antes Shift+Q), o anterior. */
   aoTrocarAlvo?: (sentido: 1 | -1) => void;
-  /** Ajuste de 15/10/2026 (D-065): `T` trava ou destrava o alvo. */
+  /** Ajuste de 15/10/2026 (D-065): `T` trava ou destrava o alvo (D-172 o levou ao V; D-185, de volta ao T). */
   aoTravarAlvo?: () => void;
   /** Marco 24 (24/10/2026, D-094): `R` usa a ultimate; `F` liga ou desliga o ataque básico automático (D-097). */
   aoUltimate?: () => void;
   aoAlternarBasico?: () => void;
   /** Marco 40 (13/11/2026, D-164): Shift usa o movimento da classe (no rumo das teclas); `G` troca a mecânica. */
-  /** D-172: o movimento do botão (0 no Shift, o principal; 1 no T; 2 no G). */
+  /** D-172: o movimento do botão (0 no Shift, o principal; 1 e 2 os outros; D-185: no V e no Espaço). */
   aoMovimento?: (rumo: Rumo, botao: number) => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
@@ -94,14 +93,17 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoTrocarAlvo(-1);
     } else if ((ev.code === 'ShiftLeft' || ev.code === 'ShiftRight') && !ev.repeat && opcoes.aoMovimento) {
       opcoes.aoMovimento(atual, 0);
-    } else if ((ev.code === 'KeyT' || ev.code === 'KeyG') && !ev.repeat && opcoes.aoMovimento) {
-      opcoes.aoMovimento(atual, ev.code === 'KeyT' ? 1 : 2);
+    } else if ((ev.code === 'KeyV' || ev.code === 'Space') && opcoes.aoMovimento) {
+      // 16/11/2026 (D-185): os outros dois movimentos saem do T e do G para o V e o Espaço; o Espaço deixa de atacar
+      // (o básico fica no automático, no F, e no clique no inimigo).
+      ev.preventDefault();
+      if (!ev.repeat) opcoes.aoMovimento(atual, ev.code === 'KeyV' ? 1 : 2);
     } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
       opcoes.aoUltimate();
     } else if (ev.code === 'KeyF' && !ev.repeat && opcoes.aoAlternarBasico) {
       opcoes.aoAlternarBasico();
-    } else if (ev.code === 'KeyV' && !ev.repeat && opcoes.aoTravarAlvo) {
-      // D-172: travar o alvo passou do T para o V (o T é do movimento).
+    } else if (ev.code === 'KeyT' && !ev.repeat && opcoes.aoTravarAlvo) {
+      // D-185: travar o alvo volta ao T (o V é do movimento).
       opcoes.aoTravarAlvo();
     } else if (ev.code === 'KeyC' && !ev.repeat && opcoes.aoCentralizar) {
       opcoes.aoCentralizar();
@@ -112,9 +114,6 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
         pressionadas.add(ev.code);
         recalcular();
       }
-    } else if (ev.code === 'Space' && !ev.repeat) {
-      ev.preventDefault();
-      opcoes.aoAtacar();
     } else if (indiceDoAtalho(ev.code) >= 0 && !ev.repeat) {
       opcoes.aoAtalho(indiceDoAtalho(ev.code));
     } else if (ev.code === 'Escape') {

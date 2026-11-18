@@ -1,10 +1,12 @@
 # Equipamento por propósito, estilo, grau e elemento (marco 46)
 
-**Versão:** 1.0 · **Data:** 16/11/2026
+**Versão:** 1.1 · **Data:** 17/11/2026
 
 > **Histórico**
+> - **1.1 (17/11/2026)**: a decisão passa a D-186 (a D-185 da main é a dos movimentos no V e no Espaço); as perneiras
+>   leem os três botões do movimento (Shift, V e Espaço); o gerador de atlas usa `--proposito`.
 > - **1.0 (16/11/2026)**: primeira versão: as quatro camadas do visual, o modelo `gatilho → condição → efeito`, a chave
->   nova do atlas e as decisões D-185.
+>   nova do atlas e as decisões D-186.
 
 ## 1. O que muda
 
@@ -80,7 +82,7 @@ leitura recusa o resto. O grau libera 1, 2 ou 3 receitas (graus 0–1, 2–3, 4�
 | Botas | pisar no chão do elemento, usar o elemento, ser atingido pelo elemento | elemento | velocidade por X ticks (renova, não soma) |
 | Luvas | atacar | corpo a corpo, à distância, magia (de um elemento ou qualquer) | dano a mais |
 | Peitoral | ser atingido | elemento (ou qualquer) | reflete parte do dano em quem bateu, se hostil |
-| Perneiras | o movimento da classe (Shift, T, G) e a chegada dele | — | recarga menor, rastro do elemento, dano ou escudo na chegada |
+| Perneiras | o movimento da classe (Shift, V e Espaço) e a chegada dele | — | recarga menor, rastro do elemento, dano ou escudo na chegada |
 | Manto | passivo; ser atingido | elemento | mais poder no elemento; absorve parte do golpe e converte em poder ou sintonia |
 | Elmo | passivo | elemento | resistência ao elemento |
 
@@ -99,7 +101,8 @@ leitura recusa o resto. O grau libera 1, 2 ou 3 receitas (graus 0–1, 2–3, 4�
 - Chave nova: `<corpo>~<propósito>.<peça>-<grau>`. O corpo é o modelo da classe de quem veste (o recorte depende dele).
 - Migração: `<classe>~<peça>-<grau>` virou `<classe>~<propósito da classe>.<peça>-<grau>` (só o nome do arquivo e a
   entrada no catálogo).
-- Os outros propósitos em cada corpo saem de `npx tsx tools/sprites/render.ts --camadas` (precisa do Chromium com GPU).
+- Os outros propósitos em cada corpo saem de `npx tsx tools/sprites/render.ts --so <classe> --proposito <propósito>` (o
+  Chromium com `--gpu` acelera; sem ele, roda em software).
   Enquanto um atlas não existe, a camada cai no propósito da classe do corpo (o visual continua, sem buraco).
 - No 3D em tempo real (com GPU) não há atlas: as peças são montadas na hora e o estilo, a marca, o destaque e o
   elemento entram ali.

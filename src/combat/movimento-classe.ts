@@ -149,7 +149,7 @@ export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDa
 }
 
 /**
- * D-172: os movimentos nos botões, na ordem: o principal (Shift) e os outros da recarga menor para a maior (T e G). Quem
+ * D-172: os movimentos nos botões, na ordem: o principal (Shift) e os outros da recarga menor para a maior (V e Espaço, D-185). Quem
  * tem companheiros tem um botão só, o do companheiro ativo.
  */
 export function movimentosDosBotoes(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse[] {
@@ -240,7 +240,7 @@ function gastarCarga(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m:
   const mc = (e.movimentoClasse ??= { ativo: m.id, cargas: {} });
   const prontas = (mc.cargas[m.id] ?? []).filter((t) => t > estado.tick);
   if (prontas.length >= Math.max(1, p.cargas)) return false;
-  // Marco 46 (D-185): as perneiras encurtam a recarga.
+  // Marco 46 (D-186): as perneiras encurtam a recarga.
   const fator = (!ehPrincipal(m) && emCombate(estado, ctx, e) ? ctx.balance.movimentoClasse.recargaEmCombatePct / 100 : 1) * fatorDeRecargaDasPecas(ctx, e);
   mc.cargas[m.id] = [...prontas, estado.tick + ticksDe(p.recargaMs * fator)];
   return true;

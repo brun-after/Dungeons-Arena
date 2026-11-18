@@ -1,4 +1,4 @@
-// As peças vestidas (marco 46, 16/11/2026, D-185): os efeitos das peças de armadura de quem tem ficha e a ponte com
+// As peças vestidas (marco 46, 16/11/2026, D-186): os efeitos das peças de armadura de quem tem ficha e a ponte com
 // os ganchos (a resistência passiva do elmo). Separado do motor (combat/efeitos-de-peca.ts) para os ganchos lerem sem
 // puxar o combate inteiro. Puro.
 

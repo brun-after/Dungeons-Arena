@@ -162,6 +162,11 @@ export interface ModoDeJogo {
    */
   dropsDeRenascido?: boolean;
   /**
+   * 16/11/2026 (D-184): o XP do abate cai no chão como uma luz que só o dono vê e pega (com `objetosDeFase`).
+   * Ausente = o XP vai direto, como antes.
+   */
+  xpNoChao?: boolean;
+  /**
    * Marco 30 (D-129): o loot do lugar em % (o ouro e a chance de item); o Mundo põe o do perigo da região. Ausente =
    * 100.
    */
@@ -320,6 +325,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),
     ...(o.dropsDeRenascido === undefined ? {} : { dropsDeRenascido: l.booleano(o, 'dropsDeRenascido') }),
     ...(o.fadigaDeXpPorFase === undefined ? {} : { fadigaDeXpPorFase: l.booleano(o, 'fadigaDeXpPorFase') }),
+    ...(o.xpNoChao === undefined ? {} : { xpNoChao: l.booleano(o, 'xpNoChao') }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');
