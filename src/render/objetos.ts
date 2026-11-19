@@ -42,7 +42,7 @@ import { desenharCirculoDeRetorno, progressoDoCirculo } from './circulo-retorno'
 import { BALANCE_PADRAO } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import { brilhoDoOrbeXp } from '../progression/orbe-xp';
-import { desenharOrbeXp } from './orbe-xp';
+import { LuzesDeXp } from './orbe-xp';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -70,7 +70,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
 // Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira', 'caixa_acampamento', 'orbe_xp']);
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira', 'caixa_acampamento']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -99,6 +99,8 @@ export class CamadaObjetos {
   /** O nível do jogador local neste quadro (o brilho da luz de XP é pela fração do nível dele). */
   private nivelLocal = 1;
   private tMs = 0;
+  /** D-184: as luzes de XP, sprites de luz pura (render/orbe-xp.ts). */
+  private readonly luzesXp = new LuzesDeXp();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -394,10 +396,6 @@ export class CamadaObjetos {
 
   /** Os orbes (vida, recurso, efeito e refúgio), com o brilho em volta. */
   private orbe(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number, pulso: number): void {
-    if (o.tipo === 'orbe_xp') {
-      desenharOrbeXp(g, cx, cy, brilhoDoOrbeXp(o, this.nivelLocal, BALANCE_PADRAO), o.xpSorte ?? 1, pulso, this.tMs);
-      return;
-    }
     if (o.tipo === 'orbe_efeito') {
       const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
       g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
@@ -453,6 +451,15 @@ export class CamadaObjetos {
           titulo.zIndex = p.z + 1;
           titulo.visible = !o.escondido;
         }
+      }
+      // D-184 (19/11/2026): a luz de XP é luz pura, sem superfície nem sombra; no isométrico, flutua acima do chão.
+      if (o.tipo === 'orbe_xp') {
+        vistos.add(o.objetoId);
+        const p = iso && this.emPe ? proj.projetar(cx, cy) : { x: cx, y: cy, z: cy };
+        const flutua = this.tMs === 0 ? 0 : Math.sin(this.tMs / 420 + o.x * 1.7 + o.y) * 3;
+        const camada = iso && this.emPe ? this.emPe.camada : this.camadaHalo;
+        this.luzesXp.mostrar(o.objetoId, camada, p.x, p.y - (iso ? 18 : 0) + flutua, p.z, brilhoDoOrbeXp(o, this.nivelLocal, BALANCE_PADRAO), o.xpSorte ?? 1, this.tMs, o.x * 1.3 + o.y * 0.7);
+        continue;
       }
       if (o.tipo === 'quebravel') {
         vistos.add(o.objetoId);
@@ -516,6 +523,7 @@ export class CamadaObjetos {
       this.orbe(g, o, cx, cy, pulso);
     }
     this.halos_(estado, agoraMs, movimentoReduzido);
+    this.luzesXp.podar(vistos);
     for (const [id, titulo] of this.titulos) if (!vistos.has(id)) { titulo.destroy(); this.titulos.delete(id); }
     for (const [id, alto] of this.altos) {
       if (vistos.has(id)) continue;
@@ -698,6 +706,7 @@ export class CamadaObjetos {
 
   /** Esconde (fora da vista) ou volta a mostrar os desenhos próprios do objeto, sem destruí-los. */
   private mostrarProprios(id: string, visivel: boolean): void {
+    this.luzesXp.visivel(id, visivel);
     const titulo = this.titulos.get(id);
     if (titulo) titulo.visible = visivel;
     const alto = this.altos.get(id);
@@ -714,6 +723,7 @@ export class CamadaObjetos {
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */
   reiniciarVisual(): void {
+    this.luzesXp.limpar();
     for (const titulo of this.titulos.values()) titulo.destroy();
     this.titulos.clear();
     for (const alto of this.altos.values()) alto.destroy();
@@ -731,6 +741,7 @@ export class CamadaObjetos {
 
   destruir(): void {
     this.reiniciarVisual();
+    this.luzesXp.destruir();
     for (const s of this.halos.values()) s.destroy();
     this.halos.clear();
     this.texturaHalo?.destroy(true);
