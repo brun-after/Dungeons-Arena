@@ -1,4 +1,4 @@
-// O texto da peça de armadura na mochila e na loja (marco 46, 16/11/2026, D-186): o propósito, o estilo e uma linha
+// O texto da peça de armadura na mochila e na loja (marco 46, 16/11/2026, D-188): o propósito, o estilo e uma linha
 // por efeito, montados do perfil (progression/pecas.ts) pelo dicionário. O HTML que os mostra escapa tudo.
 
 import { t, tOu, type ChaveTexto } from '../i18n';

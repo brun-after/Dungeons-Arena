@@ -403,7 +403,7 @@ export function aplicarImpacto(
     dispararGanchosDe(estado, ctx, conjurador, 'aoAcertar', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (critico) dispararGanchosDe(estado, ctx, conjurador, 'aoCritico', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (dano > 0) dispararGanchosDe(estado, ctx, alvo, 'aoReceberGolpe', { outro: conjurador, hab }, saida);
-    // Marco 46 (16/11/2026, D-186): as peças de quem levou o golpe (botas, peitoral e manto).
+    // Marco 46 (16/11/2026, D-188): as peças de quem levou o golpe (botas, peitoral e manto).
     if (dano > 0) aoSerAtingidoDasPecas(estado, ctx, alvo, conjurador, hab, dano, saida);
   }
 }

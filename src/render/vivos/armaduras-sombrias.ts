@@ -257,7 +257,7 @@ export function pecaDoGuerreiro(ossos: Ossos, peca: PecaDeArmadura, grau: number
 }
 
 /**
- * Marco 46 (16/11/2026, D-186): os kits por PROPÓSITO (a silhueta), não mais pela classe de quem veste. Cada kit de
+ * Marco 46 (16/11/2026, D-188): os kits por PROPÓSITO (a silhueta), não mais pela classe de quem veste. Cada kit de
  * classe virou o primeiro propósito dele (data/pecas.json diz, em `classe`, qual propósito o corpo de cada classe usa
  * sem peça vestida e no atlas antigo).
  */

@@ -567,7 +567,7 @@ export interface AparenciaEquipada {
   raridadeSecundaria?: string | null;
   /** 06/11/2026: a skin ativa; com ela, o equipamento não aparece no personagem (palco-vivo.ts). */
   skin?: string | null;
-  /** Marco 46 (D-186): o visual de cada peça (`<propósito>.<estilo>.<marca>`) e o elemento do vínculo (degrau 0–4). */
+  /** Marco 46 (D-188): o visual de cada peça (`<propósito>.<estilo>.<marca>`) e o elemento do vínculo (degrau 0–4). */
   vestes?: Partial<Record<'capa' | 'corpo' | 'pernas' | 'pes' | 'maos' | 'cabeca', string>>;
   elementoVeste?: string | null; vinculoVeste?: number;
 }

@@ -568,13 +568,12 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       const h = habilidadesDaBarra[indice];
       if (h) usarHabilidade(h.id);
     },
-    aoInteragir: () => { emitir({ t: 'interagir' }); },
-    aoDispensar: () => { emitir({ t: 'dispensar' }); },
+    aoInteragir: () => { emitir({ t: 'interagir' }); }, aoAtacar: () => { emitir({ t: 'ataqueBasico' }); }, aoDispensar: () => { emitir({ t: 'dispensar' }); },
     aoTrocarAlvo: trocarAlvo,
     aoTravarAlvo: travarAlvo,
     aoUltimate: usarUltimate,
     aoAlternarBasico: alternarBasico,
-    // Marco 40 (13/11/2026, D-164): o movimento da classe (Shift) e a troca da mecânica (G).
+    // Marco 40 (D-164): o movimento da classe. D-187: as teclas de cada ação vêm das Configurações.
     aoMovimento: movToque.doTeclado,
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
@@ -583,7 +582,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     isometrico,
     iniciais: o.troca?.teclas() ?? [],
-    teclas: () => aparencia.teclasMovimento,
+    teclas: () => aparencia.teclasMovimento, atalhos: () => aparencia.atalhos,
     aoMochila: mochila.alternar,
     // Marco 30 (30/10/2026, D-129): qualquer diálogo modal aberto (os do Mundo: quadro, banco, mercado, troca, portal)
     // fica com o teclado; o Esc dele fecha o diálogo, não abre a pausa.

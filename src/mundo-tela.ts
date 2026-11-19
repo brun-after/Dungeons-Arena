@@ -1,4 +1,5 @@
 import { painelPersonagem } from './ui/retrato-personagem';
+import { normalizarCodigo } from './input/atalhos';
 import { lerPreferencias } from './plataforma/preferencias';
 import { ConsultaParty } from './plataforma/consulta-party';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
@@ -403,7 +404,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty, orientacao });
   };
   const teclaMapa = (ev: KeyboardEvent) => {
-    if ((ev.key === 'm' || ev.key === 'M') && !(ev.target instanceof HTMLInputElement)) verMapa();
+    // 19/11/2026 (D-187): a tecla do mapa vem das Configurações (o M, por padrão).
+    if (normalizarCodigo(ev.code) === lerPreferencias().atalhos.mapa && !(ev.target instanceof HTMLInputElement)) verMapa();
   };
 
   const tratarAviso = (a: AvisoDoMundo) => {

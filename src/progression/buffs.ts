@@ -102,7 +102,7 @@ export function baseDaArma(ctx: Pick<ContextoSimulacao, 'conteudo'>, itemId: str
 const ORDEM_FORMAS = ['comum', 'epica', 'lendaria', 'ultima'];
 
 /**
- * Marco 46 (16/11/2026, D-186): o elemento dominante do vínculo (sem o Físico, que não tem cor) e a força dele em
+ * Marco 46 (16/11/2026, D-188): o elemento dominante do vínculo (sem o Físico, que não tem cor) e a força dele em
  * degraus de 0 a 4 (o degrau, e não o valor, para a aparência não mudar a cada tick com o uso esfriando).
  */
 function elementoDaVeste(ctx: ContextoSimulacao, e: Entidade, tick: number): { elementoVeste: string | null; vinculoVeste: number } {

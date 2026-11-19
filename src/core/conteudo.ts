@@ -108,7 +108,7 @@ export interface Conteudo {
   ressonancias: ReadonlyMap<string, Ressonancia>;
   /** Marco 40 (13/11/2026, D-164): o movimento de cada classe (três mecânicas, uma ativa). */
   movimentos: ReadonlyMap<string, readonly MovimentoDaClasse[]>;
-  /** Marco 46 (16/11/2026, D-186): propósitos, estilos e efeitos das peças de armadura (data/pecas.json). */
+  /** Marco 46 (16/11/2026, D-188): propósitos, estilos e efeitos das peças de armadura (data/pecas.json). */
   pecas: RegrasDePecas;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
   regrasDeBuff: Catalogo<RegraDeBuff>;
@@ -222,7 +222,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const ar = lerArmas(fontes.armas);
   const dm = lerDimensoes(fontes.dimensoes ?? dimensoesJson);
   const erros = [...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
-  // Marco 46 (D-186): o propósito e o estilo escolhidos nos itens fixos existem em pecas.json.
+  // Marco 46 (D-188): o propósito e o estilo escolhidos nos itens fixos existem em pecas.json.
   for (const item of it.itens.values()) {
     if (item.proposito !== undefined && !pc.pecas.propositos.has(item.proposito)) erros.push(`item ${item.id}: propósito desconhecido "${item.proposito}"`);
     if (item.estilo !== undefined && !pc.pecas.estilos.has(item.estilo)) erros.push(`item ${item.id}: estilo desconhecido "${item.estilo}"`);

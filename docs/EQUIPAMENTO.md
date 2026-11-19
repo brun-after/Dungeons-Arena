@@ -1,12 +1,14 @@
 # Equipamento por propósito, estilo, grau e elemento (marco 46)
 
-**Versão:** 1.1 · **Data:** 17/11/2026
+**Versão:** 1.2 · **Data:** 19/11/2026
 
 > **Histórico**
-> - **1.1 (17/11/2026)**: a decisão passa a D-186 (a D-185 da main é a dos movimentos no V e no Espaço); as perneiras
->   leem os três botões do movimento (Shift, V e Espaço); o gerador de atlas usa `--proposito`.
+> - **1.2 (19/11/2026)**: a decisão passa a D-188 (a D-186 e a D-187 da main são o terceiro movimento no X e as teclas
+>   configuráveis); as perneiras leem os botões do movimento (Shift, V e X, ou o que o jogador configurar).
+> - **1.1 (17/11/2026)**: a decisão passa a D-186; as perneiras leem os três botões do movimento; o gerador de atlas
+>   usa `--proposito`.
 > - **1.0 (16/11/2026)**: primeira versão: as quatro camadas do visual, o modelo `gatilho → condição → efeito`, a chave
->   nova do atlas e as decisões D-186.
+>   nova do atlas e as decisões D-185.
 
 ## 1. O que muda
 
@@ -82,7 +84,7 @@ leitura recusa o resto. O grau libera 1, 2 ou 3 receitas (graus 0–1, 2–3, 4�
 | Botas | pisar no chão do elemento, usar o elemento, ser atingido pelo elemento | elemento | velocidade por X ticks (renova, não soma) |
 | Luvas | atacar | corpo a corpo, à distância, magia (de um elemento ou qualquer) | dano a mais |
 | Peitoral | ser atingido | elemento (ou qualquer) | reflete parte do dano em quem bateu, se hostil |
-| Perneiras | o movimento da classe (Shift, V e Espaço) e a chegada dele | — | recarga menor, rastro do elemento, dano ou escudo na chegada |
+| Perneiras | o movimento da classe (Shift, V e X) e a chegada dele | — | recarga menor, rastro do elemento, dano ou escudo na chegada |
 | Manto | passivo; ser atingido | elemento | mais poder no elemento; absorve parte do golpe e converte em poder ou sintonia |
 | Elmo | passivo | elemento | resistência ao elemento |
 

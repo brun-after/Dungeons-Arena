@@ -238,7 +238,7 @@ export function aceso(cor: number, forca = 2.2): THREE.MeshStandardMaterial {
   return destacar(guardado(`aceso:${String(cor)}:${String(forca)}`, () => new THREE.MeshStandardMaterial({ color: cor, emissive: cor, emissiveIntensity: forca, roughness: 0.3 })));
 }
 /**
- * Marco 46 (16/11/2026, D-186): o material de destaque (a pedra acesa, o latão, o ouro, a prata): o que acende com o
+ * Marco 46 (16/11/2026, D-188): o material de destaque (a pedra acesa, o latão, o ouro, a prata): o que acende com o
  * grau e leva os veios do elemento (vivos/vestes-vivas.ts `realcar`).
  */
 export function destacar<T extends THREE.Material>(m: T): T {

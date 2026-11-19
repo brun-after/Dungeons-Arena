@@ -10,6 +10,7 @@
 // local escolhido neste aparelho (o app Android não tem barra de endereço para o `?servidor=`).
 
 import { skinPorId, skinValida } from '../entities/skins';
+import { normalizarTeclas, TECLAS_PADRAO, type MapaTeclas } from '../input/atalhos';
 import { gravarNoBanco, lerDoBanco } from './banco';
 
 export type TipoControle = 'joystick' | 'dpad';
@@ -32,6 +33,8 @@ export interface Preferencias {
   visaoParty: boolean;
   controle: TipoControle;
   teclasMovimento: TeclasMovimento;
+  /** 19/11/2026 (D-187): a tecla de cada ação (input/atalhos.ts); os direcionais ficam fora, fixos. */
+  atalhos: MapaTeclas;
   camera: ModoCamera;
   qualidade: EscolhaQualidade;
   /** Tremor, flash, congelamento e soco de zoom (§2.4). */
@@ -81,6 +84,7 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   visaoParty: false,
   controle: 'joystick',
   teclasMovimento: 'wasd',
+  atalhos: { ...TECLAS_PADRAO },
   camera: 'janela',
   qualidade: 'auto',
   efeitosDeTela: true,
@@ -120,6 +124,7 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     visaoParty: booleano(d.visaoParty, false),
     controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
     teclasMovimento: opcao(d.teclasMovimento, ['wasd', 'ewas'] as const, PADRAO.teclasMovimento),
+    atalhos: normalizarTeclas(d.atalhos),
     camera: d.camera === 'centralizada' ? 'centralizada' : 'janela',
     qualidade: opcao(d.qualidade, ['auto', ...QUALIDADES], PADRAO.qualidade),
     efeitosDeTela: booleano(d.efeitosDeTela, PADRAO.efeitosDeTela),
@@ -191,11 +196,11 @@ export async function prepararPreferencias(): Promise<void> {
 }
 
 export function lerPreferencias(): Preferencias {
-  return { ...cache };
+  return { ...cache, atalhos: { ...cache.atalhos } };
 }
 
 export function gravarPreferencias(p: Preferencias): void {
-  cache = { ...p };
+  cache = { ...p, atalhos: { ...p.atalhos } };
   if (usarBanco) {
     gravarNoBanco('perfil', { chave: CHAVE_PERFIL, valor: cache }).catch(() => {
       // Falhou: a preferência vale só nesta sessão.
