@@ -5854,6 +5854,7 @@ XP só entra quando ela é recolhida; contra quem está abaixo do nível do joga
   disco cheio, reflexo branco e sombra no chão, igual aos orbes de vida e de buff. Agora é um núcleo minúsculo que
   emana raios de luz em todos os sentidos, tudo somado ao fundo (blend aditivo), sem borda, reflexo nem sombra.
   - O XP dá o número de raios (de 5 a 16), o comprimento deles e a força do clarão em volta do núcleo.
+  - Os raios são curtos: de 6 a 22 px pelo XP (os da sorte, 35% mais longos).
   - Cada raio tem o seu comprimento, cintila e gira devagar. Com a sorte, raios extras mais longos e claros (4 no 3×,
     6 no 5×).
   - Um brilho redondo grande ainda parecia superfície: um miolo forte em blend aditivo satura em branco e forma um

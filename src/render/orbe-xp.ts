@@ -113,7 +113,7 @@ export class LuzesDeXp {
     luz.raiz.visible = true;
     this.raios(luz, b, sorte, tMs, semente);
     // O clarão fraco em volta e, por cima de tudo, o núcleo minúsculo.
-    luz.brilho.scale.set((10 + 18 * b) / LADO);
+    luz.brilho.scale.set((8 + 12 * b) / LADO);
     luz.brilho.alpha = 0.25 + 0.3 * b;
     if (luz.nucleo.parent !== luz.raiz) luz.raiz.addChild(luz.nucleo);
     else luz.raiz.setChildIndex(luz.nucleo, luz.raiz.children.length - 1);
@@ -133,7 +133,8 @@ export class LuzesDeXp {
     }
     while (luz.raios.length > n) luz.raios.pop()?.destroy();
     const giro = tMs / 9000;
-    const comprimento = 10 + 34 * b;
+    // 19/11/2026: raios curtos (eram 10 + 34 × brilho), para a luz ficar pequena no chão.
+    const comprimento = 6 + 16 * b;
     luz.raios.forEach((r, i) => {
       const extra = i >= comuns;
       const fase = acaso(semente, i);
@@ -141,7 +142,7 @@ export class LuzesDeXp {
       // Os comuns espalhados por igual, com um desvio próprio; os da sorte entre eles, deslocados.
       const base = extra ? ((i - comuns + 0.5) / Math.max(1, extras)) * Math.PI * 2 : (i / comuns) * Math.PI * 2;
       r.rotation = base + (fase - 0.5) * 0.35 + giro * (i % 2 === 0 ? 1 : -1);
-      const tamanho = comprimento * (extra ? 1.5 : 0.55 + 0.6 * fase) * (0.85 + 0.15 * cintila);
+      const tamanho = comprimento * (extra ? 1.35 : 0.55 + 0.6 * fase) * (0.85 + 0.15 * cintila);
       r.scale.set(tamanho / RAIO_C, (extra ? 3 : 2) / RAIO_E + b * (1.2 / RAIO_E));
       r.alpha = (extra ? 0.95 : 0.55 + 0.35 * b) * cintila;
     });
