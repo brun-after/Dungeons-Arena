@@ -19,8 +19,6 @@ export interface OpcoesTeclado {
   aoMochila?: () => void;
   /** Tecla `E`: interage com baú ou loja (marco 9A). */
   aoInteragir?: () => void;
-  /** Tecla `X`: dispensa as invocações (marco 10A-3). */
-  aoDispensar?: () => void;
   /** Marco 26 (D-117): a tecla C (quem a usa decide o toque duplo). */
   aoCentralizar?: () => void;
   /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; `Z` (marco 40, D-164; antes Shift+Q), o anterior. */
@@ -31,7 +29,7 @@ export interface OpcoesTeclado {
   aoUltimate?: () => void;
   aoAlternarBasico?: () => void;
   /** Marco 40 (13/11/2026, D-164): Shift usa o movimento da classe (no rumo das teclas); `G` troca a mecânica. */
-  /** D-172: o movimento do botão (0 no Shift, o principal; 1 e 2 os outros; D-185: no V e no Espaço). */
+  /** D-172: o movimento do botão (0 no Shift, o principal; 1 e 2 os outros; D-186: no V e no X). */
   aoMovimento?: (rumo: Rumo, botao: number) => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
@@ -85,18 +83,15 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoMochila();
     } else if (ev.code === teclaInteragir(modo(), iso)) {
       if (!ev.repeat) opcoes.aoInteragir?.();
-    } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
-      opcoes.aoDispensar();
     } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {
       opcoes.aoTrocarAlvo(1);
     } else if (ev.code === 'KeyZ' && !ev.repeat && opcoes.aoTrocarAlvo) {
       opcoes.aoTrocarAlvo(-1);
     } else if ((ev.code === 'ShiftLeft' || ev.code === 'ShiftRight') && !ev.repeat && opcoes.aoMovimento) {
       opcoes.aoMovimento(atual, 0);
-    } else if ((ev.code === 'KeyV' || ev.code === 'Space') && opcoes.aoMovimento) {
-      // 16/11/2026 (D-185): os outros dois movimentos saem do T e do G para o V e o Espaço; o Espaço deixa de atacar
-      // (o básico fica no automático, no F, e no clique no inimigo).
-      ev.preventDefault();
+    } else if ((ev.code === 'KeyV' || ev.code === 'KeyX') && opcoes.aoMovimento) {
+      // 16/11/2026 (D-185, D-186): os outros dois movimentos saem do T e do G para o V e o X; o Espaço deixa de atacar
+      // (o básico fica no automático, no F, e no clique no inimigo) e o X deixa de dispensar as invocações.
       if (!ev.repeat) opcoes.aoMovimento(atual, ev.code === 'KeyV' ? 1 : 2);
     } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
       opcoes.aoUltimate();

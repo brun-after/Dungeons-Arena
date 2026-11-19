@@ -569,7 +569,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (h) usarHabilidade(h.id);
     },
     aoInteragir: () => { emitir({ t: 'interagir' }); },
-    aoDispensar: () => { emitir({ t: 'dispensar' }); },
     aoTrocarAlvo: trocarAlvo,
     aoTravarAlvo: travarAlvo,
     aoUltimate: usarUltimate,

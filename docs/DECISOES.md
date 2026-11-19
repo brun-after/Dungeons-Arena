@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.34 · **Data:** 16/11/2026
+**Versão:** 1.35 · **Data:** 19/11/2026
 
 > **Histórico**
+> - **1.35 (19/11/2026)**: D-186: o terceiro movimento da classe sai do Espaço para o X; o X deixa de dispensar as invocações (sem tecla).
 > - **1.34 (16/11/2026)**: D-185: os outros dois movimentos da classe saem do T e do G para o V e o Espaço; travar o alvo volta ao T e o Espaço deixa de atacar.
 > - **1.33 (16/11/2026)**: D-184: o XP do abate deixa de entrar sozinho e fica no chão como uma luz que só o dono vê e pega de perto, com o brilho pela quantidade; contra os mais fracos, 5% de chance de 3× e 1% de 5×.
 > - **1.32 (16/11/2026)**: D-183: o jogador não trava (o cenário baixo se atravessa, o corpo escorrega na parede, na quina e no tronco, e sai do degrau que passou a barrar) a tocha diante dos mais fracos e a noite 15% menos escura.
@@ -5864,3 +5865,9 @@ fecha a aba e a página não consegue impedir, e quem aperta o W ainda segurando
 - Travar ou destravar o alvo volta ao **T** (o V é do movimento).
 - O Espaço **deixa de atacar**: o ataque básico fica sem tecla, no automático (`F` liga ou desliga) e no clique no
   inimigo. O celular não muda.
+
+## D-186 — O terceiro movimento no X (19/11/2026)
+
+**Decisão.** O terceiro movimento da classe passa do Espaço para o **X** (o segundo segue no V, o principal no Shift).
+O X deixa de dispensar as invocações, que ficam **sem tecla** (o botão "Dispensar" da mochila continua). O Espaço
+fica livre (não ataca, desde a D-185).
