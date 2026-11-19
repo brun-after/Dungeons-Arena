@@ -9,9 +9,12 @@ import { t } from '../i18n';
 import type { Item } from '../progression/itens';
 import { ATALHOS_DE_CONSUMIVEL } from '../progression/inventario';
 import { iconeDoItem } from './icones';
+import { acaoDoAtalho, HABILIDADES_NO_TECLADO } from '../input/atalhos';
+import { lerPreferencias } from '../plataforma/preferencias';
+import { teclaDaAcao } from './nome-tecla';
 
 /** A tecla de cada posição da barra (as mesmas do teclado: 7–9 e 0 desde o marco 24, com 1–6 nas habilidades). */
-const TECLAS = ['7', '8', '9', '0'];
+
 
 /** 17/10/2026: rótulo curto nos dois dispositivos; recuperação nominal, antes de modificadores. */
 export function nomeCurtoConsumivel(item: Item, jogador: Pick<Entidade, 'hpMax' | 'manaMax'>): string {
@@ -38,7 +41,7 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
 
   const atualizar = (j: Entidade | undefined) => {
     const lista = (j?.bolsa?.mochila ?? []).filter((i) => ctx.conteudo.itens.get(i.itemId)?.tipo === 'consumivel' && !ctx.conteudo.itens.get(i.itemId)?.progressao);
-    const chave = lista.map((i) => `${i.invId}:${i.itemId}:${i.qtd}`).join(',') + `:${j?.hpMax}:${j?.manaMax}`;
+    const chave = lista.map((i) => `${i.invId}:${i.itemId}:${i.qtd}`).join(',') + `:${j?.hpMax}:${j?.manaMax}:${toque ? '' : JSON.stringify(lerPreferencias().atalhos)}`;
     if (chave === ultimo) return;
     ultimo = chave;
     elemento.textContent = '';
@@ -50,7 +53,8 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
       b.type = 'button';
       b.className = 'botao-consumivel';
       b.dataset.item = item.id;
-      const tecla = !toque && n < Math.min(ATALHOS_DE_CONSUMIVEL, TECLAS.length) ? TECLAS[n] : undefined;
+      // D-187: a tecla de cada posição vem das Configurações (7–9 e 0 por padrão).
+      const tecla = !toque && n < ATALHOS_DE_CONSUMIVEL ? teclaDaAcao(acaoDoAtalho(HABILIDADES_NO_TECLADO + n)) || undefined : undefined;
       const rotulo = tecla ? t('consumiveis.usarComTecla', { nome: item.nome, tecla }) : t('consumiveis.usar', { nome: item.nome });
       b.title = rotulo;
       b.setAttribute('aria-label', rotulo);

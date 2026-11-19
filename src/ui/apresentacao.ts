@@ -306,7 +306,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   palco.tela.addChild(flash);
 
   const minimapa = criarMinimapa(ctx, idLocal, toque, o.destinoMapa);
-  const prompt = criarPrompt(ctx, idLocal, toque, () => letraInteragir(prefs.teclasMovimento, camera.projecaoAtual.visao === 'iso'));
+  const prompt = criarPrompt(ctx, idLocal, toque, () => letraInteragir(prefs.teclasMovimento, camera.projecaoAtual.visao === 'iso', prefs.atalhos));
   const indicadorCombo = new IndicadorCombo();
   o.ui.append(minimapa.elemento, prompt.elemento, medidor.elemento);
   faixaSuperior(o.ui).append(indicadorCombo.elemento);

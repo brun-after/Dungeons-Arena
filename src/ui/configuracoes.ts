@@ -1,11 +1,13 @@
 // Configurações (§2.15). Marco 12 (14/10/2026). Gráficos, áudio, câmera, controles e acessibilidade, num
 // modal acessível (<dialog>). Cada mudança vale na hora (`aoMudar`) e é gravada (preferencias.ts).
 // Marco 13 (14/10/2026): a visão (de cima ou isométrica) e a aparência (imagem própria, sentido e tamanho).
+// 19/11/2026 (D-187): as teclas de cada ação (ui/config-teclas.ts).
 
 import { t, type ChaveTexto } from '../i18n';
 import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { apagarImagemToken, gravarImagemToken } from '../plataforma/token';
 import { prepararToken } from '../render/token-imagem';
+import { linhasDasTeclas } from './config-teclas';
 import { criarModal, type Modal } from './modal';
 
 export interface Configuracoes {
@@ -136,6 +138,8 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
     } else {
       secao(t('config.controles'), teclas, seguir);
     }
+    // 19/11/2026 (D-187): a tecla de cada ação (menos os direcionais), onde há teclado.
+    if (!o.toque) secao(t('config.atalhos'), ...linhasDasTeclas({ atual: () => lerPreferencias().atalhos, mudar: (atalhos) => { mudar({ atalhos }); } }));
     secao(
       t('config.acessibilidade'),
       campo(t('config.escala'), faixa('escalaInterface', Math.round(p.escalaInterface * 100), 80, 150, 10, (v) => { mudar({ escalaInterface: v / 100 }); })),

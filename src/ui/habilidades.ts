@@ -10,6 +10,8 @@
 import type { Habilidade } from '../combat/habilidades';
 import { t } from '../i18n';
 import { icone } from './icones';
+import { acaoDoAtalho } from '../input/atalhos';
+import { teclaDaAcao } from './nome-tecla';
 
 export interface EstadoBotao {
   /** Fração da recarga que ainda falta, em [0, 1]. */
@@ -82,13 +84,15 @@ export function criarBarraHabilidades(
       if (i < 2) b.classList.add('de-classe');
       const cor = corDo(h);
       if (cor) b.style.setProperty('--cor-elemento', cor);
-      b.setAttribute('aria-label', t('controles.habilidade', { nome: h.nome, tecla: i + 1 }));
+      // D-187: a tecla da posição vem das Configurações (1 a 6 por padrão).
+      const nomeTecla = teclaDaAcao(acaoDoAtalho(i));
+      b.setAttribute('aria-label', nomeTecla ? t('controles.habilidade', { nome: h.nome, tecla: nomeTecla }) : h.nome);
       const simbolo = document.createElement('span');
       simbolo.className = 'icone';
       simbolo.append(icone(h.icone));
       const tecla = document.createElement('span');
       tecla.className = 'tecla';
-      tecla.textContent = String(i + 1);
+      tecla.textContent = nomeTecla;
       b.append(simbolo, tecla);
       if (h.rank > 1) {
         const rank = document.createElement('span');
