@@ -137,6 +137,8 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 
 ### Controles
 
+As teclas abaixo são as padrão; nas Configurações (Teclas das ações) dá para trocar qualquer uma, menos os direcionais.
+
 | Ação | Teclado e mouse | Toque |
 |---|---|---|
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |

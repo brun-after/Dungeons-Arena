@@ -3599,3 +3599,19 @@ body:not(.toque) .botao-acao.centralizar.flutuante {
 .lore-monstro { color: var(--texto); line-height: 1.35; }
 .marca-chefe { font-size: 0.75rem; font-weight: normal; color: #f0c674; border: 1px solid #8a6d2f; border-radius: 3px; padding: 0 4px; }
 .pagina-monstro .vitorias { color: #9ad8a8; }
+/* 19/11/2026 (D-187): as teclas das ações nas Configurações. */
+.linha-tecla {
+  min-height: 36px;
+}
+.botao-tecla {
+  min-width: 96px;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.botao-tecla[data-esperando='true'] {
+  border-color: var(--destaque);
+  color: var(--destaque);
+}
+.aviso-teclas {
+  min-height: 1.4em;
+}

@@ -1,6 +1,6 @@
 // Marco 40 (14/11/2026, D-168): o movimento da classe pela interface.
 // D-172 (14/11/2026): um botão por movimento, em vez de um só que o G trocava.
-// - Teclado: o Shift usa o movimento principal da classe (o mais usado); o V e o Espaço (D-185; antes, o T e o G), os outros dois, da recarga menor
+// - Teclado: o Shift usa o movimento principal da classe (o mais usado); o V e o X (D-186; antes, o T e o G), os outros dois, da recarga menor
 //   para a maior. Os que miram (o Acelerar, a Arremetida, o Posto dos Mortos) vão para o ponteiro; os outros, no rumo
 //   das teclas (ou no de agora).
 // - Celular: os botões lado a lado junto do direcional, o principal primeiro. Tocar usa o movimento no rumo do joystick;
@@ -8,7 +8,7 @@
 // - O Aventureiro tem um botão só: o do companheiro ativo (a montaria muda com o companheiro).
 // Cada botão mostra o ícone e a cor do seu movimento e escurece enquanto ele recarrega.
 // D-173 (14/11/2026): no computador, os mesmos botões ficam no HUD, ao lado da ultimate, com a tecla de cada um (Shift,
-// T, G; D-185: V, Espaço) e os segundos que faltam da recarga; clicar também usa.
+// T, G; D-186: V, X) e os segundos que faltam da recarga; clicar também usa.
 
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -19,6 +19,7 @@ import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { comandoDoMovimento, PARADO, type Rumo } from '../input/direcao';
 import { icone } from './icones';
+import { teclaDaAcao } from './nome-tecla';
 
 export interface OpcoesMovimentoToque {
   ctx: ContextoSimulacao;
@@ -36,7 +37,7 @@ export interface OpcoesMovimentoToque {
 export interface MovimentoToque {
   /** Os botões do celular, lado a lado (vão junto do direcional). */
   botoes: HTMLElement;
-  /** Shift (0), V (1) e Espaço (2) (D-185; antes, T e G). */
+  /** Os botões 0, 1 e 2 (Shift, V e X por padrão; D-187: as teclas das Configurações). */
   doTeclado: (rumo: Rumo, botao: number) => void;
   /** O rumo do joystick (o toque nos botões usa o último). */
   rumo: (r: Rumo) => void;
@@ -47,7 +48,8 @@ export interface MovimentoToque {
 
 const ATUALIZAR_MS = 200;
 const MAX_BOTOES = 3;
-const TECLAS = ['Shift', 'V', 'Espaço'] as const;
+/** D-187: as ações de cada botão; a tecla vem das Configurações. */
+const ACOES = ['movimento1', 'movimento2', 'movimento3'] as const;
 
 export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
   let rumo: Rumo = PARADO;
@@ -99,7 +101,7 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
     botao.addEventListener('pointercancel', soltar);
     botao.addEventListener('pointerleave', soltar);
     caixa.append(botao);
-    return { botao, id: '', resta: null as HTMLSpanElement | null };
+    return { botao, id: '', resta: null as HTMLSpanElement | null, tecla: null as HTMLSpanElement | null };
   });
   function armar(i: number | null): void {
     mirando = i;
@@ -121,12 +123,16 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
         b.resta.className = 'resta';
         b.botao.replaceChildren(icone(m.icone), b.resta);
         if (o.teclas) {
-          const tecla = document.createElement('span');
-          tecla.className = 'tecla';
-          tecla.textContent = TECLAS[i] ?? '';
-          b.botao.append(tecla);
+          b.tecla = document.createElement('span');
+          b.tecla.className = 'tecla';
+          b.botao.append(b.tecla);
         }
         b.botao.style.setProperty('--cor-movimento', m.cor);
+      }
+      // D-187: a tecla pode mudar nas Configurações com o jogo aberto.
+      if (b.tecla) {
+        const nome = teclaDaAcao(ACOES[i] ?? null);
+        if (b.tecla.textContent !== nome) b.tecla.textContent = nome;
         b.botao.setAttribute('aria-label', t('movimento.botao', { nome: t(`movimento.${m.id}` as ChaveTexto) }));
         if (mirando === i) armar(null);
       }

@@ -5,6 +5,7 @@
 // WASD. Funções puras.
 
 import type { TeclasMovimento } from '../plataforma/preferencias';
+import { nomeCurtoDaTecla, TECLAS_PADRAO, type MapaTeclas } from './atalhos';
 import { dirDeVetor, PARADO, rumoDaTela, vetorDaTela, type Rumo } from './direcao';
 
 export type { TeclasMovimento };
@@ -40,9 +41,20 @@ export function teclaInteragir(modo: TeclasMovimento, isometrico: boolean): 'Key
   return inclinado(modo, isometrico) ? 'KeyD' : 'KeyE';
 }
 
-/** A letra que os textos mostram para interagir. */
-export function letraInteragir(modo: TeclasMovimento, isometrico: boolean): string {
-  return teclaInteragir(modo, isometrico) === 'KeyD' ? 'D' : 'E';
+/** A letra que os textos mostram para interagir (D-187: a do mapa das Configurações; vazio sem tecla). */
+export function letraInteragir(modo: TeclasMovimento, isometrico: boolean, mapa: Readonly<MapaTeclas> = TECLAS_PADRAO): string {
+  const tecla = teclaDeInteragir(mapa, modo, isometrico);
+  return tecla ? nomeCurtoDaTecla(tecla) : '';
+}
+
+/**
+ * 19/11/2026 (D-187): a tecla de interagir do mapa das Configurações; quando ela anda (o E no EWAS isométrico), o D,
+ * como antes. Null: sem tecla.
+ */
+export function teclaDeInteragir(mapa: Readonly<MapaTeclas>, modo: TeclasMovimento, isometrico: boolean): string | null {
+  const tecla = mapa.interagir;
+  if (tecla === null) return null;
+  return ehTeclaDeMovimento(tecla, modo, isometrico) ? teclaInteragir(modo, isometrico) : tecla;
 }
 
 /** A tecla move o personagem neste modo e nesta visão? */
