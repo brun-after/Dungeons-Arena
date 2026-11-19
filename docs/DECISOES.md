@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.35 · **Data:** 19/11/2026
+**Versão:** 1.36 · **Data:** 19/11/2026
 
 > **Histórico**
+> - **1.36 (19/11/2026)**: D-187: as teclas de cada ação passam a ser configuráveis nas Configurações; só os direcionais ficam fixos.
 > - **1.35 (19/11/2026)**: D-186: o terceiro movimento da classe sai do Espaço para o X; o X deixa de dispensar as invocações (sem tecla).
 > - **1.34 (16/11/2026)**: D-185: os outros dois movimentos da classe saem do T e do G para o V e o Espaço; travar o alvo volta ao T e o Espaço deixa de atacar.
 > - **1.33 (16/11/2026)**: D-184: o XP do abate deixa de entrar sozinho e fica no chão como uma luz que só o dono vê e pega de perto, com o brilho pela quantidade; contra os mais fracos, 5% de chance de 3× e 1% de 5×.
@@ -5871,3 +5872,21 @@ fecha a aba e a página não consegue impedir, e quem aperta o W ainda segurando
 **Decisão.** O terceiro movimento da classe passa do Espaço para o **X** (o segundo segue no V, o principal no Shift).
 O X deixa de dispensar as invocações, que ficam **sem tecla** (o botão "Dispensar" da mochila continua). O Espaço
 fica livre (não ataca, desde a D-185).
+
+## D-187 — Teclas configuráveis (19/11/2026)
+
+**Contexto.** As teclas mudaram três vezes em poucos dias (D-172, D-185, D-186). Cada jogador tem a sua mão.
+
+**Decisão.**
+- **Todas as ações do teclado têm tecla configurável**, numa seção "Teclas das ações" das Configurações (só onde há
+  teclado): os três movimentos da classe, as seis habilidades, a ultimate, o ataque básico, o automático, os três do
+  alvo, os quatro consumíveis, interagir, mochila, mapa do Mundo, dispensar, centralizar e pausar.
+- **Só os direcionais são fixos** (WASD, EWAS e as setas); o Tab também fica de fora, com a navegação da página.
+- **Uma tecla por ação**, ou nenhuma (Backspace). O pausar sempre tem tecla. A tecla que já era de outra ação troca
+  com esta, e a tela diz o que mudou. Os lados do Shift, do Ctrl e do Alt e os números do teclado lateral valem igual.
+- **As padrão são as de hoje** (Shift, V e X nos movimentos; o ataque básico e o dispensar começam sem tecla).
+- **Interagir no EWAS**: se a tecla de interagir anda (o E no EWAS isométrico), passa ao D, como antes.
+- O mapa fica nas preferências (`atalhos`, normalizado: tecla inválida volta à padrão e a repetida fica só na
+  primeira); as regras puras ficam em `input/atalhos.ts`, e o HUD (movimentos, habilidades, consumíveis e o aviso de
+  interagir) mostra a tecla escolhida.
+- Escolher o Ctrl mostra um aviso: com ele seguro, o W fecha a aba do navegador, e a página não consegue impedir.

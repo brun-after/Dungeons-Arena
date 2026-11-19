@@ -19,6 +19,7 @@ import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { comandoDoMovimento, PARADO, type Rumo } from '../input/direcao';
 import { icone } from './icones';
+import { teclaDaAcao } from './nome-tecla';
 
 export interface OpcoesMovimentoToque {
   ctx: ContextoSimulacao;
@@ -36,7 +37,7 @@ export interface OpcoesMovimentoToque {
 export interface MovimentoToque {
   /** Os botões do celular, lado a lado (vão junto do direcional). */
   botoes: HTMLElement;
-  /** Shift (0), V (1) e X (2) (D-186; antes, T e G). */
+  /** Os botões 0, 1 e 2 (Shift, V e X por padrão; D-187: as teclas das Configurações). */
   doTeclado: (rumo: Rumo, botao: number) => void;
   /** O rumo do joystick (o toque nos botões usa o último). */
   rumo: (r: Rumo) => void;
@@ -47,7 +48,8 @@ export interface MovimentoToque {
 
 const ATUALIZAR_MS = 200;
 const MAX_BOTOES = 3;
-const TECLAS = ['Shift', 'V', 'X'] as const;
+/** D-187: as ações de cada botão; a tecla vem das Configurações. */
+const ACOES = ['movimento1', 'movimento2', 'movimento3'] as const;
 
 export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
   let rumo: Rumo = PARADO;
@@ -99,7 +101,7 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
     botao.addEventListener('pointercancel', soltar);
     botao.addEventListener('pointerleave', soltar);
     caixa.append(botao);
-    return { botao, id: '', resta: null as HTMLSpanElement | null };
+    return { botao, id: '', resta: null as HTMLSpanElement | null, tecla: null as HTMLSpanElement | null };
   });
   function armar(i: number | null): void {
     mirando = i;
@@ -121,12 +123,16 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
         b.resta.className = 'resta';
         b.botao.replaceChildren(icone(m.icone), b.resta);
         if (o.teclas) {
-          const tecla = document.createElement('span');
-          tecla.className = 'tecla';
-          tecla.textContent = TECLAS[i] ?? '';
-          b.botao.append(tecla);
+          b.tecla = document.createElement('span');
+          b.tecla.className = 'tecla';
+          b.botao.append(b.tecla);
         }
         b.botao.style.setProperty('--cor-movimento', m.cor);
+      }
+      // D-187: a tecla pode mudar nas Configurações com o jogo aberto.
+      if (b.tecla) {
+        const nome = teclaDaAcao(ACOES[i] ?? null);
+        if (b.tecla.textContent !== nome) b.tecla.textContent = nome;
         b.botao.setAttribute('aria-label', t('movimento.botao', { nome: t(`movimento.${m.id}` as ChaveTexto) }));
         if (mirando === i) armar(null);
       }

@@ -2,34 +2,41 @@
 // a repetição automática do sistema operacional não gera comandos. Marco 26 (D-105): as 8 direções de tela vão à
 // fase pela inversa da projeção (no isométrico, a seta para a direita anda para a direita na tela). D-107: com EWAS
 // nas Configurações, as teclas seguem a inclinação do isométrico e interagir vai para o D (input/teclas.ts).
+// 19/11/2026 (D-187): as outras teclas vêm do mapa das Configurações (input/atalhos.ts); só os direcionais são fixos.
 
 import { PARADO, type Rumo } from './direcao';
-import { ehTeclaDeMovimento, rumoDasTeclas, teclaInteragir, type TeclasMovimento } from './teclas';
+import { acaoDaTecla, indiceDoAtalhoDaAcao, normalizarCodigo, TECLAS_PADRAO, type AcaoTeclado, type MapaTeclas } from './atalhos';
+import { ehTeclaDeMovimento, rumoDasTeclas, teclaDeInteragir, type TeclasMovimento } from './teclas';
 
 export interface OpcoesTeclado {
   aoMudarDirecao: (rumo: Rumo) => void;
-  /** Teclas 1–9 e 0 (§2.10): índice 0 a 9. */
+  /** Os atalhos das habilidades (índice 0 a 5) e dos consumíveis (6 a 9) (§2.10). */
   aoAtalho: (indice: number) => void;
-  /** `Esc` é contextual (§2.15): cancela a mira antes de pausar. */
+  /** A tecla de pausar (o `Esc`, por padrão) é contextual (§2.15): cancela a mira antes de pausar. */
   aoCancelar: () => void;
   isometrico: () => boolean;
   /** Marco 26 (D-107): WASD (tela) ou EWAS (inclinação do isométrico). */
   teclas?: () => TeclasMovimento;
-  /** Tecla `I`: abre a mochila (marco 6). */
+  /** 19/11/2026 (D-187): a tecla de cada ação, das Configurações (sem isto, as padrão). */
+  atalhos?: () => Readonly<MapaTeclas>;
+  /** Abre a mochila (marco 6). */
   aoMochila?: () => void;
-  /** Tecla `E`: interage com baú ou loja (marco 9A). */
+  /** Interage com baú ou loja (marco 9A). */
   aoInteragir?: () => void;
-  /** Marco 26 (D-117): a tecla C (quem a usa decide o toque duplo). */
+  /** Marco 26 (D-117): recentraliza a câmera (quem a usa decide o toque duplo). */
   aoCentralizar?: () => void;
-  /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; `Z` (marco 40, D-164; antes Shift+Q), o anterior. */
+  /** Ajuste de 15/10/2026 (D-065): o próximo alvo (1) ou o anterior (−1). */
   aoTrocarAlvo?: (sentido: 1 | -1) => void;
-  /** Ajuste de 15/10/2026 (D-065): `T` trava ou destrava o alvo (D-172 o levou ao V; D-185, de volta ao T). */
+  /** Ajuste de 15/10/2026 (D-065): trava ou destrava o alvo. */
   aoTravarAlvo?: () => void;
-  /** Marco 24 (24/10/2026, D-094): `R` usa a ultimate; `F` liga ou desliga o ataque básico automático (D-097). */
+  /** Marco 24 (24/10/2026, D-094): a ultimate; e liga ou desliga o ataque básico automático (D-097). */
   aoUltimate?: () => void;
   aoAlternarBasico?: () => void;
-  /** Marco 40 (13/11/2026, D-164): Shift usa o movimento da classe (no rumo das teclas); `G` troca a mecânica. */
-  /** D-172: o movimento do botão (0 no Shift, o principal; 1 e 2 os outros; D-186: no V e no X). */
+  /** D-187: um ataque básico (sem tecla por padrão desde a D-185). */
+  aoAtacar?: () => void;
+  /** D-187: dispensa as invocações (sem tecla por padrão desde a D-186). */
+  aoDispensar?: () => void;
+  /** D-172: o movimento do botão (0 o principal; 1 e 2 os outros), no rumo das teclas. */
   aoMovimento?: (rumo: Rumo, botao: number) => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
@@ -53,8 +60,8 @@ export interface Teclado {
 const ORDEM_ATALHOS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 /**
- * Índice do atalho (0–9) de uma tecla: os números de cima e, desde o ajuste de 15/10/2026, os do teclado numérico
- * lateral (`Numpad1`–`Numpad0`). Outras teclas: −1.
+ * Índice do atalho (0–9) de uma tecla nas teclas padrão: os números de cima e, desde o ajuste de 15/10/2026, os do
+ * teclado numérico lateral (`Numpad1`–`Numpad0`). Outras teclas: −1.
  */
 export function indiceDoAtalho(codigo: string): number {
   const m = /^(?:Digit|Numpad)(\d)$/.exec(codigo);
@@ -75,47 +82,53 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     }
   };
 
+  /** A função de cada ação; as que o chamador não passou ficam de fora (a tecla segue para a página). */
+  const mover = (botao: number) => opcoes.aoMovimento && (() => { opcoes.aoMovimento?.(atual, botao); });
+  const trocar = (sentido: 1 | -1) => opcoes.aoTrocarAlvo && (() => { opcoes.aoTrocarAlvo?.(sentido); });
+  const funcoes: Partial<Record<AcaoTeclado, (() => void) | undefined>> = {
+    movimento1: mover(0),
+    movimento2: mover(1),
+    movimento3: mover(2),
+    ultimate: opcoes.aoUltimate,
+    atacar: opcoes.aoAtacar,
+    alternarBasico: opcoes.aoAlternarBasico,
+    trocarAlvo: trocar(1),
+    alvoAnterior: trocar(-1),
+    travarAlvo: opcoes.aoTravarAlvo,
+    interagir: opcoes.aoInteragir,
+    mochila: opcoes.aoMochila,
+    dispensar: opcoes.aoDispensar,
+    centralizar: opcoes.aoCentralizar,
+    pausar: opcoes.aoCancelar,
+  };
+
   const aoBaixar = (ev: KeyboardEvent) => {
     if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement) return;
     if (opcoes.bloqueado?.()) return;
     const iso = opcoes.isometrico();
-    if (ev.code === 'KeyI' && !ev.repeat && opcoes.aoMochila) {
-      opcoes.aoMochila();
-    } else if (ev.code === teclaInteragir(modo(), iso)) {
-      if (!ev.repeat) opcoes.aoInteragir?.();
-    } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {
-      opcoes.aoTrocarAlvo(1);
-    } else if (ev.code === 'KeyZ' && !ev.repeat && opcoes.aoTrocarAlvo) {
-      opcoes.aoTrocarAlvo(-1);
-    } else if ((ev.code === 'ShiftLeft' || ev.code === 'ShiftRight') && !ev.repeat && opcoes.aoMovimento) {
-      opcoes.aoMovimento(atual, 0);
-    } else if ((ev.code === 'KeyV' || ev.code === 'KeyX') && opcoes.aoMovimento) {
-      // 16/11/2026 (D-185, D-186): os outros dois movimentos saem do T e do G para o V e o X; o Espaço deixa de atacar
-      // (o básico fica no automático, no F, e no clique no inimigo) e o X deixa de dispensar as invocações.
-      if (!ev.repeat) opcoes.aoMovimento(atual, ev.code === 'KeyV' ? 1 : 2);
-    } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
-      opcoes.aoUltimate();
-    } else if (ev.code === 'KeyF' && !ev.repeat && opcoes.aoAlternarBasico) {
-      opcoes.aoAlternarBasico();
-    } else if (ev.code === 'KeyT' && !ev.repeat && opcoes.aoTravarAlvo) {
-      // D-185: travar o alvo volta ao T (o V é do movimento).
-      opcoes.aoTravarAlvo();
-    } else if (ev.code === 'KeyC' && !ev.repeat && opcoes.aoCentralizar) {
-      opcoes.aoCentralizar();
-    } else if (ehTeclaDeMovimento(ev.code, modo(), iso)) {
+    // Os direcionais vêm primeiro e são fixos (D-187: nenhuma ação os usa).
+    if (ehTeclaDeMovimento(ev.code, modo(), iso)) {
       ev.preventDefault();
       // Marco 41 (D-169): a repetição do sistema também traz a tecla que já vinha mantida de outra cena.
       if (!pressionadas.has(ev.code)) {
         pressionadas.add(ev.code);
         recalcular();
       }
-    } else if (indiceDoAtalho(ev.code) >= 0 && !ev.repeat) {
-      opcoes.aoAtalho(indiceDoAtalho(ev.code));
-    } else if (ev.code === 'Escape') {
-      // Marco 12: sem isto, a ação padrão deste mesmo Esc fecharia na hora a pausa que ele abre.
-      ev.preventDefault();
-      opcoes.aoCancelar();
+      return;
     }
+    // 19/11/2026 (D-187): a ação da tecla vem do mapa das Configurações. No EWAS, o interagir que caiu num
+    // direcional passa ao D (como antes).
+    const mapa = opcoes.atalhos?.() ?? TECLAS_PADRAO;
+    const acao = normalizarCodigo(ev.code) === teclaDeInteragir(mapa, modo(), iso) ? 'interagir' : acaoDaTecla(mapa, ev.code);
+    if (!acao) return;
+    const atalho = indiceDoAtalhoDaAcao(acao);
+    const funcao = atalho >= 0 ? () => { opcoes.aoAtalho(atalho); } : funcoes[acao];
+    if (!funcao) return;
+    // Marco 12: sem isto, a ação padrão deste mesmo Esc fecharia na hora a pausa que ele abre. D-187: vale para
+    // qualquer tecla com ação (o Espaço não rola a página, o Alt não abre o menu).
+    ev.preventDefault();
+    if (ev.repeat) return;
+    funcao();
   };
   const aoSoltar = (ev: KeyboardEvent) => {
     if (pressionadas.delete(ev.code)) recalcular();

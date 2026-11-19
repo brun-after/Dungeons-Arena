@@ -30,6 +30,8 @@ import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habili
 import { desenharDiario } from './mochila-diario';
 import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
+import { normalizarCodigo } from '../input/atalhos';
+import { lerPreferencias } from '../plataforma/preferencias';
 import { icone, iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
 
@@ -138,9 +140,13 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       desenhar();
     },
   });
-  // `I` fecha de dentro do modal (a entrada de jogo fica bloqueada enquanto ele está aberto).
+  // A tecla da mochila (`I`, ou a das Configurações, D-187) fecha de dentro do modal (a entrada de jogo fica bloqueada
+  // enquanto ele está aberto).
   modal.dialogo.addEventListener('keydown', (ev) => {
-    if (ev.code === 'KeyI') modal.fechar();
+    if (normalizarCodigo(ev.code) !== lerPreferencias().atalhos.mochila) return;
+    // Sem parar aqui, a mesma tecla chegaria ao teclado do jogo já com a mochila fechada e a abriria de novo.
+    ev.stopPropagation();
+    modal.fechar();
   });
 
   const botaoAbrir = el('button', 'botao-cabecalho botao-mochila');
