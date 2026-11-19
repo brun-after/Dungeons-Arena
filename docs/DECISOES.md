@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.36 · **Data:** 19/11/2026
+**Versão:** 1.37 · **Data:** 19/11/2026
 
 > **Histórico**
+> - **1.37 (19/11/2026)**: D-184, adendo: a luz de XP vira luz pura, sem superfície: um núcleo minúsculo que emana raios, mais e mais longos com o XP.
 > - **1.36 (19/11/2026)**: D-187: as teclas de cada ação passam a ser configuráveis nas Configurações; só os direcionais ficam fixos.
 > - **1.35 (19/11/2026)**: D-186: o terceiro movimento da classe sai do Espaço para o X; o X deixa de dispensar as invocações (sem tecla).
 > - **1.34 (16/11/2026)**: D-185: os outros dois movimentos da classe saem do T e do G para o V e o Espaço; travar o alvo volta ao T e o Espaço deixa de atacar.
@@ -5851,6 +5852,15 @@ XP só entra quando ela é recolhida; contra quem está abaixo do nível do joga
   de 3×. O sorteio é por dono, num RNG próprio da morte (não desloca o do combate nem o do loot). A luz da sorte ganha
   um anel de faíscas.
 - **Prazo no chão** de 3 min (`xp.orbe.prazoMs`): a luz não recolhida some com o XP.
+- **Adendo de 19/11/2026: luz pura, sem superfície** (`render/orbe-xp.ts`). A primeira versão era uma esfera, com
+  disco cheio, reflexo branco e sombra no chão, igual aos orbes de vida e de buff. Agora é um núcleo minúsculo que
+  emana raios de luz em todos os sentidos, tudo somado ao fundo (blend aditivo), sem borda, reflexo nem sombra.
+  - O XP dá o número de raios (de 5 a 16), o comprimento deles e a força do clarão em volta do núcleo.
+  - Os raios são curtos: de 6 a 22 px pelo XP (os da sorte, 35% mais longos).
+  - Cada raio tem o seu comprimento, cintila e gira devagar. Com a sorte, raios extras mais longos e claros (4 no 3×,
+    6 no 5×).
+  - Um brilho redondo grande ainda parecia superfície: um miolo forte em blend aditivo satura em branco e forma um
+    disco de borda nítida. Por isso o núcleo tem poucos pixels.
 
 **Observação.** Os testes da conta do XP recolhem a luz pelo `tests/apoio/xp.ts`; a coleta de verdade tem o próprio
 teste (`orbe-xp.test.ts`).
