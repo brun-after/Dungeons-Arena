@@ -116,14 +116,14 @@ export function acaoDoAtalho(indice: number): AcaoTeclado | null {
 
 /** Os nomes curtos de teclas que não são letra nem número (o Espaço e o Enter vêm do dicionário, na interface). */
 const NOMES: Readonly<Record<string, string>> = {
-  ShiftLeft: 'Shift', ControlLeft: 'Ctrl', AltLeft: 'Alt', MetaLeft: 'Meta', Escape: 'Esc', Backspace: '⌫',
+  ShiftLeft: 'Shift', ControlLeft: 'Ctrl', AltLeft: 'Alt', MetaLeft: 'Meta', Escape: 'Esc', Backspace: 'Backspace',
   CapsLock: 'Caps', Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\',
   Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Slash: '/', IntlBackslash: '\\', IntlRo: '/',
   NumpadAdd: 'Num +', NumpadSubtract: 'Num -', NumpadMultiply: 'Num *', NumpadDivide: 'Num /', NumpadDecimal: 'Num ,',
   Insert: 'Ins', Delete: 'Del', Home: 'Home', End: 'End', PageUp: 'PgUp', PageDown: 'PgDn',
 };
 
-/** O nome curto da tecla para mostrar (KeyX → X, Digit1 → 1, ShiftLeft → Shift); o Espaço e o Enter ficam com quem chama. */
+/** O nome curto da tecla para mostrar (KeyX vira X, Digit1 vira 1, ShiftLeft vira Shift); o Espaço e o Enter ficam com quem chama. */
 export function nomeCurtoDaTecla(codigo: string): string {
   const c = normalizarCodigo(codigo);
   const letra = /^Key([A-Z])$/.exec(c);
