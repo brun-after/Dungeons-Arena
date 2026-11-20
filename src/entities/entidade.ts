@@ -11,6 +11,7 @@ import type { Afinidade } from '../combat/afinidade';
 import type { Elemento } from '../combat/elementos';
 import type { PontaElemental } from '../progression/vinculo';
 import type { EstadoFera, EstadoMovimento } from './movimento-estado';
+import type { Escalada } from '../world/escalada';
 export type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
 import type { Slot } from '../modos/modo';
 
@@ -374,6 +375,11 @@ export interface Entidade {
   /** 04/11/2026 (D-132): a lentidão de quem atacou de longe (%) e até quando vale. */
   recuoPct?: number;
   recuoAteTick?: number;
+  /**
+   * 20/11/2026 (D-191): a escalada do muro ou o pulo curto da queda em curso (world/escalada.ts). Acaba em null, não
+   * apagada (o patch não leva a chave apagada).
+   */
+  escalada?: Escalada | null;
 
   atributos: Atributos;
   classe: ClasseCombate;
@@ -714,6 +720,7 @@ export function clonarEntidade(e: Entidade): Entidade {
   return {
     ...e,
     ...(e.encontro ? { encontro: { ...e.encontro } } : {}),
+    ...(e.escalada ? { escalada: { ...e.escalada } } : {}),
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
