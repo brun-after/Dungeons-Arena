@@ -53,9 +53,9 @@
         "urso": { "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2, "nadaLutando": true }
       },
       "feras": {
-        "falcao": { "viagemPct": 100, "repassePct": [30, 20], "descansoMs": [15000, 10000], "golpe": [6, 4], "cansacoPorDano": 1, "danoPct": 70, "arremesso": 0.25, "arremessoDescanso": 2 },
-        "lobo": { "viagemPct": 60, "disparadaPct": 80, "disparadaGasto": 2, "sustentaMs": [60000, 90000], "repassePct": [20, 12], "descansoMs": [30000, 20000], "golpe": [3, 2], "cansacoPorDano": 0.8, "danoPct": 49 },
-        "urso": { "viagemPct": 30, "sustentaMs": [90000, 120000], "repassePct": [10, 5], "descansoMs": [90000, 60000], "golpe": [5, 3], "cansacoPorDano": 0.6, "danoPct": 70, "contencao": { "duracaoMs": 3000, "raio": 2, "bloqueioVidaPct": 10, "descontoMaxPct": 60 } },
+        "falcao": { "viagemPct": 100, "montadoReducaoPct": [10, 15], "repassePct": [30, 20], "descansoMs": [15000, 10000], "golpe": [6, 4], "cansacoPorDano": 1, "danoPct": 70, "arremesso": 0.25, "arremessoDescanso": 2 },
+        "lobo": { "viagemPct": 60, "montadoReducaoPct": [10, 15], "disparadaPct": 80, "disparadaGasto": 2, "sustentaMs": [60000, 90000], "repassePct": [20, 12], "descansoMs": [30000, 20000], "golpe": [3, 2], "cansacoPorDano": 0.8, "danoPct": 49 },
+        "urso": { "viagemPct": 30, "montadoReducaoPct": [20, 30], "sustentaMs": [90000, 120000], "repassePct": [10, 5], "descansoMs": [90000, 60000], "golpe": [5, 3], "cansacoPorDano": 0.6, "danoPct": 70, "contencao": { "duracaoMs": 3000, "raio": 2, "bloqueioVidaPct": 10, "descontoMaxPct": 60 } },
         "skill": { "padrao": [20, 15], "mergulho": [33, 25] },
         "foraDeCampo": 2,
         "chamadoMs": 3000,

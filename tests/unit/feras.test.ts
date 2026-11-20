@@ -2,7 +2,7 @@
 // o dano gastam; o descanso, a troca sozinha e o que fica sem fera; o X de cada uma.
 import { describe, expect, it } from 'vitest';
 import { companheiroDe } from '../../src/combat/companheiro';
-import { feraDe, gastoDaSkill, noNivel } from '../../src/combat/feras';
+import { fatorMontado, feraDe, gastoDaSkill, noNivel } from '../../src/combat/feras';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { fonteDaHabilidade } from '../../src/combat/acao';
 import { fatorDeVelocidade, movimentosDosBotoes } from '../../src/combat/movimento-classe';
@@ -163,6 +163,43 @@ describe('o cansaço das feras (D-188)', () => {
     expect(urso.cansado).toBe(true);
     // Barrou uma magia: volta antes do descanso inteiro.
     expect(urso.descansoAteTick - c.estado.tick).toBeLessThan(ticksDe(noNivel(f.urso.descansoMs, 1)));
+  });
+
+  it('montados, uma vida só: o golpe no lobo cai inteiro no dono, 10% menor, e o lobo não cansa; no urso, 20%', () => {
+    const c = cena();
+    obter(c.j.bolsa).pet = 'lobo';
+    c.passo([], 100);
+    c.colar();
+    c.passo([{ t: 'movimentoClasse', botao: 1 }]);
+    expect(fatorMontado(ctx, c.j)).toBeCloseTo(0.9);
+    const lobo = obter(companheiroDe(c.estado, c.j));
+    c.j.hp = c.j.hpMax = 1000;
+    const o = c.orc(c.j.x + 1, c.j.y);
+    const hab = obter(habilidadeDoAtor(ctx, o, o.ataqueBasico));
+    aplicarImpacto(c.estado, ctx, lobo, { acaoId: 1, hab, indice: 0, fonte: { ...fonteDaHabilidade(o, ctx, 0, hab), d20Minimo: 20, multDano: 50 } }, c.eventos);
+    expect(c.j.hp).toBeLessThan(1000);
+    expect(feraDe(c.j, 'lobo').energia).toBeGreaterThan(99);
+    const u = cena();
+    obter(u.j.bolsa).pet = 'urso';
+    u.passo([], 100);
+    u.colar();
+    u.passo([{ t: 'movimentoClasse', botao: 1 }]);
+    expect(fatorMontado(ctx, u.j)).toBeCloseTo(0.8);
+    expect(fatorMontado(ctx, cena().j)).toBe(1);
+  });
+
+  it('montado, a fera morde a caça marcada ao alcance', () => {
+    const c = cena();
+    obter(c.j.bolsa).pet = 'lobo';
+    c.passo([], 100);
+    c.colar();
+    c.passo([{ t: 'movimentoClasse', botao: 1 }]);
+    const lobo = obter(companheiroDe(c.estado, c.j));
+    const o = c.orc(c.j.x + 1, c.j.y);
+    o.hp = o.hpMax = 500;
+    c.passo([{ t: 'usarHabilidade', id: c.j.ataqueBasico, alvo: o.id }], 2500);
+    expect(modo(c)).toBe('montado');
+    expect(c.eventos.some((e) => e.t === 'impacto' && e.alvoId === o.id && e.fonteId === lobo.id && e.dano > 0)).toBe(true);
   });
 
   it('com as três cansadas, sem skill de classe: o básico fere e sai do Aventureiro', () => {

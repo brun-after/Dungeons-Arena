@@ -30883,6 +30883,2382 @@
     },
     "altura": 1.12
   },
+  "aventureiro~baluarte.cabeca-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.cabeca-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.cabeca-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.cabeca-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.cabeca-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.cabeca-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.capa-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.corpo-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.maos-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.maos-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.maos-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pernas-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pernas-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pernas-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pes-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pes-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
+  "aventureiro~baluarte.pes-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.12
+  },
   "aventureiro~batedor.cabeca-0": {
     "quadroL": 108,
     "quadroA": 126,
@@ -48353,6 +50729,1062 @@
     },
     "altura": 1.14
   },
+  "guerreiro~arcano.capa-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.capa-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.capa-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.capa-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.capa-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.capa-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~arcano.corpo-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
   "guerreiro~arcano.maos-0": {
     "quadroL": 108,
     "quadroA": 126,
@@ -51434,6 +54866,1590 @@
     "altura": 1.14
   },
   "guerreiro~baluarte.pes-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.cabeca-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.capa-5": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-0": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-1": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-2": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-3": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-4": {
+    "quadroL": 108,
+    "quadroA": 126,
+    "ancoraX": 54,
+    "ancoraY": 100.8,
+    "pxCelula": 72,
+    "colunas": 102,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      },
+      "golpeCorte": {
+        "inicio": 42,
+        "n": 5
+      },
+      "golpePesado": {
+        "inicio": 47,
+        "n": 5
+      },
+      "golpeEsmagar": {
+        "inicio": 52,
+        "n": 5
+      },
+      "golpeLeve": {
+        "inicio": 57,
+        "n": 5
+      },
+      "golpeEstocada": {
+        "inicio": 62,
+        "n": 5
+      },
+      "golpeDisparo": {
+        "inicio": 67,
+        "n": 5
+      },
+      "golpeArremesso": {
+        "inicio": 72,
+        "n": 5
+      },
+      "golpeGiro": {
+        "inicio": 77,
+        "n": 5
+      },
+      "correr": {
+        "inicio": 82,
+        "n": 6
+      },
+      "saltar": {
+        "inicio": 88,
+        "n": 4
+      },
+      "voar": {
+        "inicio": 92,
+        "n": 6
+      },
+      "montar": {
+        "inicio": 98,
+        "n": 4
+      }
+    },
+    "altura": 1.14
+  },
+  "guerreiro~batedor.corpo-5": {
     "quadroL": 108,
     "quadroA": 126,
     "ancoraX": 54,
@@ -98972,5021 +103988,5 @@
       }
     },
     "altura": 0.62
-  },
-  "aventureiro~baluarte.cabeca-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.cabeca-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.cabeca-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.cabeca-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.cabeca-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.cabeca-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.capa-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.corpo-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.maos-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.maos-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.maos-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pernas-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pernas-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pernas-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pes-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pes-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "aventureiro~baluarte.pes-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.12
-  },
-  "guerreiro~arcano.capa-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.capa-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.capa-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.capa-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.capa-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.capa-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~arcano.corpo-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.cabeca-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.capa-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-0": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-1": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-2": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-3": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-4": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
-  },
-  "guerreiro~batedor.corpo-5": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
-    "pxCelula": 72,
-    "colunas": 102,
-    "faixa": 21,
-    "estados": {
-      "parado": {
-        "inicio": 0,
-        "n": 4
-      },
-      "andar": {
-        "inicio": 4,
-        "n": 8
-      },
-      "golpe": {
-        "inicio": 12,
-        "n": 6
-      },
-      "conjurar": {
-        "inicio": 18,
-        "n": 6
-      },
-      "morte": {
-        "inicio": 24,
-        "n": 6
-      },
-      "andarGolpe": {
-        "inicio": 30,
-        "n": 6
-      },
-      "andarConjurar": {
-        "inicio": 36,
-        "n": 6
-      },
-      "golpeCorte": {
-        "inicio": 42,
-        "n": 5
-      },
-      "golpePesado": {
-        "inicio": 47,
-        "n": 5
-      },
-      "golpeEsmagar": {
-        "inicio": 52,
-        "n": 5
-      },
-      "golpeLeve": {
-        "inicio": 57,
-        "n": 5
-      },
-      "golpeEstocada": {
-        "inicio": 62,
-        "n": 5
-      },
-      "golpeDisparo": {
-        "inicio": 67,
-        "n": 5
-      },
-      "golpeArremesso": {
-        "inicio": 72,
-        "n": 5
-      },
-      "golpeGiro": {
-        "inicio": 77,
-        "n": 5
-      },
-      "correr": {
-        "inicio": 82,
-        "n": 6
-      },
-      "saltar": {
-        "inicio": 88,
-        "n": 4
-      },
-      "voar": {
-        "inicio": 92,
-        "n": 6
-      },
-      "montar": {
-        "inicio": 98,
-        "n": 4
-      }
-    },
-    "altura": 1.14
   }
 }

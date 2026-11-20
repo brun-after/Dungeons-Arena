@@ -206,10 +206,14 @@ export function fatiaDaInvocacao(nivel: number, semente: number): number {
   m.bots.push(new BotDeDuelo('j1'));
   const invId = j.bolsa?.mochila.find((i) => i.itemId === 'pergaminho_lobo')?.invId;
   if (invId) m.comandar('j1', { t: 'usarItem', invId });
-  const acabou = () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1'));
-  m.rodar(LIMITE_S * TICKS_POR_S, acabou);
   // Marco 40 (14/11/2026, D-166): o companheiro permanente (que caça a marca do básico) é o ataque da classe, não invocação.
-  const companheiros = new Set(m.estado.entidades.filter((e) => e.invocacao?.companheiro).map((e) => e.id));
+  // D-188 (20/11/2026): anotado a cada tick (a fera cansada sai de campo na troca, e a que entra é outra entidade).
+  const companheiros = new Set<string>();
+  const acabou = () => {
+    for (const e of m.estado.entidades) if (e.invocacao?.companheiro) companheiros.add(e.id);
+    return m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1'));
+  };
+  m.rodar(LIMITE_S * TICKS_POR_S, acabou);
   const invocados = new Set(m.eventos.filter((e) => e.t === 'invocou' && e.donoId === 'j1' && !companheiros.has(e.id)).map((e) => (e.t === 'invocou' ? e.id : '')));
   let total = 0;
   let daInvocacao = 0;
