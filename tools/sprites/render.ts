@@ -227,7 +227,7 @@ for (const receita of RECEITAS) {
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const anterior = catalogo[receita.nome];
-    if ((soCorpo || soCabeca || soMembros || reusarMaos) && receita.equipamento && anterior && (
+    if ((soCorpo || soCabeca || soMembros || reusarMaos || soPropositos) && receita.equipamento && anterior && (
       quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
       ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
       pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||
@@ -239,7 +239,8 @@ for (const receita of RECEITAS) {
       catalogo[nome] = entrada;
       bytesTotal += bytes.length;
     };
-    if (k === 0) {
+    // Marco 46 (D-188): com `--proposito`, só as camadas novas; o atlas do corpo fica como está.
+    if (k === 0 && !soPropositos) {
       await gravar(receita.nome, saida.png);
       if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };
     }

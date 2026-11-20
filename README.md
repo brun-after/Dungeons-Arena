@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.54 · **Data:** 16/11/2026
+**Versão do documento:** 3.55 · **Data:** 19/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-188).
 > - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-182).
 > - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
 > - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
@@ -353,6 +354,32 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 46 — equipamento por propósito, estilo, grau e elemento (19/11/2026)
+
+**A peça, não a classe.** A aparência da armadura deixou de vir da classe de quem veste. Cada peça tem um propósito,
+que é a silhueta: Baluarte (placas), Batedor (couro e escamas), Arcano (pano longo e cristais), Espreita (capuz,
+máscara de bico, garras) ou Ossuário (osso, costelas, correntes). Tem também um estilo, só visual: simples, medieval,
+colorida, arcana ou meme. Os dois são fixos na peça e saem da semente do item.
+
+**Grau e elemento.** Os 3 níveis de silhueta seguem. O brilho das bordas cresce do grau 2 ao 5, e o conjunto de 6
+peças do mesmo propósito acende um pouco mais. Por cima vem o elemento mais forte do vínculo, sem atlas novo: veios na
+cor dele, partículas leves e reações ao estado (brasa da capa ao queimar, geada ao congelar, faíscas molhado com raio).
+
+**Efeitos de peça.** Cada peça traz 1, 2 ou 3 efeitos pelo grau, no modelo gatilho, condição e efeito, todos em
+`data/pecas.json` e medidos em ticks:
+
+- botas: velocidade ao pisar no elemento, ao usá-lo ou ao ser atingido por ele (renova, não soma);
+- luvas: mais dano corpo a corpo, à distância ou na magia;
+- peitoral: reflete parte do golpe em quem bateu, se ele for hostil;
+- perneiras: o movimento da classe recarrega mais rápido, deixa rastro do elemento e chega com dano ou escudo;
+- manto: mais poder no elemento, e absorve parte do golpe dele (em poder ou em vínculo);
+- elmo: resistência ao elemento.
+
+A marca do efeito aparece na peça: espinhos no reflexo, garras no corpo a corpo, penas na velocidade, filigrana na
+magia. A mochila mostra o propósito, o estilo e cada efeito.
+
+Desenho em [docs/EQUIPAMENTO.md](docs/EQUIPAMENTO.md); detalhes em D-188.
 
 ### Marco 45 — as criaturas de Filo (16/11/2026)
 

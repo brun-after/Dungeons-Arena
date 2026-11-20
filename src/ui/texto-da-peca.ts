@@ -5,7 +5,8 @@ import { t, tOu, type ChaveTexto } from '../i18n';
 import type { EfeitoDaPeca, PerfilDePeca } from '../progression/pecas';
 import { DT_MS } from '../core/loop';
 
-const segundos = (ticks: number) => Math.round((ticks * DT_MS) / 100) / 10;
+/** Os segundos com vírgula (1,5 s) e o percentual inteiro: a peça mostra números redondos. */
+const segundos = (ticks: number) => String(Math.round((ticks * DT_MS) / 100) / 10).replace('.', ',');
 const elemento = (el: string | null) => (el ? tOu(`elemento.${el}`, el) : '');
 
 /** A linha de um efeito da peça. */
@@ -13,7 +14,7 @@ export function textoDoEfeito(x: EfeitoDaPeca): string {
   const ef = x.efeito;
   const el = elemento(x.se.elemento);
   const ataque = x.se.ataque === 'qualquer' ? '' : t(`peca.ataque.${x.se.ataque}` as ChaveTexto);
-  const p = { elemento: el, ataque, pct: 'pct' in ef ? ef.pct : 'pctDaVida' in ef ? ef.pctDaVida : 0, s: 'ticks' in ef ? segundos(ef.ticks) : 0, raio: 'raio' in ef ? ef.raio : 0 };
+  const p = { elemento: el, ataque, pct: Math.round('pct' in ef ? ef.pct : 'pctDaVida' in ef ? ef.pctDaVida : 0), s: 'ticks' in ef ? segundos(ef.ticks) : 0, raio: 'raio' in ef ? ef.raio : 0 };
   const base = `peca.efeito.${x.gatilho}.${ef.tipo}`;
   if (ef.tipo === 'absorver') return t(`${base}.${ef.em}` as ChaveTexto, p);
   if (ef.tipo === 'dano') return t((x.se.elemento ? `${base}.elemento` : base) as ChaveTexto, p).replace(/\s+/g, ' ').trim();
