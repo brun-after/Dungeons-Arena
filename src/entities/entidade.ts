@@ -10,7 +10,7 @@ import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Afinidade } from '../combat/afinidade';
 import type { Elemento } from '../combat/elementos';
 import type { PontaElemental } from '../progression/vinculo';
-import type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
+import type { EstadoFera, EstadoMovimento } from './movimento-estado';
 export type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
 import type { Slot } from '../modos/modo';
 
