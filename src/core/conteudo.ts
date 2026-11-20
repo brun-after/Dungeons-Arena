@@ -23,7 +23,7 @@ import ressonanciasJson from '../data/ressonancias.json';
 import { lerRessonancias, type Ressonancia } from '../combat/ressonancias-dados';
 import movimentosJson from '../data/movimentos.json';
 import pecasJson from '../data/pecas.json';
-import lojasJson from '../data/lojas.json';
+import sorteioJson from '../data/equipamento-sorteio.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
 import origensJson from '../data/origens.json';
@@ -73,7 +73,7 @@ import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progres
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
 import { lerPecas, type RegrasDePecas } from '../progression/pecas';
-import { lerLojas, type RegrasDeLoja } from '../progression/vitrine';
+import { lerSorteioDePecas, type RegrasDoSorteio } from '../progression/sorteio-pecas';
 import { BALANCE_PADRAO } from './contexto';
 
 export interface Conteudo {
@@ -112,8 +112,8 @@ export interface Conteudo {
   movimentos: ReadonlyMap<string, readonly MovimentoDaClasse[]>;
   /** Marco 46 (16/11/2026, D-189): propósitos, estilos e efeitos das peças de armadura (data/pecas.json). */
   pecas: RegrasDePecas;
-  /** Marco 47 (20/11/2026, D-190): a vitrine de armadura das lojas e o preço das peças (data/lojas.json). */
-  lojas: RegrasDeLoja;
+  /** Marco 47 (20/11/2026, D-190): o sorteio das peças de armadura, para a vitrine e o loot (data/equipamento-sorteio.json). */
+  sorteio: RegrasDoSorteio;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
   regrasDeBuff: Catalogo<RegraDeBuff>;
   /** Marco 18 (D-070): missões, origens raras e as receitas da forja. */
@@ -181,8 +181,8 @@ export interface FontesDeConteudo {
   modos: Readonly<Record<string, unknown>>;
   /** Marco 46: data/pecas.json (opcional: sem ele, o oficial). */
   pecas?: unknown;
-  /** Marco 47: data/lojas.json (opcional: sem ele, o oficial). */
-  lojas?: unknown;
+  /** Marco 47: data/equipamento-sorteio.json (opcional: sem ele, o oficial). */
+  sorteio?: unknown;
   /** Marco 45: data/dimensoes.json (opcional nos testes). */
   dimensoes?: unknown;
   /** Marco 29: arquivo -> JSON de cada reino em src/data/mundo (opcional nos testes). */
@@ -218,7 +218,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const ca = lerAssinados(fontes.combosPapel ?? combosPapelJson);
   const mv = lerMovimentos(movimentosJson);
   const pc = lerPecas(fontes.pecas ?? pecasJson);
-  const lj = lerLojas(fontes.lojas ?? lojasJson);
+  const lj = lerSorteioDePecas(fontes.sorteio ?? sorteioJson);
   const rs = lerRessonancias(ressonanciasJson);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
@@ -351,7 +351,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       ressonancias: rs.ressonancias,
       movimentos: mv.movimentos,
       pecas: pc.pecas,
-      lojas: lj.lojas,
+      sorteio: lj.sorteio,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
       origens: og.origens,

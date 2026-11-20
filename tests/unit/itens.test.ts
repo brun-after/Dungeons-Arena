@@ -224,11 +224,14 @@ describe('drops e coleta de itens', () => {
     c.estado.entidades.push(primeira, reincidente);
     c.tick();
     const objetos = c.estado.objetos.map((o) => [o.tipo, o.x, o.y]);
+    // Marco 47 (20/11/2026, D-190): este goblin também solta uma peça de armadura gerada (sorteio próprio do abate).
     expect(objetos).toEqual([
       ['orbe_hp', 6, 6],
       ['ouro', 6, 5],
       ['item', 7, 6],
+      ['item', 6, 7],
     ]);
+    expect(c.estado.objetos.filter((o) => o.itemId?.startsWith('gi_'))).toHaveLength(1);
   });
 
   it('o boss sempre solta item, de raridade mínima configurada', () => {

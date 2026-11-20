@@ -12,7 +12,8 @@ import { lerIdItemGerado } from '../../src/progression/gerar-item';
 import { ehPecaDeArmadura } from '../../src/progression/graus';
 import { precoDoItem } from '../../src/progression/itens-progressao';
 import { comprar, estoqueDaLoja } from '../../src/progression/loja';
-import { lerLojas, periodoDaRodada, precoDaPeca, ticksAteRenovar, vitrineDaLoja } from '../../src/progression/vitrine';
+import { periodoDaRodada, ticksAteRenovar, vitrineDaLoja } from '../../src/progression/vitrine';
+import { lerSorteioDePecas, precoDaPeca } from '../../src/progression/sorteio-pecas';
 import { novoObjeto } from '../../src/world/objetos';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -21,7 +22,7 @@ function obter<T>(v: T | undefined | null, nome = 'dado'): T {
   return v;
 }
 
-const VILA = obter(CONTEUDO.lojas.perfis.get(CONTEUDO.lojas.perfilPadrao), 'perfil da vila');
+const VILA = obter(CONTEUDO.sorteio.perfis.get(CONTEUDO.sorteio.lojas.perfilVila), 'perfil da vila');
 const PROPOSITOS = [...CONTEUDO.pecas.propositos.keys()];
 const indiceDe = (r: string) => RARIDADES.indexOf(r as (typeof RARIDADES)[number]);
 
@@ -38,9 +39,9 @@ function cena(ref: string | null = null) {
 }
 
 describe('vitrine de armadura (D-190)', () => {
-  it('lê data/lojas.json sem erros e recusa perfil inexistente', () => {
-    expect(CONTEUDO.lojas.oficios).toContain('ferreiro');
-    expect(lerLojas({ oficios: [], semOficio: false, perfilPadrao: 'x', perfilDungeon: 'x', perfis: {}, preco: { multRaridade: {}, porGrauPct: 0, porEfeitoPct: 0 } }).erros.length).toBeGreaterThan(0);
+  it('lê data/equipamento-sorteio.json sem erros e recusa perfil inexistente', () => {
+    expect(CONTEUDO.sorteio.lojas.oficios).toContain('ferreiro');
+    expect(lerSorteioDePecas({ perfis: {}, lojas: { oficios: [], semOficio: false, perfilVila: 'x', perfilDungeon: 'x', preco: {} }, loot: {} }).erros.length).toBeGreaterThan(0);
   });
 
   it('é determinística na rodada e muda na seguinte', () => {
@@ -92,7 +93,7 @@ describe('vitrine de armadura (D-190)', () => {
     const mercado = novoObjeto('mercado', 'loja', 4, 4, { ref: 'mercado' });
     c.estado.objetos.push(mercado);
     marcarVitrinesDaVila(c.estado.objetos, c.ctx, 7, [10, 14]);
-    expect(c.loja).toMatchObject({ vitrine: CONTEUDO.lojas.perfilPadrao, rodadaVitrine: 7, nivelVitrine: 12 });
+    expect(c.loja).toMatchObject({ vitrine: CONTEUDO.sorteio.lojas.perfilVila, rodadaVitrine: 7, nivelVitrine: 12 });
     expect(mercado.vitrine).toBeUndefined();
     const dia7 = vitrineDaLoja(c.estado, c.ctx, c.loja);
     for (const id of dia7) expect(obter(lerIdItemGerado(id), id).nivel).toBeGreaterThanOrEqual(12 + VILA.folgaNivel[0]);
@@ -110,7 +111,7 @@ describe('vitrine de armadura (D-190)', () => {
     const c = cena();
     aplicarEstoqueDaDungeon(c.estado.objetos, c.ctx, territorioDoLugar(reino, d.id), d, 100);
     const semana = vitrineDaLoja(c.estado, c.ctx, c.loja);
-    const perfil = obter(CONTEUDO.lojas.perfis.get(CONTEUDO.lojas.perfilDungeon), 'perfil da dungeon');
+    const perfil = obter(CONTEUDO.sorteio.perfis.get(CONTEUDO.sorteio.lojas.perfilDungeon), 'perfil da dungeon');
     expect(semana).toHaveLength(perfil.quantidade);
     for (const id of semana) expect(indiceDe(obter(CONTEUDO.itens.get(id), id).raridade)).toBeGreaterThanOrEqual(indiceDe('incomum'));
     expect(c.loja.itens).toContain('pergaminho_retorno');
@@ -120,13 +121,13 @@ describe('vitrine de armadura (D-190)', () => {
 
   it('o preço sobe com a raridade, o grau e os efeitos', () => {
     const c = cena();
-    const r = CONTEUDO.lojas;
+    const r = CONTEUDO.sorteio;
     for (let rodada = 0; rodada < 10; rodada++) {
       c.estado.tick = rodada * periodoDaRodada(c.ctx);
       for (const id of vitrineDaLoja(c.estado, c.ctx, c.loja)) {
         const item = obter(CONTEUDO.itens.get(id), id);
         const p = obter(item.peca, 'perfil');
-        const esperado = Math.round(item.valorBase * r.preco.multRaridade[item.raridade] * (1 + (r.preco.porGrauPct * p.grau) / 100) * (1 + (r.preco.porEfeitoPct * p.efeitos.length) / 100));
+        const esperado = Math.round(item.valorBase * r.lojas.preco.multRaridade[item.raridade] * (1 + (r.lojas.preco.porGrauPct * p.grau) / 100) * (1 + (r.lojas.preco.porEfeitoPct * p.efeitos.length) / 100));
         expect(precoDaPeca(r, item)).toBe(esperado);
         expect(precoDaPeca(r, item)).toBeGreaterThanOrEqual(item.valorBase);
       }

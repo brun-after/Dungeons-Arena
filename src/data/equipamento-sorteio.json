@@ -1,0 +1,71 @@
+{
+  "versao": 1,
+  "_doc": "Marco 47 (20/11/2026, D-190): o sorteio das peças de armadura geradas, o mesmo para as lojas e para o loot. `perfis`: quantas peças (a vitrine e os chefes), a folga de nível, o peso de cada raridade e se o peso das raras sobe com o nível (balance.itensGerados.raridadePorNivelPct). `lojas`: quem tem vitrine e o preço. `loot`: a chance por abate, a garantia contra azar, o elemento da criatura e o que cada chefe e cada baú soltam.",
+  "perfis": {
+    "vila": {
+      "quantidade": 12,
+      "folgaNivel": [-2, 1],
+      "pesoRaridade": { "comum": 55, "incomum": 33, "raro": 12, "epico": 0, "lendario": 0, "ultima": 0 },
+      "crescePorNivel": false
+    },
+    "dungeon": {
+      "quantidade": 5,
+      "folgaNivel": [0, 3],
+      "pesoRaridade": { "comum": 0, "incomum": 40, "raro": 38, "epico": 17, "lendario": 5, "ultima": 0 },
+      "crescePorNivel": false
+    },
+    "comum": {
+      "quantidade": 1,
+      "folgaNivel": [-1, 1],
+      "pesoRaridade": { "comum": 58, "incomum": 30, "raro": 10, "epico": 2, "lendario": 0, "ultima": 0 },
+      "crescePorNivel": true
+    },
+    "chefe": {
+      "quantidade": 1,
+      "folgaNivel": [0, 2],
+      "pesoRaridade": { "comum": 0, "incomum": 0, "raro": 80, "epico": 18, "lendario": 2, "ultima": 0 },
+      "crescePorNivel": false
+    },
+    "chefeMaior": {
+      "quantidade": 2,
+      "folgaNivel": [0, 3],
+      "pesoRaridade": { "comum": 0, "incomum": 0, "raro": 76, "epico": 20, "lendario": 4, "ultima": 0 },
+      "crescePorNivel": false
+    },
+    "chefeFilo": {
+      "quantidade": 1,
+      "folgaNivel": [0, 2],
+      "pesoRaridade": { "comum": 0, "incomum": 0, "raro": 0, "epico": 90, "lendario": 10, "ultima": 0 },
+      "crescePorNivel": false
+    },
+    "bau": {
+      "quantidade": 1,
+      "folgaNivel": [0, 2],
+      "pesoRaridade": { "comum": 45, "incomum": 35, "raro": 17, "epico": 3, "lendario": 0, "ultima": 0 },
+      "crescePorNivel": true
+    }
+  },
+  "lojas": {
+    "oficios": ["ferreiro"],
+    "semOficio": true,
+    "perfilVila": "vila",
+    "perfilDungeon": "dungeon",
+    "preco": {
+      "multRaridade": { "comum": 1, "incomum": 1.1, "raro": 1.25, "epico": 1.5, "lendario": 1.8, "ultima": 2.2 },
+      "porGrauPct": 12,
+      "porEfeitoPct": 15
+    }
+  },
+  "loot": {
+    "perfilComum": "comum",
+    "chancePorAbatePct": 8,
+    "garantia": { "abatesSemPeca": 20, "abatesSemRara": 60, "raridade": "raro" },
+    "elementoDaCriaturaPct": 20,
+    "tentativasDoElemento": 40,
+    "raridadePorDificuldadePct": { "facil": -20, "normal": 0, "dificil": 20, "pesadelo": 40 },
+    "chefe": "chefe",
+    "chefeMaior": "chefeMaior",
+    "chefeFiloPrimeira": "chefeFilo",
+    "bau": { "perfil": "bau", "chancePct": 50 }
+  }
+}

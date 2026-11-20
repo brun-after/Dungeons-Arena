@@ -118,7 +118,8 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
   const masmorra = lugar.tipo === 'masmorra';
   const dados = masmorra ? lugar.masmorra : lugar.covil;
   // A masmorra não deixa túmulo; o covil segue a regra do Mundo (conta como fora).
-  const modo = comMateriais(masmorra ? { ...modoBase, tumuloNaMorte: false } : modoBase, reino, dados.id);
+  // Marco 47 (D-190): o chefe da masmorra e do covil é maior (mais peças de armadura).
+  const modo = comMateriais(masmorra ? { ...modoBase, tumuloNaMorte: false, chefeMaior: true } : { ...modoBase, chefeMaior: true }, reino, dados.id);
   const r = contextoDaFase(conteudo, interior(conteudo, reino, dados, lugar.tipo), modo);
   if (!r.ok) throw new Error(`${lugar.tipo} ${dados.id} inválida: ${r.erro}`);
   return { ctx: r.ctx, estado: estadoInicialDaFase(r.ctx), exterior: null };

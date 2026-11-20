@@ -2,12 +2,15 @@
 // dimensões (cada grupo com a cor da fenda e a contagem "x/6"). A criatura que ainda não foi vista é sombra; vista,
 // mostra o nome e o desenho pré-renderizado; derrotada, a lore, a faixa de nível, a dica de luta, o que faz no terreno
 // e, nos chefes, quantas vezes você venceu. Só lê o estado; todo texto entra por textContent.
+// Marco 47 (20/11/2026, D-190): vista, a criatura já mostra a ficha (vida, XP, elemento, resistências) e o loot: a
+// chance de item e de peça de armadura, o elemento que a peça puxa, as peças do chefe e os materiais do lugar.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Entidade } from '../entities/entidade';
 import type { PresetInimigo } from '../entities/presets';
-import { t, type ChaveTexto } from '../i18n';
+import { t, tOu, type ChaveTexto } from '../i18n';
 import { retrato3d } from '../render/retrato';
+import { lootDaCriatura } from '../progression/loot-pecas';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -31,7 +34,28 @@ function desenho(preset: PresetInimigo, vista: boolean): HTMLElement {
   return caixa;
 }
 
-function pagina(preset: PresetInimigo, bolsa: NonNullable<Entidade['bolsa']>, vistas: ReadonlySet<string>): HTMLElement {
+const nomeDoElemento = (el: string) => tOu(`elemento.${el}`, el);
+
+/** A ficha e o loot da criatura vista (números do conteúdo e do modo do lugar). */
+function fichaDaCriatura(preset: PresetInimigo, ctx: ContextoSimulacao): HTMLElement[] {
+  const linha = (texto: string) => el('span', 'linha-diario ficha-monstro', texto);
+  const chefe = preset.arquetipo === 'boss';
+  const loot = lootDaCriatura(ctx, preset);
+  const linhas = [linha(t('monstro.ficha', { hp: preset.hpBase, xp: preset.xp }))];
+  if (loot.elemento) linhas.push(linha(t('monstro.elemento', { elemento: nomeDoElemento(loot.elemento) })));
+  const resistencias = Object.entries(preset.resistencias).filter(([, v]) => v !== 0).map(([k, v]) => `${nomeDoElemento(k)} ${String(v)}%`);
+  if (resistencias.length > 0) linhas.push(linha(t('monstro.resistencias', { lista: resistencias.join(', ') })));
+  const itemPct = Math.round(Math.min(100, (chefe ? ctx.balance.drops.chanceItemBoss : ctx.balance.drops.chanceItem) * (ctx.modo.lootPct ?? 100)));
+  linhas.push(linha(t('monstro.lootItem', { pct: itemPct })));
+  linhas.push(linha(chefe ? t('monstro.lootPecasChefe', { n: loot.pecasDoChefe }) : t('monstro.lootPeca', { pct: Math.round(loot.pecaPct * 10) / 10 })));
+  if (loot.elemento) linhas.push(linha(t('monstro.lootElemento', { pct: loot.elementoPct, elemento: nomeDoElemento(loot.elemento) })));
+  if (loot.primeiraVitoria && loot.elemento) linhas.push(linha(t('monstro.lootPrimeira', { elemento: nomeDoElemento(loot.elemento) })));
+  const materiais = ctx.modo.materiaisDeInimigos?.[preset.id] ?? [];
+  if (materiais.length > 0) linhas.push(linha(t('monstro.lootMateriais', { lista: materiais.map((m) => `${ctx.conteudo.itens.get(m.itemId)?.nome ?? m.itemId} ${m.chancePct}%`).join(', ') })));
+  return linhas;
+}
+
+function pagina(preset: PresetInimigo, bolsa: NonNullable<Entidade['bolsa']>, vistas: ReadonlySet<string>, ctx: ContextoSimulacao): HTMLElement {
   const id = `criatura:${preset.id}`;
   const vista = vistas.has(id);
   const caiu = vistas.has(`${id}:caiu`);
@@ -47,7 +71,7 @@ function pagina(preset: PresetInimigo, bolsa: NonNullable<Entidade['bolsa']>, vi
   }
   const titulo = el('strong', undefined, preset.nome);
   if (chefe) titulo.append(' ', el('span', 'marca-chefe', t('monstro.chefe')));
-  textos.append(titulo);
+  textos.append(titulo, ...fichaDaCriatura(preset, ctx));
   if (!caiu) {
     textos.append(el('span', 'linha-diario', t('monstro.derrote')));
     return li;
@@ -70,6 +94,10 @@ export function desenharMonstruario(corpo: HTMLElement, j: Entidade, ctx: Contex
   if (!bolsa) return;
   const vistas = new Set(bolsa.diario);
   corpo.append(el('h3', 'subtitulo-modal', t('monstro.titulo')));
+  // Marco 47 (D-190): a garantia contra azar do loot de armadura, com o contador de quem lê.
+  const g = ctx.conteudo.sorteio.loot.garantia;
+  const azar = bolsa.azarDePeca ?? { semPeca: 0, semRara: 0 };
+  corpo.append(el('p', 'linha-diario garantia-loot', t('monstro.garantia', { semPeca: Math.floor(azar.semPeca), tetoPeca: g.abatesSemPeca, semRara: Math.floor(azar.semRara), tetoRara: g.abatesSemRara })));
   for (const d of ctx.conteudo.dimensoes.values()) {
     const lista = [...ctx.conteudo.presets.values()].filter((p) => p.dimensao === d.id).sort((a, b) => Number(a.arquetipo === 'boss') - Number(b.arquetipo === 'boss') || a.nivelMin - b.nivelMin);
     if (lista.length === 0) continue;
@@ -85,7 +113,7 @@ export function desenharMonstruario(corpo: HTMLElement, j: Entidade, ctx: Contex
     grupo.addEventListener('toggle', () => {
       if (aberto || !grupo.open) return;
       aberto = true;
-      for (const p of lista) ul.append(pagina(p, bolsa, vistas));
+      for (const p of lista) ul.append(pagina(p, bolsa, vistas, ctx));
     });
     grupo.append(ul);
     corpo.append(grupo);

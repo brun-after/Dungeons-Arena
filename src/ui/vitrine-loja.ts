@@ -35,7 +35,7 @@ export function filtrarVitrine(itens: readonly Item[], filtros: FiltrosDaVitrine
 
 /** O texto do contador: quanto falta para a vitrine renovar. */
 export function textoDaRenovacao(estado: EstadoJogo, ctx: ContextoSimulacao, loja: ObjetoNoMundo): string {
-  if (loja.vitrine === ctx.conteudo.lojas.perfilDungeon) return t('loja.vitrineSemanal');
+  if (loja.vitrine === ctx.conteudo.sorteio.lojas.perfilDungeon) return t('loja.vitrineSemanal');
   const ticks = ticksAteRenovar(estado, ctx, loja);
   if (ticks !== null) return t('loja.vitrineRenova', { tempo: duracaoLegivel(ticks * DT_MS) });
   const ciclo = duracaoDoCiclo(ctx.balance.mundo.ciclo);

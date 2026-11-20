@@ -74,7 +74,7 @@ export function aplicarEstoqueDaDungeon(objetos: ObjetoNoMundo[], ctx: ContextoS
   for (const o of objetos) {
     if (o.tipo !== 'loja') continue;
     o.itens = [...itens];
-    o.vitrine = ctx.conteudo.lojas.perfilDungeon;
+    o.vitrine = ctx.conteudo.sorteio.lojas.perfilDungeon;
     o.rodadaVitrine = semana;
     o.nivelVitrine = dungeon.nivel;
   }
@@ -85,12 +85,12 @@ export function aplicarEstoqueDaDungeon(objetos: ObjetoNoMundo[], ctx: ContextoS
  * da região (o meio da faixa). A vitrine renova quando o dia vira; cliente e servidor leem o mesmo objeto.
  */
 export function marcarVitrinesDaVila(objetos: ObjetoNoMundo[], ctx: ContextoSimulacao, dia: number, nivel: readonly [number, number]): void {
-  const r = ctx.conteudo.lojas;
+  const r = ctx.conteudo.sorteio;
   const n = Math.max(1, Math.round((nivel[0] + nivel[1]) / 2));
   for (const o of objetos) {
     if (o.tipo !== 'loja' || o.ref === null || !oficioComVitrine(r, o)) continue;
-    if (o.vitrine === r.perfilPadrao && o.rodadaVitrine === dia && o.nivelVitrine === n) continue;
-    o.vitrine = r.perfilPadrao;
+    if (o.vitrine === r.lojas.perfilVila && o.rodadaVitrine === dia && o.nivelVitrine === n) continue;
+    o.vitrine = r.lojas.perfilVila;
     o.rodadaVitrine = dia;
     o.nivelVitrine = n;
   }
