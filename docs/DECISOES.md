@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.39 · **Data:** 20/11/2026
+**Versão:** 1.40 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
 > - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
 > - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
 > - **1.37 (19/11/2026)**: D-184, adendo: a luz de XP vira luz pura, sem superfície: um núcleo minúsculo que emana raios, mais e mais longos com o XP.
@@ -5954,6 +5955,11 @@ os marcos):
 `combat/movimento-classe.ts` (os botões e a montaria), `render/anel-invocacao.ts` (o anel) e
 `render/movimento/chao-movimento.ts` (o Círculo). O leitor de `movimentos.json` foi para `combat/movimentos-dados.ts`
 e o estado do movimento para `entities/movimento-estado.ts` (o limite de 800 linhas).
+
+**Adendo (20/11/2026): as metas do simulador.** Com o lobo batendo 49% do básico do dono a cada 650 ms, a fera passa a
+fazer a maior parte do dano, como pedido: a meta da fatia da invocação (que mede só o lobo do Aventureiro) vai de
+15–35% a 15–65% (medido: 58,5%). A luta do Aventureiro contra ele mesmo no PvP Livre ficou mais curta (5,5 s); o piso
+dele cai para 5 s em `metas.pvpLivre.tempoMinSPorClasse`, e as outras classes seguem com 6–10 s.
 
 ## D-189 — Marco 46: equipamento por propósito, estilo, grau e elemento (16/11/2026)
 
