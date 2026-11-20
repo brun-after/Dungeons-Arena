@@ -6,6 +6,7 @@ import { hashTexto } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import type { Reino } from './reino';
 import type { Item } from '../progression/itens';
+import { oficioComVitrine } from '../progression/vitrine';
 
 export function estoqueDeDungeon(conteudo: Conteudo, reino: Reino, nivel: number): string[] {
   const raros=[...conteudo.itens.values()].filter(i=>i.raridade==='raro'&&i.valorBase>0&&i.id!=='chave_cripta');
@@ -62,4 +63,35 @@ export function estoqueSemanalDaDungeon(conteudo: Conteudo, territorio: Reino, d
     ...(chance('epico', r.epicoChancePct) ? embaralhar(daRaridade('epico'), 'epico').slice(0, 1) : []),
     ...(chance('lendario', r.lendarioChancePct) ? embaralhar(daRaridade('lendario'), 'lendario').slice(0, 1) : []),
   ])].filter((id) => conteudo.itens.has(id));
+}
+
+/**
+ * Marco 47 (20/11/2026, D-190): a loja da dungeon na semana: o estoque fixo sorteado e a vitrine de armadura com o
+ * perfil das dungeons (raridade mínima incomum), renovada na mesma semana.
+ */
+export function aplicarEstoqueDaDungeon(objetos: ObjetoNoMundo[], ctx: ContextoSimulacao, territorio: Reino, dungeon: { id: string; nivel: number }, semana: number): void {
+  const itens = estoqueSemanalDaDungeon(ctx.conteudo, territorio, dungeon, semana, ctx.balance.mundo.lojaDungeon);
+  for (const o of objetos) {
+    if (o.tipo !== 'loja') continue;
+    o.itens = [...itens];
+    o.vitrine = ctx.conteudo.sorteio.lojas.perfilDungeon;
+    o.rodadaVitrine = semana;
+    o.nivelVitrine = dungeon.nivel;
+  }
+}
+
+/**
+ * Marco 47 (D-190): a sala marca, a cada segundo, as lojas da vila com vitrine (o ferreiro) com o dia do ciclo e o nível
+ * da região (o meio da faixa). A vitrine renova quando o dia vira; cliente e servidor leem o mesmo objeto.
+ */
+export function marcarVitrinesDaVila(objetos: ObjetoNoMundo[], ctx: ContextoSimulacao, dia: number, nivel: readonly [number, number]): void {
+  const r = ctx.conteudo.sorteio;
+  const n = Math.max(1, Math.round((nivel[0] + nivel[1]) / 2));
+  for (const o of objetos) {
+    if (o.tipo !== 'loja' || o.ref === null || !oficioComVitrine(r, o)) continue;
+    if (o.vitrine === r.lojas.perfilVila && o.rodadaVitrine === dia && o.nivelVitrine === n) continue;
+    o.vitrine = r.lojas.perfilVila;
+    o.rodadaVitrine = dia;
+    o.nivelVitrine = n;
+  }
 }

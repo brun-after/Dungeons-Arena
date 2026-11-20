@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.55 · **Data:** 19/11/2026
+**Versão do documento:** 3.56 · **Data:** 20/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.56 (20/11/2026)**: marco 47: o ferreiro vende peças de armadura geradas numa vitrine com filtros, que renova a cada dia do Mundo; o loot de armadura usa o mesmo sorteio, com garantia contra azar, e o monstruário mostra a ficha e o loot de cada criatura (D-190).
 > - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-189).
 > - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-182).
 > - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
@@ -354,6 +355,29 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 47 — a vitrine de armaduras e o loot de armadura (20/11/2026)
+
+**O ferreiro vende as peças do marco 46.** Além das armas e armaduras fixas, o ferreiro (e a loja da campanha) mostra
+uma vitrine de 12 peças de armadura geradas, com propósito, estilo, grau, elemento e efeitos. Toda vitrine traz pelo
+menos uma peça de cada propósito, quase todas comuns e incomuns e algumas raras, no nível da região (ou dos inimigos da
+fase). A loja semanal das dungeons acrescenta 5 peças a partir de incomum, com chance de épica e lendária. O mercado,
+o mercador e o alquimista seguem como estavam.
+
+**Renova a cada dia do Mundo.** A sala marca o ferreiro com o dia do ciclo de dia e noite e com o nível da região; na
+dungeon, com a semana da loja. Fora do Mundo, a rodada conta em ticks, um ciclo do dia por rodada. A vitrine sai da
+semente da loja e da rodada, sem o RNG do combate: cliente e servidor veem as mesmas peças.
+
+**Preço e filtros.** A peça custa o valor do item × a raridade × (1 + 12% por grau) × (1 + 15% por efeito), com o desconto
+do Carisma de sempre. Na tela, chips filtram por peça, propósito, estilo e elemento, e um contador mostra quando a
+vitrine renova.
+
+**O loot no mesmo sorteio.** Cerca de 1 peça de armadura a cada 12 abates comuns, com garantia: nunca mais de 20 abates
+sem peça nem 60 sem uma rara (o contador fica no personagem). A peça sai no elemento da criatura em 20% das vezes. O
+chefe solta uma rara ou melhor; o da masmorra e do covil, duas; o de Filo, na primeira vitória, mais uma épica no
+elemento dele. A dificuldade pesa nas raridades, e o baú passa a sortear no nível da fase, com 50% de chance de peça.
+O monstruário mostra, de cada criatura vista, a vida, o XP, o elemento, as resistências e o que ela solta. Tudo em
+`data/equipamento-sorteio.json` (progression/sorteio-pecas.ts, vitrine.ts e loot-pecas.ts).
 
 ### Marco 46 — equipamento por propósito, estilo, grau e elemento (19/11/2026)
 

@@ -4,6 +4,7 @@
 // ilimitado na v1 (D-050): a loja é o dreno de ouro, não um recurso disputado.
 
 import { ofertasDoMundo } from '../mundo/lojas-mundo';
+import { vitrineDaLoja } from './vitrine';
 import { precoDoItem } from './itens-progressao';
 import { hashTexto } from '../core/rng';
 import { estudoAvanca } from '../modos/regras';
@@ -21,7 +22,10 @@ export function lojaAberta(estado: EstadoJogo, e: Entidade): ObjetoNoMundo | nul
   return estado.objetos.find((o) => o.objetoId === i.objetoId && o.tipo === 'loja') ?? null;
 }
 
-/** D-075: oferta estável inclusive em lojas de saves antigos; não consome o RNG do combate. */
+/**
+ * D-075: oferta estável inclusive em lojas de saves antigos; não consome o RNG do combate. Marco 47 (20/11/2026,
+ * D-190): no fim, a vitrine de armadura gerada (progression/vitrine.ts), que renova a cada dia do Mundo.
+ */
 export function estoqueDaLoja(estado: EstadoJogo, ctx: ContextoSimulacao, loja: ObjetoNoMundo): string[] {
   if (!estudoAvanca(ctx.modo)) return loja.itens;
   const s = `${estado.faseId}/${loja.objetoId}/${loja.x}/${loja.y}`;
@@ -32,7 +36,7 @@ export function estoqueDaLoja(estado: EstadoJogo, ctx: ContextoSimulacao, loja: 
   const livros = [...ctx.conteudo.itens.values()].filter((i) => i.ensina && ctx.conteudo.habilidades.get(i.ensina)?.tags.includes('expansao19'));
   livros.sort((a, b) => hashTexto(`${s}/${a.id}`) - hashTexto(`${s}/${b.id}`));
   extras.push(...livros.slice(0, 3).map((i) => i.id));
-  return [...new Set([...loja.itens, ...extras, ...ofertasDoMundo(estado,ctx,loja)])];
+  return [...new Set([...loja.itens, ...extras, ...ofertasDoMundo(estado, ctx, loja), ...vitrineDaLoja(estado, ctx, loja)])];
 }
 
 export function comprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, itemId: string, saida: EventoSimulacao[]): void {

@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.42 · **Data:** 20/11/2026
+**Versão:** 1.43 · **Data:** 20/11/2026
 
 > **Histórico**
-> - **1.42 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarTeclasDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: a tecla vazia pega uma conhecida fora da barra ou, na falta, uma inicial da classe no rank 1).
+> - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarTeclasDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: a tecla vazia pega uma conhecida fora da barra ou, na falta, uma inicial da classe no rank 1).
+> - **1.42 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
 > - **1.41 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada, as pernas abraçam o lobo e o urso e o simulador conta as feras que saíram de campo como companheiras.
 > - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
 > - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
@@ -6010,3 +6011,60 @@ elemento, e dar a cada peça efeitos próprios. Desenho completo em [`docs/EQUIP
 
 **Observação.** Os números dos efeitos são a primeira calibragem; o simulador de balanceamento ainda não veste peças com
 efeito.
+
+## D-190 — Marco 47: a vitrine de armaduras das lojas e o loot de armadura (20/11/2026)
+
+**Contexto.** O marco 46 (D-189) deu a cada peça de armadura um perfil (propósito, estilo, grau, elemento e efeitos),
+mas as lojas só vendiam os 39 itens fixos, sempre com o mesmo perfil. A variedade das peças geradas só chegava pelo drop,
+e mal: das 54 bases `ib_` dos drops, 40 são armas principais, e uma peça de armadura caía a cada ~80 abates comuns. Os
+baús e o `loot` do spawner sorteavam sempre no nível 1.
+
+**Decisão.**
+- **Quem vende.** O ferreiro mantém as armas e armaduras fixas e ganha uma **vitrine** de peças `gi_` de armadura. A
+  loja sem ofício da campanha também ganha, e o mercado, o mercador, o alquimista e os vendedores errantes e noturnos
+  não. A lista de ofícios fica em `data/equipamento-sorteio.json → lojas` (`oficios`, `semOficio`).
+- **Quando renova.** Renova a cada **dia do Mundo**, um ciclo completo de dia e noite (`mundo/ciclo.ts → diaDoCiclo`).
+  A hora do Mundo sai do relógio do servidor, então quem conta o dia é a sala (`conferirFocosENoite`, a cada segundo).
+  Ela posta no objeto da loja o perfil, a rodada e o nível (`vitrine`, `rodadaVitrine` e `nivelVitrine`). O núcleo não
+  lê relógio nenhum, e o cliente recebe o objeto. Na dungeon, a rodada é a semana da loja (D-144). Fora do Mundo, a
+  rodada conta em ticks, um ciclo do dia por rodada, com um deslocamento por loja.
+- **O que aparece.** Perfil `vila`: 12 peças, com raridade por peso (55/33/12, até raro) e nível da loja de −2 a +1. No
+  Mundo, o nível da loja é o meio da faixa da região; fora dele, a média dos inimigos da fase. Perfil `dungeon`: 5 peças
+  a partir de incomum, com chance de épica (17%) e lendária (5%), de 0 a +3 do nível da dungeon. A garantia recusa um
+  propósito repetido quando as vagas que sobram só bastam para os que faltam: toda vitrine traz os cinco propósitos.
+- **Determinismo.** `sortearVitrine` usa `hash(vitrine:<fase>/<loja>:<rodada>)`, nunca o RNG do combate, como as
+  ofertas temporárias (D-075). `comprar` já recusa o que não está em `estoqueDaLoja`, e a vitrine entra nele: peça de
+  outra rodada é recusada sem cobrar.
+- **Preço.** `valorBase × multRaridade × (1 + porGrauPct·grau) × (1 + porEfeitoPct·efeitos)` (1 a 2,2; 12%; 15%) vale
+  para toda peça de armadura, fixa ou gerada, com o desconto do Carisma por cima. A venda continua pelo `valorBase`, sem
+  arbitragem.
+- **Tela.** A vitrine tem seção própria e chips por peça, propósito, estilo e elemento (só os valores presentes). O
+  filtro é só da tela e não emite comando; um contador mostra quando a vitrine renova.
+
+- **Um sorteio só.** `progression/sorteio-pecas.ts → sortearPeca` serve à vitrine e ao loot. `data/equipamento-sorteio.json`
+  tem os perfis (`vila`, `dungeon`, `comum`, `chefe`, `chefeMaior`, `chefeFilo` e `bau`: folga de nível, peso de raridade,
+  quantas peças e se a raridade cresce com o nível), as lojas e o loot. Nenhuma lista fica duplicada. A armadura sai em
+  `gi_` (a raridade fina vira o grau 0–5); as armas seguem nos `ib_` de sempre.
+- **Loot comum.** Cerca de 1 peça a cada 12 abates (`chancePorAbatePct` 8, vezes o loot do lugar), além do drop de
+  sempre. O RNG é próprio do abate (fase, morto e tick), e o do combate não anda.
+- **Garantia contra azar.** Quem leva o crédito (o dono da invocação) conta na bolsa (`azarDePeca`) os abates sem peça e
+  sem peça rara. Com 20 abates sem peça, a peça cai; com 60 sem rara, cai rara ou melhor. O renascido conta só a
+  fração do antifarm. O contador segue o personagem (save, ficha do Mundo, certificado), limitado ao teto na conferência.
+- **Elemento e propósito.** O elemento da criatura (a afinidade dela, ou o sotaque da dimensão de Filo) puxa a peça em
+  20% das vezes: tenta sementes até a peça sair nele, sem mexer em `pecas.json`. O propósito não tem viés.
+- **Raridade.** O peso das raras sobe com o nível (`itensGerados.raridadePorNivelPct`, nos perfis com `crescePorNivel`) e
+  com a dificuldade (−20% no fácil a +40% no pesadelo).
+- **Chefes, escalonado.** O chefe solta 1 peça rara ou melhor. O da masmorra e do covil do Mundo (`modo.chefeMaior`,
+  posto pelo lugar) solta 2, com épica em 20% e lendária em 4%. O chefe de Filo, na primeira vitória de quem o derruba,
+  solta uma épica ou melhor a mais, no elemento dele. O jogador derrubado na arena não solta peça gerada.
+- **Baú.** O baú do spawner sorteia no nível da fase (antes, sempre 1) e traz uma peça em 50% das vezes, pelo RNG dele.
+- **Monstruário.** A criatura vista já mostra a ficha (vida, XP, elemento e resistências) e o loot: a chance de item e de
+  peça, o elemento puxado, as peças do chefe, a peça da primeira vitória e os materiais do lugar. A lore segue para depois
+  do primeiro abate. No topo aparece a garantia, com o contador de quem lê.
+
+**Alternativas descartadas.** Renovar por tempo de jogo (30 min) dava pressa sem relação com o mundo. Pôr peças também
+no mercado misturava os ofícios. Vender épicas na vila tirava o motivo de ir às dungeons.
+Puxar o propósito pela classe de quem abate foi recusado: a peça para outra classe também tem valor (troca e mercado).
+
+**Observação.** Os pesos, as chances e os preços são a primeira calibragem; o simulador de balanceamento ainda não compra
+na vitrine nem veste o loot de armadura.

@@ -171,6 +171,8 @@ export interface ModoDeJogo {
    * 100.
    */
   lootPct?: number;
+  /** Marco 47 (20/11/2026, D-190): o chefe daqui é maior (masmorra e covil do Mundo): solta mais peças de armadura. */
+  chefeMaior?: boolean;
   /** Marco 30 (D-129): os materiais que cada preset deixa ao morrer (o Mundo põe os do reino). Ausente = nenhum. */
   materiaisDeInimigos?: Readonly<Record<string, readonly { itemId: string; chancePct: number }[]>>;
 }

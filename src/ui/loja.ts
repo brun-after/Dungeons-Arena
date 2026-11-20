@@ -17,6 +17,8 @@ import { fundivel } from '../progression/fusao-elemental';
 import { criarModal } from './modal';
 import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
+import { vitrineDaLoja } from '../progression/vitrine';
+import { chipsDoFiltro, filtrarVitrine, filtrosVazios, FILTROS_DA_VITRINE, textoDaRenovacao, type FiltrosDaVitrine } from './vitrine-loja';
 
 export interface OpcoesLoja {
   ctx: ContextoSimulacao;
@@ -53,6 +55,12 @@ export function criarLoja(o: OpcoesLoja): Loja {
   let janelaAtual = -1;
   /** 09/11/2026 (D-144): a vida no quadro anterior; perder vida com a loja aberta faz a janela tremer. */
   let vidaAntes = -1;
+  /** Marco 47 (20/11/2026, D-190): os filtros da vitrine de armadura (só da tela) e o contador de renovação. */
+  let filtros: FiltrosDaVitrine = filtrosVazios();
+  let lojaDosFiltros = '';
+  let renovacao: HTMLElement | null = null;
+  const assinaturaDe = (bolsa: NonNullable<Entidade['bolsa']>, loja: ObjetoNoMundo) =>
+    JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(), o.ctx, loja), estoqueDaLoja(o.estado(), o.ctx, loja), filtros]);
 
   const modal = criarModal({
     titulo: t('loja.titulo'),
@@ -108,11 +116,16 @@ export function criarLoja(o: OpcoesLoja): Loja {
   const desenhar = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
     if (!bolsa) return;
-    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(),o.ctx,loja)]);
+    if (lojaDosFiltros !== loja.objetoId) {
+      lojaDosFiltros = loja.objetoId;
+      filtros = filtrosVazios();
+    }
+    assinatura = assinaturaDe(bolsa, loja);
     const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
     saldo.textContent = t('loja.saldo', { ouro: bolsa.ouro });
     saldo.dataset.ouro = String(bolsa.ouro);
     listas.textContent = '';
+    renovacao = null;
     if(ctx.fase.id.startsWith('mundo_masmorra_'))listas.append(el('p','detalhe-item',t('loja.retornoDungeon',{mortes:bolsa.mortesNaDungeon??0})));
     // Marco 38 (D-142): o mercado da vila vende o estoque do reino e, pelo botão, os anúncios dos jogadores.
     if (loja.ref === 'mercado' && o.abrirAnuncios) {
@@ -126,21 +139,20 @@ export function criarLoja(o: OpcoesLoja): Loja {
 
     listas.append(el('h3', 'subtitulo-modal', t('loja.estoque')));
     const estoque = el('ul', 'lista-itens estoque-loja');
+    const vitrine = new Set(vitrineDaLoja(o.estado(), o.ctx, loja));
+    const ofertas = ofertasDoMundo(o.estado(), o.ctx, loja);
+    // Marco 17: o preço já com o desconto do Carisma.
+    const linhaDeCompra = (item: Item, rotulo: string) => {
+      const preco = precoDoItem(item, j, o.ctx);
+      return linha(item, rotulo, 1, { texto: t('loja.comprar', { preco }), chave: `comprar-${item.id}`, desligado: bolsa.ouro < preco, fazer: () => { emitir({ t: 'comprar', itemId: item.id }); } });
+    };
     for (const id of estoqueDaLoja(o.estado(), o.ctx, loja)) {
       const item = itens.get(id);
-      if (!item) continue;
-      // Marco 17: o preço já com o desconto do Carisma.
-      const preco = precoDoItem(item, j, o.ctx);
-      estoque.append(
-        linha(item, ofertasDoMundo(o.estado(),o.ctx,loja).includes(id) ? `${item.nome} · ${t('loja.ofertaTemporaria')}` : item.nome, 1, {
-          texto: t('loja.comprar', { preco }),
-          chave: `comprar-${id}`,
-          desligado: bolsa.ouro < preco,
-          fazer: () => { emitir({ t: 'comprar', itemId: id }); },
-        }),
-      );
+      if (!item || vitrine.has(id)) continue;
+      estoque.append(linhaDeCompra(item, ofertas.includes(id) ? `${item.nome} · ${t('loja.ofertaTemporaria')}` : item.nome));
     }
     listas.append(estoque);
+    if (vitrine.size > 0) desenharVitrine([...vitrine].map((id) => itens.get(id)).filter((i): i is Item => !!i), loja, linhaDeCompra);
 
     listas.append(el('h3', 'subtitulo-modal', t('loja.suaMochila')));
     if (bolsa.mochila.length === 0) listas.append(el('p', 'vazio-modal', t('loja.semItens')));
@@ -162,6 +174,23 @@ export function criarLoja(o: OpcoesLoja): Loja {
     listas.append(mochila);
     desenharForja(j, loja);
     if (focoAntes) modal.corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
+  };
+
+  /** Marco 47 (D-190): a vitrine de armadura, com os filtros e o contador de renovação. */
+  const desenharVitrine = (pecas: Item[], loja: ObjetoNoMundo, linhaDeCompra: (item: Item, rotulo: string) => HTMLLIElement) => {
+    listas.append(el('h3', 'subtitulo-modal', t('loja.vitrine')));
+    renovacao = el('p', 'tempo-loja', textoDaRenovacao(o.estado(), ctx, loja));
+    listas.append(renovacao);
+    const escolher = (f: (typeof FILTROS_DA_VITRINE)[number], v: string | null) => {
+      filtros = { ...filtros, [f]: v };
+      assinatura = '';
+    };
+    for (const f of FILTROS_DA_VITRINE) listas.append(chipsDoFiltro(pecas, f, filtros, escolher));
+    const visiveis = filtrarVitrine(pecas, filtros);
+    const ul = el('ul', 'lista-itens vitrine-loja');
+    for (const item of visiveis) ul.append(linhaDeCompra(item, item.nome));
+    listas.append(ul);
+    if (visiveis.length === 0) listas.append(el('p', 'vazio-modal', t('loja.vitrineVazia')));
   };
 
   /**
@@ -239,7 +268,11 @@ export function criarLoja(o: OpcoesLoja): Loja {
       modal.abrir();
     }
     const bolsa = j.bolsa;
-    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(),o.ctx,loja)]) !== assinatura) desenhar(j, loja);
+    if (bolsa && assinaturaDe(bolsa, loja) !== assinatura) desenhar(j, loja);
+    else if (renovacao) {
+      const texto = textoDaRenovacao(estado, ctx, loja);
+      if (renovacao.textContent !== texto) renovacao.textContent = texto;
+    }
   };
 
   return { aberta: modal.aberto, atualizar };

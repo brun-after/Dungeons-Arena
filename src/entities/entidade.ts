@@ -301,6 +301,8 @@ export interface Bolsa {
   /** Marco 18 (D-070): as entradas do diário de descobertas. */
   diario: string[];
   vitorias?: Record<string, number>; // Marco 45 (16/11/2026, D-182): as vitórias sobre cada chefe de Filo.
+  /** Marco 47 (20/11/2026, D-190): a garantia contra azar no loot de armadura (abates sem peça e sem peça rara). */
+  azarDePeca?: { semPeca: number; semRara: number };
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -701,6 +703,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
     missoesConcluidas: [...b.missoesConcluidas],
     diario: [...b.diario],
     ...(b.vitorias ? { vitorias: { ...b.vitorias } } : {}),
+    ...(b.azarDePeca ? { azarDePeca: { ...b.azarDePeca } } : {}),
     ...(b.runas ? { runas: { ...b.runas } } : {}),
     ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
   };

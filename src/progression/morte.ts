@@ -46,6 +46,7 @@ import { concederXpDeProgressao, perderXp } from './nivel';
 import { ID_LIVRO_RARO } from './itens';
 import { familiaDaHabilidade } from './itens-progressao';
 import { sortearItem } from './sorteio';
+import { pecasDoAbate } from './loot-pecas';
 import { antesDeCair, aoCair } from '../entities/criaturas/morte';
 import { largarOrbeXp, sorteDoXp, xpVaiAoChao } from './orbe-xp';
 
@@ -308,6 +309,8 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
     if (essencia) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, essencia.id, x, y, saida));
   }
   largarMateriais(estado, ctx, e, saida);
+  // Marco 47 (20/11/2026, D-190): as peças de armadura, com a garantia contra azar de quem leva o crédito.
+  for (const id of pecasDoAbate(estado, ctx, e, creditado(estado, quem), lootMult, renascido)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, id, x, y, saida));
   if (aleatorio(estado.rng) >= Math.min(1, (boss ? d.chanceItemBoss : d.chanceItem) * lootMult)) return;
   // Marco 27 (D-126): a sorte do Aventureiro nos pergaminhos (de quem abateu, ou do dono da invocação).
   const item = sortearItem(estado, ctx, boss, e.nivel, sorteDePergaminhoPct(ctx, quem ? creditado(estado, quem) : undefined));
