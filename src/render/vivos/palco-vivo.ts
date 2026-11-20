@@ -18,10 +18,11 @@ import { fundirPecas, malhasDe } from './fundir-pecas';
 import { BATIDA_DO_VOO_MS, FRACAO_PLANAR, PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
-import { grauDe, GRAUS, PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
+import { PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
 import type { Equipamento3d } from '../adornos';
 import type { AparenciaEquipada } from '../../entities/entidade';
-import { definirDetalhe, KITS_SOMBRIOS, type PecaSombria } from './armaduras-sombrias';
+import { definirDetalhe, type PecaSombria } from './armaduras-sombrias';
+import { grauDaChave, montarVesteViva, pecasDoPedido, realcar, realceDe, type Realce } from './vestes-vivas';
 import { CHEFES, CHEFES_DE_GEOMETRIA } from './chefes-vivos';
 import { PROCS_FILO } from './filo';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
@@ -154,8 +155,9 @@ const OSSOS_DAS_PERNAS = /^(root|pelvis|thigh|calf|foot|ball)/i;
 export interface PedidoVivo {
   id: string;
   modelo: string;
-  /** As peças vestidas (grau 0 a 5) e as armas de cada mão. */
-  pecas: Partial<Record<PecaDeArmadura, number>>;
+  /** As peças vestidas (marco 46: `<propósito>.<estilo>.<marca>.<grau>`), o realce delas e as armas de cada mão. */
+  pecas: Partial<Record<PecaDeArmadura, string>>;
+  realce?: Realce | undefined;
   arma: { modelo: string; grau: number } | null;
   secundaria: { modelo: string; grau: number } | null;
   estado: EstadoPersonagem;
@@ -394,7 +396,6 @@ export class PalcoVivo {
     // As peças: montadas no modelo de referência em repouso, já na escala do jogo. 09/11/2026 (D-144): só quando
     // alguém veste cada uma (antes, as 36 peças de todos os graus saíam juntas e o jogo travava quando chegava um
     // jogador de uma classe ainda não vista; o ping medido subia junto).
-    const kit = Object.hasOwn(KITS_SOMBRIOS, nome) ? KITS_SOMBRIOS[nome] : undefined;
     const ossos = { get: (n: string) => modelo.getObjectByName(n) as THREE.Bone | undefined };
     const emRepouso = (montar: (inverso: THREE.Matrix4) => PecaFundida | null): PecaFundida | null => {
       if (parado) {
@@ -422,10 +423,11 @@ export class PalcoVivo {
     const montarPeca = (chave: string): PecaFundida | null => {
       const pronta = pecas.get(chave);
       if (pronta !== undefined) return pronta;
-      const [peca, grauTexto] = chave.split('-');
-      const grau = Number(grauTexto);
-      const valida = (PECAS_DE_ARMADURA as readonly string[]).includes(peca ?? '') && Number.isInteger(grau) && grau >= 0 && grau < GRAUS.length;
-      const f = valida && kit ? emRepouso((inverso) => fundida(kit(ossos, peca as PecaDeArmadura, grau), inverso)) : null;
+      // Marco 46 (D-189): a peça do propósito (o kit), com o estilo e a marca; a chave diz tudo.
+      const f = emRepouso((inverso) => {
+        const v = montarVesteViva(ossos, chave);
+        return v ? fundida(v, inverso) : null;
+      });
       pecas.set(chave, f);
       return f;
     };
@@ -464,7 +466,7 @@ export class PalcoVivo {
 
   /** Veste as peças e as armas do pedido (só quando mudam). */
   private vestir(a: Ator, p: PedidoVivo): void {
-    const roupa = JSON.stringify([p.pecas, p.arma, p.secundaria]);
+    const roupa = JSON.stringify([p.pecas, p.arma, p.secundaria, p.realce]);
     if (a.roupa === roupa) return;
     a.roupa = roupa;
     for (const x of a.extras) x.removeFromParent();
@@ -484,16 +486,16 @@ export class PalcoVivo {
     a.raiz.rotation.y = 0;
     a.raiz.updateMatrixWorld(true);
     const vestidas: [string, boolean][] = PECAS_DE_ARMADURA.flatMap((peca) => {
-      const grau = p.pecas[peca];
-      return grau === undefined ? [] : [[`${peca}-${grau}`, peca === 'corpo'] as [string, boolean]];
+      const veste = p.pecas[peca];
+      return veste === undefined ? [] : [[`${peca}|${veste}`, peca === 'corpo'] as [string, boolean]];
     });
     if (a.base.pecas.get('veste')) vestidas.push(['veste', true]);
     for (const [chave, doCorpo] of vestidas) {
       const f = a.base.montarPeca(chave);
       if (!f) continue;
       for (const { geometria, material } of f.malhas) {
-        // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele)
-        let mat = material;
+        // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele); D-189: o realce do grau e do elemento
+        let mat = realcar(material, grauDaChave(chave), p.realce, a.panos);
         if (material.userData.vento) {
           a.vento ??= { u: novosUniformes(), estado: novoEstadoDeVento() };
           mat = aplicarVento(material, a.vento.u);
@@ -781,20 +783,16 @@ export function pedidoVivo(
   angulo: number,
   golpe?: PedidoVivo['golpe'],
 ): PedidoVivo {
-  const pecas: Partial<Record<PecaDeArmadura, number>> = {};
   // 06/11/2026: com skin (a chave `skin:<id>`), prevalece a skin: sem peças e sem armas do equipamento (a skin tem a dela).
-  if (modelo.startsWith('skin:')) return { id, modelo, pecas, estado, tempoMs, fracao, angulo, golpe, arma: null, secundaria: null };
-  for (const peca of PECAS_DE_ARMADURA) {
-    const raridade = aparencia?.[peca];
-    if (raridade) pecas[peca] = grauDe(raridade);
-  }
+  if (modelo.startsWith('skin:')) return { id, modelo, pecas: {}, estado, tempoMs, fracao, angulo, golpe, arma: null, secundaria: null };
+  // Marco 46 (D-189): cada peça pelo propósito, estilo, marca e grau dela; o realce pelo grau, conjunto e elemento.
+  const realce = realceDe(aparencia, modelo);
   const arma = equipamento?.arma.modelo ? equipamento.arma : null;
   const secundaria = equipamento?.secundaria ?? null;
   // Só no servidor de desenvolvimento: `&vestir=N` veste todas as peças (e as armas) no grau N, para revisar o visual.
   const vestir = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get('vestir') ?? Number.NaN) : Number.NaN;
   if (vestir >= 0 && vestir <= 5) {
-    for (const peca of PECAS_DE_ARMADURA) pecas[peca] = vestir;
-    return { id, modelo, pecas, estado, tempoMs, fracao, angulo, golpe, arma: arma && { ...arma, grau: vestir }, secundaria: secundaria && { ...secundaria, grau: vestir } };
+    return { id, modelo, pecas: pecasDoPedido(aparencia, modelo, vestir), realce, estado, tempoMs, fracao, angulo, golpe, arma: arma && { ...arma, grau: vestir }, secundaria: secundaria && { ...secundaria, grau: vestir } };
   }
-  return { id, modelo, pecas, estado, tempoMs, fracao, angulo, golpe, arma, secundaria };
+  return { id, modelo, pecas: pecasDoPedido(aparencia, modelo), realce, estado, tempoMs, fracao, angulo, golpe, arma, secundaria };
 }

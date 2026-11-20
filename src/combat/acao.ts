@@ -58,6 +58,7 @@ import { aoAgir, motivoDoMovimento, naTirolesa, noAr, ocultoDosMonstros } from '
 import { basicoElemental } from './movimento-extras';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
+import { aoUsarHabilidadeDasPecas } from './efeitos-de-peca';
 import { comCombo, fazerCombo } from './combos';
 import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
 import { agendarFase, fasesVencidas } from './fases';
@@ -571,6 +572,8 @@ function lancar(
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
     // Marco 39 (D-150): usar a skill alimenta o vínculo com o elemento dela (o básico não conta).
     if (ator.bolsa && !ehBasico(ator, hab.id)) registrarUso(ctx, ator.bolsa, hab.elemento, estado.tick);
+    // Marco 46 (D-189): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
+    if (ator.bolsa && !ehBasico(ator, hab.id)) aoUsarHabilidadeDasPecas(estado, ctx, ator, hab, saida);
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };

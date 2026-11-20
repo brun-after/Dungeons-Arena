@@ -16,7 +16,7 @@ import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehMovimento, ehVariante, estadosDe, 
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
 import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
-import { KITS_SOMBRIOS, type PecaSombria } from '../../src/render/vivos/armaduras-sombrias';
+import { KITS_POR_PROPOSITO, type PecaSombria } from '../../src/render/vivos/armaduras-sombrias';
 import { VESTES_DO_ATLAS } from '../../src/render/vivos/chefes-vivos';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { criatura } from './criaturas3d';
@@ -36,7 +36,7 @@ export interface PedidoDeCamada {
   pecas?: string[];
   armas?: Arma[];
   /** A peça de armadura em 3D (armaduras3d.ts) e o grau dela; a cor da raridade também tinge as malhas do traje. */
-  armadura?: { peca: PecaDeArmadura; grau: number; acento: number };
+  armadura?: { peca: PecaDeArmadura; grau: number; acento: number; proposito: string };
 }
 
 export interface SaidaAtlas {
@@ -388,7 +388,8 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   const mats = new Map<THREE.Mesh, Mats>();
   const pinta = new Set<THREE.Mesh>();
   // 04/11/2026 (marco 37): a classe com kit sombrio troca o pano tingido pela raridade pelo material do nível.
-  const kit = p.armadura ? KITS_SOMBRIOS[classe] : undefined;
+  // Marco 46 (D-189): o kit é o do propósito da peça (no corpo da classe).
+  const kit = p.armadura ? KITS_POR_PROPOSITO[p.armadura.proposito] : undefined;
   const sombria: PecaSombria | null = kit && p.armadura ? kit(mt.ossos, p.armadura.peca, p.armadura.grau) : null;
   const tecido = sombria?.tecido ? sombria.tecido.clone() : null;
   if (tecido) igualOuFrente(tecido);

@@ -143,7 +143,7 @@ tabela('Dificuldades (aventureiro; comum no nível 5, chefe sozinho)', ['Dificul
 const corpoPvp: string[][] = [];
 for (const classe of CLASSES) {
   const t = mediana(SEMENTES.map((s) => pvpLivre(classe, s, metas.pvpLivre.nivel).tempoS));
-  conferir(`PvP Livre: ${classe} contra ${classe}, tempo`, t, metas.pvpLivre.tempoMinS, metas.pvpLivre.tempoMaxS, ' s');
+  conferir(`PvP Livre: ${classe} contra ${classe}, tempo`, t, metas.pvpLivre.tempoMinSPorClasse?.[classe] ?? metas.pvpLivre.tempoMinS, metas.pvpLivre.tempoMaxS, ' s');
   corpoPvp.push([classe, `${br(t)} s`]);
 }
 tabela(`PvP no Livre (nível ${metas.pvpLivre.nivel}, com o clamp do modo)`, ['Classe', 'Tempo para cair'], corpoPvp);

@@ -624,7 +624,8 @@ export interface Balance {
     comum: { golpesMin: number; golpesMax: number; tempoMinS: number; tempoMaxS: number };
     aguenta: { golpesMin: number; golpesMax: number };
     chefe: { tempoMinS: number; tempoMaxS: number; nivelJogador: number; nivelChefe: number };
-    pvpLivre: { tempoMinS: number; tempoMaxS: number; nivel: number };
+    /** D-188, adendo (20/11/2026): `tempoMinSPorClasse` baixa o piso de uma classe (o Aventureiro com as feras da D-188). */
+    pvpLivre: { tempoMinS: number; tempoMaxS: number; nivel: number; tempoMinSPorClasse?: Readonly<Record<string, number>> };
     avisoUtilMinMs: number;
     grupo: { tempoMinPctDoSolo: number; tempoMaxPctDoSolo: number };
     invocacao: { fatiaMinPct: number; fatiaMaxPct: number };

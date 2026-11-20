@@ -521,12 +521,8 @@ export interface BuffArmado {
 export interface AparenciaEquipada {
   arma: string | null;
   secundaria: string | null;
-  cabeca: string | null;
-  corpo: string | null;
-  capa: string | null;
-  maos?: string | null;
-  pernas?: string | null;
-  pes?: string | null;
+  cabeca: string | null; corpo: string | null; capa: string | null;
+  maos?: string | null; pernas?: string | null; pes?: string | null;
   /** Marco 18 (D-069): a forma da arma (null = sem forma) e o elemento dela. */
   formaArma: string | null;
   elementoArma: string | null;
@@ -537,6 +533,9 @@ export interface AparenciaEquipada {
   raridadeSecundaria?: string | null;
   /** 06/11/2026: a skin ativa; com ela, o equipamento não aparece no personagem (palco-vivo.ts). */
   skin?: string | null;
+  /** Marco 46 (D-189): o visual de cada peça (`<propósito>.<estilo>.<marca>`) e o elemento do vínculo (degrau 0–4). */
+  vestes?: Partial<Record<'capa' | 'corpo' | 'pernas' | 'pes' | 'maos' | 'cabeca', string>>;
+  elementoVeste?: string | null; vinculoVeste?: number;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -761,7 +760,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     invocacao: e.invocacao ? { ...e.invocacao, ...(e.invocacao.posto && { posto: { ...e.invocacao.posto } }), ...(e.invocacao.descarga && { descarga: { ...e.invocacao.descarga } }) } : null,
     interacao: e.interacao ? { ...e.interacao } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
-    aparencia: e.aparencia ? { ...e.aparencia } : null,
+    aparencia: e.aparencia ? { ...e.aparencia, ...(e.aparencia.vestes && { vestes: { ...e.aparencia.vestes } }) } : null,
     estilos: [...e.estilos],
     ultimoGolpe: e.ultimoGolpe ? { ...e.ultimoGolpe } : null,
     ...(e.tatica ? { tatica: { ...e.tatica, aparou: e.tatica.aparou ? { ...e.tatica.aparou } : null, etapas: e.tatica.etapas.map((a) => ({ ...a, alvos: [...a.alvos], fatos: [...a.fatos], concluidos: [...a.concluidos] })) } } : {}),

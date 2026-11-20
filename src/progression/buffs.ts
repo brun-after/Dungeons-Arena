@@ -15,6 +15,9 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type AparenciaEquipada, type Entidade } from '../entities/entidade';
 import { perseguido } from './recursos';
+import { PECAS_DE_ARMADURA } from './graus';
+import { codigoVisual } from './pecas';
+import { PONTAS_ELEMENTAIS, vinculoDe } from './vinculo';
 
 /** Os efeitos de orbe que reforçam o ataque: chegam armados. */
 export const EFEITOS_OFENSIVOS: ReadonlySet<TipoEfeito> = new Set<TipoEfeito>(['bonus_dano', 'ab_dano', 'ab_recarga', 'ab_alcance', 'ab_multi_alvo', 'atravessar', 'rastro_dano']);
@@ -98,7 +101,20 @@ export function baseDaArma(ctx: Pick<ContextoSimulacao, 'conteudo'>, itemId: str
 
 const ORDEM_FORMAS = ['comum', 'epica', 'lendaria', 'ultima'];
 
-export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquipada | null {
+/**
+ * Marco 46 (16/11/2026, D-189): o elemento dominante do vínculo (sem o Físico, que não tem cor) e a força dele em
+ * degraus de 0 a 4 (o degrau, e não o valor, para a aparência não mudar a cada tick com o uso esfriando).
+ */
+function elementoDaVeste(ctx: ContextoSimulacao, e: Entidade, tick: number): { elementoVeste: string | null; vinculoVeste: number } {
+  const v = vinculoDe(ctx, e, tick);
+  let melhor: string | null = null;
+  let forca = 0;
+  for (const p of PONTAS_ELEMENTAIS) if (p !== 'fisico' && v[p] > forca) [melhor, forca] = [p, v[p]];
+  const degrau = Math.min(4, Math.floor(forca * 5));
+  return degrau > 0 ? { elementoVeste: melhor, vinculoVeste: degrau } : { elementoVeste: null, vinculoVeste: 0 };
+}
+
+export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade, tick = 0): AparenciaEquipada | null {
   const eq = e.bolsa?.equipamento;
   if (!eq) return e.aparencia;
   const raridade = (itemId: string | undefined) => (itemId ? (ctx.conteudo.itens.get(itemId)?.raridade ?? null) : null);
@@ -124,6 +140,11 @@ export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquip
     raridadeSecundaria: raridade(eq.arma_secundaria?.itemId),
     // 06/11/2026: a skin vai na aparência pública (vai pela rede com ela); o equipamento segue no estado, só não aparece.
     skin: e.skin ?? null,
+    vestes: Object.fromEntries(PECAS_DE_ARMADURA.flatMap((p) => {
+      const peca = eq[p] ? ctx.conteudo.itens.get(eq[p].itemId)?.peca : undefined;
+      return peca ? [[p, codigoVisual(peca)]] : [];
+    })),
+    ...elementoDaVeste(ctx, e, tick),
   };
 }
 
@@ -132,13 +153,15 @@ const iguais = (a: AparenciaEquipada | null, b: AparenciaEquipada | null) =>
   (!!a && !!b && a.arma === b.arma && a.secundaria === b.secundaria && a.cabeca === b.cabeca && a.corpo === b.corpo && a.capa === b.capa &&
     a.maos === b.maos && a.pernas === b.pernas && a.pes === b.pes &&
     a.formaArma === b.formaArma && a.elementoArma === b.elementoArma && a.formaMaxima === b.formaMaxima &&
-    a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria && (a.skin ?? null) === (b.skin ?? null));
+    a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria && (a.skin ?? null) === (b.skin ?? null) &&
+    (a.elementoVeste ?? null) === (b.elementoVeste ?? null) && (a.vinculoVeste ?? 0) === (b.vinculoVeste ?? 0) &&
+    PECAS_DE_ARMADURA.every((p) => a.vestes?.[p] === b.vestes?.[p]));
 
 /** Etapa do tick: a aparência pública segue o equipamento de quem tem bolsa. */
 export function atualizarAparencias(estado: EstadoJogo, ctx: ContextoSimulacao): void {
   for (const e of estado.entidades) {
     if (!e.bolsa) continue;
-    const nova = aparenciaDe(ctx, e);
+    const nova = aparenciaDe(ctx, e, estado.tick);
     if (!iguais(nova, e.aparencia)) e.aparencia = nova;
   }
 }

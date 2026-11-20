@@ -48,6 +48,7 @@ import { DT_MS } from '../core/loop';
 import { viradoNevoa } from './movimento/corpo-movimento';
 
 import { corDaArmadilha } from './armadilhas-visual';
+import { particulasDaVeste } from './veste-elemental';
 
 /** 06/11/2026 (D-135): o efeito que cada elemento solta quando o círculo de conjuração dispara. */
 const ASSINATURA_DA_ARMADILHA: Readonly<Record<Elemento, AssinaturaVisual>> = {
@@ -473,6 +474,11 @@ export class EfeitosDeHabilidade {
       this.ultimaAura.set(chave, agoraMs);
       const pos = this.posicoes.get(e.id);
       if (pos) this.o.particulas.emitir('aura_forma', pos.x, pos.y, forma === 'ultima' ? COR_ULTIMA : COR_LENDARIA);
+    }
+    // Marco 46 (16/11/2026, D-189): a camada elemental da armadura (o vínculo e as reações aos estados).
+    for (const e of estado.entidades) {
+      const pos = this.posicoes.get(e.id);
+      if (pos) particulasDaVeste(e, estado.tick, agoraMs, this.ultimaAura, (preset, dx, dy, cor) => { this.o.particulas.emitir(preset, pos.x + dx, pos.y + dy, cor); });
     }
   }
 }

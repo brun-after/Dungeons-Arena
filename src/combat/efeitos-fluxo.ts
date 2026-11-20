@@ -411,7 +411,7 @@ export function causarDano(
   alvo: Entidade,
   valor: number,
   origemId: EntidadeId,
-  tipo: 'rastro_dano' | 'armadilha',
+  tipo: 'rastro_dano' | 'armadilha' | 'reflexo',
   saida: EventoSimulacao[],
 ): void {
   const imune = alvo.efeitos.some((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].imuneDano);
