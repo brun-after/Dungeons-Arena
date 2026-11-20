@@ -1,8 +1,10 @@
 # Equipamento por propósito, estilo, grau e elemento (marco 46)
 
-**Versão:** 1.3 · **Data:** 20/11/2026
+**Versão:** 1.4 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.4 (20/11/2026)**: as luvas, as perneiras e as botas ganham a assinatura do propósito em todos os graus (antes
+>   mudavam só de material e ficavam iguais no grau 0).
 > - **1.3 (20/11/2026)**: a decisão passa a D-189 (a D-188 da main são as feras do Aventureiro).
 > - **1.2 (19/11/2026)**: a decisão passa a D-188 (a D-186 e a D-187 da main são o terceiro movimento no X e as teclas
 >   configuráveis); as perneiras leem os botões do movimento (Shift, V e X, ou o que o jogador configurar).
@@ -60,6 +62,12 @@ mecânica de dano): os nomes ficam separados no código (`estilo` da peça × `e
 ## 4. Grau e destaque
 
 - Os 3 níveis de silhueta seguem (graus 0–1, 2–3, 4–5); o grau ímpar ornamenta o nível.
+- Os membros (luvas, perneiras e botas) de todos os propósitos saem da mesma função e mudavam só de material; no grau 0,
+  e nas botas do Batedor e da Espreita, ficavam iguais. Cada propósito leva agora a sua assinatura neles, em todos os
+  graus (`render/vivos/membros-assinatura.ts`): Baluarte, munhequeiras de ferro, tira rebitada na coxa e biqueira;
+  Batedor, correias claras com fivela, bolsa na coxa e faixas no cano; Arcano, punho em sino, aba de pano na coxa e
+  ponta da sapatilha virada; Espreita, braçadeira de arqueiro, bainha de faca e bico macio em couro pardo-esverdeado;
+  Ossuário, esporões de osso, rótula de osso e falanges na ponta do pé.
 - O destaque emissivo cresce com o grau: nenhum nos graus 0–1, fraco no 2, mais forte a cada grau, máximo no 5 (antes
   só o 5 acendia).
 - Conjunto completo (as 6 peças do mesmo propósito): um destaque extra.

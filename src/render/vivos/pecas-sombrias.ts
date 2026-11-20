@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { anel, aoLongo, caixa, chifre, Corpo, esfera, grupoEm, nivelDe, seg, torno, V } from './sombrio-base';
+import { assinaturaDosMembros } from './membros-assinatura';
 
 type Mat = THREE.Material;
 type Saida = THREE.Object3D[];
@@ -20,6 +21,8 @@ export interface LigaDosMembros {
   borda: Mat;
   /** O feiticeiro não usa cotoveleira nem asa no joelho: só couro e pano. */
   semJuntas?: boolean;
+  /** Marco 46 (20/11/2026, D-189): o propósito, que dá a forma própria nos membros (membros-assinatura.ts). */
+  proposito?: string;
 }
 
 export function membros(c: Corpo, peca: 'maos' | 'pernas' | 'pes', grau: number, l: LigaDosMembros): Saida {
@@ -107,6 +110,7 @@ export function membros(c: Corpo, peca: 'maos' | 'pernas' | 'pes', grau: number,
       }
     }
   }
+  saida.push(...assinaturaDosMembros(c, peca, grau, l.proposito, l));
   return saida;
 }
 

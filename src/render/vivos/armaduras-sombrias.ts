@@ -253,7 +253,7 @@ export function pecaDoGuerreiro(ossos: Ossos, peca: PecaDeArmadura, grau: number
   if (peca === 'capa') {
     return { extras: capa(c, grau, { panos: [m.mantoCurto, m.capaMedia, m.capa], forro: m.forro, fecho: borda, gola: { tipo: 'pele', m: m.pele } }) };
   }
-  return { extras: membros(c, peca, grau, { leve: m.couro, placa: m.placa, junta: m.aco, luva: [m.malha, m.placa], borda }) };
+  return { extras: membros(c, peca, grau, { leve: m.couro, placa: m.placa, junta: m.aco, luva: [m.malha, m.placa], borda, proposito: 'baluarte' }) };
 }
 
 /**

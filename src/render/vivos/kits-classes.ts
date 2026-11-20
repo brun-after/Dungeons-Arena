@@ -65,7 +65,7 @@ const pecaDoMago: Kit = (ossos, peca, grau) => {
       forro: pano('#2a3a66', 101, { rasgo: 0.82 }), fecho: borda, gola: { tipo: 'alta', m: vestes[2] },
     }) };
   }
-  return { extras: membros(c, peca, grau, { leve: pano('#4a3b2a', 73), placa: k.couroNegro, junta: k.couro, luva: [k.couro, k.couroNegro], borda, semJuntas: true }) };
+  return { extras: membros(c, peca, grau, { leve: pano('#4a3b2a', 73), placa: k.couroNegro, junta: k.couro, luva: [k.couro, k.couroNegro], borda, semJuntas: true, proposito: 'arcano' }) };
 };
 
 // ---------- arqueiro ----------
@@ -107,7 +107,7 @@ const pecaDoArqueiro: Kit = (ossos, peca, grau) => {
       forro: pano('#4a3a28', 131, { rasgo: 0.8 }), fecho: borda, gola: { tipo: 'pele', m: k.pele }, comprimentos: [0.55, 0.85, 1.2],
     }) };
   }
-  return { extras: membros(c, peca, grau, { leve: k.couro, placa: k.couroNegro, junta: k.couro, luva: [k.couro, k.couroNegro], borda }) };
+  return { extras: membros(c, peca, grau, { leve: k.couro, placa: k.couroNegro, junta: k.couro, luva: [k.couro, k.couroNegro], borda, proposito: 'espreita' }) };
 };
 
 // ---------- necromante ----------
@@ -145,7 +145,7 @@ const pecaDoNecromante: Kit = (ossos, peca, grau) => {
       forro: pano('#2a1f33', 169, { rasgo: 0.6 }), fecho: osso, gola: { tipo: 'penas', m: liso(0x141216, 0.9) },
     }) };
   }
-  return { extras: membros(c, peca, grau, { leve: pano('#2a2620', 171), placa: k.couroNegro, junta: osso, luva: [k.couroNegro, k.couroNegro], borda: osso }) };
+  return { extras: membros(c, peca, grau, { leve: pano('#2a2620', 171), placa: k.couroNegro, junta: osso, luva: [k.couroNegro, k.couroNegro], borda: osso, proposito: 'ossuario' }) };
 };
 
 // ---------- aventureiro ----------
@@ -184,7 +184,7 @@ const pecaDoAventureiro: Kit = (ossos, peca, grau) => {
       forro: pano('#5a2a1e', 197, { rasgo: 0.8 }), fecho: borda, gola: { tipo: 'pele', m: k.pele }, comprimentos: [0.6, 0.95, 1.3],
     }) };
   }
-  return { extras: membros(c, peca, grau, { leve: k.couro, placa: k.couroNegro, junta: k.ferro, luva: [k.couro, k.ferro], borda }) };
+  return { extras: membros(c, peca, grau, { leve: k.couro, placa: k.couroNegro, junta: k.ferro, luva: [k.couro, k.ferro], borda, proposito: 'batedor' }) };
 };
 
 /** Marco 46 (D-189): os kits viraram propósitos (o do mago é o arcano, o do arqueiro a espreita, e assim por diante). */
