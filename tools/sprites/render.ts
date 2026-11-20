@@ -2,7 +2,7 @@
 // src/assets/personagens/<nome>.webp (o atlas: 8 direções × os quadros dos estados) e catalogo.json. Os pacotes brutos
 // ficam em .brutos/ (fora do git; as pastas estão em PASTAS). Roda o three.js no Chromium do Playwright, como
 // tools/objetos/render.ts. As classes saem também com as medidas das mãos e as camadas de armadura por grau
-// (`<nome>~<peça>-<grau>.webp`, src/render/equipamento-3d.ts); `--so-corpo` pula as camadas. `--armas` grava as armas
+// (`<nome>~<propósito>.<peça>-<grau>.webp`, marco 46; `--proposito a,b` só esses); `--so-corpo` pula as camadas. `--armas` grava as armas
 // (`armas/<desenho>.webp`, os 6 graus lado a lado, e armas/catalogo.json).
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -13,6 +13,7 @@ import { MOVIMENTOS, RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
 import { ARMAS_3D, TOMOS_FECHADOS } from '../../src/render/vivos/armas3d';
 import { GRAUS, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
+import { camadaDaPeca, PROPOSITOS } from '../../src/render/vestes';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
 const B = join(RAIZ, '.brutos');
@@ -73,15 +74,18 @@ function arquivoNoDisco(caminho: string): string | null {
 /** A cor de destaque de cada grau: a da raridade (render/objetos.ts COR_RARIDADE). */
 const ACENTOS = [0x888888, 0x2ecc71, 0x3498db, 0x9b59b6, 0xf39c12, 0xff4d6d];
 
-/** As camadas de armadura da classe: a capa, o peito e a cabeça, um atlas por grau. */
+/**
+ * As camadas de armadura do corpo da classe: cada propósito (marco 46, D-189), cada peça, um atlas por grau
+ * (`<propósito>.<peça>-<grau>`). `--proposito a,b` gera só esses propósitos.
+ */
 function camadasDe(r: Receita): PedidoDeCamada[] {
   const eq = r.equipamento;
   if (!eq) return [];
-  return PECAS_DE_ARMADURA.flatMap((peca) =>
+  return PROPOSITOS.filter((p) => !soPropositos || soPropositos.has(p)).flatMap((proposito) => PECAS_DE_ARMADURA.flatMap((peca) =>
     GRAUS.flatMap((_, grau) => {
       if (pecaDeMembro(peca) && grau % 2 !== 0) return [];
-      const armadura = { peca, grau, acento: ACENTOS[grau] ?? 0x888888 };
-      const nome = `${peca}-${grau}`;
+      const armadura = { peca, grau, acento: ACENTOS[grau] ?? 0x888888, proposito };
+      const nome = camadaDaPeca(peca, { proposito, grau });
       if (peca === 'capa') return { nome, tingir: false, armadura };
       if (pecaDeMembro(peca)) return { nome, tingir: false, armadura };
       // O peito sempre tinge o pano do traje; a cabeça, só enquanto é capuz (o elmo entra no raro).
@@ -91,7 +95,7 @@ function camadasDe(r: Receita): PedidoDeCamada[] {
       if (grau >= 2) return { nome, tingir: false, armadura, esconder: 'Hood|Hair' };
       return { nome, tingir: false, armadura, ...eq.cabeca };
     }),
-  );
+  ));
 }
 
 function urlsDe(r: Receita, camadas: PedidoDeCamada[], comVariantes = !!r.equipamento): Record<string, string> {
@@ -123,6 +127,8 @@ const soMembros = args.includes('--so-membros');
 // Use só em revisões que preservam os rigs, a arma, a pose e a geometria do tronco.
 const reusarMaos = args.includes('--reusar-maos');
 const comArmas = args.includes('--armas');
+const iProposito = args.indexOf('--proposito');
+const soPropositos = iProposito >= 0 ? new Set((args[iProposito + 1] ?? '').split(',')) : null;
 const iModelos = args.indexOf('--modelos');
 const pastaModelos = iModelos >= 0 ? args[iModelos + 1] : undefined;
 if (iModelos >= 0 && (!pastaModelos || pastaModelos.startsWith('--'))) throw new Error('Use --modelos <diretório>');
@@ -221,7 +227,7 @@ for (const receita of RECEITAS) {
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const anterior = catalogo[receita.nome];
-    if ((soCorpo || soCabeca || soMembros || reusarMaos) && receita.equipamento && anterior && (
+    if ((soCorpo || soCabeca || soMembros || reusarMaos || soPropositos) && receita.equipamento && anterior && (
       quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
       ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
       pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||
@@ -233,7 +239,8 @@ for (const receita of RECEITAS) {
       catalogo[nome] = entrada;
       bytesTotal += bytes.length;
     };
-    if (k === 0) {
+    // Marco 46 (D-189): com `--proposito`, só as camadas novas; o atlas do corpo fica como está.
+    if (k === 0 && !soPropositos) {
       await gravar(receita.nome, saida.png);
       if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };
     }

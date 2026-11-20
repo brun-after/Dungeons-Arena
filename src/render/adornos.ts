@@ -12,7 +12,8 @@ import { ARMA_DE_CLASSE, OPCOES_JOGAVEIS } from './modelos';
 import { LADO_QUADRO, type Vista } from './modelos/svg';
 import { COR_RARIDADE } from './objetos';
 import type { Raridade } from '../modos/modo';
-import { grauDe, modeloDaArma3d, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from './equipamento-3d';
+import { grauDe, modeloDaArma3d, nomeDaCamada, PECAS_DE_ARMADURA } from './equipamento-3d';
+import { camadaDaPeca, propositoDoModelo, vesteDe } from './vestes';
 
 export interface TexturasAdorno {
   atras: Texture | null;
@@ -135,14 +136,14 @@ const cache3d = new Map<string, Equipamento3d>();
  * da raridade (só as peças vestidas) e as armas de cada mão pelo desenho e pelo grau (a raridade ou a forma). Mãos
  * vazias: a arma da classe, no grau comum.
  */
-export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | null, existeArma: (m: string) => boolean): Equipamento3d | null {
+export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | null, existeArma: (m: string) => boolean, existeCamada: (nome: string) => boolean = () => true): Equipamento3d | null {
   if (!Object.hasOwn(OPCOES_JOGAVEIS, modelo)) return null;
   const padrao = ARMA_DE_CLASSE[modelo as keyof typeof OPCOES_JOGAVEIS];
   const eq = aparencia;
   const desenho = eq ? (eq.arma ?? '') : padrao.arma;
   const secundaria = eq ? eq.secundaria : padrao.secundaria;
   const elemento = eq?.arma ? eq.elementoArma : null;
-  const pecas = PECAS_DE_ARMADURA.map(peca => eq?.[peca] ?? '').join('|');
+  const pecas = PECAS_DE_ARMADURA.map(peca => `${eq?.[peca] ?? ''}:${eq?.vestes?.[peca] ?? ''}`).join('|');
   const chave = `${modelo}|${desenho}|${secundaria}|${pecas}|${elemento}|${eq?.raridadeArma}|${eq?.raridadeSecundaria}|${eq?.formaArma}`;
   const pronto = cache3d.get(chave);
   if (pronto) return pronto;
@@ -150,9 +151,10 @@ export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | nul
   for (const peca of PECAS_DE_ARMADURA) {
     const raridade = eq?.[peca] ?? null;
     if (!raridade) continue;
-    const grau = grauDe(raridade);
-    const visual = pecaDeMembro(peca) ? grau - grau % 2 : grau;
-    camadas.push({ nome: nomeDaCamada(modelo, `${peca}-${visual}`) });
+    // Marco 46 (16/11/2026, D-189): a camada é do propósito da peça; sem o atlas dele neste corpo, a do kit da classe.
+    const v = vesteDe(eq, peca, grauDe(raridade), modelo);
+    const nome = nomeDaCamada(modelo, camadaDaPeca(peca, v));
+    camadas.push({ nome: existeCamada(nome) ? nome : nomeDaCamada(modelo, camadaDaPeca(peca, { ...v, proposito: propositoDoModelo(modelo) })) });
   }
   const saida: Equipamento3d = {
     camadas,

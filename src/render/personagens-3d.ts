@@ -74,6 +74,9 @@ export function armaDe(modelo: string): { url: Promise<string>; medidas: Entrada
   return medidas && url ? { url, medidas } : null;
 }
 
+/** Marco 46 (D-189): há atlas para a camada (`<corpo>~<propósito>.<peça>-<grau>`)? */
+export const existeAtlas = (nome: string): boolean => Object.hasOwn(CAT, nome);
+
 /** Há modelo 3D para a arma? */
 export const existeArma3d = (modelo: string): boolean => Object.hasOwn(CAT_ARMAS, modelo);
 

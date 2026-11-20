@@ -33,7 +33,7 @@ function juntar(pecas: PecaSombria[]): PecaSombria {
 }
 
 function necromanteAncestral(ossos: Ossos): PecaSombria {
-  const kit = KITS_DAS_CLASSES.necromante;
+  const kit = KITS_DAS_CLASSES.ossuario;
   if (!kit) return { extras: [] };
   const pecas = PECAS_DE_ARMADURA.map((p) => kit(ossos, p, 5));
   const c = new Corpo(ossos);

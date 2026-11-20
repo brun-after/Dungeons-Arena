@@ -12,6 +12,7 @@ import { textosVisuais } from './pt-BR-visuais';
 import { textosMovimento } from './pt-BR-movimento';
 import { textosTeclas } from './pt-BR-teclas';
 import { textosEstilos } from './pt-BR-estilos';
+import { textosPecas } from './pt-BR-pecas';
 
 export const ptBR = {
   'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
@@ -753,6 +754,7 @@ export const ptBR = {
   ...textosMovimento,
   ...textosTeclas,
   ...textosEstilos,
+  ...textosPecas,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

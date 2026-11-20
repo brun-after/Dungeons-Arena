@@ -5,7 +5,7 @@ import type { Entidade } from '../entities/entidade';
 
 import { equipamento3d } from './adornos';
 import { SEM_GIRO } from './equipamento-3d';
-import { armaDe, atlasDe, existeArma3d, maoNoQuadro, urlDoAtlas } from './personagens-3d';
+import { armaDe, atlasDe, existeArma3d, existeAtlas, maoNoQuadro, urlDoAtlas } from './personagens-3d';
 import { adornosDoBipede } from './modelos/adornos';
 import { ARMA_DE_CLASSE, MODELOS, OPCOES_JOGAVEIS } from './modelos/index';
 import { LADO_QUADRO } from './modelos/svg';
@@ -53,7 +53,7 @@ export function retrato3d(modelo: string, aparencia: Entidade['aparencia'] = nul
   const canvas = document.createElement('canvas');
   canvas.width = corpo.quadroL;
   canvas.height = corpo.quadroA;
-  const eq = equipamento3d(modelo, aparencia, existeArma3d);
+  const eq = equipamento3d(modelo, aparencia, existeArma3d, existeAtlas);
   const armas = (['d', 'e'] as const).flatMap((lado) => {
     const a = lado === 'd' ? eq?.arma : eq?.secundaria;
     const dados = a ? armaDe(a.modelo) : null;

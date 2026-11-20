@@ -22,6 +22,7 @@ import combosPapelJson from '../data/combos-papel.json';
 import ressonanciasJson from '../data/ressonancias.json';
 import { lerRessonancias, type Ressonancia } from '../combat/ressonancias-dados';
 import movimentosJson from '../data/movimentos.json';
+import pecasJson from '../data/pecas.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
 import origensJson from '../data/origens.json';
@@ -70,6 +71,7 @@ import { lerMovimentos, type MovimentoDaClasse } from '../combat/movimento-class
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
+import { lerPecas, type RegrasDePecas } from '../progression/pecas';
 import { BALANCE_PADRAO } from './contexto';
 
 export interface Conteudo {
@@ -106,6 +108,8 @@ export interface Conteudo {
   ressonancias: ReadonlyMap<string, Ressonancia>;
   /** Marco 40 (13/11/2026, D-164): o movimento de cada classe (três mecânicas, uma ativa). */
   movimentos: ReadonlyMap<string, readonly MovimentoDaClasse[]>;
+  /** Marco 46 (16/11/2026, D-189): propósitos, estilos e efeitos das peças de armadura (data/pecas.json). */
+  pecas: RegrasDePecas;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
   regrasDeBuff: Catalogo<RegraDeBuff>;
   /** Marco 18 (D-070): missões, origens raras e as receitas da forja. */
@@ -171,6 +175,8 @@ export interface FontesDeConteudo {
   armas: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
+  /** Marco 46: data/pecas.json (opcional: sem ele, o oficial). */
+  pecas?: unknown;
   /** Marco 45: data/dimensoes.json (opcional nos testes). */
   dimensoes?: unknown;
   /** Marco 29: arquivo -> JSON de cada reino em src/data/mundo (opcional nos testes). */
@@ -205,6 +211,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const cp = lerCombosDePapel(fontes.combosPapel ?? combosPapelJson);
   const ca = lerAssinados(fontes.combosPapel ?? combosPapelJson);
   const mv = lerMovimentos(movimentosJson);
+  const pc = lerPecas(fontes.pecas ?? pecasJson);
   const rs = lerRessonancias(ressonanciasJson);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
@@ -214,7 +221,12 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
   const dm = lerDimensoes(fontes.dimensoes ?? dimensoesJson);
-  const erros = [...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  // Marco 46 (D-189): o propósito e o estilo escolhidos nos itens fixos existem em pecas.json.
+  for (const item of it.itens.values()) {
+    if (item.proposito !== undefined && !pc.pecas.propositos.has(item.proposito)) erros.push(`item ${item.id}: propósito desconhecido "${item.proposito}"`);
+    if (item.estilo !== undefined && !pc.pecas.estilos.has(item.estilo)) erros.push(`item ${item.id}: estilo desconhecido "${item.estilo}"`);
+  }
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -318,7 +330,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
-      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos, BALANCE_PADRAO.mundo.fusao),
+      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos, BALANCE_PADRAO.mundo.fusao, pc.pecas),
       itensBase: ib.bases,
       elementos: el.elementos,
       interacoes: ia.interacoes,
@@ -331,6 +343,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       combosAssinados: ca.assinados,
       ressonancias: rs.ressonancias,
       movimentos: mv.movimentos,
+      pecas: pc.pecas,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
       origens: og.origens,

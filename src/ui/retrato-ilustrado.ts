@@ -4,7 +4,7 @@ import { grauDe, modeloDaArma3d, SEM_GIRO, TOMOS, tomoFechado } from '../render/
 import { ARMA_DE_CLASSE } from '../render/modelos';
 import catalogo from '../assets/retratos/armas/catalogo.json';
 import { equipamento3d } from '../render/adornos';
-import { existeArma3d } from '../render/personagens-3d';
+import { existeArma3d, existeAtlas } from '../render/personagens-3d';
 import { webglAcelerado } from '../render/vivos/acelerado';
 
 const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
@@ -205,7 +205,7 @@ async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<
   // 06/11/2026: com skin vestida, o retrato é a skin (sem o equipamento).
   const chave = chaveDaSkin(eq?.skin, modelo) ?? modelo;
   if (chave !== modelo && !p.suporta(chave)) return null;
-  const pedido = pedidoVivo(`retrato:${chave}`, chave, eq, equipamento3d(modelo, eq, existeArma3d), 'parado', 0, 0, Math.PI / 2);
+  const pedido = pedidoVivo(`retrato:${chave}`, chave, eq, equipamento3d(modelo, eq, existeArma3d, existeAtlas), 'parado', 0, 0, Math.PI / 2);
   const escala = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
   const canvas = await p.retrato(pedido, Math.round((LARGURA + MARGEM * 2) * escala), Math.round(ALTURA * escala));
   return canvas;

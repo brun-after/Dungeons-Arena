@@ -50,6 +50,7 @@ import { miraDaGeral } from './sintonia-arqueiro';
 import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
 import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
 import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
+import { aoSerAtingidoDasPecas, multiplicadorDasPecas, resistenciaFisicaDasPecas } from './efeitos-de-peca';
 import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 import { curaDoBasico, vinculoDosMortos } from './necromancia';
 import { penetracaoPct } from '../progression/vinculo';
@@ -237,14 +238,14 @@ export function aplicarImpacto(
     const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
     // Marco 45 (16/11/2026, D-182): os traços das criaturas de Filo e as mecânicas dos chefes, nos dois lados.
     const criatura = fatorRecebidoDaCriatura(estado, ctx, alvo, atacante, hab, costas) * (atacante ? fatorCausadoDaCriatura(estado, ctx, atacante, alvo) * forcaDoChefe(estado, ctx, atacante) : 1);
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp * criatura;
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp * criatura * (1 - resistenciaFisicaDasPecas(ctx, alvo, hab) / 100);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: absorve === 0 && (imuneADano(alvo, tick) || recebido === 0), multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) : 1),
+      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) * multiplicadorDasPecas(ctx, atacante, hab) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     absorveu = absorve > 0 && !r.falha;
@@ -413,6 +414,8 @@ export function aplicarImpacto(
     dispararGanchosDe(estado, ctx, conjurador, 'aoAcertar', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (critico) dispararGanchosDe(estado, ctx, conjurador, 'aoCritico', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (dano > 0) dispararGanchosDe(estado, ctx, alvo, 'aoReceberGolpe', { outro: conjurador, hab }, saida);
+    // Marco 46 (16/11/2026, D-189): as peças de quem levou o golpe (botas, peitoral e manto).
+    if (dano > 0) aoSerAtingidoDasPecas(estado, ctx, alvo, conjurador, hab, dano, saida);
   }
 }
 

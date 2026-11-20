@@ -26,6 +26,7 @@ export { lerMovimentos, TIPOS_MOVIMENTO, type MovimentoDaClasse, type Parametros
 import { buscarEntidade } from '../core/estado';
 import { escolher } from '../core/rng';
 import { posicionar, vivo, type Entidade, type ModoDeMovimento } from '../entities/entidade';
+import { fatorDeRecargaDasPecas } from './efeitos-de-peca';
 import { podeFerir } from '../modos/relacao';
 import { emCombate } from '../progression/buffs';
 import { aplicarEfeito } from './efeitos';
@@ -178,7 +179,8 @@ function gastarCarga(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m:
   const mc = (e.movimentoClasse ??= { ativo: m.id, cargas: {} });
   const prontas = (mc.cargas[m.id] ?? []).filter((t) => t > estado.tick);
   if (prontas.length >= Math.max(1, p.cargas)) return false;
-  const fator = !ehPrincipal(m) && emCombate(estado, ctx, e) ? ctx.balance.movimentoClasse.recargaEmCombatePct / 100 : 1;
+  // Marco 46 (D-189): as perneiras encurtam a recarga.
+  const fator = (!ehPrincipal(m) && emCombate(estado, ctx, e) ? ctx.balance.movimentoClasse.recargaEmCombatePct / 100 : 1) * fatorDeRecargaDasPecas(ctx, e);
   mc.cargas[m.id] = [...prontas, estado.tick + ticksDe(p.recargaMs * fator)];
   return true;
 }

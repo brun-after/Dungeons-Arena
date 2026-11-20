@@ -14,6 +14,7 @@ import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../mo
 import type { Elemento } from '../combat/elementos';
 import { lerGanchos, type Gancho } from './ganchos';
 import type { FormaItem } from './gerar-item-base';
+import type { PerfilDePeca } from './pecas';
 
 export type NomeAtributo = keyof Atributos;
 export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
@@ -67,6 +68,11 @@ export interface Item {
   monta?: 'acampamento';
   /** Marco 27 (29/10/2026, D-126): o desenho da arma (data/armas.json), que diz a família e o básico dela. */
   arma?: string;
+  /** Marco 46 (16/11/2026, D-189): o perfil da peça de armadura (propósito, estilo, grau e efeitos), pelo id. */
+  peca?: PerfilDePeca | undefined;
+  /** Marco 46: o item fixo pode escolher o propósito e o estilo da peça (sem eles, a semente do id escolhe). */
+  proposito?: string;
+  estilo?: string;
 }
 
 /** Marco 27 (D-126): qualquer arma também cabe na mão secundária (o 3º básico sai por ela). */
@@ -136,6 +142,8 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       ganchos: lerGanchos(l, o.ganchos),
       ...(o.arma !== undefined ? { arma: l.texto(o, 'arma') } : {}),
       ...(o.monta !== undefined ? { monta: l.opcao(o, 'monta', ['acampamento'] as const) } : {}),
+      ...(o.proposito !== undefined ? { proposito: l.texto(o, 'proposito') } : {}),
+      ...(o.estilo !== undefined ? { estilo: l.texto(o, 'estilo') } : {}),
     };
     if (o.progressao !== undefined) {
       const p = l.objeto(o.progressao, 'progressao');

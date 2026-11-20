@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.38 · **Data:** 20/11/2026
+**Versão:** 1.40 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
+> - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
 > - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
 > - **1.37 (19/11/2026)**: D-184, adendo: a luz de XP vira luz pura, sem superfície: um núcleo minúsculo que emana raios, mais e mais longos com o XP.
 > - **1.36 (19/11/2026)**: D-187: as teclas de cada ação passam a ser configuráveis nas Configurações; só os direcionais ficam fixos.
@@ -5953,3 +5955,42 @@ os marcos):
 `combat/movimento-classe.ts` (os botões e a montaria), `render/anel-invocacao.ts` (o anel) e
 `render/movimento/chao-movimento.ts` (o Círculo). O leitor de `movimentos.json` foi para `combat/movimentos-dados.ts`
 e o estado do movimento para `entities/movimento-estado.ts` (o limite de 800 linhas).
+
+**Adendo (20/11/2026): as metas do simulador.** Com o lobo batendo 49% do básico do dono a cada 650 ms, a fera passa a
+fazer a maior parte do dano, como pedido: a meta da fatia da invocação (que mede só o lobo do Aventureiro) vai de
+15–35% a 15–65% (medido: 58,5%). A luta do Aventureiro contra ele mesmo no PvP Livre ficou mais curta (5,5 s); o piso
+dele cai para 5 s em `metas.pvpLivre.tempoMinSPorClasse`, e as outras classes seguem com 6–10 s.
+
+## D-189 — Marco 46: equipamento por propósito, estilo, grau e elemento (16/11/2026)
+
+**Contexto.** A aparência da armadura vinha da classe de quem a vestia, e as peças só davam atributos e defesa. O pedido
+é descolar o visual das classes, organizar por propósito e estilo, manter os graus, acrescentar o destaque e o
+elemento, e dar a cada peça efeitos próprios. Desenho completo em [`docs/EQUIPAMENTO.md`](EQUIPAMENTO.md).
+
+**Decisão.**
+- **Fixos na peça.** Propósito e estilo são campos do perfil da peça, sem transmog. O perfil nasce do id do item (a
+  semente escolhe propósito, estilo, elemento e receitas), então nada muda no save, na rede nem no certificado: o item
+  continua sendo só o id. Os itens fixos podem escolher `proposito` e `estilo` em `itens.json`.
+- **Cinco propósitos**, pelas referências: Baluarte (Guerreiro), Batedor (Aventureiro), Arcano (Mago), Espreita
+  (Arqueiro) e Ossuário (Necromante). O Arqueiro vai para Espreita (o kit dele já tinha capuz, pano no rosto e máscara
+  de ave) e o Aventureiro para Batedor (gambeson, brigandina, chapéu de ferro), ao contrário da sugestão inicial do
+  prompt. Os espinhos das referências viram a marca do reflexo, não um sexto propósito.
+- **Estilo é só visual** (simples, medieval, colorida, arcana, meme) e **não reaproveita o pentagrama** do marco 39
+  (D-147, D-148): o pentagrama é mecânica de dano e de ritmo; o estilo da peça é persona. No código, `estilo` da peça e
+  `estilos` da ficha ficam em módulos separados.
+- **Efeitos fixos e variados.** Um modelo só, `gatilho → condição → efeito`, em `data/pecas.json`. `aceita` diz os
+  pares de cada peça, sem código por peça. O grau libera 1, 2 ou 3 receitas e multiplica os números; `grauMinimo`
+  guarda as mais fortes; os `tetos` seguram as somas.
+- **Botas renovam, não acumulam.** A velocidade entra como `acelerado` (regra `mais_forte`): disparar de novo leva o
+  fim para a frente e mantém o bônus.
+- **Reflexo e absorção pela `relacao()`**: o reflexo e o dano da chegada só caem em quem é hostil a quem veste, igual
+  em PvP e contra criaturas. O dano da chegada vem do poder base (D-148).
+- **Ponte com os ganchos.** A resistência do elmo vira um gancho passivo (o combate já soma resistências); a física
+  entra no multiplicador recebido do golpe sem elemento.
+- **Atlas.** A chave passa a `<corpo>~<propósito>.<peça>-<grau>`. Os atlas antigos mudaram só de nome (o kit da
+  classe é o propósito dela). Sem o atlas de um propósito num corpo, a camada usa o propósito da classe do corpo.
+- **Elemento em tempo de execução.** Nenhum atlas por elemento: a aparência pública leva o elemento dominante do vínculo
+  em 4 degraus, e o render pinta veios, partículas e as reações aos estados.
+
+**Observação.** Os números dos efeitos são a primeira calibragem; o simulador de balanceamento ainda não veste peças com
+efeito.

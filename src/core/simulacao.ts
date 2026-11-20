@@ -53,6 +53,7 @@ import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
 import { processarEncarnacoes } from '../combat/encarnacao';
 import { processarClima } from '../combat/clima';
+import { pecasNosEventos, processarPecas } from '../combat/efeitos-de-peca';
 import { processarMissoes } from '../progression/missoes';
 import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos, expirarDrops } from '../world/objetos';
@@ -133,6 +134,8 @@ export function simular(
   processarAmbientes(estado, ctx, saida, inicio);
   // Marco 23 (D-092): o pulso do clima da fase de tema elemental.
   processarClima(estado, ctx, saida);
+  // Marco 46 (16/11/2026, D-189): as botas que leem o chão do elemento.
+  processarPecas(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   // Marco 22: o dano que o falcão levou sai da vida do dono antes das mortes.
   sincronizarCompanheiros(estado, ctx, saida);
@@ -142,6 +145,8 @@ export function simular(
   registrarDescobertas(estado, ctx, saida.slice(inicio), saida);
   // Marco 24 (D-096): os ganchos da ultimate e do combo (ressonâncias Gladiador, Maestro, Eco ancestral…).
   dispararGanchosDosEventos(estado, ctx, saida.slice(inicio), saida);
+  // Marco 46 (D-189): o rastro e a chegada das perneiras, pelos eventos do movimento da classe.
+  pecasNosEventos(estado, ctx, saida.slice(inicio), saida);
   processarEnxame(estado, ctx);
   processarSpawner(estado, ctx, saida);
   estado.tick++;

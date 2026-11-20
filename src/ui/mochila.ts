@@ -6,6 +6,7 @@ import { retratoPersonagem, painelPersonagem } from './retrato-personagem';
 // cada consumível (7–9 e 0 desde o marco 24, D-050).
 // Marco 14 (14/10/2026): a aba Habilidades (ui/mochila-habilidades.ts) e os livros (usar ensina).
 
+import { textoDaPeca } from './texto-da-peca';
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -113,6 +114,8 @@ export function resumoDoItem(item: Item, arma?: { familia: string; basico: strin
   // Marco 18 (D-069): a forma e o que a Lendária/Última faz.
   if (item.forma) partes.unshift(t(`forma.${item.forma}` as ChaveTexto));
   if (item.forma && item.descricao) partes.push(item.descricao);
+  // Marco 46 (D-189): o propósito, o estilo e os efeitos da peça de armadura.
+  if (item.peca) partes.push(textoDaPeca(item.peca));
   return partes.join(' · ');
 }
 
