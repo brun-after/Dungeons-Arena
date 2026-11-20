@@ -583,7 +583,7 @@ export function processarMovimentoClasse(estado: EstadoJogo, ctx: ContextoSimula
     const montaria = movimentoAtivo(ctx, e);
     if (!montaria || !feraDisponivel(e, petDe(e)) || !companheiroDe(estado, e, petDe(e))) continue;
     delete mc.revezarAteTick;
-    delete mc.cargas[montaria.id];
+    mc.cargas[montaria.id] = [];
     usarMovimento(estado, ctx, e, saida, undefined, undefined, undefined, 1);
   }
 }

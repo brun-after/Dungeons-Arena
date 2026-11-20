@@ -75,7 +75,7 @@ describe('o cansaço das feras (D-188)', () => {
 
   it('o lobo leva o dono por 1 min no nível 1; cansado, desce o dono e a vez passa ao urso', () => {
     const c = cena();
-    c.j.bolsa && (c.j.bolsa.pet = 'lobo');
+    obter(c.j.bolsa).pet = 'lobo';
     c.passo([], 100);
     c.colar();
     c.passo([{ t: 'movimentoClasse', botao: 1 }]);
@@ -96,7 +96,7 @@ describe('o cansaço das feras (D-188)', () => {
 
   it('a Disparada do lobo vai a +80% e gasta o dobro', () => {
     const c = cena();
-    c.j.bolsa && (c.j.bolsa.pet = 'lobo');
+    obter(c.j.bolsa).pet = 'lobo';
     c.passo([], 100);
     c.colar();
     c.passo([{ t: 'movimentoClasse', botao: 1 }]);
@@ -115,7 +115,7 @@ describe('o cansaço das feras (D-188)', () => {
 
   it('o golpe no lobo passa 20% à vida atual do dono e o resto cansa o lobo', () => {
     const c = cena();
-    c.j.bolsa && (c.j.bolsa.pet = 'lobo');
+    obter(c.j.bolsa).pet = 'lobo';
     c.passo([], 100);
     const lobo = obter(companheiroDe(c.estado, c.j));
     c.j.hp = c.j.hpMax = 1000;
@@ -144,7 +144,7 @@ describe('o cansaço das feras (D-188)', () => {
 
   it('o Círculo de Contenção barra a magia de fora e gasta todo o fôlego do urso', () => {
     const c = cena();
-    c.j.bolsa && (c.j.bolsa.pet = 'urso');
+    obter(c.j.bolsa).pet = 'urso';
     c.passo([], 100);
     c.colar();
     c.passo([{ t: 'movimentoClasse', botao: 1 }]);
