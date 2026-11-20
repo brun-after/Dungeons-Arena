@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.38 · **Data:** 20/11/2026
+**Versão:** 1.39 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.39 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada e as pernas abraçam o lobo e o urso.
 > - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
 > - **1.37 (19/11/2026)**: D-184, adendo: a luz de XP vira luz pura, sem superfície: um núcleo minúsculo que emana raios, mais e mais longos com o XP.
 > - **1.36 (19/11/2026)**: D-187: as teclas de cada ação passam a ser configuráveis nas Configurações; só os direcionais ficam fixos.
@@ -5953,3 +5954,14 @@ os marcos):
 `combat/movimento-classe.ts` (os botões e a montaria), `render/anel-invocacao.ts` (o anel) e
 `render/movimento/chao-movimento.ts` (o Círculo). O leitor de `movimentos.json` foi para `combat/movimentos-dados.ts`
 e o estado do movimento para `entities/movimento-estado.ts` (o limite de 800 linhas).
+
+**Adendo (20/11/2026).**
+- **Uma vida só, montado**: o golpe no cavaleiro ou na fera que o leva cai inteiro na vida do dono (sem o repasse e
+  sem cansar a fera), menor pela montaria: 10% no falcão, 10% no lobo e 20% no urso no nível 1, até 15%, 15% e 30% no
+  100 (`montadoReducaoPct`). O lobo montado não intercepta golpes (já está embaixo do dono).
+- **A fera montada luta**: não sai do lugar, mas golpeia a caça marcada que estiver ao lado, no ritmo e no gasto de
+  fôlego dela.
+- **A pose**: a biblioteca de animações não tem montaria; o `Driving_Loop` deixava as pernas juntas à frente (sentado
+  no ar, as duas à vista). `render/vivos/sela.ts` abre as coxas para os lados com os joelhos dobrados e esconde a perna
+  do lado de lá quando o bicho é visto de lado, no 3D ao vivo e no atlas (`tools/sprites/pagina.ts`, o Aventureiro
+  reassado).

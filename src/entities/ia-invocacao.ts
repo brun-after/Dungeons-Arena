@@ -137,7 +137,13 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   if (inv.comportamento === 'isca') return;
   // Marco 40 (13/11/2026, D-164): o servo do Posto dos Mortos espera parado. D-168: o servo na névoa vai com o
   // Necromante (o núcleo o leva, sem lutar) e o companheiro que é o veículo do dono vai com ele.
-  if (postoDormente(estado, ctx, e) || naNevoaDoDono(estado, e) || ehVeiculo(estado, ctx, e)) return;
+  if (postoDormente(estado, ctx, e) || naNevoaDoDono(estado, e)) return;
+  // D-188, adendo (20/11/2026): a fera que leva o dono não sai do lugar, mas morde (ou bica) a caça marcada ao alcance.
+  if (ehVeiculo(estado, ctx, e)) {
+    const caca = companheiroCansado(estado, e) ? null : cacaDoPet(estado, e);
+    if (caca && dono && alvoOfensivoValido(estado, ctx, e, caca) && chebyshev(celulaOcupada(e), celulaOcupada(caca)) <= 1) golpearDaSela(estado, ctx, e, ia, preset, dono, caca, saida);
+    return;
+  }
   // Marco 28 (D-127): a Flecha-âncora do Arqueiro não anda; atira no hostil mais perto no alcance do básico dela.
   if (inv.comportamento === 'torre') {
     atirarDaTorre(estado, ctx, e, ia, preset, saida);
@@ -187,6 +193,14 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   // Marco 24 (D-095): com a vertente Lich, os mortos atiram de longe.
   const lich = ataqueDoMorto(estado, ctx, e);
   perseguirEAtacar(estado, ctx, e, ia, preset, alvo, lich?.alcance ?? 1, lich?.habilidade ?? e.ataqueBasico, saida);
+}
+
+/** D-188, adendo: o golpe da fera montada, no intervalo dela, gastando o fôlego como na caça. */
+function golpearDaSela(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo, dono: Entidade, alvo: Entidade, saida: EventoSimulacao[]): void {
+  if (e.acao || estado.tick < ia.proximoAtaqueTick || !iniciarAcao(estado, ctx, e, e.ataqueBasico, alvo.id, saida)) return;
+  ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs / ritmoDoCompanheiro(estado, ctx, e));
+  ia.ataquesFeitos++;
+  gastarFolego(estado, ctx, dono, petDoCompanheiro(e), gastoDoGolpe(ctx, dono, petDoCompanheiro(e)), saida);
 }
 
 /** Vai até o alvo (sem empilhar com as irmãs) e, no alcance, ataca no intervalo do preset. */

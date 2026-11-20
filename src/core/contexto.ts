@@ -26,7 +26,7 @@ import type { RegrasVinculo } from '../progression/vinculo';
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
 
 /** D-188: os números comuns das três feras do Aventureiro. */
-export interface FeraBalance { viagemPct: number; repassePct: [number, number]; descansoMs: [number, number]; golpe: [number, number]; cansacoPorDano: number; danoPct: number }
+export interface FeraBalance { viagemPct: number; /** D-188, adendo: montado, a vida é uma só e o dano cai isto. */ montadoReducaoPct: [number, number]; repassePct: [number, number]; descansoMs: [number, number]; golpe: [number, number]; cansacoPorDano: number; danoPct: number }
 
 export interface Balance {
   dragoes: { alturaAtlas: number; larguraAtlas: number; alturaMin: number; alturaMax: number; nivelMax: number; folgaCorredor: number; salaMin: number; salaPorCorredor: number; salaExtra: number; areaPorSala: number };
