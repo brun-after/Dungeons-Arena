@@ -423,7 +423,7 @@ export class PalcoVivo {
     const montarPeca = (chave: string): PecaFundida | null => {
       const pronta = pecas.get(chave);
       if (pronta !== undefined) return pronta;
-      // Marco 46 (D-188): a peça do propósito (o kit), com o estilo e a marca; a chave diz tudo.
+      // Marco 46 (D-189): a peça do propósito (o kit), com o estilo e a marca; a chave diz tudo.
       const f = emRepouso((inverso) => {
         const v = montarVesteViva(ossos, chave);
         return v ? fundida(v, inverso) : null;
@@ -494,7 +494,7 @@ export class PalcoVivo {
       const f = a.base.montarPeca(chave);
       if (!f) continue;
       for (const { geometria, material } of f.malhas) {
-        // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele); D-188: o realce do grau e do elemento
+        // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele); D-189: o realce do grau e do elemento
         let mat = realcar(material, grauDaChave(chave), p.realce, a.panos);
         if (material.userData.vento) {
           a.vento ??= { u: novosUniformes(), estado: novoEstadoDeVento() };
@@ -784,7 +784,7 @@ export function pedidoVivo(
 ): PedidoVivo {
   // 06/11/2026: com skin (a chave `skin:<id>`), prevalece a skin: sem peças e sem armas do equipamento (a skin tem a dela).
   if (modelo.startsWith('skin:')) return { id, modelo, pecas: {}, estado, tempoMs, fracao, angulo, golpe, arma: null, secundaria: null };
-  // Marco 46 (D-188): cada peça pelo propósito, estilo, marca e grau dela; o realce pelo grau, conjunto e elemento.
+  // Marco 46 (D-189): cada peça pelo propósito, estilo, marca e grau dela; o realce pelo grau, conjunto e elemento.
   const realce = realceDe(aparencia, modelo);
   const arma = equipamento?.arma.modelo ? equipamento.arma : null;
   const secundaria = equipamento?.secundaria ?? null;

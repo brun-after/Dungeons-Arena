@@ -38,8 +38,8 @@ describe('os botões do movimento (D-172)', () => {
     expect(ids('guerreiro')).toEqual(['arremetida', 'marcha_de_guerra', 'salto_de_guerra']);
     expect(ids('necromante')).toEqual(['troca_de_corpo', 'posto_dos_mortos', 'forma_de_nevoa']);
     expect(ids('arqueiro')).toEqual(['salto_atras', 'chegada', 'camuflagem']);
-    // O Aventureiro: um botão só, o do companheiro ativo.
-    expect(ids('aventureiro')).toHaveLength(1);
+    // D-188: o Aventureiro: a troca no Shift, a montaria da fera da vez no V e o Chamado no X.
+    expect(ids('aventureiro')).toEqual(['troca_de_companheiro', 'falcao_carrega', 'chamado']);
   });
 
   it('cada botão usa o próprio movimento, sem trocar antes', () => {

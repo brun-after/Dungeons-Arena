@@ -1,4 +1,4 @@
-// Marco 46 (16/11/2026, D-188): as peças de armadura por propósito e estilo, e os textos dos efeitos de peça.
+// Marco 46 (16/11/2026, D-189): as peças de armadura por propósito e estilo, e os textos dos efeitos de peça.
 
 export const textosPecas = {
   'peca.proposito.baluarte': 'Baluarte',

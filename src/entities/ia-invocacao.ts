@@ -10,7 +10,8 @@
 // Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
 import { ehVeiculo, naNevoaDoDono, postoDormente } from '../combat/movimento-classe';
-import { cacaDoPet, petDoCompanheiro } from '../combat/pets';
+import { cacaDoPet, companheiroCansado, petDoCompanheiro } from '../combat/pets';
+import { gastarFolego, gastoDoGolpe } from '../combat/feras';
 import { ritmoDoCompanheiro } from '../combat/pets-estilos';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';
@@ -156,6 +157,12 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   }
   // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro tem IA própria (passeia, mergulha e recolhe).
   if (inv.comportamento === 'companheiro') {
+    // D-188 (19/11/2026): a fera cansada não luta: só acompanha o dono.
+    if (companheiroCansado(estado, e)) {
+      mudarModo(ia, 'patrulha', null, estado.tick);
+      seguirDono(estado, ctx, e, dono);
+      return;
+    }
     // Marco 40 (14/11/2026, D-166): a caça marcada pelo básico do dono: o companheiro vai até ela e ataca com o básico dele.
     const caca = cacaDoPet(estado, e);
     if (caca && alvoOfensivoValido(estado, ctx, e, caca)) {
@@ -199,6 +206,9 @@ function perseguirEAtacar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidad
       // D-173: o companheiro do Mestre de Feras ataca mais vezes.
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs / ritmoDoCompanheiro(estado, ctx, e));
       ia.ataquesFeitos++;
+      // D-188: cada golpe da fera na caça gasta o fôlego dela.
+      const dono = e.invocacao?.companheiro ? buscarEntidade(estado, e.invocacao.donoId) : undefined;
+      if (dono) gastarFolego(estado, ctx, dono, petDoCompanheiro(e), gastoDoGolpe(ctx, dono, petDoCompanheiro(e)), saida);
     }
     return;
   }

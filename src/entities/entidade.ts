@@ -10,6 +10,8 @@ import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Afinidade } from '../combat/afinidade';
 import type { Elemento } from '../combat/elementos';
 import type { PontaElemental } from '../progression/vinculo';
+import type { EstadoFera, EstadoMovimento } from './movimento-estado';
+export type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -238,44 +240,6 @@ export interface HabilidadeConhecida {
  * sem o atributo de classe (a classe vive nos estilos); quem montou a build no 39 passa pela tela de novo e recebe de
  * volta também os pontos que tinha posto nele.
  */
-/** Marco 40 (D-164): o modo de movimento em curso (voo, montaria, névoa, marcha, tirolesa, camuflagem ou o preparo). */
-export interface ModoDeMovimento {
-  tipo: 'preparo' | 'voo' | 'montado' | 'nevoa' | 'marcha' | 'tirolesa' | 'camuflado' | 'salto';
-  id: string;
-  desdeTick: number;
-  ateTick?: number;
-  x?: number;
-  y?: number;
-  rumoX?: number;
-  rumoY?: number;
-  /** A tirolesa: as células que ainda faltam e a velocidade (células por segundo). */
-  restante?: number;
-  velocidade?: number;
-  lentidaoPct?: number;
-  pesada?: boolean;
-  /** Atacou ou foi atingido: o bônus de viagem acabou (o modo segue até o fim). */
-  semBuff?: boolean;
-  /** Marco 40 (14/11/2026, D-168): a ponta do eneágono que o modo leva, a partir do marco elemental da mecânica. */
-  ponta?: PontaElemental;
-}
-
-export interface EstadoMovimento {
-  ativo: string;
-  /** Por mecânica, os ticks em que cada carga gasta volta. */
-  cargas: Record<string, number[]>;
-  modo?: ModoDeMovimento;
-  /** A Âncora Rúnica do Mago: o totem no ponto de volta, até `ateTick`; `raio` é o alcance para voltar (D-168). */
-  ancora?: { x: number; y: number; ateTick: number; raio: number };
-  /** Marco 40 (14/11/2026, D-168): o círculo do Acelerar (o Mago), com a ponta quando é elemental. */
-  circulo?: { x: number; y: number; raio: number; pct: number; desdeTick: number; ateTick: number; ponta?: PontaElemental };
-  /** D-170: o tick do último Salto para Trás (a armadilha sob o Arqueiro não dispara se ele saltou a tempo). */
-  recuoTick?: number;
-  /** 15/11/2026: o tick em que a Arremetida (o dash) acaba; saltar logo depois dá o alcance máximo do salto. */
-  avancoAteTick?: number;
-  /** D-168: os tiros do Arqueiro levam a ponta até o tick (depois de sair da camuflagem). */
-  tiroElemental?: { ponta: PontaElemental; ateTick: number };
-}
-
 export const SISTEMA_DO_PERSONAGEM = 40;
 
 export interface Bolsa {
@@ -392,6 +356,8 @@ export interface Entidade {
   cacaAteTick?: number;
   /** Marco 40 (D-166): o companheiro ativo também na entidade (na arena, a ficha não tem bolsa). */
   petAtivo?: 'falcao' | 'lobo' | 'urso';
+  /** D-188 (19/11/2026): o fôlego de cada fera do Aventureiro (ausente: cheia e descansada). */
+  feras?: Partial<Record<'falcao' | 'lobo' | 'urso', EstadoFera>>;
   rumoX: number;
   rumoY: number;
   /** Pontos a percorrer em linha reta (o caminho já suavizado), e a fila curta de onde o integrador tira o próximo. */
@@ -567,7 +533,7 @@ export interface AparenciaEquipada {
   raridadeSecundaria?: string | null;
   /** 06/11/2026: a skin ativa; com ela, o equipamento não aparece no personagem (palco-vivo.ts). */
   skin?: string | null;
-  /** Marco 46 (D-188): o visual de cada peça (`<propósito>.<estilo>.<marca>`) e o elemento do vínculo (degrau 0–4). */
+  /** Marco 46 (D-189): o visual de cada peça (`<propósito>.<estilo>.<marca>`) e o elemento do vínculo (degrau 0–4). */
   vestes?: Partial<Record<'capa' | 'corpo' | 'pernas' | 'pes' | 'maos' | 'cabeca', string>>;
   elementoVeste?: string | null; vinculoVeste?: number;
 }
@@ -757,7 +723,11 @@ export function clonarEntidade(e: Entidade): Entidade {
       ...(e.movimentoClasse.circulo ? { circulo: { ...e.movimentoClasse.circulo } } : {}),
       ...(e.movimentoClasse.tiroElemental ? { tiroElemental: { ...e.movimentoClasse.tiroElemental } } : {}),
       ...(e.movimentoClasse.recuoTick !== undefined ? { recuoTick: e.movimentoClasse.recuoTick } : {}),
+      ...(e.movimentoClasse.avancoAteTick !== undefined ? { avancoAteTick: e.movimentoClasse.avancoAteTick } : {}),
+      ...(e.movimentoClasse.contencao ? { contencao: { ...e.movimentoClasse.contencao } } : {}),
+      ...(e.movimentoClasse.revezarAteTick !== undefined ? { revezarAteTick: e.movimentoClasse.revezarAteTick } : {}),
     } } : {}),
+    ...(e.feras ? { feras: Object.fromEntries(Object.entries(e.feras).map(([k, v]) => [k, { ...v }])) } : {}),
     ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),

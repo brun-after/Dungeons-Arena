@@ -1,8 +1,9 @@
 # Equipamento por propósito, estilo, grau e elemento (marco 46)
 
-**Versão:** 1.2 · **Data:** 19/11/2026
+**Versão:** 1.3 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.3 (20/11/2026)**: a decisão passa a D-189 (a D-188 da main são as feras do Aventureiro).
 > - **1.2 (19/11/2026)**: a decisão passa a D-188 (a D-186 e a D-187 da main são o terceiro movimento no X e as teclas
 >   configuráveis); as perneiras leem os botões do movimento (Shift, V e X, ou o que o jogador configurar).
 > - **1.1 (17/11/2026)**: a decisão passa a D-186; as perneiras leem os três botões do movimento; o gerador de atlas

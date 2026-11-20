@@ -747,10 +747,10 @@ test.describe('celular (emulação)', () => {
     await abrir(page);
     const viewport = page.viewportSize();
     const joystick = await page.getByTestId('joystick').boundingBox();
-    // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral; no marco 40, D-165, a Troca de companheiro fixa e o
-    // Ataque do companheiro) e a ultimate no botão grande.
+    // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral; D-188, o Mergulho e o Grito, sem a Troca de
+    // companheiro, que virou o Shift) e a ultimate no botão grande.
     await expect(page.getByTestId('ultimate')).toBeVisible();
-    for (const id of ['troca_de_companheiro', 'mergulho', 'cura_sagrado']) {
+    for (const id of ['mergulho', 'grito_do_falcao', 'cura_sagrado']) {
       const caixa = await page.getByTestId(`habilidade-${id}`).boundingBox();
       expect(caixa, id).not.toBeNull();
       if (!caixa || !viewport || !joystick) continue;

@@ -43,8 +43,10 @@ import { chaveDoAtor, habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
 import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
 import { lancarSolo } from './solos';
-import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
-import { boteDoPet, marcaComOBasico, marcar, petDoCompanheiro } from './pets';
+import { celulaDoCompanheiro, temCompanheiro, ticksDoVooDoFalcao } from './companheiro';
+import { boteDoPet, feraAtivaDisponivel, marcaComOBasico, marcar, petDe, petDoCompanheiro } from './pets';
+import { gastarFolego, gastoDaSkill } from './feras';
+import { ehDaClasse } from '../progression/habilidades-classe';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { adiantarMiraPorSkill, consumirMira, miraCheia, temMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
@@ -278,6 +280,9 @@ export function iniciarAcao(
   // Marco 40 (D-164): no meio do salto e esperando a âncora não se ataca.
   if (motivoDoMovimento(ator)) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
+  // D-188 (19/11/2026): a skill de classe do Aventureiro sai da fera; com as três cansadas, não sai.
+  const daFera = !ultimate && temCompanheiro(ator) && ehDaClasse(ctx, { classeId: 'aventureiro' }, hab.id);
+  if (daFera && !feraAtivaDisponivel(ator)) return recusar('sem_companheiro');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
   if (!podePagar(ator, custoMana, custoVida)) return recusar('recurso');
@@ -339,6 +344,8 @@ export function iniciarAcao(
   ator.mana -= custoMana;
   ator.hp -= custoVida;
   if (semMana) delete ator.classeSemMana;
+  // D-188: a skill de classe cansa a fera (o Mergulho, ~3 por fôlego cheio no nível 1).
+  if (daFera) gastarFolego(estado, ctx, ator, petDe(ator), gastoDaSkill(ctx, ator, petDe(ator), hab.id), saida);
   if (hab.recargaMs > 0) {
     // Marco 27 (D-126): o básico das duas mãos divide a recarga do automático.
     const chave = chaveRecarga(ator.id, chaveDoBasico(ator, hab.id));
@@ -504,7 +511,8 @@ function forcaDoDono(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade,
   if (!doDono?.formulaDano) return null;
   const fonte = fonteDaHabilidade(dono, ctx, estado.tick, doDono);
   // 14/11/2026 (D-166): a mordida leva uma fração do básico do dono (o companheiro também segue a skill).
-  const fracao = ctx.balance.ajustesClasses.aventureiro.marca.danoPct / 100;
+  // D-188: a fração é de cada fera (o lobo bate menos, mas mais vezes; inimigos.json, `intervaloAtaqueMs`).
+  const fracao = ctx.balance.ajustesClasses.aventureiro.feras[petDoCompanheiro(ator)].danoPct / 100;
   return { hab: { ...hab, formulaDano: doDono.formulaDano, multDano: doDono.multDano }, fonte: { ...fonte, multDano: fonte.multDano * fracao } };
 }
 
@@ -564,7 +572,7 @@ function lancar(
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
     // Marco 39 (D-150): usar a skill alimenta o vínculo com o elemento dela (o básico não conta).
     if (ator.bolsa && !ehBasico(ator, hab.id)) registrarUso(ctx, ator.bolsa, hab.elemento, estado.tick);
-    // Marco 46 (D-188): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
+    // Marco 46 (D-189): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
     if (ator.bolsa && !ehBasico(ator, hab.id)) aoUsarHabilidadeDasPecas(estado, ctx, ator, hab, saida);
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };

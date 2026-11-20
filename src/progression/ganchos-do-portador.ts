@@ -33,7 +33,7 @@ export function ganchosDe(ctx: ContextoGancho, e: Entidade): Gancho[] {
   for (const a of bonusAtivos(ctx.conteudo.conjuntos, bolsa, ctx.conteudo.itens)) for (const b of a.bonus) saida.push(...b.ganchos);
   // Marco 39 (D-147): as mecânicas dos estilos, na força de cada ponta (substituem as ressonâncias).
   saida.push(...ganchosDosEstilos(ctx, e));
-  // Marco 46 (D-188): a resistência passiva das peças (o elmo) entra como gancho passivo.
+  // Marco 46 (D-189): a resistência passiva das peças (o elmo) entra como gancho passivo.
   saida.push(...ganchosDasPecas(ctx, e));
   return saida;
 }

@@ -571,6 +571,8 @@ export const ptBR = {
   'recusa.sem_invocacao': 'Nenhuma invocação sua no alcance do ritual',
   'recusa.fora_de_alcance': 'Alvo fora de alcance',
   'recusa.nadando': 'Não é possível atacar enquanto nada. Volte à margem.',
+  // D-188 (19/11/2026): as três feras cansadas.
+  'recusa.sem_companheiro': 'As três feras estão cansadas: sem skills de classe até uma descansar',
   'recusa.bloqueado': 'Você não pode agir agora',
   'recusa.ocupado': 'Já está conjurando',
   'recusa.sem_habilidade': 'Habilidade indisponível',

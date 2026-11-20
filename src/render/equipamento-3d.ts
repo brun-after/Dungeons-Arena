@@ -6,7 +6,7 @@
 // - O capuz/elmo, o peito e a capa são camadas do tamanho do atlas da classe, uma por grau (`<classe>~<peça>-<grau>`),
 //   já recortadas pelo corpo: vão por cima dele.
 
-// Marco 46 (16/11/2026, D-188): os graus e as peças moram no núcleo (progression/graus.ts); daqui só reexportamos.
+// Marco 46 (16/11/2026, D-189): os graus e as peças moram no núcleo (progression/graus.ts); daqui só reexportamos.
 export { GRAUS, PECAS_DE_ARMADURA, grauDe, grauVisual, pecaDeMembro, type PecaDeArmadura } from '../progression/graus';
 
 /** Os desenhos sem modelo próprio (armas.json `modelo`), como nos tokens. */

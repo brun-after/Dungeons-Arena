@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.38 · **Data:** 19/11/2026
+**Versão:** 1.39 · **Data:** 20/11/2026
 
 > **Histórico**
-> - **1.38 (19/11/2026)**: D-188: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
+> - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
+> - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
 > - **1.37 (19/11/2026)**: D-184, adendo: a luz de XP vira luz pura, sem superfície: um núcleo minúsculo que emana raios, mais e mais longos com o XP.
 > - **1.36 (19/11/2026)**: D-187: as teclas de cada ação passam a ser configuráveis nas Configurações; só os direcionais ficam fixos.
 > - **1.35 (19/11/2026)**: D-186: o terceiro movimento da classe sai do Espaço para o X; o X deixa de dispensar as invocações (sem tecla).
@@ -5902,7 +5903,59 @@ fica livre (não ataca, desde a D-185).
   interagir) mostra a tecla escolhida.
 - Escolher o Ctrl mostra um aviso: com ele seguro, o W fecha a aba do navegador, e a página não consegue impedir.
 
-## D-188 — Marco 46: equipamento por propósito, estilo, grau e elemento (16/11/2026)
+## D-188 — As feras do Aventureiro com fôlego (19/11/2026)
+
+**Contexto.** A montaria tinha tempo e distância fixos, a troca de fera ocupava uma das duas teclas de classe e o
+Aventureiro usava só um botão de movimento. O usuário pediu a troca no movimento, o fôlego no lugar do tempo e um
+efeito próprio de cada fera.
+
+**Decisão (nível 1).**
+- **Botões**: Shift troca para a próxima fera descansada; V monta a da vez; X, desmontado, chama a fera para junto
+  (o Chamado, 3 s de recarga) e, montado, faz o golpe dela. A Troca de companheiro sai da barra (vai para as
+  `saidas`, e o save antigo a perde ao recalcular a ficha); as iniciais voltam a ser duas: o Mergulho e o Grito.
+- **Fôlego** (0 a 100, o anel preto em volta da fera, tracejado cinza quando cansada): a montaria não tem mais tempo
+  nem distância nem perde a velocidade ao atacar ou levar golpe; gasta o fôlego. Também gastam: cada golpe da fera
+  na caça marcada, as skills de classe que saem dela (o Mergulho, 33: três por fôlego cheio; as outras, 20) e o dano
+  que ela segura.
+- **Repasse**: do golpe no bicho, só 30% (falcão), 20% (lobo) e 10% (urso) chegam ao dono, na vida atual (a máxima
+  não muda); o resto vira cansaço, pela fração da vida do dono (o lobo cansa 0,8 e o urso 0,6 disso).
+- **Cansaço**: no zero, a fera desce o dono (o voo pousa), não luta, não protege nem provoca, e descansa 15 s, 30 s
+  ou 1 min 30; a vez passa sozinha à próxima descansada. Fora de campo (ou ao lado do dono, fora de combate e sem
+  levar), recupera o fôlego aos poucos (cheio no dobro do descanso). Com as três cansadas, o Aventureiro não usa
+  skill de classe e o básico e as comuns saem dele (o básico fere, sem marcar).
+- **Falcão**: +100% de velocidade; cheio, aguenta o tempo de andar o alcance do voo (o mesmo de antes). X, o
+  **Arremesso**: o voo acaba num salto de 1/4 do alcance do voo e o falcão cansa com o descanso em dobro.
+- **Lobo**: +60%, 1 min. Bate 49% do básico do dono (o falcão, 70%) a cada 650 ms (o falcão, 1000 ms): ~8% mais por
+  segundo. X, a **Disparada** (liga e desliga): +80%, gastando o dobro por segundo.
+- **Urso**: +30%, 1 min 30. X, o **Círculo de Contenção**: o urso desce e forma por 3 s um círculo (raio 2) em que
+  a magia vinda de fora não entra em quem está dentro (o dono, o urso, os aliados); gasta todo o fôlego que resta e
+  o descanso começa no fim. Cada magia barrada conta 10% da vida do dono e encurta o descanso em 1% por 1% (até 60%).
+  A conta é uma estimativa por magia: o núcleo não calcula o dano de um golpe que não acontece.
+
+**Do nível 1 ao 100** (pares lineares em `ajustesClasses.aventureiro.feras`, nada liga e desliga de repente, salvo
+os marcos):
+- O repasse cai a 20%, 12% e 5%; o descanso, a 10 s, 20 s e 1 min; o lobo aguenta 1 min 30 e o urso 2 min; o voo
+  cresce com o alcance (10 a 20 células); o Mergulho cai a 25 (quatro por fôlego); os golpes custam menos.
+- Marcos: **30**, o elemental (já existia: ao descer, a fera solta a ponta nos golpes; no Arremesso, a queda leva a
+  ponta); **50**, o **Revezamento** (a fera que cansa com o dono montado passa a vez já montando a próxima); **70**, o
+  **Fôlego** (fora de campo, recupera no tempo do descanso, o dobro de rápido); **90**, o **Auge** (Arremesso de 1/3,
+  Disparada de +100%, Círculo de 4 s).
+
+**Pelos estilos** (`estilosDosPets`, no valor da faixa 10, lido pela faixa de cada estilo, como na D-173):
+- **Mestre de Feras**: os golpes gastam 40% menos, as skills 25% menos e o descanso é 30% menor.
+- **Batedor**: a montaria gasta 30% menos, o Arremesso vai 50% mais longe e a Disparada perde metade do gasto extra.
+- **Implacável**: a queda do Arremesso atordoa em volta (até 1 s), a Disparada empurra quem toca e o fim do Círculo
+  empurra quem está perto.
+- **Sobrevivente**: repasse 30% a 40% menor, 40% menos cansaço pelo dano, Círculo 2 s mais longo e cada magia barrada
+  conta 50% mais.
+- **Xamã**: a queda do Arremesso, a Disparada e o Círculo levam a ponta (a runa) do dono.
+
+**Onde**: `combat/feras.ts` (fôlego, cansaço, descanso e troca), `combat/movimento-feras.ts` (o X),
+`combat/movimento-classe.ts` (os botões e a montaria), `render/anel-invocacao.ts` (o anel) e
+`render/movimento/chao-movimento.ts` (o Círculo). O leitor de `movimentos.json` foi para `combat/movimentos-dados.ts`
+e o estado do movimento para `entities/movimento-estado.ts` (o limite de 800 linhas).
+
+## D-189 — Marco 46: equipamento por propósito, estilo, grau e elemento (16/11/2026)
 
 **Contexto.** A aparência da armadura vinha da classe de quem a vestia, e as peças só davam atributos e defesa. O pedido
 é descolar o visual das classes, organizar por propósito e estilo, manter os graus, acrescentar o destaque e o
@@ -5935,4 +5988,3 @@ elemento, e dar a cada peça efeitos próprios. Desenho completo em [`docs/EQUIP
 
 **Observação.** Os números dos efeitos são a primeira calibragem; o simulador de balanceamento ainda não veste peças com
 efeito.
-

@@ -47,18 +47,29 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 2, "raioColeta": 7, "passeioMs": 1200, "passaPertoACada": 2, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 3000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 },
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 2, "raioColeta": 7, "passeioMs": 1200, "passaPertoACada": 2, "raioCombate": 8, "pousoMs": 3000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 },
       "pets": {
-        "lobo": { "reflexoPct": [70, 50], "passoMs": 260, "interceptarMs": 3000 },
-        "urso": { "reflexoPct": [60, 30], "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2, "nadaLutando": true }
+        "lobo": { "passoMs": 260, "interceptarMs": 3000 },
+        "urso": { "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2, "nadaLutando": true }
+      },
+      "feras": {
+        "falcao": { "viagemPct": 100, "repassePct": [30, 20], "descansoMs": [15000, 10000], "golpe": [6, 4], "cansacoPorDano": 1, "danoPct": 70, "arremesso": 0.25, "arremessoDescanso": 2 },
+        "lobo": { "viagemPct": 60, "disparadaPct": 80, "disparadaGasto": 2, "sustentaMs": [60000, 90000], "repassePct": [20, 12], "descansoMs": [30000, 20000], "golpe": [3, 2], "cansacoPorDano": 0.8, "danoPct": 49 },
+        "urso": { "viagemPct": 30, "sustentaMs": [90000, 120000], "repassePct": [10, 5], "descansoMs": [90000, 60000], "golpe": [5, 3], "cansacoPorDano": 0.6, "danoPct": 70, "contencao": { "duracaoMs": 3000, "raio": 2, "bloqueioVidaPct": 10, "descontoMaxPct": 60 } },
+        "skill": { "padrao": [20, 15], "mergulho": [33, 25] },
+        "foraDeCampo": 2,
+        "chamadoMs": 3000,
+        "trocaMs": 600,
+        "marcos": { "revezamento": 50, "folego": 70, "auge": 90 },
+        "auge": { "arremesso": 0.334, "disparadaPct": 100, "contencaoMs": 4000 }
       },
       "gritoDeFera": { "baseMs": 500, "porNivelMs": 100, "maxMs": 4000 },
       "estilosDosPets": {
-        "mestre_de_feras": { "falcao": { "ataquePct": 40 }, "lobo": { "invocacaoPct": 50 }, "urso": { "provocarRaio": 2 } },
-        "batedor": { "falcao": { "passoPct": 40 }, "lobo": { "passoPct": 35 }, "urso": { "passoPct": 35 } },
-        "implacavel": { "falcao": { "repetirPct": 50 }, "lobo": { "repetirPct": 40 }, "urso": { "repetirPct": 25, "empurrao": 1.5 } },
-        "sobrevivente": { "falcao": { "curaNoGolpePct": 3 }, "lobo": { "interceptarMenosPct": 40, "reflexoMenosPct": 25 }, "urso": { "reflexoMenosPct": 40 } },
-        "pergaminhista": { "falcao": { "runaNoGolpe": 1, "runaRaio": 1.5 }, "lobo": { "runaNoGolpe": 1 }, "urso": { "runaNoGolpe": 1 } }
+        "mestre_de_feras": { "falcao": { "ataquePct": 40, "golpeMenosPct": 40, "skillMenosPct": 25, "descansoMenosPct": 30 }, "lobo": { "invocacaoPct": 50, "golpeMenosPct": 40, "skillMenosPct": 25, "descansoMenosPct": 30 }, "urso": { "provocarRaio": 2, "golpeMenosPct": 40, "skillMenosPct": 25, "descansoMenosPct": 30 } },
+        "batedor": { "falcao": { "passoPct": 40, "drenoMenosPct": 30, "arremessoPct": 50 }, "lobo": { "passoPct": 35, "drenoMenosPct": 30, "disparadaMenosPct": 50 }, "urso": { "passoPct": 35, "drenoMenosPct": 30 } },
+        "implacavel": { "falcao": { "repetirPct": 50, "quedaAtordoaMs": 1000 }, "lobo": { "repetirPct": 40, "disparadaEmpurra": 1 }, "urso": { "repetirPct": 25, "empurrao": 1.5, "contencaoEmpurra": 2 } },
+        "sobrevivente": { "falcao": { "curaNoGolpePct": 3, "reflexoMenosPct": 30, "cansacoMenosPct": 40 }, "lobo": { "interceptarMenosPct": 40, "reflexoMenosPct": 30, "cansacoMenosPct": 40 }, "urso": { "reflexoMenosPct": 40, "cansacoMenosPct": 40, "contencaoMaisMs": 2000, "bloqueioMaisPct": 50 } },
+        "pergaminhista": { "falcao": { "runaNoGolpe": 1, "runaRaio": 1.5, "quedaRuna": 1.5 }, "lobo": { "runaNoGolpe": 1, "disparadaRuna": 1 }, "urso": { "runaNoGolpe": 1, "contencaoRuna": 1 } }
       },
       "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70, "duracaoMs": 5000 }
     },

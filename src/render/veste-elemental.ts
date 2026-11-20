@@ -1,4 +1,4 @@
-// A camada elemental da armadura no Pixi (marco 46, 16/11/2026, D-188). Vale no 3D em tempo real e no atlas (as
+// A camada elemental da armadura no Pixi (marco 46, 16/11/2026, D-189). Vale no 3D em tempo real e no atlas (as
 // partículas ficam por cima de qualquer um). Lê só a aparência pública e os estados da entidade:
 // - o elemento dominante do vínculo solta partículas leves nos pontos de destaque, mais densas com mais vínculo;
 // - as reações ao vivo: queimando solta brasa da capa, congelado cobre de geada, molhado com eletrizado solta faíscas.

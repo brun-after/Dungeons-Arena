@@ -179,7 +179,7 @@ export class CatalogoDeItens extends Map<string, Item> {
     private readonly elementos: ReadonlyMap<Elemento, DefinicaoElemento> = new Map(),
     /** Marco 38 (08/11/2026, D-142): as peças fundidas (`fu_`) com um troféu elemental. */
     private readonly fusao: RegrasDeFusao | null = null,
-    /** Marco 46 (16/11/2026, D-188): o perfil das peças de armadura (propósito, estilo e efeitos), fixo pelo id. */
+    /** Marco 46 (16/11/2026, D-189): o perfil das peças de armadura (propósito, estilo e efeitos), fixo pelo id. */
     private readonly pecas: RegrasDePecas | null = null,
   ) {
     super(fixos);

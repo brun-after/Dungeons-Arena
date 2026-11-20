@@ -75,7 +75,7 @@ function arquivoNoDisco(caminho: string): string | null {
 const ACENTOS = [0x888888, 0x2ecc71, 0x3498db, 0x9b59b6, 0xf39c12, 0xff4d6d];
 
 /**
- * As camadas de armadura do corpo da classe: cada propósito (marco 46, D-188), cada peça, um atlas por grau
+ * As camadas de armadura do corpo da classe: cada propósito (marco 46, D-189), cada peça, um atlas por grau
  * (`<propósito>.<peça>-<grau>`). `--proposito a,b` gera só esses propósitos.
  */
 function camadasDe(r: Receita): PedidoDeCamada[] {
@@ -239,7 +239,7 @@ for (const receita of RECEITAS) {
       catalogo[nome] = entrada;
       bytesTotal += bytes.length;
     };
-    // Marco 46 (D-188): com `--proposito`, só as camadas novas; o atlas do corpo fica como está.
+    // Marco 46 (D-189): com `--proposito`, só as camadas novas; o atlas do corpo fica como está.
     if (k === 0 && !soPropositos) {
       await gravar(receita.nome, saida.png);
       if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };

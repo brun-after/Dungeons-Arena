@@ -21,7 +21,7 @@ import { DT_MS } from '../../core/loop';
 import type { Entidade, PontoVisual } from '../../entities/entidade';
 import type { PontaElemental } from '../../progression/vinculo';
 import { centroDaCelula, type Projecao } from '../projecao';
-import { anelDePoeira, baseDoTotem, circuloAcelerar, COR_ARCANA, linhaDeAlcance, marcaDoPosto, rachaduras, sigilo } from './chao-movimento';
+import { anelDePoeira, baseDoTotem, circuloAcelerar, circuloContencao, COR_ARCANA, linhaDeAlcance, marcaDoPosto, rachaduras, sigilo } from './chao-movimento';
 import { NuvemDaNevoa, type NuvemNoQuadro } from './nuvem-nevoa';
 import { ARCO_DO_BALANCO, balancoDaCorda, MAOS_PX, naNevoa, pendulo, PIVO_PX, type CorpoEmMovimento } from './corpo-movimento';
 
@@ -136,6 +136,9 @@ export class RastrosDeMovimento {
         const fim = Math.min(1, ((c.ateTick - estado.tick) * DT_MS) / 800);
         circuloAcelerar(chao, centroDaCelula(c.x, c.y), c.raio, c.ponta ? this.o.corDaPonta(c.ponta) : COR_ARCANA, formar, fim, giro);
       }
+      // D-188: o Círculo de Contenção do urso.
+      const ct = mc?.contencao;
+      if (ct && ct.ateTick > estado.tick) circuloContencao(chao, centroDaCelula(ct.x, ct.y), ct.raio, ((ct.ateTick - estado.tick) * DT_MS) / 500, giro);
       const posto = e.invocacao?.posto;
       if (posto) {
         const centro = centroDaCelula(posto.x, posto.y);

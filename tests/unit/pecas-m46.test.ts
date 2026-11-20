@@ -1,4 +1,4 @@
-// Marco 46 (16/11/2026, D-188): as peças de armadura por propósito, estilo, grau e efeito. O modelo de dados
+// Marco 46 (16/11/2026, D-189): as peças de armadura por propósito, estilo, grau e efeito. O modelo de dados
 // (data/pecas.json, progression/pecas.ts) e o motor `gatilho → condição → efeito` (combat/efeitos-de-peca.ts): cada
 // linha da tabela tem o teste do gatilho, da duração em ticks e do fim do efeito.
 
@@ -58,7 +58,7 @@ function cena(ctx: ContextoSimulacao = contexto(faseDeTexto(SALA_ABERTA))) {
 const ativo = (estado: EstadoJogo, e: Entidade, tipo: string) => e.efeitos.find((f) => f.tipo === tipo && f.ateTick > estado.tick);
 const hab = (h: Partial<Habilidade>): Pick<Habilidade, 'elemento' | 'tipoAtaque' | 'politicaImpacto'> => ({ elemento: null, tipoAtaque: 'magico', politicaImpacto: 'projetil', ...h });
 
-describe('o modelo de dados das peças (D-188)', () => {
+describe('o modelo de dados das peças (D-189)', () => {
   it('pecas.json é válido e cobre as 6 peças, os 5 propósitos e os 5 estilos', () => {
     const { pecas, erros } = lerPecas(pecasJson);
     expect(erros).toEqual([]);

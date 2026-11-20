@@ -17,6 +17,7 @@ import { processarCampos } from '../combat/tatica';
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { processarPets } from '../combat/pets';
+import { processarFeras } from '../combat/feras';
 import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
 import { processarTirosDoBalanco } from '../combat/movimento-tiros';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
@@ -103,6 +104,8 @@ export function simular(
   // Marco 24 (D-096): as sinergias passivas por tempo (Bastião de pedra).
   processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
+  // D-188 (19/11/2026): o fôlego das feras do Aventureiro (o descanso, a recuperação).
+  processarFeras(estado, ctx, saida);
   processarMovimentoClasse(estado, ctx, saida);
   // D-168: o Arqueiro balançando na corda da Chegada atira no inimigo mais perto.
   processarTirosDoBalanco(estado, ctx, saida);
@@ -131,18 +134,18 @@ export function simular(
   processarAmbientes(estado, ctx, saida, inicio);
   // Marco 23 (D-092): o pulso do clima da fase de tema elemental.
   processarClima(estado, ctx, saida);
-  // Marco 46 (16/11/2026, D-188): as botas que leem o chão do elemento.
+  // Marco 46 (16/11/2026, D-189): as botas que leem o chão do elemento.
   processarPecas(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   // Marco 22: o dano que o falcão levou sai da vida do dono antes das mortes.
-  sincronizarCompanheiros(estado, ctx);
+  sincronizarCompanheiros(estado, ctx, saida);
   const abates = processarMortes(estado, ctx, saida);
   // Marco 18 (D-070): missões e o diário de descobertas.
   processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);
   registrarDescobertas(estado, ctx, saida.slice(inicio), saida);
   // Marco 24 (D-096): os ganchos da ultimate e do combo (ressonâncias Gladiador, Maestro, Eco ancestral…).
   dispararGanchosDosEventos(estado, ctx, saida.slice(inicio), saida);
-  // Marco 46 (D-188): o rastro e a chegada das perneiras, pelos eventos do movimento da classe.
+  // Marco 46 (D-189): o rastro e a chegada das perneiras, pelos eventos do movimento da classe.
   pecasNosEventos(estado, ctx, saida.slice(inicio), saida);
   processarEnxame(estado, ctx);
   processarSpawner(estado, ctx, saida);

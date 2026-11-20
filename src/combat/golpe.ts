@@ -1,7 +1,9 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
-import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro, reflexoDoPet } from './pets';
-import { aposGolpeDoCompanheiro, golpeDoCompanheiro, leituraDoCompanheiro } from './pets-estilos';
+import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro } from './pets';
+import { cansacoDoDano, gastarFolego, repasseDoPet } from './feras';
+import { barradoPelaContencao } from './movimento-feras';
+import { aposGolpeDoCompanheiro, golpeDoCompanheiro } from './pets-estilos';
 import { dispararRessonancias } from './ressonancias';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
@@ -153,10 +155,19 @@ export function aplicarImpacto(
       saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
       return;
     }
-    // D-173: no Sobrevivente, chega menos ao dono.
-    const menos = Math.min(80, leituraDoCompanheiro(estado, ctx, alvo, 'reflexoMenosPct'));
-    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoPet(ctx, pet, dono.nivel) * (1 - menos / 100) };
+    // D-188 (19/11/2026): chega ao dono só o repasse (30%, 20%, 10% no nível 1), na vida atual; o que o bicho segura
+    // vira cansaço (o Sobrevivente segura mais e cansa menos).
+    const repasse = repasseDoPet(ctx, dono, pet);
+    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * repasse };
+    const antes = dono.hp;
     aplicarImpacto(estado, ctx, dono, { ...impacto, fonte }, saida);
+    const chegou = Math.max(0, antes - dono.hp);
+    if (chegou > 0 && repasse > 0) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, (chegou * (1 - repasse)) / repasse), saida);
+    return;
+  }
+  // D-188: o Círculo de Contenção do urso barra as magias de fora.
+  if (barradoPelaContencao(estado, ctx, alvo, impacto.hab, impacto.fonte.id)) {
+    saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
     return;
   }
   const { hab } = impacto;
@@ -403,7 +414,7 @@ export function aplicarImpacto(
     dispararGanchosDe(estado, ctx, conjurador, 'aoAcertar', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (critico) dispararGanchosDe(estado, ctx, conjurador, 'aoCritico', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (dano > 0) dispararGanchosDe(estado, ctx, alvo, 'aoReceberGolpe', { outro: conjurador, hab }, saida);
-    // Marco 46 (16/11/2026, D-188): as peças de quem levou o golpe (botas, peitoral e manto).
+    // Marco 46 (16/11/2026, D-189): as peças de quem levou o golpe (botas, peitoral e manto).
     if (dano > 0) aoSerAtingidoDasPecas(estado, ctx, alvo, conjurador, hab, dano, saida);
   }
 }

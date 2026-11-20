@@ -131,6 +131,13 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('companheiroTrocado', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('pet.log.trocou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
   });
+  // D-188 (19/11/2026): o cansaço das feras.
+  bus.on('feraCansou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('pet.log.cansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
+  });
+  bus.on('feraDescansou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('pet.log.descansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
+  });
   bus.on('acaoCancelada', (ev) => {
     if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));
   });

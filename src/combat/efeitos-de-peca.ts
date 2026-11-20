@@ -1,4 +1,4 @@
-// O motor dos efeitos de peça (marco 46, 16/11/2026, D-188). Puro e determinístico.
+// O motor dos efeitos de peça (marco 46, 16/11/2026, D-189). Puro e determinístico.
 //
 // Cada peça de armadura vestida traz efeitos `gatilho > condição > efeito` (progression/pecas.ts, data/pecas.json).
 // Aqui eles rodam, sem código por peça: cada gatilho é um momento do combate e cada efeito é uma função pequena.

@@ -4,7 +4,7 @@
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
-> - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-188).
+> - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-189).
 > - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-182).
 > - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
 > - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
@@ -379,7 +379,7 @@ cor dele, partículas leves e reações ao estado (brasa da capa ao queimar, gea
 A marca do efeito aparece na peça: espinhos no reflexo, garras no corpo a corpo, penas na velocidade, filigrana na
 magia. A mochila mostra o propósito, o estilo e cada efeito.
 
-Desenho em [docs/EQUIPAMENTO.md](docs/EQUIPAMENTO.md); detalhes em D-188.
+Desenho em [docs/EQUIPAMENTO.md](docs/EQUIPAMENTO.md); detalhes em D-189.
 
 ### Marco 45 — as criaturas de Filo (16/11/2026)
 
