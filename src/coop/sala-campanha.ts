@@ -103,7 +103,7 @@ export class SalaCampanha extends SalaArena {
   }
 
   protected override criarPersonagem(msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId): EntradaDePersonagem {
-    const r = conferirPersonagem(msg.pedidoFicha, this.ctx, entidadeId, jogadorId);
+    const r = conferirPersonagem(msg.pedidoFicha, this.ctx, entidadeId, jogadorId, this.estado.tick);
     if (!r) return { ok: false, motivo: 'personagem_invalido' };
     const e = r.entidade;
     e.controlador = 'remoto';

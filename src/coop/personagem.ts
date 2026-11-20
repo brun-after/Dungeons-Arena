@@ -22,6 +22,7 @@ import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
 import { vontadeNoLugarDaForca } from '../save/migracao-39';
 import { semSkillsDoLegado } from '../save/migracao-40';
+import { conferirExtras, reancorarVinculoUso } from './conferir-extras';
 import { pontosAteONivel, tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 
 const MAX_NOME = 24;
@@ -169,9 +170,10 @@ function conferirItens(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimu
 
 /**
  * Confere o pedido e devolve o personagem como a sala o aceita. null quando nem a classe existe (não há o que
- * aproveitar). A entidade nasce em (0, 0): quem chama põe no lugar.
+ * aproveitar). A entidade nasce em (0, 0): quem chama põe no lugar. `tickDestino` é o tick da sala que recebe: o uso
+ * do vínculo é reancorado nele (marco 48, D-192).
  */
-export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: string, jogadorId: string): PersonagemConferido | null {
+export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: string, jogadorId: string, tickDestino = 0): PersonagemConferido | null {
   if (!ehObjeto(pedido) || !ehObjeto(pedido.bolsa)) return null;
   // Marco 40 (D-158): a ficha antiga (Mundo, grupo, certificado) troca as gerais antigas pelas skills de núcleo.
   const b = semSkillsDoLegado(pedido.bolsa, ctx.conteudo.legadoDeSkills, ctx.conteudo.skillsQueSairam);
@@ -200,6 +202,8 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   }
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
+  // Marco 48 (20/11/2026, D-192): runas, uso do vínculo, companheiro, missões, diário e vitórias passam a valer aqui.
+  conferirExtras(ctx, b, bolsa, tickDestino);
   // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
   bolsa.personagemId = typeof b.personagemId === 'string' && /^[0-9a-zA-Z-]{8,64}$/.test(b.personagemId) ? b.personagemId : '';
   // Marco 39 (D-146): só o sistema atual vale; qualquer outro valor pede a tela de atualização de novo.
@@ -229,6 +233,9 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   registrar('conhecidas', b.conhecidas, bolsa.conhecidas);
   registrar('pontosHabilidade', b.pontosHabilidade, bolsa.pontosHabilidade);
   registrar('ouro', b.ouro, bolsa.ouro);
+  registrar('runas', b.runas ?? null, bolsa.runas ?? null);
+  registrar('pet', b.pet ?? null, bolsa.pet ?? null);
+  registrar('missoesConcluidas', b.missoesConcluidas ?? [], bolsa.missoesConcluidas);
   for (const campo of ['tomosComprados', 'pontosPorItens', 'ranksPorItens', 'xpFracao', 'xpLegado'] as const) {
     if (b[campo] !== undefined) registrar(campo, b[campo], bolsa[campo] ?? 0);
   }
@@ -254,6 +261,7 @@ export function aplicarRetratoNoSave(r: RegistroProgresso, retrato: PedidoDePers
   const historico = unirHistoricosXp(j.bolsa?.xpPorFase, retrato.bolsa.xpPorFase);
   j.bolsa = clonarEntidade({ ...j, bolsa: retrato.bolsa }).bolsa;
   if (j.bolsa && Object.keys(historico).length) j.bolsa.xpPorFase = historico;
+  if (j.bolsa) reancorarVinculoUso(ctx, j.bolsa, estado.tick);
   j.nivel = retrato.nivel;
   j.xp = retrato.xp;
   recalcularFicha(j, ctx);
@@ -297,6 +305,7 @@ export function atualizarPersonagemNoSave(r: RegistroProgresso, personagem: Enti
   const historico = unirHistoricosXp(j.bolsa?.xpPorFase, copia.bolsa?.xpPorFase);
   j.bolsa = copia.bolsa;
   if (j.bolsa && Object.keys(historico).length) j.bolsa.xpPorFase = historico;
+  if (j.bolsa) reancorarVinculoUso(ctx, j.bolsa, estado.tick);
   recalcularFicha(j, ctx);
   j.hp = j.hpMax;
   j.mana = j.manaMax;

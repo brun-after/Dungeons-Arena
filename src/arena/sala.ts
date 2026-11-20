@@ -360,7 +360,7 @@ export class SalaArena {
     const cabe = (nivel: number) => !faixa || (nivel >= faixa.min && nivel <= faixa.max);
     const pedido = ehObjeto(msg.pedidoFicha) ? msg.pedidoFicha : {};
     const certificado = this.opcoes.certificacao?.conferir(pedido.certificado) ?? null;
-    const conferido = certificado ? conferirPersonagem(certificado.retrato, this.ctx, entidadeId, jogadorId) : null;
+    const conferido = certificado ? conferirPersonagem(certificado.retrato, this.ctx, entidadeId, jogadorId, this.estado.tick) : null;
     if (conferido && conferido.alteracoes.length === 0) {
       const e = conferido.entidade;
       if (!cabe(e.nivel)) return { ok: false, motivo: 'fora_da_faixa' };
