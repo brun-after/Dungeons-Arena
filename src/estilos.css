@@ -1555,6 +1555,34 @@ body.toque .botao-habilidade .tecla {
   color: var(--texto-suave);
   font-variant-numeric: tabular-nums;
 }
+/* Marco 47 (20/11/2026, D-190): os filtros da vitrine de armadura. */
+.filtro-vitrine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 6px;
+}
+.filtro-vitrine .rotulo-filtro {
+  min-width: 72px;
+  color: var(--texto-suave);
+  font-size: 12px;
+}
+.chip-vitrine {
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.chip-vitrine[aria-pressed='true'] {
+  background: #f1c40f;
+  border-color: #f1c40f;
+  color: #1a1a1a;
+}
 .ordem-item {
   display: flex;
   flex-direction: column;

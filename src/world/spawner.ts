@@ -11,9 +11,11 @@ import type { Celula } from '../core/comandos';
 import type { CategoriaSpawner, ContextoSimulacao } from '../core/contexto';
 import { DONO_FASE, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
-import { aleatorio, inteiro } from '../core/rng';
+import { aleatorio, criarRng, hashTexto, inteiro } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { sortearItem } from '../progression/sorteio';
+import { pecaDoBau } from '../progression/loot-pecas';
+import { nivelDaFase } from '../progression/sorteio-pecas';
 import { passavel } from './fase';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
 
@@ -66,17 +68,21 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
     case 'bau': {
       const itens: string[] = [];
       const n = inteiro(estado.rng, s.itensBau[0], s.itensBau[1]);
+      // Marco 47 (20/11/2026, D-190): o baú sorteia no nível da fase (era sempre 1) e pode trazer uma peça de armadura
+      // (pelo RNG do próprio baú: o do estado não anda a mais).
       for (let i = 0; i < n; i++) {
-        const item = sortearItem(estado, ctx, false);
+        const item = sortearItem(estado, ctx, false, nivelDaFase(ctx));
         if (item) itens.push(item.id);
       }
+      const peca = pecaDoBau(ctx, criarRng(hashTexto(`${estado.faseId}/${objetoId}/bau`)));
+      if (peca) itens.push(peca);
       const ouro = inteiro(estado.rng, s.ouroBau[0], s.ouroBau[1]);
       estado.objetos.push(novoObjeto(objetoId, 'bau', c.x, c.y, { itens, ouro }));
       saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'bau', x: c.x, y: c.y });
       return;
     }
     case 'loot': {
-      const item = sortearItem(estado, ctx, false);
+      const item = sortearItem(estado, ctx, false, nivelDaFase(ctx));
       if (item) largarItem(estado, item.id, c.x, c.y, saida, 1, objetoId);
       return;
     }

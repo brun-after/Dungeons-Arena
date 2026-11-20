@@ -191,6 +191,13 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   if (bolsa.pontosPorItens !== undefined) bolsa.pontosPorItens = Math.min(bolsa.pontosPorItens, bolsa.tomosComprados ?? 0);
   if (b.xpFracao !== undefined) bolsa.xpFracao = typeof b.xpFracao === 'number' && Number.isFinite(b.xpFracao) && b.xpFracao >= 0 && b.xpFracao < 1 ? b.xpFracao : 0;
   if (b.xpPorFase !== undefined) bolsa.xpPorFase = lerHistoricoXp(b.xpPorFase);
+  // Marco 47 (20/11/2026, D-190): a garantia contra azar do loot de armadura segue o personagem (nunca acima do teto).
+  const azar = b.azarDePeca;
+  if (ehObjeto(azar)) {
+    const g = ctx.conteudo.sorteio.loot.garantia;
+    const contador = (v: unknown, teto: number) => (typeof v === 'number' && Number.isFinite(v) ? limitar(v, 0, teto) : 0);
+    bolsa.azarDePeca = { semPeca: contador(azar.semPeca, g.abatesSemPeca), semRara: contador(azar.semRara, g.abatesSemRara) };
+  }
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
   // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
