@@ -1,5 +1,5 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
-import { troncoBarra } from './troncos';
+import { renteAoTronco, temTronco, troncoBarra } from './troncos';
 import { alturaEm, barraPorAltura, fatorDeSubida } from './relevo';
 import { apagarLuz } from '../combat/luz-propria';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
@@ -183,6 +183,14 @@ export function pararMovimento(e: Entidade): void {
 /** A entidade pode entrar na célula agora (terreno, muralha e a célula de outra entidade que a bloqueia)? */
 export function celulaLivre(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
   return !muralhaEm(estado, x, y) && (ehDragao(e.preset)?corpoCabe(ctx.fase,x,y,raioNoTerreno(e,ctx)):passavel(ctx.fase,x,y)) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
+}
+
+/**
+ * 20/11/2026: a célula livre onde o corpo pode parar no centro (a patrulha, o recuo, o flanco): sem o tronco de uma
+ * árvore. Mirar o centro da árvore fazia o monstro girar em volta dela até alguém bater nele.
+ */
+export function celulaDeParada(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
+  return celulaLivre(e, x, y, estado, ctx) && (noAr(e) || !temTronco(ctx.fase, x, y));
 }
 
 export function moverEntidades(
@@ -396,6 +404,8 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
       if (proximo) e.waypoints.push(proximo);
     }
     const wp = e.waypoints[0];
+    // 20/11/2026: o ponto dentro do tronco (a patrulha, o recuo, o alvo encostado na árvore) vai para rente a ele.
+    if (wp && !noAr(e)) renteAoTronco(ctx.fase, { x: e.px, y: e.py }, wp, raioNoTerreno(e, ctx), ctx.balance.movimento.raioTronco);
     let ux: number;
     let uy: number;
     let trecho: number;
@@ -425,10 +435,17 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
     if (olhar) e.olhando = olhar;
     // Marco 42 (15/11/2026, D-176): subir a encosta custa velocidade (a montaria sente menos).
     const subida = noAr(e) ? 1 : fatorDeSubida(ctx.fase, ctx.balance.relevo, { x: e.px, y: e.py }, { x: e.px + ux, y: e.py + uy }, emMontaria(e));
+    const antes = wp ? Math.sqrt((wp.x - e.px) ** 2 + (wp.y - e.py) ** 2) : 0;
     const andou = andar(e, ux * trecho * subida, uy * trecho * subida, estado, ctx, saida, grade);
     e.relogioAndar += (1000 * andou) / vel;
     total += andou;
     restante -= trecho;
+    // 20/11/2026: andou sem chegar mais perto de um ponto já colado no corpo (escorregou em volta do que barra): o
+    // ponto não se alcança daqui; desiste dele em vez de girar em volta. Contra outro corpo, segue esperando.
+    if (wp && andou >= EPS && semProgresso(e, wp, antes, andou, ctx) &&!bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) {
+      e.waypoints.shift();
+      return total;
+    }
     if (andou < EPS) {
       // Preso: atrás de quem bloqueia, espera mantendo o caminho; contra a parede, desiste do ponto.
       if (wp && !bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) e.waypoints.shift();
@@ -436,6 +453,15 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
     }
   }
   return total;
+}
+
+/**
+ * 20/11/2026: o corpo andou `andou` mas chegou menos de 10% disso mais perto do ponto, que já está a um tronco e um
+ * corpo dele (o que o barra está entre os dois: a órbita em volta do tronco, o degrau em volta do ponto).
+ */
+function semProgresso(e: Entidade, wp: Celula, antes: number, andou: number, ctx: ContextoSimulacao): boolean {
+  const depois = Math.sqrt((wp.x - e.px) ** 2 + (wp.y - e.py) ** 2);
+  return depois <= raioNoTerreno(e, ctx) + ctx.balance.movimento.raioTronco + SUBPASSO && antes - depois < 0.1 * andou;
 }
 
 /**

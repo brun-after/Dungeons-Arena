@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.41 · **Data:** 20/11/2026
+**Versão:** 1.42 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.42 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarTeclasDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: a tecla vazia pega uma conhecida fora da barra ou, na falta, uma inicial da classe no rank 1).
 > - **1.41 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada, as pernas abraçam o lobo e o urso e o simulador conta as feras que saíram de campo como companheiras.
 > - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
 > - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.

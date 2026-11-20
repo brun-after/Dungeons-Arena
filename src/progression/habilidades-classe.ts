@@ -43,13 +43,31 @@ export function fixarSkillDaClasse(ctx: Ctx, bolsa: Bolsa): void {
  */
 function tirarSkillsQueSairam(ctx: Ctx, bolsa: Bolsa): void {
   const sairam = ctx.conteudo.skillsQueSairam;
-  if (!bolsa.barra.some((id) => id !== null && sairam.has(id)) && !bolsa.conhecidas.some((c) => sairam.has(c.id))) return;
-  bolsa.barra = bolsa.barra.map((id) => (id !== null && sairam.has(id) ? null : id));
-  bolsa.conhecidas = bolsa.conhecidas.filter((c) => !sairam.has(c.id));
+  if (bolsa.barra.some((id) => id !== null && sairam.has(id)) || bolsa.conhecidas.some((c) => sairam.has(c.id))) {
+    bolsa.barra = bolsa.barra.map((id) => (id !== null && sairam.has(id) ? null : id));
+    bolsa.conhecidas = bolsa.conhecidas.filter((c) => !sairam.has(c.id));
+  }
+  completarTeclasDeClasse(ctx, bolsa);
+}
+
+/**
+ * 20/11/2026 (D-188, adendo): toda classe tem as 2 teclas de classe ocupadas. Personagens que perderam skills no ajuste do
+ * kit ficaram com 1 (ou 0) por não ter outra de classe conhecida: a tecla vazia recebe uma conhecida fora da barra e,
+ * na falta, uma das iniciais da classe (que entra nas conhecidas no rank 1; o nível sobe o rank depois). Idempotente;
+ * a skill de classe não se desequipa, só troca de tecla, então uma tecla vazia nunca é escolha do jogador.
+ */
+function completarTeclasDeClasse(ctx: Ctx, bolsa: Bolsa): void {
+  if (bolsa.barra.length < SLOTS_CLASSE) return;
+  const classe = ctx.conteudo.classes.get(bolsa.classeId);
+  if (!classe) return;
   for (let slot = 0; slot < SLOTS_CLASSE; slot++) {
     if (bolsa.barra[slot] !== null && bolsa.barra[slot] !== undefined) continue;
     const livre = bolsa.conhecidas.find((c) => ehDaClasse(ctx, bolsa, c.id) && !bolsa.barra.includes(c.id) && !definicaoDe(ctx, c.id)?.base.passiva);
-    if (livre) bolsa.barra[slot] = livre.id;
+    if (livre) { bolsa.barra[slot] = livre.id; continue; }
+    const inicial = classe.iniciais.find((id) => !bolsa.barra.includes(id));
+    if (inicial === undefined) continue;
+    if (!bolsa.conhecidas.some((c) => c.id === inicial)) bolsa.conhecidas.push({ id: inicial, rank: 1, caminhos: [] });
+    bolsa.barra[slot] = inicial;
   }
 }
 

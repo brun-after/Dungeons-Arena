@@ -24,6 +24,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Celula } from '../core/comandos';
 import { passavel } from '../world/fase';
+import { temTronco } from '../world/troncos';
 import { pararMovimento, planejarCaminho } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa } from './entidade';
 import type { PresetInvocacao, PresetInimigo } from './presets';
@@ -88,7 +89,7 @@ function lugarProprio(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c
   for (let k = 0; k < offsets.length; k++) {
     const [dx, dy] = offsets[(i + k) % offsets.length] ?? [0, 0];
     const c = { x: centro.x + dx, y: centro.y + dy };
-    if (!passavel(ctx.fase, c.x, c.y)) continue;
+    if (!passavel(ctx.fase, c.x, c.y) || temTronco(ctx.fase, c.x, c.y)) continue;
     if (lista.some((x) => x !== e && celulaOcupada(x).x === c.x && celulaOcupada(x).y === c.y)) continue;
     return c;
   }
