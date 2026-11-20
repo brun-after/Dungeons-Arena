@@ -3,7 +3,7 @@
 **Versão:** 1.43 · **Data:** 20/11/2026
 
 > **Histórico**
-> - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarTeclasDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: a tecla vazia pega uma conhecida fora da barra ou, na falta, uma inicial da classe no rank 1).
+> - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
 > - **1.42 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
 > - **1.41 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada, as pernas abraçam o lobo e o urso e o simulador conta as feras que saíram de campo como companheiras.
 > - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
