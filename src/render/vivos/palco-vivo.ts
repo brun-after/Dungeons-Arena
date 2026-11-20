@@ -13,6 +13,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { clone as clonarComEsqueleto } from 'three/addons/utils/SkeletonUtils.js';
 import { Rectangle, Texture } from 'pixi.js';
 import { CELULA_PX } from '../camera-calculo';
+import { posarNaSela } from './sela';
 import { fundirPecas, malhasDe } from './fundir-pecas';
 import { BATIDA_DO_VOO_MS, FRACAO_PLANAR, PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 
@@ -217,7 +218,6 @@ interface Ator {
   pedido: PedidoVivo | null;
   semPedido: number;
 }
-
 
 /** O clipe só com as faixas dos ossos que passam no teste (o passo nas pernas, o golpe no resto). */
 /**
@@ -714,6 +714,7 @@ export class PalcoVivo {
       a.raiz.position.copy(this.direita).multiplyScalar(col * QL).addScaledVector(this.cima, -lin * QA);
       a.raiz.position.y += (CLASSES[p.modelo]?.elevacao ?? 0) * (1 + 0.12 * Math.sin(performance.now() / 420)); // flutua sobe e desce (06/11/2026)
       if (p.estado === 'voar') a.raiz.position.y += this.acimaDoChao(a);
+      posarNaSela(a.raiz, p.estado === 'montar', this.camera); // D-188, adendo: as pernas abraçam o lobo e o urso.
       if (a.emPe.length > 0) this.endireitar(a);
     }
     this.renderer.render(this.cena, this.camera);

@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { posarNaSela } from '../../src/render/vivos/sela';
 import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehMovimento, ehVariante, estadosDe, MOVIMENTOS, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
@@ -657,6 +658,10 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
           const limites = new THREE.Box3().setFromObject(mt.grupo,true);
           if(limites.min.y<0)mt.grupo.position.y-=limites.min.y;
         }
+        // D-188, adendo (20/11/2026): montado, as pernas abraçam o lobo e o urso; a de lá some atrás do bicho.
+        cena.updateMatrixWorld(true);
+        camera.updateMatrixWorld(true);
+        posarNaSela(mt.grupo, e === 'montar', camera);
         // As criaturas de geometria: o tronco do estado de base (o passo delas não se separa).
         mt.animar?.(base, ciclo ? i / n : i / Math.max(1, n - 1));
         // O pivô girou: as matrizes do mundo (e a da câmera) valem para as medidas das mãos.

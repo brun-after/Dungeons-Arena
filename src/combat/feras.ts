@@ -80,6 +80,22 @@ export function cansacoDoDano(ctx: ContextoSimulacao, dono: Entidade, pet: Pet, 
   return ((retido / Math.max(1, dono.hpMax)) * 100 * feras(ctx)[pet].cansacoPorDano) * (1 - menos(ctx, dono, pet, 'cansacoMenosPct'));
 }
 
+/**
+ * D-188, adendo (20/11/2026): a fera que leva o dono agora (montado no lobo ou no urso, levado pelo falcão), ou null.
+ * Montados, os dois têm uma vida só: o golpe em qualquer um cai inteiro na vida do dono, sem cansar a fera, e menor
+ * (`montadoReducaoPct`: 10% no falcão e no lobo, 20% no urso no nível 1).
+ */
+export function montadoEm(dono: Entidade): Pet | null {
+  const m = dono.movimentoClasse?.modo;
+  return m && (m.tipo === 'montado' || m.tipo === 'voo') && m.viagemPct !== undefined ? petDe(dono) : null;
+}
+
+/** A fração do dano que sobra montado (1 = nada muda). */
+export function fatorMontado(ctx: ContextoSimulacao, dono: Entidade): number {
+  const pet = montadoEm(dono);
+  return pet ? 1 - noNivel(feras(ctx)[pet].montadoReducaoPct, dono.nivel) / 100 : 1;
+}
+
 /** O id da montaria da fera (o botão que mostra o descanso como recarga). */
 export function montariaDaFera(ctx: ContextoSimulacao, dono: Entidade, pet: Pet): string | null {
   return (ctx.conteudo.movimentos.get(classeDoAventureiro(dono)) ?? []).find((m) => m.pet === pet && (m.tipo === 'voo' || m.tipo === 'montaria'))?.id ?? null;
