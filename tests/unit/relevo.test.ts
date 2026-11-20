@@ -211,7 +211,7 @@ describe('relevo das regiões (D-176)', () => {
           // Pelo meio do corredor, da borda até 6 células além da saída.
           for (let t = lo + 3; t <= hi - 3; t++) {
             for (let d = 0; d < 34; d++) {
-              const cel = (k: number) => (p.lado === 'norte' ? [t, k] : p.lado === 'sul' ? [t, n - 1 - k] : p.lado === 'oeste' ? [k, t] : [n - 1 - k, t]);
+              const cel = (k: number): [number, number] => (p.lado ==='norte' ? [t, k] : p.lado === 'sul' ? [t, n - 1 - k] : p.lado === 'oeste' ? [k, t] : [n - 1 - k, t]);
               const [x0, y0] = cel(d);
               const [x1, y1] = cel(d + 1);
               if (ex.fase.mapa[y0]?.[x0] === '#' || ex.fase.mapa[y1]?.[x1] === '#') continue;
