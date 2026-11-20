@@ -21,7 +21,7 @@ import { registrarParticipacao } from './participacao';
 import { construirEfeito } from './registro-efeitos';
 import { fatorDeDominio } from '../progression/dominio';
 import { feraAtivaDisponivel, petDe, petDoCompanheiro, presetDoPet } from './pets';
-import { cansacoDoDano, gastarFolego, repasseDoPet } from './feras';
+import { cansacoDoDano, fatorMontado, gastarFolego, montadoEm, repasseDoPet } from './feras';
 
 export const PRESET_FALCAO = 'falcao_companheiro';
 
@@ -82,9 +82,11 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
     // atual; o resto cansa o bicho.
     const pet = petDoCompanheiro(falcao);
     const bruto = Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp);
-    const repasse = repasseDoPet(ctx, dono, pet);
+    // D-188, adendo: montados, uma vida só (o dano inteiro, com a redução da montaria, e a fera não cansa).
+    const junto = montadoEm(dono) === pet;
+    const repasse = junto ? fatorMontado(ctx, dono) : repasseDoPet(ctx, dono, pet);
     const dano = Math.round(bruto * repasse);
-    if (bruto > 0) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, bruto * (1 - repasse)), saida);
+    if (bruto > 0 && !junto) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, bruto * (1 - repasse)), saida);
     if (dano > 0) {
       dono.hp = Math.max(0, dono.hp - dano);
       // A autoria dos golpes no falcão passa ao dono (quem derruba o Aventureiro pelo falcão leva o abate).

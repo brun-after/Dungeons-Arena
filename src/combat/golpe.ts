@@ -1,7 +1,7 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
 import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro } from './pets';
-import { cansacoDoDano, gastarFolego, repasseDoPet } from './feras';
+import { cansacoDoDano, fatorMontado, gastarFolego, montadoEm, repasseDoPet } from './feras';
 import { barradoPelaContencao } from './movimento-feras';
 import { aposGolpeDoCompanheiro, golpeDoCompanheiro } from './pets-estilos';
 import { dispararRessonancias } from './ressonancias';
@@ -155,6 +155,11 @@ export function aplicarImpacto(
       saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
       return;
     }
+    // D-188, adendo (20/11/2026): montados, uma vida só: o golpe na fera cai inteiro no dono (com a redução da montaria).
+    if (montadoEm(dono) === pet) {
+      aplicarImpacto(estado, ctx, dono, impacto, saida);
+      return;
+    }
     // D-188 (19/11/2026): chega ao dono só o repasse (30%, 20%, 10% no nível 1), na vida atual; o que o bicho segura
     // vira cansaço (o Sobrevivente segura mais e cansa menos).
     const repasse = repasseDoPet(ctx, dono, pet);
@@ -170,6 +175,9 @@ export function aplicarImpacto(
     saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
     return;
   }
+  // D-188, adendo: montado, o dano cai pela montaria (10% no falcão e no lobo, 20% no urso no nível 1).
+  const montado = fatorMontado(ctx, alvo);
+  if (montado < 1 && impacto.hab.formulaDano !== null) impacto = { ...impacto, fonte: { ...impacto.fonte, multDano: impacto.fonte.multDano * montado } };
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
   // Marco 40 (14/11/2026, D-166): o básico do Aventureiro não fere: marca a caça para o companheiro (o golpe segue, sem
@@ -178,7 +186,7 @@ export function aplicarImpacto(
     impacto = { ...impacto, fonte: { ...impacto.fonte, multDano: 0 }, danoExtra: 0 };
   }
   // D-165: o lobo colado no Aventureiro toma para si o golpe de perto, de tempos em tempos.
-  const lobo = atacante && atacante !== alvo ? loboIntercepta(estado, ctx, alvo, hab) : null;
+  const lobo = atacante && atacante !== alvo && montado >= 1 ? loboIntercepta(estado, ctx, alvo, hab) : null;
   if (lobo) {
     aplicarImpacto(estado, ctx, lobo, impacto, saida);
     return;

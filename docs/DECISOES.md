@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.41 · **Data:** 20/11/2026
+**Versão:** 1.42 · **Data:** 20/11/2026
 
 > **Histórico**
-> - **1.41 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
+> - **1.42 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
+> - **1.41 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada, as pernas abraçam o lobo e o urso e o simulador conta as feras que saíram de campo como companheiras.
 > - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
 > - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
 > - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
@@ -5961,6 +5962,20 @@ e o estado do movimento para `entities/movimento-estado.ts` (o limite de 800 lin
 fazer a maior parte do dano, como pedido: a meta da fatia da invocação (que mede só o lobo do Aventureiro) vai de
 15–35% a 15–65% (medido: 58,5%). A luta do Aventureiro contra ele mesmo no PvP Livre ficou mais curta (5,5 s); o piso
 dele cai para 5 s em `metas.pvpLivre.tempoMinSPorClasse`, e as outras classes seguem com 6–10 s.
+
+**Adendo (20/11/2026): montado.**
+- **Uma vida só, montado**: o golpe no cavaleiro ou na fera que o leva cai inteiro na vida do dono (sem o repasse e
+  sem cansar a fera), menor pela montaria: 10% no falcão, 10% no lobo e 20% no urso no nível 1, até 15%, 15% e 30% no
+  100 (`montadoReducaoPct`). O lobo montado não intercepta golpes (já está embaixo do dono).
+- **A fera montada luta**: não sai do lugar, mas golpeia a caça marcada que estiver ao lado, no ritmo e no gasto de
+  fôlego dela.
+- **A pose**: a biblioteca de animações não tem montaria; o `Driving_Loop` deixava as pernas juntas à frente (sentado
+  no ar, as duas à vista). `render/vivos/sela.ts` abre as coxas para os lados com os joelhos dobrados e esconde a perna
+  do lado de lá quando o bicho é visto de lado, no 3D ao vivo e no atlas (`tools/sprites/pagina.ts`, o Aventureiro
+  reassado).
+- **O simulador**: a fatia da invocação anotava como companheira só a fera em campo no fim da luta; com a troca por
+  cansaço, as que saíram contavam como lobo de pergaminho. Anotadas a cada tick, a fatia medida cai de 58,5% para
+  ~25% (dentro da faixa de 15–65% do adendo das metas).
 
 ## D-189 — Marco 46: equipamento por propósito, estilo, grau e elemento (16/11/2026)
 
