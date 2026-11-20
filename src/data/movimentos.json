@@ -1,5 +1,5 @@
 {
-  "versao": 4,
+  "versao": 5,
   "classes": {
     "mago": [
       { "id": "voo_arcano", "principal": true, "nivel": 1, "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#a569bd" },
@@ -22,9 +22,14 @@
       { "id": "posto_dos_mortos", "nivel": 1, "tipo": "posto", "alcance": 10, "crescimento": 1, "duracaoMs": 60000, "recargaMs": 4000, "mira": true, "icone": "caveira", "cor": "#5b4a6e", "marcos": { "30": { "curaPctPorS": 3 }, "50": { "postos": 2 }, "70": { "escudo": 40 }, "90": { "reuniao": 1 } } }
     ],
     "aventureiro": [
-      { "id": "falcao_carrega", "nivel": 1, "pet": "falcao", "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#d4ac0d", "marcos": { "30": { "elemental": 1 } } },
-      { "id": "lobo", "nivel": 1, "pet": "lobo", "tipo": "montaria", "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#a1887f", "marcos": { "30": { "elemental": 1 } } },
-      { "id": "urso", "nivel": 1, "pet": "urso", "tipo": "montaria", "pesada": true, "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#6e4b3a", "marcos": { "30": { "elemental": 1 } } }
+      { "id": "troca_de_companheiro", "principal": true, "nivel": 1, "tipo": "troca_pet", "recargaMs": 600, "icone": "troca", "cor": "#c9a227" },
+      { "id": "falcao_carrega", "nivel": 1, "pet": "falcao", "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 800, "icone": "asa", "cor": "#d4ac0d", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "lobo", "nivel": 1, "pet": "lobo", "tipo": "montaria", "alcance": 10, "crescimento": 1, "recargaMs": 800, "icone": "investida", "cor": "#a1887f", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "urso", "nivel": 1, "pet": "urso", "tipo": "montaria", "pesada": true, "alcance": 10, "crescimento": 1, "recargaMs": 800, "icone": "escudo", "cor": "#6e4b3a", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "chamado", "nivel": 1, "tipo": "chamado", "recargaMs": 3000, "icone": "grito", "cor": "#b7950b" },
+      { "id": "arremesso", "nivel": 1, "pet": "falcao", "tipo": "arremesso", "recargaMs": 0, "icone": "seta_cima", "cor": "#f1c40f" },
+      { "id": "disparada", "nivel": 1, "pet": "lobo", "tipo": "disparada", "recargaMs": 0, "icone": "redemoinho", "cor": "#bcaaa4" },
+      { "id": "contencao", "nivel": 1, "pet": "urso", "tipo": "contencao", "recargaMs": 0, "icone": "barreira", "cor": "#4a3428" }
     ]
   }
 }

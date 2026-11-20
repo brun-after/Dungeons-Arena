@@ -671,7 +671,7 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 1000,
+      "intervaloAtaqueMs": 650,
       "invocacao": {
         "comportamento": "companheiro"
       }

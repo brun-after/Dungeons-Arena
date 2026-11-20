@@ -5,7 +5,8 @@ import { fonteDaHabilidade } from '../../src/combat/acao';
 import { companheiroDe } from '../../src/combat/companheiro';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
-import { duracaoDoGrito, golpeAlcancaOPet, petDe, petDoCompanheiro, reflexoDoPet } from '../../src/combat/pets';
+import { duracaoDoGrito, golpeAlcancaOPet, petDe, petDoCompanheiro } from '../../src/combat/pets';
+import { repasseDoPet } from '../../src/combat/feras';
 import { recargaDoBasicoPct } from '../../src/combat/basico';
 import type { Comando } from '../../src/core/comandos';
 import { criarEstado } from '../../src/core/estado';
@@ -41,8 +42,9 @@ function cena(nivel = 1) {
   };
   return { estado, j, eventos, passo, orc };
 }
+// D-188 (19/11/2026): a troca é o Shift (o botão 0 do movimento), não mais uma skill.
 const trocar = (c: ReturnType<typeof cena>) => {
-  c.passo([{ t: 'usarHabilidade', id: 'troca_de_companheiro' }], 200);
+  c.passo([{ t: 'movimentoClasse', botao: 0 }], 700);
   c.estado.recargas = {};
 };
 const duracao = (e: Entidade, tipo: string) => {
@@ -51,16 +53,20 @@ const duracao = (e: Entidade, tipo: string) => {
 };
 
 describe('companheiros do Aventureiro (D-165)', () => {
-  it('a Troca de companheiro fica sempre na tecla 1 e o jogador não a tira de lá', () => {
+  it('D-188: a Troca de companheiro sai da barra; as duas teclas de classe ficam livres', () => {
     const { j, estado } = cena();
     const bolsa = obter(j.bolsa);
-    expect(bolsa.barra[0]).toBe('troca_de_companheiro');
+    expect(bolsa.barra.slice(0, 2)).toEqual(['mergulho', 'grito_do_falcao']);
     const saida: EventoSimulacao[] = [];
-    expect(equiparHabilidade(j, ctx, 'mergulho', 0, estado.tick, saida)).toBe(false);
-    expect(equiparHabilidade(j, ctx, 'troca_de_companheiro', 1, estado.tick, saida)).toBe(false);
-    expect(equiparHabilidade(j, ctx, null, 0, estado.tick, saida)).toBe(true);
-    // Mesmo esvaziada, a ficha a põe de volta.
-    expect(bolsa.barra[0]).toBe('troca_de_companheiro');
+    expect(equiparHabilidade(j, ctx, 'grito_do_falcao', 0, estado.tick, saida)).toBe(true);
+    // O save antigo, com a Troca na tecla 1, a perde e a tecla recebe outra skill de classe conhecida.
+    bolsa.barra[0] = 'troca_de_companheiro';
+    bolsa.barra[1] = null;
+    bolsa.conhecidas.push({ id: 'troca_de_companheiro', rank: 1, caminhos: [] });
+    recalcularFicha(j, ctx);
+    expect(bolsa.barra).not.toContain('troca_de_companheiro');
+    expect(bolsa.conhecidas.some((c) => c.id === 'troca_de_companheiro')).toBe(false);
+    expect(bolsa.barra[0]).not.toBeNull();
   });
 
   it('troca do falcão para o lobo, do lobo para o urso e de volta; o companheiro em campo muda junto', () => {
@@ -135,8 +141,10 @@ describe('companheiros do Aventureiro (D-165)', () => {
     expect(golpeAlcancaOPet('lobo', golpe)).toBe(true);
     expect(golpeAlcancaOPet('urso', { ...golpe, politicaImpacto: 'area' })).toBe(true);
     expect(golpeAlcancaOPet('lobo', { ...golpe, politicaImpacto: 'area' })).toBe(false);
-    expect(reflexoDoPet(ctx, 'urso', 30)).toBeLessThan(reflexoDoPet(ctx, 'lobo', 30));
-    expect(reflexoDoPet(ctx, 'lobo', 30)).toBeLessThan(reflexoDoPet(ctx, 'falcao', 30));
+    const { j } = cena();
+    expect(repasseDoPet(ctx, j, 'falcao')).toBeCloseTo(0.3);
+    expect(repasseDoPet(ctx, j, 'lobo')).toBeCloseTo(0.2);
+    expect(repasseDoPet(ctx, j, 'urso')).toBeCloseTo(0.1);
   });
 
   it('o lobo colado no dono toma para si um golpe de perto', () => {

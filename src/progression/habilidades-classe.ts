@@ -24,7 +24,8 @@ export function ehDeAlgumaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, id: s
  * Marco 40 (13/11/2026, D-165): a skill fixa da classe (a Troca de companheiro do Aventureiro) é sempre conhecida e
  * fica na tecla 1; o que estava lá vai para a tecla 2, se ela estiver vazia.
  */
-export function fixarSkillDaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, bolsa: Bolsa): void {
+export function fixarSkillDaClasse(ctx: Ctx, bolsa: Bolsa): void {
+  tirarSkillsQueSairam(ctx, bolsa);
   const fixa = ctx.conteudo.classes.get(bolsa.classeId)?.fixa ?? null;
   if (fixa === null || bolsa.barra.length === 0) return;
   if (!bolsa.conhecidas.some((c) => c.id === fixa)) bolsa.conhecidas.push({ id: fixa, rank: 1, caminhos: [] });
@@ -33,6 +34,23 @@ export function fixarSkillDaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, bol
   bolsa.barra = bolsa.barra.map((id) => (id === fixa ? null : id));
   bolsa.barra[0] = fixa;
   if (antes !== null && bolsa.barra[1] === null) bolsa.barra[1] = antes;
+}
+
+/**
+ * D-188 (19/11/2026): as skills de classe que saíram do kit (`classes.json`, campo `saidas`; a Troca de companheiro virou o
+ * Shift) somem das conhecidas e da barra também nos saves já migrados, e a tecla de classe que ficou vazia recebe
+ * outra skill de classe conhecida. Idempotente.
+ */
+function tirarSkillsQueSairam(ctx: Ctx, bolsa: Bolsa): void {
+  const sairam = ctx.conteudo.skillsQueSairam;
+  if (!bolsa.barra.some((id) => id !== null && sairam.has(id)) && !bolsa.conhecidas.some((c) => sairam.has(c.id))) return;
+  bolsa.barra = bolsa.barra.map((id) => (id !== null && sairam.has(id) ? null : id));
+  bolsa.conhecidas = bolsa.conhecidas.filter((c) => !sairam.has(c.id));
+  for (let slot = 0; slot < SLOTS_CLASSE; slot++) {
+    if (bolsa.barra[slot] !== null && bolsa.barra[slot] !== undefined) continue;
+    const livre = bolsa.conhecidas.find((c) => ehDaClasse(ctx, bolsa, c.id) && !bolsa.barra.includes(c.id) && !definicaoDe(ctx, c.id)?.base.passiva);
+    if (livre) bolsa.barra[slot] = livre.id;
+  }
 }
 
 /** Por que a tecla não aceita a skill (null = aceita): 1–2 só de classe, 3–6 só ativas gerais (ou fusões). */

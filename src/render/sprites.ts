@@ -36,7 +36,8 @@ import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/p
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
 import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado , type MovimentoDoAtlas } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
-import { anelDaInvocacao } from './anel-invocacao';
+import { anelDaInvocacao, arcoNaElipse, desenharFolego } from './anel-invocacao';
+import { petDoCompanheiro } from '../combat/pets';
 import { coresDasRunas, desenharRuna } from './runas';
 import { atualizarTochaPortada } from './tocha-portada';
 import { temLuzPropria } from '../combat/luz-propria';
@@ -704,21 +705,11 @@ export class CamadaEntidades {
     else if (e.invocacao && doNecromante(estado, e.invocacao)) {
       const a = anelDaInvocacao(e.invocacao, estado.tick);
       const r = RAIO * 1.15 * m.escala + 3;
-      const inicio = -Math.PI / 2;
       if (a.fracao >= 1) anel(r).stroke({ width: 2, color: a.cor, alpha: a.alpha });
-      else if (a.fracao > 0) {
-        // O arco na elipse do chão (achatada no isométrico), ponto a ponto.
-        const passos = Math.max(2, Math.ceil(48 * a.fracao));
-        for (let i = 0; i <= passos; i++) {
-          const ang = inicio + Math.PI * 2 * a.fracao * (i / passos);
-          const x = Math.cos(ang) * r;
-          const y = Math.sin(ang) * r * k;
-          if (i === 0) g.moveTo(x, y);
-          else g.lineTo(x, y);
-        }
-        g.stroke({ width: 2, color: a.cor, alpha: a.alpha });
-      }
+      else if (a.fracao > 0) arcoNaElipse(g, r, k, a.fracao).stroke({ width: 2, color: a.cor, alpha: a.alpha });
     }
+    // D-188 (19/11/2026): a fera do Aventureiro tem o anel preto do fôlego (render/anel-invocacao.ts).
+    else if (e.invocacao?.companheiro) desenharFolego(g, RAIO * 1.15 * m.escala + 4, k, estado.entidades.find((d) => d.id === e.invocacao?.donoId)?.feras?.[petDoCompanheiro(e)]);
     // Marco 10A-3: invocação com anel verde-azulado; avatar mostra os golpes que ainda aguenta.
     else if (e.invocacao) anel(RAIO * 1.15 * m.escala + 3).stroke({ width: 1.5, color: 0x1abc9c, alpha: 0.9 });
     const golpes = e.invocacao?.avatar ? e.invocacao.golpesRestantes : 0;

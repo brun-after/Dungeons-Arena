@@ -10,7 +10,7 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
     for (const c of catalogo.classes) {
       const classe = CONTEUDO.classes.get(c.id);
       // Marco 40 (D-165): a Troca de companheiro do Aventureiro fica fora do catálogo do Grimório v1.2.
-      expect([...(classe?.exclusivas ?? []), ...(classe?.saidas ?? [])].filter((id) => id !== classe?.fixa).sort(), c.id).toEqual([...c.skills].sort());
+      expect([...(classe?.exclusivas ?? []), ...(classe?.saidas ?? [])].filter((id) => id !== classe?.fixa && id !== 'troca_de_companheiro').sort(), c.id).toEqual([...c.skills].sort());
       expect(classe?.geralInicial, c.id).toBe(c.geralInicial);
       expect(new Set(c.skills).size).toBe(8);
     }

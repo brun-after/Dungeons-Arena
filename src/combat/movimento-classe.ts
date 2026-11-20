@@ -10,6 +10,10 @@
 // substitui o Piscar; a Âncora tem duas ativações (o totem; a volta, com o eco a partir do 30); o Posto tem duas ativações (deixa o servo no ponto, depois troca); os marcos elementais levam a
 // ponta do eneágono de quem usa (movimento-extras.ts); a névoa leva todos os servos em anel; o companheiro do
 // Aventureiro precisa estar perto para montar e fica onde a viagem acabar.
+// D-188 (19/11/2026): o Aventureiro tem três botões: o Shift troca de fera (a Troca de companheiro deixa de ser skill),
+// o V monta a da vez e o X chama a fera para perto (desmontado) ou faz o golpe dela (montado: o Arremesso do falcão,
+// a Disparada do lobo, o Círculo de Contenção do urso; movimento-feras.ts). A montaria não tem mais tempo nem
+// distância: gasta o fôlego da fera (combat/feras.ts), que, no zero, desce o dono, cansa e passa a vez à próxima.
 
 import { desnivel, passaDesnivel } from '../world/relevo';
 import type { Celula } from '../core/comandos';
@@ -17,7 +21,8 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { Leitor } from '../core/validar';
+import { lerMovimentos, TIPOS_MOVIMENTO, type MovimentoDaClasse, type ParametrosMovimento, type TipoMovimento } from './movimentos-dados';
+export { lerMovimentos, TIPOS_MOVIMENTO, type MovimentoDaClasse, type ParametrosMovimento, type TipoMovimento };
 import { buscarEntidade } from '../core/estado';
 import { escolher } from '../core/rng';
 import { posicionar, vivo, type Entidade, type ModoDeMovimento } from '../entities/entidade';
@@ -32,97 +37,13 @@ import { comecarDeslize, largarSeguirNoRecuo } from './deslize';
 import { corpoCabe } from '../world/corpo';
 import { passavel } from '../world/fase';
 import { velocidadeDeViagem } from '../world/movimento';
-import { petDe } from './pets';
+import { feraDisponivel, petDe } from './pets';
+import { drenoDaMontaria, gastarFolego, gastoDaDisparada, trocarPet, viagemDaMontaria } from './feras';
+import { cansarNoArremesso, celulasDoArremesso, chamarFera, iniciarContencao, petDaMontaria, processarContencao, pulsoDaDisparada, quedaDoArremesso } from './movimento-feras';
 import { armadilhaDoRecuo, assentarServo, carregarDescarga, companheiroDe, deixarEco, levarServosNaNevoa, levarVeiculo, pontaDaAfinidade, processarCirculos, servosDaNevoa, tocarEmVolta } from './movimento-extras';
 
-export const TIPOS_MOVIMENTO = ['voo', 'tirolesa', 'salto', 'marcha', 'nevoa', 'montaria', 'posto', 'avanco', 'teleporte', 'recuo', 'ancora', 'acelerar', 'troca', 'camuflagem'] as const;
-export type TipoMovimento = (typeof TIPOS_MOVIMENTO)[number];
-
-/** Os números de uma mecânica (os marcos sobrescrevem a partir do nível deles). */
-export interface ParametrosMovimento {
-  /** As células no nível 1. */
-  alcance: number;
-  /** Quantas células o alcance ganha a cada 10 níveis (arredondado para baixo). */
-  crescimento: number;
-  velocidade: number;
-  recargaMs: number;
-  cargas: number;
-  duracaoMs: number;
-  lentidaoPct: number;
-  /** O Posto dos Mortos: quantos postos, a cura do servo parado (% da vida por s), o escudo ao trocar e a reunião. */
-  postos: number;
-  curaPctPorS: number;
-  escudo: number;
-  reuniao: number;
-  /** D-168: o raio e a velocidade do círculo do Acelerar; o eco do Piscar; a armadilha do recuo; o marco elemental. */
-  raio: number;
-  velocidadePct: number;
-  eco: number;
-  armadilha: number;
-  elemental: number;
-}
-
-export interface MovimentoDaClasse {
-  id: string;
-  nivel: number;
-  tipo: TipoMovimento;
-  icone: string;
-  cor: string;
-  pesada: boolean;
-  /**
-   * Marco 40 (14/11/2026): o companheiro dono da mecânica (o Aventureiro). Na classe com companheiros, o movimento ativo
-   * é sempre o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria) e o G não troca.
-   */
-  pet: string | null;
-  /** D-168: vai ao ponto mirado (o cursor; no celular, o toque depois do botão). */
-  mira: boolean;
-  /**
-   * D-172: o movimento principal da classe (o mais usado, de recarga menor): fica no Shift e no primeiro botão e não
-   * recarrega mais devagar em combate. Os de companheiro (o Aventureiro) contam todos como principal.
-   */
-  principal: boolean;
-  base: ParametrosMovimento;
-  marcos: ReadonlyMap<number, Partial<ParametrosMovimento>>;
-}
-
-const CAMPOS: readonly (keyof ParametrosMovimento)[] = ['alcance', 'crescimento', 'velocidade', 'recargaMs', 'cargas', 'duracaoMs', 'lentidaoPct', 'postos', 'curaPctPorS', 'escudo', 'reuniao', 'raio', 'velocidadePct', 'eco', 'armadilha', 'elemental'];
 /** Os modos que dão o bônus de viagem (e o perdem ao atacar ou ser atingido). */
 const VIAGEM: readonly ModoDeMovimento['tipo'][] = ['voo', 'montado', 'nevoa', 'marcha'];
-
-export function lerMovimentos(json: unknown): { movimentos: Map<string, MovimentoDaClasse[]>; erros: string[] } {
-  const l = new Leitor('movimentos.json');
-  const saida = new Map<string, MovimentoDaClasse[]>();
-  const classes = l.objeto(l.objeto(json, 'raiz').classes, 'classes');
-  for (const [classe, lista] of Object.entries(classes)) {
-    const itens: MovimentoDaClasse[] = [];
-    for (const bruto of Array.isArray(lista) ? lista : []) {
-      const o = l.objeto(bruto, `${classe}.movimento`);
-      const numeros = (x: Record<string, unknown>): Partial<ParametrosMovimento> => {
-        const p: Partial<ParametrosMovimento> = {};
-        for (const k of CAMPOS) if (x[k] !== undefined) p[k] = l.numero(x, k, { min: 0, max: 60_000 });
-        return p;
-      };
-      const marcos = new Map<number, Partial<ParametrosMovimento>>();
-      for (const [n, m] of Object.entries(l.objeto(o.marcos ?? {}, 'marcos'))) marcos.set(Number(n), numeros(l.objeto(m, `marco ${n}`)));
-      itens.push({
-        id: l.texto(o, 'id'),
-        nivel: l.numero(o, 'nivel', { min: 1, max: 100, inteiro: true }),
-        tipo: l.opcao(o, 'tipo', TIPOS_MOVIMENTO),
-        icone: l.texto(o, 'icone'),
-        cor: l.texto(o, 'cor'),
-        pesada: o.pesada === true,
-        pet: o.pet === undefined ? null : l.texto(o, 'pet'),
-        mira: o.mira === true,
-        principal: o.principal === true,
-        base: { alcance: 0, crescimento: 0, velocidade: 12, recargaMs: 3000, cargas: 1, duracaoMs: 0, lentidaoPct: 0, postos: 1, curaPctPorS: 0, escudo: 0, reuniao: 0, raio: 0, velocidadePct: 0, eco: 0, armadilha: 0, elemental: 0, ...numeros(o) },
-        marcos,
-      });
-    }
-    saida.set(classe, itens);
-  }
-  return { movimentos: saida, erros: l.erros };
-}
-
 const classeDe = (e: Entidade) => e.bolsa?.classeId ?? e.classeId ?? '';
 
 /** As mecânicas que a entidade já tem (pelo nível). */
@@ -141,9 +62,16 @@ export function alcanceNoNivel(p: ParametrosMovimento, nivel: number): number {
   return p.alcance + Math.floor(Math.floor(Math.min(100, Math.max(1, nivel)) / 10) * p.crescimento);
 }
 
+/** D-188: a montaria de uma fera (o voo do falcão, o lobo, o urso), não o golpe do X. */
+export const ehMontaria = (m: MovimentoDaClasse): boolean => m.pet !== null && (m.tipo === 'voo' || m.tipo === 'montaria');
+/** D-188: o golpe da fera no X, montado. */
+const GOLPES_DA_FERA: readonly TipoMovimento[] = ['arremesso', 'disparada', 'contencao'];
+/** Quem tem feras (o Aventureiro): as mecânicas trazem `pet` ou a troca. */
+const temFeras = (liberados: readonly MovimentoDaClasse[]) => liberados.some((m) => m.pet !== null || m.tipo === 'troca_pet');
+
 export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse | null {
   const liberados = movimentosLiberados(ctx, e);
-  if (liberados.some((m) => m.pet !== null)) return liberados.find((m) => m.pet === petDe(e)) ?? null;
+  if (temFeras(liberados)) return liberados.find((m) => ehMontaria(m) && m.pet === petDe(e)) ?? null;
   return liberados.find((m) => m.id === e.movimentoClasse?.ativo) ?? liberados[0] ?? null;
 }
 
@@ -153,9 +81,14 @@ export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDa
  */
 export function movimentosDosBotoes(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse[] {
   const liberados = movimentosLiberados(ctx, e);
-  if (liberados.some((m) => m.pet !== null)) {
-    const m = movimentoAtivo(ctx, e);
-    return m ? [m] : [];
+  if (temFeras(liberados)) {
+    // D-188: o Shift troca de fera, o V monta a da vez e o X chama (desmontado) ou faz o golpe dela (montado).
+    const montaria = movimentoAtivo(ctx, e);
+    const montado = !!montaria && modo(e)?.id === montaria.id;
+    const golpe = liberados.find((m) => GOLPES_DA_FERA.includes(m.tipo) && m.pet === petDe(e));
+    const chamado = liberados.find((m) => m.tipo === 'chamado');
+    const x = montado ? golpe : chamado;
+    return [liberados.find((m) => m.tipo === 'troca_pet'), montaria, x].filter((m): m is MovimentoDaClasse => !!m);
   }
   const principal = liberados.find((m) => m.principal);
   const resto = liberados.filter((m) => m !== principal).sort((a, b) => a.base.recargaMs - b.base.recargaMs);
@@ -221,7 +154,13 @@ export function fimDaTirolesa(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
 export function fimDoSalto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   if (!noSalto(e)) return;
   const ponta = modo(e)?.ponta;
+  const arremesso = modo(e)?.arremesso === true;
   terminar(estado, ctx, e, saida);
+  // D-188: a queda do Arremesso do falcão não atordoa (salvo no Implacável).
+  if (arremesso) {
+    quedaDoArremesso(estado, ctx, e, ponta, saida);
+    return;
+  }
   const s = ctx.balance.movimentoClasse.salto;
   for (const o of estado.entidades) {
     if (o === e || !vivo(o) || chebyshev(o, e) > s.raio || !podeFerir(e, o, ctx.modo)) continue;
@@ -248,7 +187,7 @@ function gastarCarga(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m:
 export function trocarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   const liberados = movimentosLiberados(ctx, e);
   // Marco 40 (14/11/2026): quem tem companheiros troca de movimento trocando de companheiro.
-  if (liberados.length === 0 || liberados.some((m) => m.pet !== null) || noSalto(e) || naTirolesa(e)) return;
+  if (liberados.length === 0 || temFeras(liberados) || noSalto(e) || naTirolesa(e)) return;
   const atual = movimentoAtivo(ctx, e);
   const i = atual ? liberados.indexOf(atual) : -1;
   const proximo = liberados[(i + 1) % liberados.length];
@@ -329,6 +268,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   if (atual && (atual.tipo === 'salto' || atual.tipo === 'tirolesa')) return;
   // 15/11/2026: lido antes de a corrida acabar (usar o salto encerra a marcha).
   const extensao = m.tipo === 'salto' ? extensaoDoSalto(estado, ctx, e, atual) : 0;
+  if (usarDaFera(estado, ctx, e, m, p, atual, rumoDe(e, dx, dy, alvo), recusar, saida)) return;
   if (atual?.tipo === 'voo' && atual.id !== m.id && !cabeAli(ctx, e.px, e.py)) { recusar('pouso'); return; }
   (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).ativo = m.id;
   // Os modos de viagem desligam no mesmo botão.
@@ -355,17 +295,22 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     case 'nevoa': {
       // D-168: o Aventureiro só monta (ou é levado) com o companheiro perto; ele não vem até o dono.
       const veiculo = m.pet ? companheiroDe(estado, e, m.pet) : undefined;
+      const fera = petDaMontaria(m.pet);
+      // D-188: a fera cansada não leva ninguém.
+      if (fera && !feraDisponivel(e, fera)) { recusar('cansado'); return; }
       if (m.pet && (!veiculo || chebyshev(veiculo, e) > b.montarRaio)) { recusar('longe'); return; }
       if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       const tipo = m.tipo === 'montaria' ? 'montado' : m.tipo;
-      const ateTick = tick + duracaoDaViagem(estado, ctx, e, alcance);
-      iniciar(tipo, { ateTick, ...(m.pesada && { pesada: true }) });
+      const duracao = duracaoDaViagem(estado, ctx, e, alcance);
+      // D-188: a montaria da fera não acaba no tempo: gasta o fôlego (o falcão, cheio, dura o tempo de andar o alcance).
+      if (fera) iniciar(tipo, { viagemPct: viagemDaMontaria(ctx, e, fera, false), dreno: drenoDaMontaria(ctx, e, fera, duracao * DT_TICK_MS) });
+      else iniciar(tipo, { ateTick: tick + duracao, ...(m.pesada && { pesada: true }) });
       // D-170: a névoa leva a cor da afinidade no rastro (só desenho).
       const viagem = e.movimentoClasse.modo;
       if (tipo === 'nevoa' && viagem) viagem.ponta = pontaDaAfinidade(ctx, e, tick);
       if (tipo === 'nevoa') {
         // D-168: a névoa leva todos os servos (os do posto ficam), em volta do Necromante, até o fim.
-        for (const s of servosDaNevoa(estado, e)) if (s.invocacao) s.invocacao.nevoaAteTick = ateTick;
+        for (const s of servosDaNevoa(estado, e)) if (s.invocacao) s.invocacao.nevoaAteTick = tick + duracao;
         protegerNaNevoa(estado, ctx, e, saida);
       }
       return;
@@ -491,6 +436,65 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   }
 }
 
+/** Quantos ms tem um tick (o voo do falcão vira fôlego pelo tempo dele). */
+const DT_TICK_MS = 1000 / ticksDe(1000);
+
+/**
+ * D-188: os botões do Aventureiro que não são a montaria: a troca de fera (Shift), o Chamado e os golpes da fera (X).
+ * Devolve true quando tratou o pedido (usado ou recusado).
+ */
+function usarDaFera(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m: MovimentoDaClasse, p: ParametrosMovimento, atual: ModoDeMovimento | undefined, r: { dx: number; dy: number }, recusar: (motivo: string) => void, saida: EventoSimulacao[]): boolean {
+  const tick = estado.tick;
+  const inicio = () => { saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' }); };
+  switch (m.tipo) {
+    case 'troca_pet':
+      if (atual?.tipo === 'voo' && !cabeAli(ctx, e.px, e.py)) { recusar('pouso'); return true; }
+      if ((e.movimentoClasse?.cargas[m.id] ?? []).some((t) => t > tick)) { recusar('recarga'); return true; }
+      if (!trocarPet(estado, e, saida)) { recusar('cansado'); return true; }
+      gastarCarga(estado, ctx, e, m, p);
+      inicio();
+      return true;
+    case 'chamado':
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return true; }
+      if (!chamarFera(estado, ctx, e, saida)) { recusar('longe'); return true; }
+      inicio();
+      return true;
+    case 'arremesso': {
+      if (atual?.tipo !== 'voo') { recusar('sem_montaria'); return true; }
+      const voo = movimentoAtivo(ctx, e);
+      const longe = celulasDoArremesso(ctx, e, voo ? alcanceNoNivel(parametros(voo, e.nivel), e.nivel) : 10);
+      let destino: Celula | null = null;
+      for (let k = longe; k >= 1 && !destino; k--) {
+        const c = aFrente(e, r, k);
+        if (cabeAli(ctx, c.x, c.y)) destino = c;
+      }
+      if (!destino) { recusar('bloqueado'); return true; }
+      const velocidade = velocidadeDeViagem(e, estado, ctx) * fatorDeVelocidade(ctx, e);
+      terminar(estado, ctx, e, saida);
+      e.waypoints = [];
+      e.caminho = [];
+      (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).modo = { tipo: 'salto', id: m.id, desdeTick: tick, x: destino.x, y: destino.y, velocidade: Math.max(1, velocidade), arremesso: true, ...(atual.ponta && { ponta: atual.ponta }) };
+      cansarNoArremesso(estado, ctx, e, saida);
+      inicio();
+      return true;
+    }
+    case 'disparada':
+      if (atual?.tipo !== 'montado' || atual.viagemPct === undefined) { recusar('sem_montaria'); return true; }
+      atual.disparada = !atual.disparada;
+      atual.viagemPct = viagemDaMontaria(ctx, e, 'lobo', atual.disparada);
+      saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: atual.disparada ? 'inicio' : 'fim' });
+      return true;
+    case 'contencao':
+      if (atual?.tipo !== 'montado' || e.movimentoClasse?.contencao) { recusar('sem_montaria'); return true; }
+      terminar(estado, ctx, e, saida);
+      iniciarContencao(estado, ctx, e, saida);
+      inicio();
+      return true;
+    default:
+      return false;
+  }
+}
+
 /** O servo do Necromante para a troca e a possessão: o selecionado, ou o mais longe dentro do alcance. */
 function servoPerto(estado: EstadoJogo, e: Entidade, alcance: number): Entidade | undefined {
   return estado.entidades.filter((s) => vivo(s) && s.invocacao?.donoId === e.id && !s.invocacao.companheiro && chebyshev(s, e) <= alcance)
@@ -534,7 +538,9 @@ export function processarMovimentoClasse(estado: EstadoJogo, ctx: ContextoSimula
     if (!m) continue;
     if (!vivo(e)) { terminar(estado, ctx, e, saida); continue; }
     // Marco 40 (14/11/2026): trocou o companheiro no meio da viagem: a do companheiro que saiu acaba (o voo pousa).
-    if (m.tipo !== 'preparo' && m.id !== movimentoAtivo(ctx, e)?.id) {
+    // D-188: o salto do Arremesso segue depois da troca.
+    const daFera = (m.tipo === 'montado' || m.tipo === 'voo') && m.viagemPct !== undefined;
+    if (m.tipo !== 'preparo' && m.tipo !== 'salto' && m.id !== movimentoAtivo(ctx, e)?.id) {
       if (m.tipo === 'voo') pousar(estado, ctx, e);
       terminar(estado, ctx, e, saida);
       continue;
@@ -553,7 +559,32 @@ export function processarMovimentoClasse(estado: EstadoJogo, ctx: ContextoSimula
       const pet = movimentosLiberados(ctx, e).find((x) => x.id === m.id)?.pet;
       const veiculo = pet ? companheiroDe(estado, e, pet) : undefined;
       if (veiculo) levarVeiculo(veiculo, e);
+      // D-188: a fera gasta o fôlego enquanto leva (a Disparada, mais); cansada, o dono desce (o voo pousa).
+      const fera = petDaMontaria(pet);
+      if (daFera && fera) {
+        gastarFolego(estado, ctx, e, fera, (m.dreno ?? 0) * (m.disparada ? gastoDaDisparada(ctx, e) : 1), saida);
+        if (m.disparada) pulsoDaDisparada(estado, ctx, e, saida);
+        if (!veiculo || !feraDisponivel(e, fera)) {
+          if (m.tipo === 'voo') pousar(estado, ctx, e);
+          terminar(estado, ctx, e, saida);
+        }
+      }
     }
+  }
+  for (const e of estado.entidades) {
+    const mc = e.movimentoClasse;
+    if (mc?.contencao) processarContencao(estado, ctx, e, saida);
+    // D-188 (marco do Revezamento): a fera que chegou na troca monta sozinha.
+    if (mc?.revezarAteTick === undefined) continue;
+    if (tick > mc.revezarAteTick || mc.modo) {
+      delete mc.revezarAteTick;
+      continue;
+    }
+    const montaria = movimentoAtivo(ctx, e);
+    if (!montaria || !feraDisponivel(e, petDe(e)) || !companheiroDe(estado, e, petDe(e))) continue;
+    delete mc.revezarAteTick;
+    mc.cargas[montaria.id] = [];
+    usarMovimento(estado, ctx, e, saida, undefined, undefined, undefined, 1);
   }
 }
 
@@ -566,7 +597,8 @@ export function motivoDoMovimento(e: Entidade): string | null {
 /** Perde o bônus de viagem até o modo acabar (o modo segue). */
 function perderBonus(estado: EstadoJogo, e: Entidade, saida: EventoSimulacao[]): void {
   const m = modo(e);
-  if (!m || m.semBuff || !VIAGEM.includes(m.tipo)) return;
+  // D-188: a montaria da fera não perde a velocidade (o limite dela é o fôlego).
+  if (!m || m.semBuff || !VIAGEM.includes(m.tipo) || m.viagemPct !== undefined) return;
   m.semBuff = true;
   saida.push({ t: 'movimentoClasse', tick: estado.tick, id: e.id, mov: m.id, fase: 'perdeu' });
 }
@@ -596,6 +628,7 @@ export function fatorDeVelocidade(ctx: ContextoSimulacao, e: Entidade): number {
   const m = modo(e);
   if (!m) return 1;
   if (m.tipo === 'camuflado') return 1 - (m.lentidaoPct ?? 0) / 100;
+  if (m.viagemPct !== undefined && VIAGEM.includes(m.tipo)) return 1 + m.viagemPct / 100;
   if (m.semBuff || !VIAGEM.includes(m.tipo)) return 1;
   const b = ctx.balance.movimentoClasse;
   return 1 + (m.pesada ? b.viagemPesadaPct : b.viagemPct) / 100;

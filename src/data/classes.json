@@ -33,9 +33,7 @@
           "custoPct": -20
         }
       ],
-      "fixa": "troca_de_companheiro",
       "exclusivas": [
-        "troca_de_companheiro",
         "grito_do_falcao",
         "mergulho",
         "garras_cegantes",
@@ -45,12 +43,13 @@
         "retorno_ao_punho"
       ],
       "iniciais": [
-        "troca_de_companheiro",
-        "mergulho"
+        "mergulho",
+        "grito_do_falcao"
       ],
       "geralInicial": "cura_sagrado",
       "saidas": [
-        "presa_dupla"
+        "presa_dupla",
+        "troca_de_companheiro"
       ]
     },
     {
