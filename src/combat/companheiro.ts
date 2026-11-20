@@ -20,7 +20,8 @@ import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { construirEfeito } from './registro-efeitos';
 import { fatorDeDominio } from '../progression/dominio';
-import { petDe, petDoCompanheiro, presetDoPet, reflexoDoPet } from './pets';
+import { feraAtivaDisponivel, petDe, petDoCompanheiro, presetDoPet } from './pets';
+import { cansacoDoDano, gastarFolego, repasseDoPet } from './feras';
 
 export const PRESET_FALCAO = 'falcao_companheiro';
 
@@ -68,7 +69,7 @@ export function processarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulacao
  * Antes das mortes: o dano que o falcão levou neste tick sai da vida do dono (com a autoria, para o abate e a cura dos
  * inimigos), e o falcão volta a mostrar a vida do dono. Dono caído, o falcão cai junto.
  */
-export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulacao): void {
+export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[] = []): void {
   for (const falcao of estado.entidades) {
     const inv = falcao.invocacao;
     if (!inv?.companheiro || falcao.morto) continue;
@@ -77,8 +78,13 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
       falcao.hp = 0;
       continue;
     }
-    // Marco 24 (25/10/2026, D-098): o dono sente só o reflexo do dano (80% no nível 1, 60% no máximo).
-    const dano = Math.round(Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp) * reflexoDoPet(ctx, petDoCompanheiro(falcao), dono.nivel));
+    // Marco 24 (25/10/2026, D-098): o dono sente só o reflexo do dano. D-188 (19/11/2026): o repasse da fera, na vida
+    // atual; o resto cansa o bicho.
+    const pet = petDoCompanheiro(falcao);
+    const bruto = Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp);
+    const repasse = repasseDoPet(ctx, dono, pet);
+    const dano = Math.round(bruto * repasse);
+    if (bruto > 0) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, bruto * (1 - repasse)), saida);
     if (dano > 0) {
       dono.hp = Math.max(0, dono.hp - dano);
       // A autoria dos golpes no falcão passa ao dono (quem derruba o Aventureiro pelo falcão leva o abate).
@@ -131,7 +137,8 @@ export function ticksDoVooDoFalcao(ctx: ContextoSimulacao, dono: Entidade, de: C
 
 /** A célula do falcão, quando ele está vivo (para a origem das habilidades). */
 export function celulaDoCompanheiro(estado: EstadoJogo, dono: Entidade): { x: number; y: number } | null {
-  if (!temCompanheiro(dono)) return null;
+  // D-188: com a fera da vez cansada (as três cansadas), as skills saem do próprio Aventureiro.
+  if (!temCompanheiro(dono) || !feraAtivaDisponivel(dono)) return null;
   const f = companheiroDe(estado, dono);
   return f ? celulaOcupada(f) : null;
 }

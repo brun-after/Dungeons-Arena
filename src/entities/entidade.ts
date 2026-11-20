@@ -257,6 +257,19 @@ export interface ModoDeMovimento {
   semBuff?: boolean;
   /** Marco 40 (14/11/2026, D-168): a ponta do eneágono que o modo leva, a partir do marco elemental da mecânica. */
   ponta?: PontaElemental;
+  /** D-188 (19/11/2026): a montaria do Aventureiro: o bônus de velocidade dela, a energia que gasta por tick e a Disparada do lobo. */
+  viagemPct?: number;
+  dreno?: number;
+  disparada?: boolean;
+  /** D-188: o salto do Arremesso do falcão (não atordoa, salvo no Implacável). */
+  arremesso?: boolean;
+}
+
+/** D-188 (19/11/2026): o fôlego de uma fera do Aventureiro (0 a 100) e o descanso dela, quando cansou. */
+export interface EstadoFera {
+  energia: number;
+  cansado: boolean;
+  descansoAteTick: number;
 }
 
 export interface EstadoMovimento {
@@ -274,6 +287,10 @@ export interface EstadoMovimento {
   avancoAteTick?: number;
   /** D-168: os tiros do Arqueiro levam a ponta até o tick (depois de sair da camuflagem). */
   tiroElemental?: { ponta: PontaElemental; ateTick: number };
+  /** D-188: o Círculo de Contenção do urso (barra as magias de fora); `bloqueado`, a vida (em % do dono) que ele segurou. */
+  contencao?: { x: number; y: number; raio: number; desdeTick: number; ateTick: number; bloqueado: number };
+  /** D-188: o marco do Revezamento: a fera que chega monta sozinha (até o tick). */
+  revezarAteTick?: number;
 }
 
 export const SISTEMA_DO_PERSONAGEM = 40;
@@ -392,6 +409,8 @@ export interface Entidade {
   cacaAteTick?: number;
   /** Marco 40 (D-166): o companheiro ativo também na entidade (na arena, a ficha não tem bolsa). */
   petAtivo?: 'falcao' | 'lobo' | 'urso';
+  /** D-188 (19/11/2026): o fôlego de cada fera do Aventureiro (ausente: cheia e descansada). */
+  feras?: Partial<Record<'falcao' | 'lobo' | 'urso', EstadoFera>>;
   rumoX: number;
   rumoY: number;
   /** Pontos a percorrer em linha reta (o caminho já suavizado), e a fila curta de onde o integrador tira o próximo. */
@@ -758,7 +777,11 @@ export function clonarEntidade(e: Entidade): Entidade {
       ...(e.movimentoClasse.circulo ? { circulo: { ...e.movimentoClasse.circulo } } : {}),
       ...(e.movimentoClasse.tiroElemental ? { tiroElemental: { ...e.movimentoClasse.tiroElemental } } : {}),
       ...(e.movimentoClasse.recuoTick !== undefined ? { recuoTick: e.movimentoClasse.recuoTick } : {}),
+      ...(e.movimentoClasse.avancoAteTick !== undefined ? { avancoAteTick: e.movimentoClasse.avancoAteTick } : {}),
+      ...(e.movimentoClasse.contencao ? { contencao: { ...e.movimentoClasse.contencao } } : {}),
+      ...(e.movimentoClasse.revezarAteTick !== undefined ? { revezarAteTick: e.movimentoClasse.revezarAteTick } : {}),
     } } : {}),
+    ...(e.feras ? { feras: Object.fromEntries(Object.entries(e.feras).map(([k, v]) => [k, { ...v }])) } : {}),
     ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),

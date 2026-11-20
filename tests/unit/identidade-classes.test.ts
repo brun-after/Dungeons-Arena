@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { estadoPublico } from '../../src/arena/estado-publico';
 import { alvoOfensivoValido, fonteDaHabilidade, origemDaHabilidade } from '../../src/combat/acao';
-import { reflexoDoFalcao } from '../../src/combat/ajustes-classes';
+import { repasseDoPet } from '../../src/combat/feras';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { companheiroDe, sincronizarCompanheiros } from '../../src/combat/companheiro';
 import { contarInvocacoes } from '../../src/combat/efeitos-fluxo';
@@ -87,11 +87,11 @@ describe('falcão do Aventureiro', () => {
     a.tick();
     const f = obter(companheiroDe(a.estado, a.j), 'falcão');
     const hp = a.j.hp;
-    // Marco 24 (D-098): no nível 1, 80% do dano chega ao dono.
+    // D-188 (19/11/2026): no nível 1, 30% do dano no falcão chega à vida atual do dono.
     f.hp -= 10;
     registrarParticipacao(f, 'b', a.estado.tick, ctx);
     sincronizarCompanheiros(a.estado, ctx);
-    expect(a.j.hp).toBe(hp - 8);
+    expect(a.j.hp).toBe(hp - 3);
     expect(f.hp).toBe(a.j.hp);
     expect(a.j.participacao.some((p) => p.id === 'b')).toBe(true);
     expect(f.participacao).toEqual([]);
@@ -106,18 +106,18 @@ describe('falcão do Aventureiro', () => {
     expect(f.hp).toBe(0);
   });
 
-  it('o reflexo do dano no dono cai com o nível: 80% no 1, 60% no máximo (marco 24)', () => {
-    expect(reflexoDoFalcao(ctx, 1)).toBeCloseTo(0.8, 5);
-    expect(reflexoDoFalcao(ctx, ctx.balance.xp.nivelMax)).toBeCloseTo(0.6, 5);
+  it('o repasse do dano no dono cai com o nível: 30% no 1, 20% no 100 (D-188)', () => {
     const a = arena('aventureiro');
     a.tick();
+    expect(repasseDoPet(ctx, a.j, 'falcao')).toBeCloseTo(0.3, 5);
     const f = obter(companheiroDe(a.estado, a.j), 'falcão');
-    // No nível máximo, 10 de dano no falcão viram 6 no dono.
-    a.j.nivel = ctx.balance.xp.nivelMax;
+    // No nível 100, 10 de dano no falcão viram 2 no dono.
+    a.j.nivel = 100;
+    expect(repasseDoPet(ctx, a.j, 'falcao')).toBeCloseTo(0.2, 5);
     const hp = a.j.hp;
     f.hp -= 10;
     sincronizarCompanheiros(a.estado, ctx);
-    expect(a.j.hp).toBe(hp - 6);
+    expect(a.j.hp).toBe(hp - 2);
   });
 
   it('o falcão não atrai inimigos: só vira alvo de quem já está perseguindo (marco 24)', () => {

@@ -37,6 +37,29 @@ export function sigilo(g: Graphics, p: Ponto, u: number, escala: number, cor: nu
   if (u < 0.25) g.circle(p.x, p.y, r * 0.4).fill({ color: cor, alpha: 0.18 * (1 - u * 4) });
 }
 
+/**
+ * D-188 (19/11/2026): o Círculo de Contenção do urso. Um anel grosso, cor de terra, com as garras riscadas em volta e
+ * as runas de contenção girando devagar no sentido contrário; o miolo escurece um pouco (as magias de fora param ali).
+ * Nos últimos instantes (`fim`, 1 a 0), apaga.
+ */
+export function circuloContencao(g: Graphics, c: Ponto, raioCelulas: number, fim: number, tMs: number): void {
+  const R = (raioCelulas + 0.5) * CELULA_PX;
+  const a = Math.min(1, fim);
+  const giro = -tMs / 1400;
+  const TERRA = 0x8d6e4a;
+  g.circle(c.x, c.y, R).fill({ color: 0x2a1c12, alpha: 0.16 * a });
+  g.circle(c.x, c.y, R).stroke({ color: TERRA, width: 4, alpha: 0.85 * a });
+  g.circle(c.x, c.y, R * 0.86).stroke({ color: TERRA, width: 1.4, alpha: 0.55 * a });
+  for (let i = 0; i < 12; i++) {
+    const ang = giro + (i * Math.PI) / 6;
+    const x1 = c.x + Math.cos(ang) * R * 0.88;
+    const y1 = c.y + Math.sin(ang) * R * 0.88;
+    const x2 = c.x + Math.cos(ang + 0.12) * R * 1.04;
+    const y2 = c.y + Math.sin(ang + 0.12) * R * 1.04;
+    g.moveTo(x1, y1).lineTo(x2, y2).stroke({ color: 0xd7b98a, width: 2, alpha: 0.7 * a });
+  }
+}
+
 /** Um arco aberto de `ini` a `ini + varre` (sem a linha solta que o `arc` puxa do último ponto). */
 function arco(g: Graphics, c: Ponto, r: number, ini: number, varre: number): Graphics {
   g.moveTo(c.x + Math.cos(ini) * r, c.y + Math.sin(ini) * r);

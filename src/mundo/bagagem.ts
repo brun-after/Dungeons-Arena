@@ -30,6 +30,8 @@ export interface EstadoQueViaja {
   /** A mecânica de movimento escolhida e as cargas gastas (ticks relativos); o modo em curso termina na troca. */
   movimento: { ativo: string; cargas: Record<string, number[]> } | null;
   petAtivo?: Entidade['petAtivo'];
+  /** D-188 (19/11/2026): o fôlego das feras (o descanso, relativo à saída). */
+  feras?: Entidade['feras'];
   furia?: Entidade['furia'];
   cargaUltimate?: number;
   encarnacao?: Entidade['encarnacao'];
@@ -95,6 +97,7 @@ export function recolherBagagem(estado: EstadoJogo, e: Entidade, daComitiva: Rea
     buffsArmados: e.buffsArmados.map((b) => ({ efeito: { ...b.efeito }, ateTick: relativo(b.ateTick, base) })),
     movimento: mc ? { ativo: mc.ativo, cargas } : null,
     ...(e.petAtivo !== undefined && { petAtivo: e.petAtivo }),
+    ...(e.feras && { feras: Object.fromEntries(Object.entries(e.feras).map(([k, v]) => [k, { ...v, descansoAteTick: relativo(v.descansoAteTick, base) }])) }),
     ...(e.furia && { furia: deslocarFuria(e.furia, base, true) }),
     ...(e.cargaUltimate !== undefined && { cargaUltimate: e.cargaUltimate }),
     ...(e.encarnacao !== undefined && { encarnacao: e.encarnacao }),
@@ -131,6 +134,7 @@ export function aplicarBagagem(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 
     e.movimentoClasse = { ...(e.movimentoClasse ?? { ativo: b.movimento.ativo, cargas: {} }), ativo: liberado ? b.movimento.ativo : (e.movimentoClasse?.ativo ?? b.movimento.ativo), cargas };
   }
   if (b.petAtivo !== undefined) e.petAtivo = b.petAtivo;
+  if (b.feras) e.feras = Object.fromEntries(Object.entries(b.feras).map(([k, v]) => [k, { ...v, descansoAteTick: absoluto(v.descansoAteTick, base) }]));
   if (b.furia) e.furia = deslocarFuria(b.furia, base, false);
   if (b.cargaUltimate !== undefined) e.cargaUltimate = b.cargaUltimate;
   if (b.encarnacao !== undefined) e.encarnacao = b.encarnacao;

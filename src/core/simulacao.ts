@@ -17,6 +17,7 @@ import { processarCampos } from '../combat/tatica';
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { processarPets } from '../combat/pets';
+import { processarFeras } from '../combat/feras';
 import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
 import { processarTirosDoBalanco } from '../combat/movimento-tiros';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
@@ -102,6 +103,8 @@ export function simular(
   // Marco 24 (D-096): as sinergias passivas por tempo (Bastião de pedra).
   processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
+  // D-188 (19/11/2026): o fôlego das feras do Aventureiro (o descanso, a recuperação).
+  processarFeras(estado, ctx, saida);
   processarMovimentoClasse(estado, ctx, saida);
   // D-168: o Arqueiro balançando na corda da Chegada atira no inimigo mais perto.
   processarTirosDoBalanco(estado, ctx, saida);
@@ -132,7 +135,7 @@ export function simular(
   processarClima(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   // Marco 22: o dano que o falcão levou sai da vida do dono antes das mortes.
-  sincronizarCompanheiros(estado, ctx);
+  sincronizarCompanheiros(estado, ctx, saida);
   const abates = processarMortes(estado, ctx, saida);
   // Marco 18 (D-070): missões e o diário de descobertas.
   processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);

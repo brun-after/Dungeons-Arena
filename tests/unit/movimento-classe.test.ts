@@ -53,7 +53,9 @@ const golpear = (c: ReturnType<typeof cena>, alvo: Entidade, de: Entidade) => {
 describe('movimento da classe (D-164)', () => {
   it('três mecânicas por classe, todas no nível 1 (D-167); a de longa distância cobre 10 células no 1 e 20 no 100', () => {
     for (const classe of ['mago', 'arqueiro', 'guerreiro', 'necromante', 'aventureiro']) {
-      const lista = obter(CONTEUDO.movimentos.get(classe));
+      // D-188: no Aventureiro, só as montarias das feras (a troca, o Chamado e os golpes do X ficam de fora).
+      const todas = obter(CONTEUDO.movimentos.get(classe));
+      const lista = classe === 'aventureiro' ? todas.filter((m) => m.tipo === 'voo' || m.tipo === 'montaria') : todas;
       // Marco 40 (14/11/2026): as três liberadas desde o nível 1 (D-167); as do Aventureiro são as dos companheiros.
       expect(lista.map((m) => m.nivel)).toEqual([1, 1, 1]);
       const longa = obter(lista[0]);
@@ -188,22 +190,20 @@ describe('movimento da classe (D-164)', () => {
     expect(veloz(true)).toBeLessThan(corrida * 1.5);
   });
 
-  it('o Lobo perde a velocidade ao ser atingido; o Urso, montaria pesada, não', () => {
+  it('D-188: o lobo leva a +60% e o urso a +30%, e ser atingido não tira a velocidade (o limite é o fôlego)', () => {
     const lobo = cena('aventureiro');
     obter(lobo.j.bolsa).pet = 'lobo';
     lobo.passo([{ t: 'movimentoClasse' }]);
     expect(modo(lobo.j)).toBe('montado');
-    expect(fatorDeVelocidade(ctx, lobo.j)).toBeCloseTo(viagem);
+    expect(fatorDeVelocidade(ctx, lobo.j)).toBeCloseTo(1.6);
     golpear(lobo, lobo.j, lobo.orc(3, 5));
-    expect(modo(lobo.j)).toBe('montado');
-    expect(fatorDeVelocidade(ctx, lobo.j)).toBe(1);
+    expect(fatorDeVelocidade(ctx, lobo.j)).toBeCloseTo(1.6);
 
     const urso = cena('aventureiro', 25);
     obter(urso.j.bolsa).pet = 'urso';
     urso.passo([{ t: 'movimentoClasse' }]);
-    expect(urso.j.movimentoClasse?.modo?.pesada).toBe(true);
     golpear(urso, urso.j, urso.orc(3, 5));
-    expect(fatorDeVelocidade(ctx, urso.j)).toBeCloseTo(1 + ctx.balance.movimentoClasse.viagemPesadaPct / 100);
+    expect(fatorDeVelocidade(ctx, urso.j)).toBeCloseTo(1.3);
   });
 
   it('o movimento do Aventureiro é o do companheiro ativo: o falcão o leva voando; o G não troca; trocar de companheiro encerra', () => {

@@ -18,6 +18,8 @@ export type CausaDeslocamento = 'puxao' | 'empurrao' | 'arremesso' | 'avanco' | 
 
 export type MotivoRecusa =
   | 'nadando'
+  /** D-188: o Aventureiro com as três feras cansadas não usa skill de classe. */
+  | 'sem_companheiro'
   | 'sem_habilidade'
   | 'vida_cheia'
   | 'sem_invocacao'
@@ -193,6 +195,9 @@ export type EventoSimulacao =
   | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado' | 'perdeu'; motivo?: string; ponta?: PontaElemental; eco?: boolean }
   /** Marco 40 (D-165): o Aventureiro trocou de companheiro. */
   | { t: 'companheiroTrocado'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
+  /** D-188 (19/11/2026): a fera do Aventureiro cansou (desce, não luta, descansa) e voltou descansada. */
+  | { t: 'feraCansou'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
+  | { t: 'feraDescansou'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
   /** Marco 40 (D-166): o básico do Aventureiro marcou a caça do companheiro. */
   | { t: 'cacaMarcada'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null; x?: number; y?: number; origemX?: number; origemY?: number; atorX?: number; atorY?: number; miraX?: number; miraY?: number }

@@ -37,6 +37,7 @@ import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
 import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado , type MovimentoDoAtlas } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
+import { petDoCompanheiro } from '../combat/pets';
 import { coresDasRunas, desenharRuna } from './runas';
 import { atualizarTochaPortada } from './tocha-portada';
 import { temLuzPropria } from '../combat/luz-propria';
@@ -717,6 +718,36 @@ export class CamadaEntidades {
           else g.lineTo(x, y);
         }
         g.stroke({ width: 2, color: a.cor, alpha: a.alpha });
+      }
+    }
+    // D-188 (19/11/2026): a fera do Aventureiro tem o anel preto do fôlego, que esvazia como o dos mortos do
+    // Necromante; o contorno claro o separa do chão escuro. Cansada, o anel cinza enche com o descanso.
+    else if (e.invocacao?.companheiro) {
+      const dono = estado.entidades.find((d) => d.id === e.invocacao?.donoId);
+      const fera = dono?.feras?.[petDoCompanheiro(e)];
+      const r = RAIO * 1.15 * m.escala + 4;
+      const inicio = -Math.PI / 2;
+      const cansada = fera?.cansado === true;
+      const fracao = cansada ? 0 : (fera?.energia ?? 100) / 100;
+      const arcoNoChao = (f: number, largura: number, cor: number, alpha: number) => {
+        if (f >= 0.999) { anel(r).stroke({ width: largura, color: cor, alpha }); return; }
+        if (f <= 0) return;
+        const passos = Math.max(2, Math.ceil(48 * f));
+        for (let i = 0; i <= passos; i++) {
+          const ang = inicio + Math.PI * 2 * f * (i / passos);
+          const x = Math.cos(ang) * r;
+          const y = Math.sin(ang) * r * k;
+          if (i === 0) g.moveTo(x, y);
+          else g.lineTo(x, y);
+        }
+        g.stroke({ width: largura, color: cor, alpha });
+      };
+      anel(r).stroke({ width: 5, color: 0xd8d2c4, alpha: 0.18 });
+      arcoNoChao(fracao, 3, 0x000000, 0.92);
+      // Cansada: o anel vira tracejado cinza (descansando).
+      if (cansada) for (let i = 0; i < 12; i += 2) {
+        const a0 = inicio + (i * Math.PI) / 6;
+        g.moveTo(Math.cos(a0) * r, Math.sin(a0) * r * k).lineTo(Math.cos(a0 + Math.PI / 8) * r, Math.sin(a0 + Math.PI / 8) * r * k).stroke({ width: 2, color: 0x8a8a8a, alpha: 0.7 });
       }
     }
     // Marco 10A-3: invocação com anel verde-azulado; avatar mostra os golpes que ainda aguenta.

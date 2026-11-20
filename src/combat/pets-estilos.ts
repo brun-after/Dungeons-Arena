@@ -24,6 +24,9 @@ import { construirEfeito } from './registro-efeitos';
 export const CAMPOS_DO_PET = [
   'ataquePct', 'passoPct', 'provocarRaio', 'invocacaoPct', 'repetirPct', 'empurrao', 'curaNoGolpePct',
   'reflexoMenosPct', 'interceptarMenosPct', 'runaNoGolpe', 'runaRaio',
+  // D-188 (19/11/2026): o fôlego e as ações do X pelos estilos (combat/feras.ts, combat/movimento-feras.ts).
+  'golpeMenosPct', 'skillMenosPct', 'descansoMenosPct', 'drenoMenosPct', 'cansacoMenosPct', 'arremessoPct', 'disparadaMenosPct',
+  'quedaAtordoaMs', 'quedaRuna', 'disparadaEmpurra', 'disparadaRuna', 'contencaoEmpurra', 'contencaoMaisMs', 'bloqueioMaisPct', 'contencaoRuna',
 ] as const;
 export type CampoDoPet = (typeof CAMPOS_DO_PET)[number];
 

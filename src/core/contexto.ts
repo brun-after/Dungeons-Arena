@@ -25,6 +25,9 @@ import type { RegrasVinculo } from '../progression/vinculo';
 /** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
 
+/** D-188: os números comuns das três feras do Aventureiro. */
+export interface FeraBalance { viagemPct: number; repassePct: [number, number]; descansoMs: [number, number]; golpe: [number, number]; cansacoPorDano: number; danoPct: number }
+
 export interface Balance {
   dragoes: { alturaAtlas: number; larguraAtlas: number; alturaMin: number; alturaMax: number; nivelMax: number; folgaCorredor: number; salaMin: number; salaPorCorredor: number; salaExtra: number; areaPorSala: number };
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
@@ -42,9 +45,26 @@ export interface Balance {
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; lentidaoPct: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
-    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; /** D-170: a cada tantas voltas, uma passa perto do dono (para ele montar). */ passaPertoACada: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number };
+    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; /** D-170: a cada tantas voltas, uma passa perto do dono (para ele montar). */ passaPertoACada: number; raioCombate: number; /** Marco 24 (D-098): a espera até pousar no ombro (D-188: o repasse do dano foi para `feras`). */ pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number };
       /** Marco 40 (D-165): o lobo e o urso (o dano que chega ao dono, nível 1 e pleno; o passo; o golpe que o lobo toma; a provocação do urso). */
-      pets: { lobo: { reflexoPct: [number, number]; passoMs: number; interceptarMs: number; nadaLutando?: boolean }; urso: { reflexoPct: [number, number]; passoMs: number; provocarMs: number; provocarRaio: number; /** D-170: ataca nadando. */ nadaLutando?: boolean } };
+      pets: { lobo: { passoMs: number; interceptarMs: number; nadaLutando?: boolean }; urso: { passoMs: number; provocarMs: number; provocarRaio: number; /** D-170: ataca nadando. */ nadaLutando?: boolean } };
+      /**
+       * D-188 (19/11/2026): o cansaço das feras. Pares [nível 1, nível 100] (linear no meio). `viagemPct`, a velocidade
+       * montado; `sustentaMs`, o tempo montado de energia cheia (o falcão: o tempo de andar o alcance do voo);
+       * `repassePct`, o dano no bicho que chega à vida atual do dono; `descansoMs`, o descanso do cansado; `golpe`, o
+       * gasto de cada golpe na caça; `cansacoPorDano`, a energia (em %) por 1% da vida do dono que o bicho segura.
+       */
+      feras: {
+        falcao: FeraBalance & { arremesso: number; arremessoDescanso: number };
+        lobo: FeraBalance & { sustentaMs: [number, number]; disparadaPct: number; disparadaGasto: number };
+        urso: FeraBalance & { sustentaMs: [number, number]; contencao: { duracaoMs: number; raio: number; bloqueioVidaPct: number; descontoMaxPct: number } };
+        skill: Record<string, [number, number]> & { padrao: [number, number] };
+        foraDeCampo: number;
+        chamadoMs: number;
+        trocaMs: number;
+        marcos: { revezamento: number; folego: number; auge: number };
+        auge: { arremesso: number; disparadaPct: number; contencaoMs: number };
+      };
       /** D-165: o Rosnar e o Rugido (base, por nível de diferença e teto, em ms). */
       gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number };
       /** D-173: o que cada estilo do dono dá a cada companheiro (por estilo, companheiro e campo, o valor na faixa 10). */
