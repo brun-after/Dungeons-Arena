@@ -22,7 +22,8 @@ import { passavel } from '../world/fase';
 import { emPassagem } from '../world/passagem';
 import { emRefugio } from '../world/refugio';
 import { ehDragao } from '../world/porte-dragoes';
-import { escuroDoLugar, horaDoMundo } from './ciclo';
+import { diaDoCiclo, escuroDoLugar, horaDoMundo } from './ciclo';
+import { marcarVitrinesDaVila } from './lojas-mundo';
 import { naSombra, type RegrasDaCamuflagem } from '../world/camuflagem';
 import { acenderFoco, apagarFoco, focoAceso } from './focos';
 import type { RegiaoDoMundo } from './reino';
@@ -233,6 +234,8 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
   const escuro = escuroDoLugar(hora, 0, false);
   const novo = (ctx.modo.escuro ?? 0) === escuro && (ctx.modo.noite ?? 0) === hora.noite ? ctx : { ...ctx, modo: { ...ctx.modo, escuro, noite: hora.noite } };
   conferirVilaANoite(estado, novo, regiao);
+  // Marco 47 (20/11/2026, D-190): a vitrine do ferreiro renova a cada dia do Mundo.
+  marcarVitrinesDaVila(estado.objetos, novo, diaDoCiclo(agoraMs, ctx.balance.mundo.ciclo), regiao.nivel);
   conferirNoite(estado, novo, regiao, escuro);
   conferirSonoDoCovil(estado, novo, agoraMs, new Set(ctx.balance.mundo.noite.noturnos));
   // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo e os monstros que o fogo de acampamento chama.

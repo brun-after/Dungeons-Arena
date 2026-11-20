@@ -123,6 +123,13 @@ export interface ObjetoNoMundo {
   escondido?: boolean;
   /** 16/11/2026 (D-184): o multiplicador da sorte na luz de XP (3 ou 5); ausente sem sorte. */
   xpSorte?: number;
+  /**
+   * Marco 47 (20/11/2026, D-190): a vitrine de armadura da loja (progression/vitrine.ts), posta pela sala do Mundo: o
+   * perfil (data/lojas.json), a rodada (o dia do ciclo na vila, a semana na dungeon) e o nível do lugar.
+   */
+  vitrine?: string;
+  rodadaVitrine?: number;
+  nivelVitrine?: number;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.40 · **Data:** 20/11/2026
+**Versão:** 1.41 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.41 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos.
 > - **1.40 (20/11/2026)**: D-188, adendo: as metas do simulador acompanham as feras (a fatia do lobo vai a 15–65% e o PvP do Aventureiro contra ele mesmo aceita 5 s).
 > - **1.39 (20/11/2026)**: D-189: marco 46, o equipamento por propósito, estilo, grau e elemento, e os efeitos das peças no modelo `gatilho → condição → efeito`.
 > - **1.38 (20/11/2026)**: D-188: as feras do Aventureiro com fôlego (sem tempo nem distância na montaria), a troca no Shift, a montaria no V e o X de cada fera; a Troca de companheiro sai da barra.
@@ -5994,3 +5995,36 @@ elemento, e dar a cada peça efeitos próprios. Desenho completo em [`docs/EQUIP
 
 **Observação.** Os números dos efeitos são a primeira calibragem; o simulador de balanceamento ainda não veste peças com
 efeito.
+
+## D-190 — Marco 47: a vitrine de armaduras das lojas (20/11/2026)
+
+**Contexto.** O marco 46 (D-189) deu a cada peça de armadura um perfil (propósito, estilo, grau, elemento e efeitos),
+mas as lojas só vendiam os 39 itens fixos, sempre com o mesmo perfil. A variedade das peças geradas só chegava pelo drop.
+
+**Decisão.**
+- **Quem vende.** O ferreiro mantém as armas e armaduras fixas e ganha uma **vitrine** de peças `gi_` de armadura. A
+  loja sem ofício da campanha também ganha, e o mercado, o mercador, o alquimista e os vendedores errantes e noturnos
+  não. A lista de ofícios fica em `data/lojas.json` (`oficios`, `semOficio`).
+- **Quando renova.** Renova a cada **dia do Mundo**, um ciclo completo de dia e noite (`mundo/ciclo.ts → diaDoCiclo`).
+  A hora do Mundo sai do relógio do servidor, então quem conta o dia é a sala (`conferirFocosENoite`, a cada segundo).
+  Ela posta no objeto da loja o perfil, a rodada e o nível (`vitrine`, `rodadaVitrine` e `nivelVitrine`). O núcleo não
+  lê relógio nenhum, e o cliente recebe o objeto. Na dungeon, a rodada é a semana da loja (D-144). Fora do Mundo, a
+  rodada conta em ticks, um ciclo do dia por rodada, com um deslocamento por loja.
+- **O que aparece.** Perfil `vila`: 12 peças, com raridade por peso (55/33/12, até raro) e nível da loja de −2 a +1. No
+  Mundo, o nível da loja é o meio da faixa da região; fora dele, a média dos inimigos da fase. Perfil `dungeon`: 5 peças
+  a partir de incomum, com chance de épica (17%) e lendária (5%), de 0 a +3 do nível da dungeon. A garantia recusa um
+  propósito repetido quando as vagas que sobram só bastam para os que faltam: toda vitrine traz os cinco propósitos.
+- **Determinismo.** `sortearVitrine` usa `hash(vitrine:<fase>/<loja>:<rodada>)`, nunca o RNG do combate, como as
+  ofertas temporárias (D-075). `comprar` já recusa o que não está em `estoqueDaLoja`, e a vitrine entra nele: peça de
+  outra rodada é recusada sem cobrar.
+- **Preço.** `valorBase × multRaridade × (1 + porGrauPct·grau) × (1 + porEfeitoPct·efeitos)` (1 a 2,2; 12%; 15%) vale
+  para toda peça de armadura, fixa ou gerada, com o desconto do Carisma por cima. A venda continua pelo `valorBase`, sem
+  arbitragem.
+- **Tela.** A vitrine tem seção própria e chips por peça, propósito, estilo e elemento (só os valores presentes). O
+  filtro é só da tela e não emite comando; um contador mostra quando a vitrine renova.
+
+**Alternativas descartadas.** Renovar por tempo de jogo (30 min) dava pressa sem relação com o mundo. Pôr peças também
+no mercado misturava os ofícios. Vender épicas na vila tirava o motivo de ir às dungeons.
+
+**Observação.** Os pesos e os preços são a primeira calibragem; o simulador de balanceamento ainda não compra na
+vitrine.

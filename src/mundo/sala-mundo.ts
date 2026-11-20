@@ -54,7 +54,7 @@ import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { chaveDoDono, REF_ERRANTE } from './objetos-mundo';
-import { estoqueSemanalDaDungeon, semanaDaLoja } from './lojas-mundo';
+import { aplicarEstoqueDaDungeon, semanaDaLoja } from './lojas-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, portaDa, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
@@ -324,7 +324,7 @@ export class SalaMundo extends SalaArena {
     if (semana === this.semanaDaLoja) return;
     this.semanaDaLoja = semana;
     const d = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra : this.lugar.covil;
-    for (const o of this.estado.objetos) if (o.tipo === 'loja') o.itens = estoqueSemanalDaDungeon(this.ctx.conteudo, territorioDoLugar(this.reino, d.id), d, semana, r);
+    aplicarEstoqueDaDungeon(this.estado.objetos, this.ctx, territorioDoLugar(this.reino, d.id), d, semana);
   }
 
   /** Marco 30 (D-129): a estrutura escondida perto de quem passa entra no mapa (mundo/sala-viagem.ts). */

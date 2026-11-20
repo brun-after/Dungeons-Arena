@@ -37,6 +37,15 @@ export interface HoraDoMundo {
 
 const MINUTO = 60_000;
 
+/** A duração de um dia inteiro do Mundo (ms). */
+export const duracaoDoCiclo = (r: RegrasDoCiclo): number => FASES_DO_DIA.reduce((s, f) => s + Math.max(0, r.minutos[f]) * MINUTO, 0);
+
+/** Marco 47 (20/11/2026, D-190): o número do dia do Mundo (sobe a cada ciclo, no começo do amanhecer). */
+export function diaDoCiclo(agoraMs: number, r: RegrasDoCiclo): number {
+  const ciclo = duracaoDoCiclo(r);
+  return ciclo > 0 ? Math.floor(agoraMs / ciclo) : 0;
+}
+
 /** A hora do mundo agora. */
 export function horaDoMundo(agoraMs: number, r: RegrasDoCiclo): HoraDoMundo {
   const duracoes = FASES_DO_DIA.map((f) => Math.max(0, r.minutos[f]) * MINUTO);

@@ -7,6 +7,7 @@ import type { Entidade } from '../entities/entidade';
 import { concluirEstudo } from './habilidades-personagem';
 import type { Item } from './itens';
 import { precoDeCompra } from './efeitos-atributo';
+import { precoDaPeca } from './vitrine';
 
 export function familiaDaHabilidade(ctx: ContextoSimulacao, id: string): string {
   const d = definicaoDe(ctx, id);
@@ -39,7 +40,8 @@ export function precoDoItem(item: Item, e: Entidade, ctx: ContextoSimulacao): nu
   if(item.id === 'pergaminho_retorno' && mortes >= ctx.balance.mundo.resgate.mortesGratis) return 0;
   const resgate = item.id === 'pergaminho_retorno' && mortes >= ctx.balance.mundo.resgate.mortesDesconto ? 0.5 : 1;
   const r = ctx.balance.progressaoItens;
-  const base = item.progressao?.tipo === 'ponto' ? r.tomoPrecoBase : item.valorBase;
+  // Marco 47 (20/11/2026, D-190): a peça de armadura custa mais pela raridade, pelo grau e pelos efeitos.
+  const base = item.progressao?.tipo === 'ponto' ? r.tomoPrecoBase : precoDaPeca(ctx.conteudo.lojas, item);
   // Marco 27 (D-126): a passiva do Aventureiro (arremessável na principal) barateia os pergaminhos de invocação.
   const desconto = ehPergaminho(item) ? descontoDePergaminhoPct(ctx, e) : 0;
   return Math.max(1, Math.round(precoDeCompra(base, e.atributos, ctx.balance) * (1 - desconto / 100) * resgate));
