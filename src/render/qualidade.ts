@@ -13,6 +13,10 @@
 // até o fim da cena, e o jogo "ficava pesado" com o tempo. Agora, com `SUBIDA_MS` seguidos de quadros bons, volta um
 // nível (nunca acima do nível com que a cena começou). Se cair logo depois de subir, a espera da próxima subida dobra
 // (até `SUBIDA_MAX_MS`), para não ficar oscilando. O quadro marcado com `ignorarProximo` (o salvamento) não conta.
+// 21/11/2026 (D-199): no toque (celular), a qualidade automática tem piso no baixo — as skills nunca perdem os efeitos
+// por conta própria. Abaixo do piso, em vez de descer de nível, o monitor "aperta a economia" em degraus
+// (`ECONOMIA_TOQUE`): 1 = palco em meia resolução e metade das partículas; 2 = também 30 fps. Folgando, a economia
+// afrouxa antes de o nível subir. No computador o piso é o mínimo e não há economia: nada muda lá.
 
 import type { NivelQualidade } from '../plataforma/preferencias';
 
@@ -46,6 +50,24 @@ export const PRESETS_QUALIDADE: Readonly<Record<NivelQualidade, PresetQualidade>
 };
 
 const ORDEM: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];
+
+/** D-199: degraus de economia do toque (abaixo do piso da qualidade automática). */
+export const ECONOMIA_TOQUE = 2;
+/** D-199: a partir deste degrau, o palco vai a meia resolução e as partículas à metade. */
+export const ECONOMIA_RESOLUCAO = 1;
+/** D-199: a partir deste degrau, o teto de 30 fps. */
+export const ECONOMIA_30FPS = 2;
+
+/** D-199: o preset do nível com a economia aplicada (só as partículas mudam aqui; resolução e fps, no palco). */
+export function presetComEconomia(nivel: NivelQualidade, economia: number): PresetQualidade {
+  const p = PRESETS_QUALIDADE[nivel];
+  return economia >= ECONOMIA_RESOLUCAO ? { ...p, particulas: Math.round(p.particulas / 2) } : p;
+}
+
+/** D-199: o piso e os degraus de economia da qualidade automática: no toque, baixo e 2; no computador, mínimo e 0. */
+export function limitesAutomaticos(toque: boolean): { piso: NivelQualidade; economiaMax: number } {
+  return toque ? { piso: 'baixo', economiaMax: ECONOMIA_TOQUE } : { piso: 'minimo', economiaMax: 0 };
+}
 
 /** Padrão do primeiro uso: baixo no toque, alto no desktop (§4.10). */
 export function qualidadePadrao(toque: boolean): NivelQualidade {
@@ -85,8 +107,14 @@ export class MonitorDeQualidade {
   private ignorar = false;
   /** O nível com que a cena começou: a subida automática não passa dele. */
   teto: NivelQualidade;
+  /** D-199: o degrau de economia (0 = nenhum); só sobe abaixo do piso e até `economiaMax`. */
+  economia = 0;
 
-  constructor(public nivel: NivelQualidade) {
+  constructor(
+    public nivel: NivelQualidade,
+    private readonly piso: NivelQualidade = 'minimo',
+    private readonly economiaMax = 0,
+  ) {
     this.teto = nivel;
   }
 
@@ -95,7 +123,10 @@ export class MonitorDeQualidade {
     this.ignorar = true;
   }
 
-  /** Registra um quadro; devolve o novo nível quando a qualidade deve mudar, senão null. */
+  /**
+   * Registra um quadro; devolve o nível quando a qualidade deve mudar (o novo nível, ou o mesmo quando só a economia
+   * mudou, D-199), senão null.
+   */
   registrar(duracaoMs: number, agoraMs: number, alvoFps = 60): NivelQualidade | null {
     if (this.ignorar) {
       this.ignorar = false;
@@ -114,15 +145,21 @@ export class MonitorDeQualidade {
     const lento = this.fpsMedio() < Math.min(FPS_MINIMO, alvoFps * 0.75);
     const travando = this.p95Ms() > Math.max(PICO_P95_MS, 1500 / alvoFps);
     this.abaixoSeguidas = lento || travando ? this.abaixoSeguidas + 1 : 0;
-    if (this.abaixoSeguidas >= 2 && this.nivel !== 'minimo') return this.descer(agoraMs);
+    if (this.abaixoSeguidas >= 2) {
+      if (ORDEM.indexOf(this.nivel) > ORDEM.indexOf(this.piso)) return this.descer(agoraMs);
+      if (this.economia < this.economiaMax) return this.apertar(agoraMs);
+    }
     const bom = this.fpsMedio() >= alvoFps * FRACAO_BOA && this.p95Ms() <= (P95_BOM_QUADROS * 1000) / alvoFps;
     if (!bom) {
       this.boasDesdeMs = null;
       return null;
     }
     this.boasDesdeMs ??= agoraMs;
-    if (this.nivel === this.teto || agoraMs - this.boasDesdeMs < this.esperaSubidaMs) return null;
-    this.nivel = nivelAcima(this.nivel, this.teto);
+    if (agoraMs - this.boasDesdeMs < this.esperaSubidaMs) return null;
+    // D-199: folgando, a economia afrouxa antes de o nível subir.
+    if (this.economia > 0) this.economia--;
+    else if (this.nivel !== this.teto) this.nivel = nivelAcima(this.nivel, this.teto);
+    else return null;
     this.boasDesdeMs = null;
     this.subiuEmMs = agoraMs;
     this.reiniciarBuffer();
@@ -130,13 +167,26 @@ export class MonitorDeQualidade {
   }
 
   private descer(agoraMs: number): NivelQualidade {
+    this.recuar(agoraMs);
+    this.nivel = nivelAbaixo(this.nivel);
+    return this.nivel;
+  }
+
+  /** D-199: no piso, um degrau a mais de economia em vez de descer o nível. */
+  private apertar(agoraMs: number): NivelQualidade {
+    this.recuar(agoraMs);
+    this.economia++;
+    // Os quadros de antes do aperto não dizem nada do degrau novo.
+    this.reiniciarBuffer();
+    return this.nivel;
+  }
+
+  private recuar(agoraMs: number): void {
     // Caiu logo depois de subir: a próxima subida espera o dobro.
     if (this.subiuEmMs !== null && agoraMs - this.subiuEmMs < SUBIDA_MS) this.esperaSubidaMs = Math.min(SUBIDA_MAX_MS, this.esperaSubidaMs * 2);
     this.subiuEmMs = null;
     this.abaixoSeguidas = 0;
     this.boasDesdeMs = null;
-    this.nivel = nivelAbaixo(this.nivel);
-    return this.nivel;
   }
 
   /** Depois de subir, o buffer recomeça (os quadros do nível anterior não dizem nada do novo). */

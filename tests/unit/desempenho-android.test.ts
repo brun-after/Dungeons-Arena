@@ -6,7 +6,7 @@ import { ehAppNativo } from '../../src/plataforma/nativo';
 import { enderecoDeServidorValido, gravarPreferencias, normalizarPreferencias, PREFERENCIAS_PADRAO } from '../../src/plataforma/preferencias';
 import { enderecoDoServidor } from '../../src/plataforma/servidor';
 import { escalaDaResolucao, fpsAlvo, PuladorDeQuadros, resolucaoDoPalco } from '../../src/render/desempenho';
-import { MonitorDeQualidade } from '../../src/render/qualidade';
+import { limitesAutomaticos, MonitorDeQualidade, presetComEconomia, PRESETS_QUALIDADE } from '../../src/render/qualidade';
 import { resumirQuadros } from '../../src/ui/medidor';
 
 afterEach(() => {
@@ -118,6 +118,43 @@ describe('degradação automática por travadas', () => {
     // A espera agora é de 60 s: 40 s bons não bastam.
     expect(rodar(40, () => 1000 / 30, 30)).toEqual([]);
     expect(rodar(30, () => 1000 / 30, 30)).toEqual(['baixo']);
+  });
+
+  // D-199 (21/11/2026): no toque, a automática não desce do baixo; aperta a economia e depois a afrouxa.
+  it('toque: no piso, aperta a economia em vez de ir ao mínimo, e afrouxa antes de subir', () => {
+    const { piso, economiaMax } = limitesAutomaticos(true);
+    const m = new MonitorDeQualidade('baixo', piso, economiaMax);
+    const rodar = continuo(m);
+    rodar(12, () => 40);
+    expect(m.nivel).toBe('baixo');
+    expect(m.economia).toBe(1);
+    rodar(20, () => 40);
+    expect(m.economia).toBe(2);
+    // Mais travada não muda nada: o mínimo (sem efeitos de skill) nunca vem sozinho.
+    expect(rodar(30, () => 40)).toEqual([]);
+    expect(m.nivel).toBe('baixo');
+    // No degrau dos 30 fps, quadros firmes de 33 ms são bons: a economia afrouxa um degrau por vez.
+    rodar(40, () => 1000 / 30, 30);
+    expect(m.economia).toBe(1);
+    rodar(40, () => 16);
+    expect(m.economia).toBe(0);
+    expect(m.nivel).toBe('baixo');
+  });
+
+  it('computador: sem piso nem economia, a escada é a de antes', () => {
+    const { piso, economiaMax } = limitesAutomaticos(false);
+    const m = new MonitorDeQualidade('baixo', piso, economiaMax);
+    expect(continuo(m)(12, () => 40)).toEqual(['minimo']);
+    expect(m.economia).toBe(0);
+  });
+
+  it('a economia corta as partículas à metade e, no degrau 2, põe o teto de 30 fps', () => {
+    expect(presetComEconomia('baixo', 0)).toBe(PRESETS_QUALIDADE.baixo);
+    expect(presetComEconomia('baixo', 1).particulas).toBe(60);
+    expect(presetComEconomia('baixo', 1).auras).toBe(true);
+    expect(fpsAlvo('auto', 'baixo', 1)).toBe(60);
+    expect(fpsAlvo('auto', 'baixo', 2)).toBe(30);
+    expect(fpsAlvo('60', 'baixo', 2)).toBe(60);
   });
 
   it('o quadro marcado (o salvamento) não conta', () => {

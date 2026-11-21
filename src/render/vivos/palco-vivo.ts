@@ -259,12 +259,12 @@ export class PalcoVivo {
   private livres: number[] = [];
   private pedidos = 0;
   private destruido = false;
+  private ultimoDesenhoMs = -Infinity;
 
-  /**
-   * `resolucao`: px de tela por px de mundo (o dpr, limitado pela qualidade). `detalhe`: os segmentos das peças
-   * torneadas (0,4 no jogo; 1 nos retratos dos menus, vistos de perto).
-   */
-  constructor(private readonly resolucao: number, private readonly detalhe = DETALHE) {
+  // `resolucao`: px de tela por px de mundo (o dpr, limitado pela qualidade). `detalhe`: os segmentos das peças torneadas
+  // (0,4 no jogo; 1 nos retratos dos menus). `intervaloMs` (D-199, 21/11/2026): o mínimo entre redesenhos (0 = todo
+  // quadro; no toque, ~30 por segundo com 4 ms de folga: a pose anda a 30, o corpo desliza a cada quadro no Pixi).
+  constructor(private readonly resolucao: number, private readonly detalhe = DETALHE, private readonly intervaloMs = 0) {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.tela, antialias: true, alpha: true, premultipliedAlpha: true });
     this.renderer.setPixelRatio(1);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -692,6 +692,8 @@ export class PalcoVivo {
   /** Desenha, numa passada só, todos os personagens pedidos neste quadro. */
   desenhar(): void {
     if (this.destruido) return;
+    if (this.intervaloMs > 0 && performance.now() - this.ultimoDesenhoMs < this.intervaloMs - 4) return;
+    this.ultimoDesenhoMs = performance.now();
     for (const [id, a] of this.atores) {
       if (a.semPedido++ > ESQUECER_APOS) {
         a.raiz.removeFromParent();
