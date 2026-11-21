@@ -30,7 +30,8 @@ export function lerIdFundido(id: string): { elemento: Elemento; grau: number; ba
 }
 
 /** A peça aceita a fusão? (equipável e ainda não fundida). */
-export const fundivel = (item: Item | undefined): item is Item => !!item && item.tipo === 'equipamento' && item.slotPadrao !== null && !ehIdFundido(item.id);
+// Marco 51 (D-197): a peça engastada (`en_`) não funde: a fusão fica por dentro e os engastes por fora.
+export const fundivel = (item: Item | undefined): item is Item => !!item && item.tipo === 'equipamento' && item.slotPadrao !== null && !ehIdFundido(item.id) && !item.id.startsWith('en_');
 
 const ehArma = (item: Item): boolean => item.slotPadrao === 'arma_principal' || item.base === 'aljava' || !!item.arma;
 

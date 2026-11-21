@@ -3699,3 +3699,17 @@ body:not(.toque) .botao-acao.centralizar.flutuante {
   .bancada-alquimia { grid-template-columns: 1fr; }
   .roda-alquimia { order: -1; }
 }
+
+/* Marco 51 (21/11/2026, D-197): a mesa da forja no ferreiro (a cena, os espaços da receita e os engastes). */
+.mesa-forja { display: grid; gap: 10px; margin: 8px 0 16px; padding: 10px; border: 1px solid rgba(255, 138, 38, 0.35); border-radius: 8px; background: linear-gradient(180deg, rgba(40, 22, 10, 0.55), rgba(10, 8, 8, 0.85)); }
+.palco-forja { display: flex; justify-content: center; }
+.cena-forja { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid rgba(255, 138, 38, 0.25); touch-action: manipulation; }
+.espacos-forja { display: flex; flex-wrap: wrap; gap: 8px; }
+.espaco-forja { min-width: 140px; min-height: 52px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borda); background: rgba(12, 10, 10, 0.75); color: var(--texto); font: inherit; text-align: left; }
+.espaco-forja.ocupado { border-style: solid; border-color: var(--destaque); }
+.espaco-forja .icone { width: 22px; height: 22px; }
+.espaco-forja.alvo-ativo, .encaixe-alquimia.alvo-ativo { box-shadow: 0 0 0 2px var(--destaque); }
+.engastes-forja { display: grid; gap: 6px; }
+@media (max-width: 480px) {
+  .espaco-forja { min-width: 0; flex: 1 1 100%; }
+}

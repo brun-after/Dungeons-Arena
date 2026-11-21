@@ -526,7 +526,39 @@
  "materiais": {
   "minerio_ferro": {
    "texto": "+10% de dano do golpe",
-   "danoPct": 10
+   "danoPct": 10,
+   "elemento": "fisico",
+   "dimensao": "litia",
+   "arma": {
+    "texto": "golpe físico: +6% de dano por 3 s",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 6
+       },
+       "em": "portador"
+      },
+      "se": {
+       "tipoAtaque": "fisico"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 4% a todo elemento",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 4
+      }
+     }
+    ]
+   }
   },
   "minerio_prata": {
    "texto": "+25% contra mortos-vivos (a luz da prata expõe)",
@@ -538,11 +570,68 @@
      "valor": 0,
      "pct": 15
     }
-   ]
+   ],
+   "elemento": "sagrado",
+   "dimensao": "halonia",
+   "arma": {
+    "texto": "20% de chance de consagrar o alvo",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "consagrado",
+        "duracaoMs": 3000,
+        "pct": 15
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 20% a trevas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 20,
+       "elemento": "trevas"
+      }
+     }
+    ]
+   }
   },
   "cristal_arcano": {
    "texto": "−12% de mana",
-   "custoPct": -12
+   "custoPct": -12,
+   "elemento": "psiquico",
+   "dimensao": "oniria",
+   "arma": {
+    "texto": "golpes devolvem 2 de mana",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "mana": 2
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+8% de potência dos efeitos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "potenciaPct": 8
+      }
+     }
+    ]
+   }
   },
   "erva_curativa": {
    "texto": "cura 4% da vida ao lançar",
@@ -554,11 +643,66 @@
      "valor": 6,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "sagrado",
+   "arma": {
+    "texto": "cura 1% da vida por abate",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "curarPct": 1
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+15% nos escudos recebidos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "escudoPct": 15
+      }
+     }
+    ]
+   }
   },
   "erva_lunar": {
    "texto": "os estados duram 20% a mais",
-   "duracaoPct": 20
+   "duracaoPct": 20,
+   "elemento": "psiquico",
+   "dimensao": "oniria",
+   "arma": {
+    "texto": "10% de chance de expor o alvo",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "exposto",
+        "duracaoMs": 2000,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+10% na revelação de armadilhas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "revelarPct": 10
+      }
+     }
+    ]
+   }
   },
   "flor_de_fogo": {
    "texto": "queima o alvo por 1 s a mais",
@@ -570,12 +714,79 @@
      "valor": 2,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "5% de chance de queimar",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 3
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 5
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 10% a fogo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 10,
+       "elemento": "fogo"
+      }
+     }
+    ]
+   }
   },
   "presa_de_lobo": {
    "texto": "+15% de dano",
    "danoPct": 15,
-   "custoPct": 5
+   "custoPct": 5,
+   "elemento": "fisico",
+   "dimensao": "zefiria",
+   "arma": {
+    "texto": "no crítico, acelera 2 s",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "acelerado",
+        "duracaoMs": 2000,
+        "pct": 10
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+4% de velocidade ao levar golpe, 2 s",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "acelerado",
+        "duracaoMs": 2000,
+        "pct": 4
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   }
   },
   "seda_de_aranha": {
    "texto": "imobiliza 1 s",
@@ -587,7 +798,43 @@
      "valor": 0,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "veneno",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "1 em 3 golpes prende 0,5 s",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "enraizado",
+        "duracaoMs": 500
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 33
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "quem te acerta fica lento 1 s",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "resfriado",
+        "duracaoMs": 1000,
+        "pct": 20
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   }
   },
   "gosma_de_slime": {
    "texto": "chão pegajoso: lento por 3 s",
@@ -599,15 +846,104 @@
      "valor": 0,
      "pct": 30
     }
-   ]
+   ],
+   "elemento": "veneno",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "+1 camada de veneno",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "envenenado",
+        "duracaoMs": 4000,
+        "valor": 2
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 50
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "ao levar golpe, escudo pequeno (1 em 5)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "escudo",
+        "duracaoMs": 3000,
+        "valor": 6
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   }
   },
   "orelha_de_goblin": {
    "texto": "−8% de recarga",
-   "recargaPct": -8
+   "recargaPct": -8,
+   "elemento": "fisico",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "abater dá 3 de mana",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "mana": 3
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+10% para desarmar armadilhas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "desarmarPct": 10
+      }
+     }
+    ]
+   }
   },
   "osso_antigo": {
    "texto": "atravessa 1 alvo",
-   "perfura": true
+   "perfura": true,
+   "elemento": "trevas",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "os projéteis mágicos atravessam +1 alvo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "atravessaMagico": 1
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a trevas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "trevas"
+      }
+     }
+    ]
+   }
   },
   "escama_de_dragao": {
    "texto": "escudo contra o fogo ao lançar (resistência por 5 s)",
@@ -619,13 +955,73 @@
      "valor": 12,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fogo",
+   "dimensao": "litia",
+   "arma": {
+    "texto": "queima sempre no golpe físico",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 4
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "tipoAtaque": "fisico"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 25% a fogo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 25,
+       "elemento": "fogo"
+      }
+     }
+    ]
+   }
   },
   "fragmento_portal": {
    "texto": "a magia sai de dois círculos atrás de quem lança",
    "entrega": {
     "origem": "circulos_atras",
     "circulos": 2
+   },
+   "elemento": "psiquico",
+   "arma": {
+    "texto": "no crítico, passo sombrio",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "passo_sombrio",
+        "duracaoMs": 1000
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+20% na duração do refúgio",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "refugioMaisPct": 20
+      }
+     }
+    ]
    }
   },
   "madeira_antiga": {
@@ -638,7 +1034,46 @@
      "valor": 0,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "terra",
+   "dimensao": "litia",
+   "arma": {
+    "texto": "10% de chance de enraizar 0,5 s",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "enraizado",
+        "duracaoMs": 500
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "regenera ao levar golpe (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "cura_periodica",
+        "duracaoMs": 3000,
+        "valor": 2
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   }
   },
   "cristal_de_gelo": {
    "texto": "chão escorregadio: resfria 3 s",
@@ -650,7 +1085,44 @@
      "valor": 0,
      "pct": 20
     }
-   ]
+   ],
+   "elemento": "gelo",
+   "dimensao": "hiemalia",
+   "arma": {
+    "texto": "+1 camada de resfriado (1 em 2)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "resfriado",
+        "duracaoMs": 2000,
+        "pct": 15
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 50
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "quem te acerta fica resfriado",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "resfriado",
+        "duracaoMs": 1500,
+        "pct": 15
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   }
   },
   "resina_negra": {
    "texto": "marca o alvo (o próximo golpe fere mais)",
@@ -662,16 +1134,121 @@
      "valor": 0,
      "pct": 15
     }
-   ]
+   ],
+   "elemento": "trevas",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "golpes deixam marca (1 em 4)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "marcado",
+        "duracaoMs": 3000,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "ao levar golpe, véu noturno (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "veu_noturno",
+        "duracaoMs": 2000
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   }
   },
   "pedra_runica": {
    "texto": "+1 encaixe de runa",
-   "encaixes": 1
+   "encaixes": 1,
+   "elemento": "sagrado",
+   "dimensao": "halonia",
+   "arma": {
+    "texto": "+10% de potência dos efeitos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "potenciaPct": 10
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "os estados negativos duram 10% menos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "negativosMenosPct": 10
+      }
+     }
+    ]
+   }
   },
   "areia_vitrea": {
    "texto": "o impacto vitrifica o chão",
    "entrega": {
     "marca": "chao"
+   },
+   "elemento": "terra",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "ao usar skill, recarga −3% por 4 s",
+    "ganchos": [
+     {
+      "quando": "aoUsarHabilidade",
+      "efeito": {
+       "aplicar": {
+        "tipo": "ab_recarga",
+        "duracaoMs": 4000,
+        "pct": 3
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "reflete parte dos golpes (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "reflexo",
+        "duracaoMs": 2000,
+        "efeito": {
+         "queimando": {
+          "duracaoMs": 2000,
+          "valor": 3
+         }
+        }
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
    }
   },
   "minerio_obsidiana": {
@@ -684,7 +1261,36 @@
      "valor": 0,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "no crítico, +15% de dano por 3 s",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 15
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 8% a todo elemento",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 8
+      }
+     }
+    ]
+   }
   },
   "couro_de_troll": {
    "texto": "regenera a vida por 3 s",
@@ -696,7 +1302,39 @@
      "valor": 2,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fisico",
+   "dimensao": "litia",
+   "arma": {
+    "texto": "cura 2% da vida por abate",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "curarPct": 2
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "regenera ao levar golpe (1 em 5)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "cura_periodica",
+        "duracaoMs": 3000,
+        "valor": 3
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   }
   },
   "presa_de_orc": {
    "texto": "empurra o alvo",
@@ -708,7 +1346,35 @@
      "valor": 1,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fisico",
+   "dimensao": "hiemalia",
+   "arma": {
+    "texto": "atordoa 0,3 s no crítico",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "atordoar",
+        "duracaoMs": 300
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "os estados negativos duram 20% menos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "negativosMenosPct": 20
+      }
+     }
+    ]
+   }
   },
   "presa_de_vampiro": {
    "texto": "rouba vida a cada golpe",
@@ -721,7 +1387,34 @@
      "pct": 0
     }
    ],
-   "danoPct": 3
+   "danoPct": 3,
+   "elemento": "trevas",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "cura 1% da vida por golpe (1 em 3)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "curarPct": 1
+      },
+      "se": {
+       "chancePct": 33
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "cura 2% ao abater",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "curarPct": 2
+      }
+     }
+    ]
+   }
   },
   "pano_cultista": {
    "texto": "expõe o alvo por 1 s a mais",
@@ -733,12 +1426,79 @@
      "valor": 0,
      "pct": 10
     }
-   ]
+   ],
+   "elemento": "psiquico",
+   "dimensao": "halonia",
+   "arma": {
+    "texto": "expõe o alvo no crítico",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "exposto",
+        "duracaoMs": 2000,
+        "pct": 10
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a psíquico",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "psiquico"
+      }
+     }
+    ]
+   }
   },
   "chifre_de_demonio": {
    "texto": "+30% de dano, pago em vida",
    "danoPct": 30,
-   "custoVidaPct": 5
+   "custoVidaPct": 5,
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "+12% de dano por 3 s ao abater",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 12
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 20% a fogo e a trevas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 20,
+       "elemento": "fogo"
+      }
+     },
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 20,
+       "elemento": "trevas"
+      }
+     }
+    ]
+   }
   },
   "coracao_infernal": {
    "texto": "a magia explode em volta de quem cai",
@@ -750,11 +1510,74 @@
      "valor": 8,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "golpes explodem em brasa ao redor (1 em 6)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "queimando",
+        "duracaoMs": 2000,
+        "valor": 4
+       },
+       "raio": 2
+      },
+      "se": {
+       "chancePct": 16
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "ao levar golpe, nova de fogo (1 em 20)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 5
+       },
+       "raio": 2
+      },
+      "se": {
+       "chancePct": 5
+      }
+     }
+    ]
+   }
   },
   "dente_de_ouro": {
    "texto": "−20% de mana",
-   "custoPct": -20
+   "custoPct": -20,
+   "elemento": "fisico",
+   "arma": {
+    "texto": "abater devolve 4 de mana",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "mana": 4
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+15% na revelação de armadilhas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "revelarPct": 15
+      }
+     }
+    ]
+   }
   },
   "olho_da_bruxa": {
    "texto": "revela e marca os atingidos",
@@ -766,7 +1589,39 @@
      "valor": 0,
      "pct": 15
     }
-   ]
+   ],
+   "elemento": "psiquico",
+   "dimensao": "oniria",
+   "arma": {
+    "texto": "+15% de dano por 3 s contra marcados",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 15
+       },
+       "em": "portador"
+      },
+      "se": {
+       "estadoDoAlvo": "marcado"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+15% na revelação de armadilhas",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "revelarPct": 15
+      }
+     }
+    ]
+   }
   },
   "seiva_venenosa": {
    "texto": "+2 camadas de veneno",
@@ -785,7 +1640,37 @@
      "valor": 2,
      "pct": 50
     }
-   ]
+   ],
+   "elemento": "veneno",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "envenena sempre",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "envenenado",
+        "duracaoMs": 4000,
+        "valor": 2
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 20% a veneno",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 20,
+       "elemento": "veneno"
+      }
+     }
+    ]
+   }
   },
   "escama_ignea": {
    "texto": "escudo de brasa por 5 s ao lançar",
@@ -797,7 +1682,40 @@
      "valor": 8,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "20% de chance de queimar",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 3
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a fogo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "fogo"
+      }
+     }
+    ]
+   }
   },
   "nucleo_igneo": {
    "texto": "queimadura de 2ª camada",
@@ -810,7 +1728,47 @@
      "pct": 0
     }
    ],
-   "danoPct": 10
+   "danoPct": 10,
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "chamas no alvo e em volta (1 em 3)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 5
+       },
+       "raio": 1
+      },
+      "se": {
+       "chancePct": 33
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "aura de brasa ao levar golpe",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "queimando",
+        "duracaoMs": 2000,
+        "valor": 3
+       },
+       "raio": 2
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   }
   },
   "escama_glacial": {
    "texto": "escudo de gelo por 5 s ao lançar",
@@ -822,7 +1780,40 @@
      "valor": 8,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "gelo",
+   "dimensao": "hiemalia",
+   "arma": {
+    "texto": "20% de chance de resfriar",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "resfriado",
+        "duracaoMs": 2000,
+        "pct": 20
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a gelo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "gelo"
+      }
+     }
+    ]
+   }
   },
   "nucleo_glacial": {
    "texto": "congela de uma vez",
@@ -834,7 +1825,45 @@
      "valor": 0,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "gelo",
+   "dimensao": "hiemalia",
+   "arma": {
+    "texto": "congela 1 s (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "congelado",
+        "duracaoMs": 1000
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "10% de congelar quem te acerta",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "congelado",
+        "duracaoMs": 1000
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   }
   },
   "escama_trovejante": {
    "texto": "escudo de raio por 5 s ao lançar",
@@ -846,11 +1875,84 @@
      "valor": 8,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "raio",
+   "dimensao": "fulguria",
+   "arma": {
+    "texto": "20% de chance de eletrizar",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "eletrizado",
+        "duracaoMs": 2500,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a raio",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "raio"
+      }
+     }
+    ]
+   }
   },
   "nucleo_trovejante": {
    "texto": "a magia salta +2",
-   "saltos": 2
+   "saltos": 2,
+   "elemento": "raio",
+   "dimensao": "fulguria",
+   "arma": {
+    "texto": "descarga no inimigo mais perto (1 em 5)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicarNoProximo": {
+        "tipo": "eletrizado",
+        "duracaoMs": 2500,
+        "pct": 15
+       },
+       "raio": 3
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "raio em quem te acerta (1 em 3)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "eletrizado",
+        "duracaoMs": 2500,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 33
+      }
+     }
+    ]
+   }
   },
   "escama_peconhenta": {
    "texto": "escudo de veneno por 5 s ao lançar",
@@ -862,7 +1964,40 @@
      "valor": 8,
      "pct": 0
     }
-   ]
+   ],
+   "elemento": "veneno",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "20% de chance de envenenar",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "envenenado",
+        "duracaoMs": 4000,
+        "valor": 2
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a veneno",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "veneno"
+      }
+     }
+    ]
+   }
   },
   "nucleo_peconhento": {
    "texto": "veneno em dobro",
@@ -875,17 +2010,685 @@
      "pct": 50
     }
    ],
-   "danoPct": 10
+   "danoPct": 10,
+   "elemento": "veneno",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "veneno em volta do alvo (1 em 4)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "envenenado",
+        "duracaoMs": 4000,
+        "valor": 2
+       },
+       "raio": 1
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "quem te acerta fica definhando",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "definhando",
+        "duracaoMs": 3000,
+        "pct": 20
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   }
   },
   "cinza_de_alma": {
    "texto": "a magia atravessa e fere quem estiver atrás",
    "perfura": true,
-   "danoPct": 5
+   "danoPct": 5,
+   "elemento": "trevas",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "abater dá 5% de carga da ultimate",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "cargaUltimate": 5
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+10% de carga da ultimate",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "cargaUltimatePct": 10
+      }
+     }
+    ]
+   }
   },
   "filacterio_rachado": {
    "texto": "−25% de recarga",
    "recargaPct": -25,
-   "danoPct": 10
+   "danoPct": 10,
+   "elemento": "trevas",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "abater cura 5% da vida",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "curarPct": 5
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+20% de chance de renascer",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "renascerPct": 20
+      }
+     }
+    ]
+   }
+  },
+  "po_de_sonho": {
+   "texto": "confunde 1 s",
+   "efeitos": [
+    {
+     "tipo": "confuso",
+     "em": "alvo",
+     "duracaoMs": 1000,
+     "valor": 0,
+     "pct": 0
+    }
+   ],
+   "elemento": "psiquico",
+   "dimensao": "oniria",
+   "arma": {
+    "texto": "+15% de dano por 3 s contra confusos",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 15
+       },
+       "em": "portador"
+      },
+      "se": {
+       "estadoDoAlvo": "confuso"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "os estados negativos duram 10% menos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "negativosMenosPct": 10
+      }
+     }
+    ]
+   }
+  },
+  "mascara_partida": {
+   "texto": "a magia vira salva de 3",
+   "entrega": {
+    "cadencia": "salva",
+    "quantidade": 3
+   },
+   "danoPct": -15,
+   "elemento": "psiquico",
+   "dimensao": "oniria",
+   "arma": {
+    "texto": "expõe o alvo (1 em 4)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "exposto",
+        "duracaoMs": 2000,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "ao levar golpe, esquiva (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "esquiva",
+        "duracaoMs": 2000,
+        "pct": 30
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   }
+  },
+  "lasca_de_marmore": {
+   "texto": "escudo de 6 ao lançar",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 6,
+     "pct": 0
+    }
+   ],
+   "elemento": "sagrado",
+   "dimensao": "halonia",
+   "arma": {
+    "texto": "+10% de potência dos efeitos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "potenciaPct": 10
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+20% nos escudos recebidos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "escudoPct": 20
+      }
+     }
+    ]
+   }
+  },
+  "pena_de_penitente": {
+   "texto": "consagra o alvo",
+   "efeitos": [
+    {
+     "tipo": "consagrado",
+     "em": "alvo",
+     "duracaoMs": 3000,
+     "valor": 0,
+     "pct": 15
+    }
+   ],
+   "elemento": "sagrado",
+   "dimensao": "halonia",
+   "arma": {
+    "texto": "cura 1% da vida por golpe (1 em 4)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "curarPct": 1
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "aliados a 3 células levam 5% menos dano",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "auraDefesaPct": 5
+      }
+     }
+    ]
+   }
+  },
+  "pluma_de_vento": {
+   "texto": "−15% de recarga",
+   "recargaPct": -15,
+   "elemento": "vento",
+   "dimensao": "zefiria",
+   "arma": {
+    "texto": "acelera 2 s no crítico",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "acelerado",
+        "duracaoMs": 2000,
+        "pct": 12
+       },
+       "em": "portador"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "acelera ao levar golpe (1 em 5)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "acelerado",
+        "duracaoMs": 2000,
+        "pct": 8
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 20
+      }
+     }
+    ]
+   }
+  },
+  "vela_rasgada": {
+   "texto": "empurra o alvo",
+   "efeitos": [
+    {
+     "tipo": "empurrao",
+     "em": "alvo",
+     "duracaoMs": 0,
+     "valor": 2,
+     "pct": 0
+    }
+   ],
+   "elemento": "vento",
+   "dimensao": "zefiria",
+   "arma": {
+    "texto": "empurra 1 célula no crítico",
+    "ganchos": [
+     {
+      "quando": "aoCritico",
+      "efeito": {
+       "aplicar": {
+        "tipo": "empurrao",
+        "valor": 1
+       },
+       "em": "alvo"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "os estados negativos duram 15% menos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "negativosMenosPct": 15
+      }
+     }
+    ]
+   }
+  },
+  "bobina_voltaica": {
+   "texto": "a magia vira rajada",
+   "entrega": {
+    "cadencia": "rajada",
+    "duracaoMs": 1500
+   },
+   "danoPct": -10,
+   "elemento": "raio",
+   "dimensao": "fulguria",
+   "arma": {
+    "texto": "eletriza 1 em 4 golpes",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "eletrizado",
+        "duracaoMs": 2500,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "+10% de carga da ultimate",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "cargaUltimatePct": 10
+      }
+     }
+    ]
+   }
+  },
+  "vidro_de_raio": {
+   "texto": "a magia salta +1",
+   "saltos": 1,
+   "elemento": "raio",
+   "dimensao": "fulguria",
+   "arma": {
+    "texto": "descarga no inimigo mais perto (1 em 4)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicarNoProximo": {
+        "tipo": "eletrizado",
+        "duracaoMs": 2500,
+        "pct": 10
+       },
+       "raio": 3
+      },
+      "se": {
+       "chancePct": 25
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a raio",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "raio"
+      }
+     }
+    ]
+   }
+  },
+  "geodo_vivo": {
+   "texto": "a magia sai do chão e enraíza 0,5 s",
+   "entrega": {
+    "origem": "chao"
+   },
+   "efeitos": [
+    {
+     "tipo": "enraizado",
+     "em": "alvo",
+     "duracaoMs": 500,
+     "valor": 0,
+     "pct": 0
+    }
+   ],
+   "elemento": "terra",
+   "dimensao": "litia",
+   "arma": {
+    "texto": "+15% de dano por 3 s contra enraizados",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "bonus_dano",
+        "duracaoMs": 3000,
+        "pct": 15
+       },
+       "em": "portador"
+      },
+      "se": {
+       "estadoDoAlvo": "enraizado"
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "inamovível",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "inamovivel": true
+      }
+     }
+    ]
+   }
+  },
+  "breu_liquido": {
+   "texto": "a magia amaldiçoa o chão e cega 1 s",
+   "entrega": {
+    "marca": "chao"
+   },
+   "efeitos": [
+    {
+     "tipo": "cego",
+     "em": "alvo",
+     "duracaoMs": 1000,
+     "valor": 0,
+     "pct": 0
+    }
+   ],
+   "elemento": "trevas",
+   "dimensao": "umbralia",
+   "arma": {
+    "texto": "marca o alvo (1 em 3)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "marcado",
+        "duracaoMs": 3000,
+        "pct": 10
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 33
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "ao levar golpe, fica invisível 1 s (1 em 10)",
+    "ganchos": [
+     {
+      "quando": "aoReceberGolpe",
+      "efeito": {
+       "aplicar": {
+        "tipo": "invisivel",
+        "duracaoMs": 1000
+       },
+       "em": "portador"
+      },
+      "se": {
+       "chancePct": 10
+      }
+     }
+    ]
+   }
+  },
+  "geada_eterna": {
+   "texto": "a magia deixa trilha gelada",
+   "entrega": {
+    "marca": "trilha"
+   },
+   "duracaoPct": 20,
+   "elemento": "gelo",
+   "dimensao": "hiemalia",
+   "arma": {
+    "texto": "resfriado dura mais (1 em 2)",
+    "ganchos": [
+     {
+      "quando": "aoAcertar",
+      "efeito": {
+       "aplicar": {
+        "tipo": "resfriado",
+        "duracaoMs": 3000,
+        "pct": 20
+       },
+       "em": "alvo"
+      },
+      "se": {
+       "chancePct": 50
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 25% a gelo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 25,
+       "elemento": "gelo"
+      }
+     }
+    ]
+   }
+  },
+  "esporo_pulmao": {
+   "texto": "a magia pulsa veneno no alvo",
+   "entrega": {
+    "permanencia": "pulsa"
+   },
+   "efeitos": [
+    {
+     "tipo": "envenenado",
+     "em": "alvo",
+     "duracaoMs": 4000,
+     "valor": 2,
+     "pct": 0
+    }
+   ],
+   "elemento": "veneno",
+   "dimensao": "putrevia",
+   "arma": {
+    "texto": "veneno em volta ao abater",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "envenenado",
+        "duracaoMs": 4000,
+        "valor": 2
+       },
+       "raio": 2
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a veneno",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "veneno"
+      }
+     }
+    ]
+   }
+  },
+  "brasa_de_vidro": {
+   "texto": "a magia vira 3 grãos de brasa",
+   "entrega": {
+    "corpo": "graos"
+   },
+   "efeitos": [
+    {
+     "tipo": "queimando",
+     "em": "alvo",
+     "duracaoMs": 2000,
+     "valor": 3,
+     "pct": 0
+    }
+   ],
+   "elemento": "fogo",
+   "dimensao": "ignarea",
+   "arma": {
+    "texto": "queimando espalha ao abater",
+    "ganchos": [
+     {
+      "quando": "aoMatar",
+      "efeito": {
+       "aplicarEmVolta": {
+        "tipo": "queimando",
+        "duracaoMs": 3000,
+        "valor": 3
+       },
+       "raio": 2
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 15% a fogo",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 15,
+       "elemento": "fogo"
+      }
+     }
+    ]
+   }
+  },
+  "sal_de_fenda": {
+   "texto": "+15% de dano",
+   "danoPct": 15,
+   "elemento": "fisico",
+   "arma": {
+    "texto": "+8% de potência dos efeitos",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "potenciaPct": 8
+      }
+     }
+    ]
+   },
+   "peca": {
+    "texto": "resiste 10% a todo elemento",
+    "ganchos": [
+     {
+      "quando": "passivo",
+      "efeito": {
+       "resistenciaPct": 10
+      }
+     }
+    ]
+   }
   }
  },
  "legado": {

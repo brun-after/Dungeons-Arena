@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.59 · **Data:** 21/11/2026
+**Versão do documento:** 3.60 · **Data:** 21/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.60 (21/11/2026)**: marco 51: a forja por receita, com engastes de 1 a 3 materiais em armas e equipamento e a mesa da forja (D-197).
 > - **3.59 (21/11/2026)**: marco 50: a alquimia, com fusões abertas de 2 a 3 skills, compreensão, runas elementais, material na magia e a aba Alquimia (D-196).
 > - **3.58 (21/11/2026)**: marco 49: as formas de lançamento, num motor de entrega em sete eixos, com canal e feixe, e 22 variantes do catálogo já nelas (D-194, D-195).
 > - **3.57 (20/11/2026)**: marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza, com os números na cor do elemento (D-192, D-193).
@@ -379,6 +380,22 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 51 — a forja (21/11/2026)
+
+Último dos quatro marcos da Alquimia. Os materiais alquímicos agora também vão para armas e equipamento.
+- **Engastes.** Cada peça leva de 1 a 3 materiais, pela raridade e pelo nível. Na arma, o material age no golpe (a
+  escama ígnea queima); na armadura, protege (a mesma escama resiste ao fogo). Dois do mesmo elemento ou da mesma
+  dimensão de Filo reforçam os efeitos, e três da mesma dimensão trazem o eco da fenda. Um par instável traz a reação
+  do par, mas enfraquece o resto.
+- **Receitas como loot.** As 15 receitas caem das criaturas que as guardam e são levadas ao ferreiro. Toda receita
+  parte de uma peça pronta: a Lâmina de cinzas transforma uma lâmina qualquer numa espada de fogo com a escama
+  engastada.
+- **A mesa da forja.** No ferreiro, a fornalha, a bigorna e o círculo rúnico ganham vida. Você põe a receita na mesa,
+  arrasta a peça e forja: a peça aquece, é martelada, as runas são gravadas e ela é temperada. Engastar e extrair
+  também ficam na mesa.
+
+Guia em [docs/ALQUIMIA.md](docs/ALQUIMIA.md); detalhes em D-197.
 
 ### Marco 50 — a alquimia (21/11/2026)
 

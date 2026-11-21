@@ -222,6 +222,13 @@ export function lerComando(v: unknown): Comando | null {
       if (!ids(v.partes, 3) || !ids(v.runas, 2) || !(v.material === null || id(v.material))) return null;
       return { t: 'fundir', partes: [...v.partes], runas: [...v.runas], material: v.material };
     }
+    // Marco 51 (D-197): a forja confere a receita, as peças, os materiais, o ouro e a loja do ferreiro.
+    case 'forjarMolde':
+      return id(v.receita) && id(v.base) && (v.segunda === null || id(v.segunda)) ? { t: 'forjarMolde', receita: v.receita, base: v.base, segunda: v.segunda } : null;
+    case 'engastar':
+      return id(v.peca) && id(v.material) ? { t: 'engastar', peca: v.peca, material: v.material } : null;
+    case 'extrair':
+      return id(v.peca) && inteiro(v.indice) && v.indice >= 0 && v.indice < 3 ? { t: 'extrair', peca: v.peca, indice: v.indice } : null;
     default:
       return null;
   }

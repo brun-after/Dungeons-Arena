@@ -247,6 +247,24 @@
     "compreensao": { "comumPct": 2, "fusaoPct": 1, "faixaNivel": 10, "essenciaPct": 25 },
     "dropRuna": { "chancePct": 4, "chefePct": 60 }
   },
+  "engaste": {
+    "_doc": "Marco 51 (21/11/2026, D-197): os engastes de arma e equipamento (progression/engaste.ts) e as receitas da forja como loot (progression/moldes.ts).",
+    "porRaridade": { "comum": 1, "incomum": 1, "raro": 2, "epico": 2, "lendario": 3, "ultima": 3 },
+    "tetoPorNivel": [{ "nivel": 1, "engastes": 1 }, { "nivel": 20, "engastes": 2 }, { "nivel": 50, "engastes": 3 }],
+    "mesmoElementoPct": [25, 40],
+    "mesmaDimensaoPct": [15, 30],
+    "instavelPct": 15,
+    "ecoChancePct": 12,
+    "ecoRaio": 2,
+    "valorMaterialPct": 60,
+    "ouroBase": 30,
+    "ouroPorNivel": 4,
+    "extrairVoltaPct": 35,
+    "dropReceitaPct": 3,
+    "dropReceitaChefePct": 25,
+    "dropMaterialPct": 6,
+    "dropMaterialChefePct": 60
+  },
   "entrega": {
     "_doc": "Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/), com o custo e a compensação de cada escolha do Grimório da Alquimia.",
     "maxTiros": 24,

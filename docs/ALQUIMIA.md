@@ -1,13 +1,14 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.0 · **Data:** 21/11/2026
+**Versão:** 1.1 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.1 (21/11/2026)**: marco 51 (D-197). A forja: engastes, receitas como loot e a mesa da forja.
 > - **1.0 (21/11/2026)**: marco 50 (D-196). Fusões abertas, compreensão, runas elementais, material na magia e a aba
 >   Alquimia.
 
 Este guia explica a alquimia como ela está no código. O desenho completo, com exemplos animados, está no Grimório da
-Alquimia (artefato). As decisões ficam em [DECISOES.md](DECISOES.md) (D-192 a D-196).
+Alquimia (artefato). As decisões ficam em [DECISOES.md](DECISOES.md) (D-192 a D-197).
 
 ## Como o jogador funde
 
@@ -105,6 +106,41 @@ As 4 fusões fixas viraram a fusão aberta das mesmas partes (`alquimia.json →
 
 As definições antigas ficam no catálogo, sem o campo `fusao`, porque inimigos e visuais ainda as usam.
 
+## A forja: engastes e receitas
+
+Os mesmos materiais também vão para armas e equipamento, engastados no ferreiro.
+
+**Engastes.** A peça leva de 1 a 3 materiais:
+
+| Raridade | Engastes | | Nível da peça | Teto |
+|---|---|---|---|---|
+| Comum, incomum | 1 | | até 19 | 1 |
+| Rara, épica | 2 | | 20 a 49 | 2 |
+| Lendária, última | 3 | | 50 ou mais | 3 |
+
+Vale o menor dos dois. O id guarda os materiais: `en_escama_ignea.po_de_sonho__fu_fogo_1__espada_curta`. A fusão
+elemental fica por dentro, os engastes por fora.
+
+**O material na arma e na peça.** Cada material tem uma leitura para a arma e outra para o equipamento
+(`alquimia.json → materiais.<id>.arma` e `.peca`), em ganchos. A escama ígnea, por exemplo: na arma, 20% de chance de
+queimar; na peça, resistência de 15% a fogo.
+
+**Conjuntos dentro da peça.**
+- **Mesmo elemento**: com 2, os efeitos sobem 25%; com 3, 40%.
+- **Mesma dimensão de Filo**: com 2, sobem 15%; com 3, sobem 30% e vem o eco da fenda (às vezes, o estado da dimensão
+  em volta de quem é golpeado).
+- **Par instável**: a reação do par entra na peça, e os efeitos caem 15%.
+
+**Receitas.** As 15 receitas do Grimório são itens `receita_<id>` que caem das criaturas que as guardam (e dos chefes,
+as de grau V). Toda receita parte de uma peça pronta:
+- a Lâmina de cinzas pede uma lâmina e uma escama ígnea, e a lâmina sai de fogo com a escama engastada;
+- o Arco da tempestade pede um arco épico, um segundo arco, o núcleo trovejante e a runa do raio.
+
+Os moldes ficam em `forja.json → moldes`.
+
+**No ferreiro, sem receita**, também se engasta e se extrai. As duas operações custam ouro pelo nível da peça, e o
+material extraído volta 35% das vezes.
+
 ## Onde mexer
 
 | O quê | Onde |
@@ -115,4 +151,7 @@ As definições antigas ficam no catálogo, sem o campo `fusao`, porque inimigos
 | O comando e as regras de quem pode fundir | `src/progression/alquimia.ts` |
 | A compreensão | `src/progression/compreensao.ts` |
 | A aba | `src/ui/alquimia/` (bancada, círculo, prévia, caderno, arrastar) |
+| Engastes, conjuntos e o id `en_` | `src/progression/engaste.ts`, `balance.json → engaste` |
+| As receitas da forja, os comandos e o drop | `src/progression/moldes.ts`, `src/data/forja.json → moldes` |
+| A mesa e a cena da forja | `src/ui/forja/` (mesa, cena) |
 | Os textos | `src/i18n/pt-BR-alquimia.ts` |
