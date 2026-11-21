@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.50 · **Data:** 21/11/2026
+**Versão:** 1.51 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.51 (21/11/2026)**: D-199: no celular, a qualidade automática não cai mais para o mínimo (sem efeitos de skill); abaixo do baixo, aperta a economia (meia resolução e metade das partículas, depois 30 fps). O palco 3D dos personagens no toque desenha até 1,5× e a ~30 quadros por segundo. O computador não muda.
 > - **1.50 (21/11/2026)**: D-198, adendo: a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez; cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível; o inferior nunca toma o lugar do superior, nem ao fim do estudo.
 > - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
 > - **1.48 (21/11/2026)**: D-197: marco 51, a forja por receita (o item `receita_<id>` cai das criaturas e parte de peça pronta), os engastes de 1 a 3 no id `en_`, os materiais na arma e no equipamento, engastar e extrair, e a mesa da forja com a cena.
@@ -6434,3 +6435,32 @@ missões sem ganho de jogo. A troca fica para quando houver substitutas para cad
 - **O inferior nunca toma o lugar do superior.** Além do sorteio (fica o melhor dos dois), a troca ao fim do estudo
   confere o nível. Se a fusão que já está lá for igual ou melhor, a estudada é descartada e a antiga fica.
 - Os dois contadores passam pelo `clonarBolsa` e pela conferência da ficha (`coop/conferir-extras.ts`).
+
+## D-199 — Celular fraco sem perder os efeitos das skills (21/11/2026)
+
+**Contexto.** Em celulares fracos, a qualidade automática descia do baixo para o mínimo, que desliga as partículas, as
+auras e os presets de impacto: as skills ficavam sem efeito nenhum. O maior gasto do celular, porém, não eram as
+partículas. O palco 3D dos personagens (`render/vivos/palco-vivo.ts`, um segundo contexto WebGL com three.js) desenhava
+na densidade da tela até 2× e reenviava a textura inteira ao Pixi a cada quadro, a 60 por segundo. A 2×, isso é o
+quádruplo de pixels de 1×.
+
+**Decisão.** Tudo vale só no toque (`detectarToque`). No computador o piso é o mínimo, não há economia, e o palco 3D
+segue em até 2× a cada quadro.
+- **Piso no baixo** (`render/qualidade.ts → limitesAutomaticos`). No toque, a qualidade automática não desce do baixo.
+  Quando o aparelho ainda trava no baixo, o monitor aperta a economia em degraus (`MonitorDeQualidade.economia`):
+  1 = o palco em meia resolução (só com a resolução automática) e metade das partículas (`presetComEconomia`);
+  2 = também o teto de 30 fps (só com o fps automático, `fpsAlvo`). Folgando, a economia afrouxa um degrau por vez antes
+  de o nível subir, com a mesma espera (e a mesma espera dobrada quando cai logo depois de subir). O mínimo continua
+  disponível, mas só escolhido à mão.
+- **O palco 3D no toque** (`ui/cena.ts`). A densidade vai até 1,5×, a mesma do palco na resolução automática do toque
+  (2 × 0,75); acima disso, os pixels se perdiam na redução. O redesenho tem um intervalo mínimo de ~33 ms: a pose dos
+  personagens anda a 30 por segundo, e o corpo segue deslizando a cada quadro no Pixi. A 30 fps, nada muda.
+- **Atributos do body.** `data-particulas` e `data-escuridao` só são escritos quando mudam. Antes, a escrita a cada
+  quadro invalidava o estilo da página.
+
+**Alternativas descartadas.** Baixar as partículas do baixo para todos. Isso mexeria no computador, e as partículas não
+eram o gargalo. Detectar o aparelho fraco pelo `deviceMemory` ou pelos núcleos também foi descartado. O dado não existe
+no Safari e erra para os dois lados; o monitor mede o aparelho de verdade.
+
+**Observação.** Ainda não foi medido num celular real. A conferência é jogar uma luta cheia com o medidor ligado
+(`data-economia` no body mostra o degrau).

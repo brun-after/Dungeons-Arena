@@ -237,7 +237,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const personagens = o.tileset ? null : new AtlasDePersonagens();
   // Marco 37 (04/11/2026): os jogadores em 3D em tempo real, na densidade da tela (até 2×); o atlas fica de reserva.
   // 05/11/2026: sem GPU (WebGL em software) o atlas desenha os jogadores.
-  const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
+  // D-199 (21/11/2026): no toque, até 1,5× (a densidade do palco na resolução automática; os 2× gastavam o quádruplo
+  // de pixels no desenho e no envio da textura a cada quadro) e no máximo ~30 redesenhos por segundo.
+  const dprVivo = Math.min(toque ? 1.5 : 2, Math.max(1, globalThis.devicePixelRatio || 1));
+  const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(dprVivo, undefined, toque ? 1000 / 30 : 0);
   const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual, ap.qualidade().soloEscala, pintor);
   if (solo) await solo.texturas;
   if (personagens) {

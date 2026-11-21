@@ -57,7 +57,7 @@ import { decoracoesDaFase } from '../world/decoracao';
 import { CamadaLuz, cintilacao, type PontoDeLuz } from '../render/luz';
 import { SistemaParticulas } from '../render/particulas';
 import { escalaDaResolucao, fpsAlvo, PuladorDeQuadros } from '../render/desempenho';
-import { MonitorDeQualidade, PRESETS_QUALIDADE, qualidadePadrao, type PresetQualidade } from '../render/qualidade';
+import { ECONOMIA_RESOLUCAO, limitesAutomaticos, MonitorDeQualidade, presetComEconomia, PRESETS_QUALIDADE, qualidadePadrao, type PresetQualidade } from '../render/qualidade';
 import type { Palco } from '../render/stage';
 import { Graphics } from 'pixi.js';
 import { t } from '../i18n';
@@ -131,10 +131,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   let prefs = lerPreferencias();
   const sistema = matchMedia('(prefers-reduced-motion: reduce)');
   const reduzido = () => (prefs.movimentoReduzido === 'sistema' ? sistema.matches : prefs.movimentoReduzido === 'sempre');
-  const monitor = new MonitorDeQualidade(prefs.qualidade === 'auto' ? qualidadePadrao(toque) : prefs.qualidade);
+  // D-199 (21/11/2026): no toque, a automática não desce do baixo; aperta a economia (resolução, partículas, 30 fps).
+  const limites = limitesAutomaticos(toque);
+  const monitor = new MonitorDeQualidade(prefs.qualidade === 'auto' ? qualidadePadrao(toque) : prefs.qualidade, limites.piso, limites.economiaMax);
   const nivel = (): NivelQualidade => (prefs.qualidade === 'auto' ? monitor.nivel : prefs.qualidade);
-  const qualidade = () => PRESETS_QUALIDADE[nivel()];
-  const alvoFps = () => o.observador ? 30 : fpsAlvo(prefs.fps, nivel());
+  const economia = () => (prefs.qualidade === 'auto' ? monitor.economia : 0);
+  const qualidade = () => presetComEconomia(nivel(), economia());
+  const alvoFps = () => o.observador ? 30 : fpsAlvo(prefs.fps, nivel(), economia());
   const pulador = new PuladorDeQuadros();
   const medidor = new Medidor();
 
@@ -298,7 +301,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       luzes.push({ x: tela.x, y, raio: (p.raio ?? vis.raioObjeto) * CELULA_PX * zoom, cor: p.cor, intensidade: Math.min(1, (p.intensidade ?? 1) * 1.6) * pulso });
     }
     const modo = qualidade().escuridao;
-    document.body.dataset.escuridao = modo;
+    // D-199: o atributo só é escrito quando muda (escrever no body a cada quadro invalida o estilo da página).
+    if (document.body.dataset.escuridao !== modo) document.body.dataset.escuridao = modo;
     const { ambiente, nivel } = escuroAgora();
     // Marco 43 (D-177): no céu aberto, o mínimo de luz cai com a noite (até `realceNoite` na noite fechada).
     const ciclo = ctx.balance.mundo.ciclo;
@@ -325,6 +329,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const n of ['minimo', 'baixo', 'medio', 'alto'] as const) document.body.classList.toggle(`qualidade-${n}`, nivel() === n);
     document.documentElement.style.setProperty('--escala-ui', String(prefs.escalaInterface));
     document.body.dataset.qualidade = nivel();
+    document.body.dataset.economia = String(economia());
     motor.definirVolumes({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: o.observador || prefs.mudo });
     particulas.limite = qualidade().particulas;
     // Marco 11A: movimento reduzido também reduz as partículas (metade, sem giro).
@@ -335,7 +340,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       corpoMovimento.limpar();
       rastrosMovimento.limpar();
     }
-    palco.definirEscala(Math.min(escalaDaResolucao(prefs.resolucao, toque), o.observador ? 1 / Math.min(window.devicePixelRatio || 1, 2) : 1));
+    // D-199: a economia do toque põe o palco em meia resolução (só com a resolução automática).
+    const meia = prefs.resolucao === 'auto' && economia() >= ECONOMIA_RESOLUCAO ? 0.5 : 1;
+    palco.definirEscala(Math.min(escalaDaResolucao(prefs.resolucao, toque), meia, o.observador ? 1 / Math.min(window.devicePixelRatio || 1, 2) : 1));
     medidor.mostrar(prefs.medidor);
   };
   aplicarPreferencias();
@@ -514,7 +521,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       luz.desenhar(pontosDoQuadro, agoraMs, qualidade().luz, reduzido());
       minimapa.atualizar(estado, agoraMs);
       prompt.atualizar(estado, agoraMs);
-      document.body.dataset.particulas = String(particulas.quantidade);
+      const vivas = String(particulas.quantidade);
+      if (document.body.dataset.particulas !== vivas) document.body.dataset.particulas = vivas;
       return impacto.quadro(agoraMs).congelado;
     },
     aplicarCamera: (agoraMs) => {

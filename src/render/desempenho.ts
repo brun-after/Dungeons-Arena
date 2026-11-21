@@ -3,6 +3,7 @@
 // desenho (e o laço que o agenda) fica mais espaçado.
 
 import type { EscolhaFps, EscolhaResolucao, NivelQualidade } from '../plataforma/preferencias';
+import { ECONOMIA_30FPS } from './qualidade';
 
 /** Fator sobre o DPR: alta = 1, média = 0,75, baixa = 0,5; automática = média no toque, alta no desktop. */
 export function escalaDaResolucao(escolha: EscolhaResolucao, toque: boolean): number {
@@ -23,11 +24,14 @@ export function resolucaoDoPalco(dpr: number, teto: number, escala: number): num
   return Math.max(0.5, Math.min(dpr || 1, teto) * escala);
 }
 
-/** Quadros por segundo desejados: automático = 60, e 30 quando a qualidade automática já chegou ao mínimo. */
-export function fpsAlvo(escolha: EscolhaFps, nivel: NivelQualidade): 30 | 60 {
+/**
+ * Quadros por segundo desejados: automático = 60, e 30 quando a qualidade automática já chegou ao mínimo ou, no toque,
+ * ao degrau de economia dos 30 fps (D-199).
+ */
+export function fpsAlvo(escolha: EscolhaFps, nivel: NivelQualidade, economia = 0): 30 | 60 {
   if (escolha === '30') return 30;
   if (escolha === '60') return 60;
-  return nivel === 'minimo' ? 30 : 60;
+  return nivel === 'minimo' || economia >= ECONOMIA_30FPS ? 30 : 60;
 }
 
 /** Folga para o vsync: um quadro de 60 Hz que chega 2 ms antes ainda conta para 30 fps. */
