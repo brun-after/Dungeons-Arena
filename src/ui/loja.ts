@@ -14,6 +14,8 @@ import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar, receitaDaLoja } from '../progression/forja';
 import { fundivel } from '../progression/fusao-elemental';
+import { ferreiroAberto } from '../progression/moldes';
+import { desenharMesaDaForja, mesaVazia } from './forja/mesa';
 import { criarModal } from './modal';
 import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
@@ -59,6 +61,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
   let filtros: FiltrosDaVitrine = filtrosVazios();
   let lojaDosFiltros = '';
   let renovacao: HTMLElement | null = null;
+  /** Marco 51 (21/11/2026, D-197): a mesa da forja (o que está posto nela e a cena), só da tela. */
+  const mesa = mesaVazia();
   const assinaturaDe = (bolsa: NonNullable<Entidade['bolsa']>, loja: ObjetoNoMundo) =>
     JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(), o.ctx, loja), estoqueDaLoja(o.estado(), o.ctx, loja), filtros]);
 
@@ -199,6 +203,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
    */
   const desenharForja = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
+    // Marco 51 (D-197): no ferreiro (e na forja da campanha), a mesa com a receita, os engastes e a cena.
+    if (ferreiroAberto(o.estado(), j)) desenharMesaDaForja(listas, o.estado(), ctx, j, emitir, mesa, () => { assinatura = ''; });
     // Marco 30 (30/10/2026, D-129): só as receitas do ofício da loja (no Mundo, o ferreiro e o alquimista).
     // Marco 38 (D-142): em ordem de grau, com o grau no começo de cada linha.
     const receitas = [...ctx.conteudo.forja.values()].filter((r) => receitaDaLoja(r, loja)).sort((a, b) => a.grau - b.grau);

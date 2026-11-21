@@ -1,3 +1,4 @@
+import { dropsDaForja } from './moldes';
 import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
 import { morteSemTumulo, PREFIXO_NOITE, recompensaDaNoite } from '../mundo/noite';
 import { criarTumulo } from '../mundo/objetos-mundo';
@@ -25,6 +26,8 @@ import { ticksDe } from '../core/tempo';
 import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { aleatorio, inteiro, proximoU32, criarRng, hashTexto } from '../core/rng';
+import { definicaoDe } from '../combat/compilar-habilidade';
+import type { Elemento } from '../combat/elementos';
 import { idGerada } from '../combat/chave-habilidade';
 import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
@@ -312,6 +315,8 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
     if (essencia) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, essencia.id, x, y, saida));
   }
   largarMateriais(estado, ctx, e, saida);
+  largarRunaElemental(estado, ctx, e, saida);
+  largarDaForja(estado, ctx, e, saida);
   // Marco 47 (20/11/2026, D-190): as peças de armadura, com a garantia contra azar de quem leva o crédito.
   for (const id of pecasDoAbate(estado, ctx, e, creditado(estado, quem), lootMult, renascido)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, id, x, y, saida));
   if (aleatorio(estado.rng) >= Math.min(1, (boss ? d.chanceItemBoss : d.chanceItem) * lootMult)) return;
@@ -333,6 +338,28 @@ function largarMateriais(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   for (const m of lista) {
     if (aleatorio(rng) * 100 < m.chancePct) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, m.itemId, x, y, saida));
   }
+}
+
+/**
+ * Marco 50 (21/11/2026, D-196): a runa elemental cai da criatura do elemento (o de uma das skills dela, sorteado), com
+ * um RNG próprio pela instância. Só onde o estudo avança (as runas são da alquimia).
+ */
+function largarRunaElemental(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  if (!ctx.modo.sobrevivencia.estudoAvanca || e.bolsa) return;
+  const elementos = [...new Set([e.ataqueBasico, ...e.habilidades].map((h) => definicaoDe(ctx, h)?.base.elemento).filter((x): x is Elemento => !!x))];
+  if (elementos.length === 0) return;
+  const r = ctx.balance.alquimia.dropRuna;
+  const rng = criarRng(hashTexto(`${estado.faseId}/${e.id}/${String(e.geracao)}/runa`));
+  if (aleatorio(rng) * 100 >= (e.arquetipo === 'boss' ? r.chefePct : r.chancePct)) return;
+  const item = ctx.conteudo.itens.get(`runa_${elementos[inteiro(rng, 0, elementos.length - 1)] ?? ''}`);
+  if (item) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
+}
+
+/** Marco 51 (21/11/2026, D-197): a receita da forja e o material da dimensão, onde o estudo avança. */
+function largarDaForja(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  if (!ctx.modo.sobrevivencia.estudoAvanca || e.bolsa) return;
+  const rng = criarRng(hashTexto(`${estado.faseId}/${e.id}/${String(e.geracao)}/forja`));
+  for (const id of dropsDaForja(ctx, e.preset, e.arquetipo === 'boss', rng)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, id, x, y, saida));
 }
 
 function celulaLivreParaRenascer(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c: { x: number; y: number }): { x: number; y: number } {

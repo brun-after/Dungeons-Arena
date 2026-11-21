@@ -216,6 +216,19 @@ export function lerComando(v: unknown): Comando | null {
     // Marco 39 (D-151): a simulação confere se a skill tem encaixe e se há vínculo com a runa.
     case 'escolherRuna':
       return id(v.habilidade) && (v.runa === null || ehPonta(v.runa)) ? { t: 'escolherRuna', habilidade: v.habilidade, runa: v.runa } : null;
+    // Marco 50 (D-196): a simulação confere as partes, a compreensão, as runas e o material.
+    case 'fundir': {
+      const ids = (l: unknown, max: number): l is string[] => Array.isArray(l) && l.length <= max && l.every(id);
+      if (!ids(v.partes, 3) || !ids(v.runas, 2) || !(v.material === null || id(v.material))) return null;
+      return { t: 'fundir', partes: [...v.partes], runas: [...v.runas], material: v.material };
+    }
+    // Marco 51 (D-197): a forja confere a receita, as peças, os materiais, o ouro e a loja do ferreiro.
+    case 'forjarMolde':
+      return id(v.receita) && id(v.base) && (v.segunda === null || id(v.segunda)) ? { t: 'forjarMolde', receita: v.receita, base: v.base, segunda: v.segunda } : null;
+    case 'engastar':
+      return id(v.peca) && id(v.material) ? { t: 'engastar', peca: v.peca, material: v.material } : null;
+    case 'extrair':
+      return id(v.peca) && inteiro(v.indice) && v.indice >= 0 && v.indice < 3 ? { t: 'extrair', peca: v.peca, indice: v.indice } : null;
     default:
       return null;
   }

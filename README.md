@@ -1,9 +1,14 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.57 · **Data:** 20/11/2026
+**Versão do documento:** 3.62 · **Data:** 21/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.62 (21/11/2026)**: marco 52: reaprender a skill consumida de graça e na hora, e a chance que sobe a cada tentativa (D-198).
+> - **3.61 (21/11/2026)**: marco 52: os níveis de raridade da fusão (3º, 2º e 1º), com a chance pela Inteligência e a fórmula refeita (D-198).
+> - **3.60 (21/11/2026)**: marco 51: a forja por receita, com engastes de 1 a 3 materiais em armas e equipamento e a mesa da forja (D-197).
+> - **3.59 (21/11/2026)**: marco 50: a alquimia, com fusões abertas de 2 a 3 skills, compreensão, runas elementais, material na magia e a aba Alquimia (D-196).
+> - **3.58 (21/11/2026)**: marco 49: as formas de lançamento, num motor de entrega em sete eixos, com canal e feixe, e 22 variantes do catálogo já nelas (D-194, D-195).
 > - **3.57 (20/11/2026)**: marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza, com os números na cor do elemento (D-192, D-193).
 > - **3.56 (20/11/2026)**: marco 47: o ferreiro vende peças de armadura geradas numa vitrine com filtros, que renova a cada dia do Mundo; o loot de armadura usa o mesmo sorteio, com garantia contra azar, e o monstruário mostra a ficha e o loot de cada criatura (D-190).
 > - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-189).
@@ -356,6 +361,76 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 49 — as formas de lançamento (21/11/2026)
+
+Segundo dos quatro marcos da Alquimia. As skills deixam de andar só em linha reta: cada uma pode ter uma **entrega**
+em sete eixos que se combinam.
+- **Origem.** Da mão, brotando do chão, caindo do céu, numa coluna sob o alvo, ou de círculos atrás ou à frente de
+  quem lança.
+- **Trajetória.** Reta, parábola (passa por cima de quem está no caminho), espiral, par que converge, caótica e órbita.
+- **Cadência.** Golpe, salva, rajada contínua e feixe canalizado, que acumula exposição no alvo enquanto dura.
+- **Marca e permanência.** Chão amaldiçoado ou trilha; efeito que gira em volta do alvo, pulsa nele ou entra em
+  erupção sob ele.
+- **Sentido e corpo.** O golpe que volta trazendo vida, a invocação no usuário ou no alvo; muitos grãos pequenos ou
+  uma peça grande e pesada.
+
+O núcleo e a tela usam a mesma curva, então o que se vê é o que acerta. Vinte e duas skills do catálogo já usam as
+formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em feixe, o granizo em grãos).
+
+**O psíquico toma a mente.** O golpe psíquico pode deixar o alvo enfeitiçado (vira contra os seus), confuso (só anda),
+aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
+
+Detalhes em D-194 e D-195.
+
+### Marco 52 — a raridade das fusões (21/11/2026)
+
+Toda transmutação agora sai num de três níveis de raridade, do 3º (o comum) ao 1º (o mais raro).
+- **O mesmo feitiço, mais bonito.** O 2º nível lapida o brilho. O 1º soma a filigrana dourada: pontos de luz na mão,
+  uma estrela de raios e um glifo rúnico no acerto, e colunas de luz na área.
+- **Mais forte.** O 2º nível dá +10% de dano, cura e força dos efeitos; o 1º, +22%. O 3º é a fusão de sempre.
+- **A Inteligência ajuda.** Com pouca, o 1º nível sai 4% das vezes e o 2º, 20%. Cada ponto acima de 10 sobe essas
+  chances, até 22% e 42%.
+- **Tente de novo.** As skills consumidas voltam na hora, sem ponto, com a compreensão 20% mais adiantada a cada vez
+  (da 5ª em diante, já compreendidas). Cada tentativa da mesma fórmula sobe as chances do 2º e do 1º nível, e fica
+  sempre o melhor: um resultado inferior nunca toma o lugar do superior.
+
+Detalhes em D-198 e em [docs/ALQUIMIA.md](docs/ALQUIMIA.md).
+
+### Marco 51 — a forja (21/11/2026)
+
+Último dos quatro marcos da Alquimia. Os materiais alquímicos agora também vão para armas e equipamento.
+- **Engastes.** Cada peça leva de 1 a 3 materiais, pela raridade e pelo nível. Na arma, o material age no golpe (a
+  escama ígnea queima); na armadura, protege (a mesma escama resiste ao fogo). Dois do mesmo elemento ou da mesma
+  dimensão de Filo reforçam os efeitos, e três da mesma dimensão trazem o eco da fenda. Um par instável traz a reação
+  do par, mas enfraquece o resto.
+- **Receitas como loot.** As 15 receitas caem das criaturas que as guardam e são levadas ao ferreiro. Toda receita
+  parte de uma peça pronta: a Lâmina de cinzas transforma uma lâmina qualquer numa espada de fogo com a escama
+  engastada.
+- **A mesa da forja.** No ferreiro, a fornalha, a bigorna e o círculo rúnico ganham vida. Você põe a receita na mesa,
+  arrasta a peça e forja: a peça aquece, é martelada, as runas são gravadas e ela é temperada. Engastar e extrair
+  também ficam na mesa.
+
+Guia em [docs/ALQUIMIA.md](docs/ALQUIMIA.md); detalhes em D-197.
+
+### Marco 50 — a alquimia (21/11/2026)
+
+Terceiro dos quatro marcos da Alquimia. As 4 fusões fixas dão lugar a **fusões abertas**: qualquer skill comum se
+funde com outras, até 3, na nova aba **Alquimia** da mochila.
+- **Compreensão.** Usar a skill em inimigos do seu nível a ensina. Com 100%, ela pode entrar numa fórmula.
+- **A bancada.**
+  - As skills aparecem como orbes na cor do elemento. Você os arrasta para o núcleo, a forma e o eco de um círculo vivo,
+    que fica dourado na ressonância e vermelho na instabilidade.
+  - Ao lado vão as runas elementais e um material, e a prévia compara a magia nova com as partes.
+  - Transmutar consome tudo, e a fusão nasce no rank da média das partes.
+- **Equilíbrio.** O par põe 112% do poder em duas funções; o par harmônico chega a 127%; o trio, 130% em três, mais caro
+  e sempre grau S.
+- **Assinaturas.** Quinze misturas com nome e efeito próprios, anotadas no diário e no caderno de fórmulas quando
+  descobertas.
+- **Runas.** Nove runas elementais caem das criaturas do elemento. As runas de classe viram pedras rúnicas por
+  arrastar.
+
+Guia em [docs/ALQUIMIA.md](docs/ALQUIMIA.md); detalhes em D-196.
 
 ### Marco 48 — as runas que ficam e os elementos que ferem (20/11/2026)
 

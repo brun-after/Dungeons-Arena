@@ -52,6 +52,8 @@ export interface Solo {
   multDano: number;
   multCura: number;
   d20Minimo?: number;
+  /** Marco 49 (21/11/2026, D-194): o chão amaldiçoado e a erupção da entrega (a definição sai do balance). */
+  entrega?: 'marca' | 'erupcao';
 }
 
 /** A alma do Lamento: velocidade e quanto procura um hostil em volta do solo. */
@@ -130,7 +132,17 @@ export function lancarSolo(estado: EstadoJogo, ator: Entidade, hab: Habilidade, 
   }, saida);
 }
 
-function criarSolo(estado: EstadoJogo, def: SoloDaVariacao, s: Solo, saida: EventoSimulacao[]): void {
+/**
+ * Marco 49 (21/11/2026, D-194): a definição do solo da entrega — o chão amaldiçoado (pulsos em volta do impacto) e a
+ * erupção periódica (o círculo parado sob o alvo, de onde a magia sai de tempos em tempos).
+ */
+export function soloDaEntrega(ctx: ContextoSimulacao, tipo: 'marca' | 'erupcao'): SoloDaVariacao {
+  const r = ctx.balance.entrega;
+  const m = tipo === 'marca' ? { pulsos: r.marca.pulsos, intervaloMs: r.marca.intervaloMs, raio: r.marca.raio, pctPulso: r.marca.pulsoPct } : { pulsos: r.erupcao.pulsos, intervaloMs: r.erupcao.intervaloMs, raio: 0, pctPulso: r.erupcao.pulsoPct };
+  return { ...m, atrasoMs: m.intervaloMs, forma: 'quadrado', cresce: false, salta: 0, enraizaMs: 0, almaPct: 0, drenoPct: 0, persegueMs: 0, colheitaPct: 0 };
+}
+
+export function criarSolo(estado: EstadoJogo, def: SoloDaVariacao, s: Solo, saida: EventoSimulacao[]): void {
   (estado.solos ??= []).push(s);
   saida.push({ t: 'soloCriado', tick: estado.tick, soloId: s.id, acaoId: s.acaoId, donoId: s.donoId, habilidadeId: s.habilidadeId, chave: s.chave, x: s.x, y: s.y, raio: s.raio, forma: def.forma, atrasoMs: def.atrasoMs });
 }
@@ -239,7 +251,7 @@ export function processarSolos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   // Os que nascem no laço (a Praga) entram no fim da lista, são visitados ainda aqui e pulsam no próximo intervalo.
   for (const s of estado.solos) {
     const hab = resolverHabilidade(ctx, s.chave);
-    const def = hab?.variacao?.solo;
+    const def = s.entrega ? soloDaEntrega(ctx, s.entrega) : hab?.variacao?.solo;
     if (!hab || !def) {
       saida.push({ t: 'soloFim', tick: estado.tick, soloId: s.id });
       continue;

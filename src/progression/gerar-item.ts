@@ -15,6 +15,8 @@ import type { DefinicaoElemento, Elemento } from '../combat/elementos';
 import { ehIdItemBase, gerarItemBase, type ItensComFormas } from './gerar-item-base';
 import { ehIdFundido, gerarItemFundido, type RegrasDeFusao } from './fusao-elemental';
 import { perfilDaPeca, type RegrasDePecas } from './pecas';
+import type { CatalogoAlquimia } from '../combat/fusao/catalogo';
+import { ehIdEngastado, gerarItemEngastado, type RegrasDeEngaste } from './engaste';
 
 export interface BaseDeItem {
   base: string;
@@ -181,6 +183,8 @@ export class CatalogoDeItens extends Map<string, Item> {
     private readonly fusao: RegrasDeFusao | null = null,
     /** Marco 46 (16/11/2026, D-189): o perfil das peças de armadura (propósito, estilo e efeitos), fixo pelo id. */
     private readonly pecas: RegrasDePecas | null = null,
+    /** Marco 51 (21/11/2026, D-197): as peças engastadas (`en_`) com materiais alquímicos. */
+    private readonly engaste: { alquimia: CatalogoAlquimia; regras: RegrasDeEngaste } | null = null,
   ) {
     super(fixos);
     this.gerados = new Map();
@@ -201,9 +205,16 @@ export class CatalogoDeItens extends Map<string, Item> {
     if (fixo) return fixo;
     const comForma = ehIdItemBase(id);
     const fundido = this.fusao !== null && ehIdFundido(id);
-    if (!comForma && !fundido && !id.startsWith(PREFIXO)) return undefined;
+    const engaste = ehIdEngastado(id) ? this.engaste : null;
+    if (!comForma && !fundido && !engaste && !id.startsWith(PREFIXO)) return undefined;
     const pronto = this.gerados.get(id);
     if (pronto) return pronto;
+    if (engaste) {
+      const { alquimia, regras } = engaste;
+      const item = gerarItemEngastado(id, (b) => this.get(b), alquimia, this.elementos, (m) => this.get(m)?.valorBase ?? 0, regras);
+      if (item) this.gerados.set(id, item);
+      return item ?? undefined;
+    }
     if (fundido) {
       const bruto = gerarItemFundido(id, (b) => this.get(b), this.elementos, this.fusao);
       const item = bruto ? this.comPeca({ ...bruto, peca: undefined }) : null;

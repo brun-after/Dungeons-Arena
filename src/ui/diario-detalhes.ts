@@ -2,12 +2,10 @@
 // condições que a fazem acontecer) e o "Efeito", montados dos dados. Usado pelo Diário, pelos combos da build e pelo
 // aviso de descoberta. Só lê o conteúdo.
 
-import { resolverHabilidade } from '../combat/compilar-habilidade';
 import type { Combo } from '../combat/combos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { t, type ChaveTexto } from '../i18n';
 import type { TipoDeEntrada } from '../progression/diario';
-import { descreverHabilidade } from './descrever';
 
 export interface DetalheDaEntrada {
   nome: string;
@@ -93,15 +91,11 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
       const nome = d?.base.nome ?? a;
       return { nome: t('diario.marco', { nome, n: b }), como: [t('diario.marcoComo', { nome, n: b })], efeito: d?.marcos[Number(b)]?.texto ?? '' };
     }
+    // Marco 50 (21/11/2026, D-196): a assinatura, com os núcleos que a formam.
     case 'fusao': {
-      const d = conteudo.definicoes.get(a);
-      const partes = (d?.fusao ?? []).map((p) => nomeDaHabilidade(ctx, p));
-      const compilada = d ? resolverHabilidade(ctx, a) : undefined;
-      return {
-        nome: d?.base.nome ?? a,
-        como: [t('diario.fusaoComo', { a: partes[0] ?? '', b: partes[1] ?? '' })],
-        efeito: compilada ? descreverHabilidade(compilada).join(' · ') : '',
-      };
+      const s = conteudo.alquimia.assinaturas.find((x) => x.id === a);
+      const nucleos = (s?.nucleos ?? []).map((n) => t(`nucleo.${n}` as ChaveTexto)).join(' + ');
+      return { nome: s?.nome ?? a, como: [t('diario.fusaoComo', { partes: nucleos })], efeito: s?.texto ?? '' };
     }
     case 'item': {
       const base = conteudo.itensComFormas.bases.get(a);

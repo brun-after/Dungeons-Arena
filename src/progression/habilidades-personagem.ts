@@ -22,6 +22,8 @@ import { passivosDe } from './ganchos-do-portador';
 import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import { estudoAvanca } from '../modos/regras';
+import { substituirFusaoAntiga } from './fusao-raridade';
+import { acelerarCompreensao } from './compreensao';
 
 /** As habilidades ativas na barra, na ordem das teclas (só as conhecidas). */
 export function habilidadesDaBarra(bolsa: Bolsa): string[] {
@@ -31,26 +33,6 @@ export function habilidadesDaBarra(bolsa: Bolsa): string[] {
 /** Marco 24 (D-094): o que se aprende com ponto — as gerais que um livro liberou. */
 export function aprendiveisDa(_ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
   return [...(bolsa.liberadas ?? [])];
-}
-
-/** Marco 18: a runa de fusão (item de missão) que destrava uma fusão. */
-export const ID_RUNA_DE_FUSAO = 'runa_de_fusao';
-
-/** Por que a fusão ainda não pode ser aprendida (null = pode). */
-export function motivoDaFusao(ctx: ContextoSimulacao, bolsa: Bolsa, partes: readonly string[]): MotivoHabilidade | null {
-  const jaTemFusao = bolsa.conhecidas.some((c) => definicaoDe(ctx, c.id)?.fusao) || (bolsa.estudo ? !!definicaoDe(ctx, bolsa.estudo.id)?.fusao : false);
-  if (jaTemFusao) return 'fusao_unica';
-  const max = ctx.balance.habilidades.rankMax;
-  if (!partes.every((p) => bolsa.conhecidas.some((c) => c.id === p && c.rank >= max))) return 'fusao_niveis';
-  if (!bolsa.mochila.some((i) => i.itemId === ID_RUNA_DE_FUSAO)) return 'fusao_runa';
-  return null;
-}
-
-/** As fusões que o personagem pode ver (as duas partes conhecidas). */
-export function fusoesVisiveis(ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
-  return [...ctx.conteudo.definicoes.values()]
-    .filter((d) => d.fusao && d.fusao.every((p) => bolsa.conhecidas.some((c) => c.id === p)))
-    .map((d) => d.base.id);
 }
 
 /** Nível mínimo para ter a habilidade no rank (o maior entre o do rank e o da definição). */
@@ -84,20 +66,20 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
     return caminho !== undefined && opcoesClasse.includes(caminho) ? null : 'caminho_invalido';
   }
   if (!conhecida && ehDeAlgumaClasse(ctx, id)) return 'nao_aprendivel';
-  // Marco 18 (D-068, camada 7): a fusão pede a runa, as duas habilidades no nível máximo e nenhuma outra fusão.
-  if (!conhecida && def.fusao) {
-    const motivoFusao = motivoDaFusao(ctx, bolsa, def.fusao);
-    if (motivoFusao) return motivoFusao;
-  } else if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_liberada';
+  // Marco 50 (21/11/2026, D-196): a fusão nasce só na bancada de transmutação (progression/alquimia.ts), nunca por ponto.
+  if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_liberada';
+  // Marco 52 (21/11/2026, D-198): a skill consumida numa fusão volta sem ponto e sem estudo.
+  const reaprende = !conhecida && reaprendivel(bolsa, id);
   // Marco 18 (D-068): um estudo por vez (e a própria habilidade em estudo não se aprende de novo).
-  if (!conhecida && bolsa.estudo) return 'estudando';
+  if (!conhecida && bolsa.estudo && !reaprende) return 'estudando';
+  if (!conhecida && bolsa.estudo?.id === id) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
   if (novo > ctx.balance.habilidades.rankMax) return 'rank_maximo';
   if (invId !== undefined) {
     const entrada = bolsa.mochila.find((i) => i.invId === invId && i.qtd > 0);
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!conhecida || item?.progressao?.tipo !== 'rank' || item.progressao.familia !== familiaDaHabilidade(ctx, id)) return 'essencia_incompativel';
-  } else if (bolsa.pontosHabilidade <= 0) return 'sem_pontos';
+  } else if (bolsa.pontosHabilidade <= 0 && !reaprende) return 'sem_pontos';
   if (e.nivel < nivelParaRank(ctx, id, novo)) return 'nivel_baixo';
   const opcoes = caminhosDoRank(ctx, id, novo);
   if (caminho !== undefined && opcoes.length > 0 && !opcoes.includes(caminho)) return 'caminho_invalido';
@@ -117,6 +99,10 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     return false;
   }
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
+  if (!conhecida && reaprendivel(bolsa, id)) {
+    reaprender(e, ctx, id, tick, saida);
+    return true;
+  }
   if (!conhecida) {
     // Marco 18 (D-068): aprender não é instantâneo — gasta o ponto e começa o estudo (um por vez).
     if (bolsa.estudo) {
@@ -124,15 +110,6 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
       return false;
     }
     bolsa.pontosHabilidade--;
-    // A fusão gasta a runa ao começar o estudo.
-    if (definicaoDe(ctx, id)?.fusao) {
-      const i = bolsa.mochila.findIndex((x) => x.itemId === ID_RUNA_DE_FUSAO);
-      const runa = bolsa.mochila[i];
-      if (runa) {
-        runa.qtd--;
-        if (runa.qtd <= 0) bolsa.mochila.splice(i, 1);
-      }
-    }
     iniciarEstudo(e, ctx, id, tick, saida);
     return true;
   }
@@ -145,6 +122,8 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     entrada.qtd--;
     bolsa.mochila = bolsa.mochila.filter((i) => i.qtd > 0);
     bolsa.ranksPorItens = (bolsa.ranksPorItens ?? 0) + 1;
+    // Marco 50 (D-196): a essência da família também acelera a compreensão (uma vez por skill).
+    acelerarCompreensao(ctx, e, id);
     saida.push({ t: 'usouItem', tick, id: e.id, itemId: entrada.itemId, hp: 0, mana: 0 });
   } else bolsa.pontosHabilidade--;
   conhecida.rank++;
@@ -201,6 +180,25 @@ export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string
   return 'ok';
 }
 
+/** Marco 52 (D-198): a skill foi consumida numa fusão (e por isso volta de graça)? */
+export const reaprendivel = (bolsa: Pick<Bolsa, 'consumidas'>, id: string): boolean => (bolsa.consumidas?.[id] ?? 0) > 0;
+
+/** D-198: reaprende na hora, no rank 1, com a compreensão adiantada pelas vezes que a skill foi consumida. */
+function reaprender(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): void {
+  const bolsa = e.bolsa;
+  if (!bolsa) return;
+  bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
+  const adiantada = Math.min(100, (bolsa.consumidas?.[id] ?? 0) * ctx.balance.alquimia.reaprender.compreensaoPorVezPct);
+  if (adiantada > 0) {
+    const compreensao = (bolsa.compreensao ??= {});
+    compreensao[id] = Math.max(adiantada, compreensao[id] ?? 0);
+  }
+  ocuparTeclaLivre(ctx, bolsa, id);
+  ligarAoAprender(ctx, bolsa, id);
+  atualizar(e, ctx);
+  saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: id, rank: 1, caminho: null });
+}
+
 /** Marco 18 (D-068): o tempo de estudo de uma habilidade para quem estuda, em ticks (grau e Inteligência). */
 export function ticksDeEstudo(ctx: ContextoSimulacao, e: Entidade, id: string): number {
   const grau = definicaoDe(ctx, id)?.base.grau ?? 'B';
@@ -224,12 +222,21 @@ export function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number
   const estudo = bolsa?.estudo;
   if (!bolsa || !estudo) return;
   bolsa.estudo = null;
-  if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
-    bolsa.conhecidas.push({ id: estudo.id, rank: 1, caminhos: [] });
+  // Marco 52 (21/11/2026, D-198): a fusão de nível melhor toma o lugar da antiga da mesma fórmula.
+  const noLugar = bolsa.conhecidas.some((c) => c.id === estudo.id) ? null : substituirFusaoAntiga(bolsa, estudo.id, Math.max(1, estudo.rank ?? 1));
+  if (noLugar === 'descartada') {
+    // Um resultado inferior (ou igual) nunca toma o lugar do superior: o estudo termina e a antiga fica.
+  } else if (noLugar !== null) {
+    atualizar(e, ctx);
+    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: noLugar, caminho: null });
+  } else if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
+    // Marco 50 (D-196): a fusão nasce no rank da média das partes.
+    const rank = Math.min(ctx.balance.habilidades.rankMax, Math.max(1, estudo.rank ?? 1));
+    bolsa.conhecidas.push({ id: estudo.id, rank, caminhos: [] });
     ocuparTeclaLivre(ctx, bolsa, estudo.id);
     ligarAoAprender(ctx, bolsa, estudo.id);
     atualizar(e, ctx);
-    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: 1, caminho: null });
+    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank, caminho: null });
   }
   saida.push({ t: 'estudoConcluido', tick, id: e.id, habilidadeId: estudo.id });
 }

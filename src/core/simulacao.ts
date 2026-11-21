@@ -29,6 +29,7 @@ import { dispararGanchosDosEventos } from '../progression/ganchos-do-portador';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { processarSolos } from '../combat/solos';
+import { processarCanais } from '../combat/entrega/canal';
 import { vivo } from '../entities/entidade';
 import { skinValida } from '../entities/skins';
 import { filtroDeAtivacao, processarIa } from '../entities/ia';
@@ -49,6 +50,7 @@ import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarEstilosDespertos } from '../progression/estilos-despertos';
 import { forjar } from '../progression/forja';
+import { engastar, extrair, forjarMolde } from '../progression/moldes';
 import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
 import { processarEncarnacoes } from '../combat/encarnacao';
@@ -60,6 +62,7 @@ import { coletarObjetos, expirarDrops } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
 import { escolherRuna } from '../combat/runas';
+import { fundir } from '../progression/alquimia';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
 import { buscarEntidade, limparRecargasVencidas, type EstadoJogo } from './estado';
@@ -88,6 +91,8 @@ export function simular(
   processarTracos(estado, ctx, acordada, saida);
   processarChefes(estado, ctx, acordada, saida);
   processarAcoes(estado, ctx, saida);
+  // Marco 49 (21/11/2026, D-194): a rajada e o feixe pulsam.
+  processarCanais(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   // Marco 27 (D-126): o solo amaldiçoado e a runa pulsam.
   processarSolos(estado, ctx, saida);
@@ -233,6 +238,18 @@ function aplicarComandos(
         break;
       case 'escolherRuna':
         escolherRuna(ctx, ator, cmd.habilidade, cmd.runa, estado.tick);
+        break;
+      case 'fundir':
+        fundir(estado, ator, ctx, { partes: cmd.partes, runas: cmd.runas, material: cmd.material }, saida);
+        break;
+      case 'forjarMolde':
+        forjarMolde(estado, ctx, ator, cmd.receita, cmd.base, cmd.segunda, saida);
+        break;
+      case 'engastar':
+        engastar(estado, ctx, ator, cmd.peca, cmd.material, saida);
+        break;
+      case 'extrair':
+        extrair(estado, ctx, ator, cmd.peca, cmd.indice, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

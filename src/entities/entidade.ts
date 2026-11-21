@@ -12,6 +12,7 @@ import type { Elemento } from '../combat/elementos';
 import type { PontaElemental } from '../progression/vinculo';
 import type { EstadoFera, EstadoMovimento } from './movimento-estado';
 import type { Escalada } from '../world/escalada';
+import type { CanalAtivo } from '../combat/entrega/tipos';
 export type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
 import type { Slot } from '../modos/modo';
 
@@ -304,6 +305,17 @@ export interface Bolsa {
   vitorias?: Record<string, number>; // Marco 45 (16/11/2026, D-182): as vitórias sobre cada chefe de Filo.
   /** Marco 47 (20/11/2026, D-190): a garantia contra azar no loot de armadura (abates sem peça e sem peça rara). */
   azarDePeca?: { semPeca: number; semRara: number };
+  /** Marco 50 (21/11/2026, D-196): a compreensão de cada skill (0 a 100%); com 100%, ela entra numa fórmula. */
+  compreensao?: Record<string, number>;
+  /** D-196: as skills que já levaram a essência que acelera a compreensão (uma vez cada). */
+  compreensaoAcelerada?: string[];
+  /**
+   * Marco 52 (21/11/2026, D-198): quantas vezes cada skill foi consumida numa fusão. Reaprendê-la não gasta ponto nem
+   * estudo, e ela volta com a compreensão adiantada (20% por vez, até nascer compreendida).
+   */
+  consumidas?: Record<string, number>;
+  /** D-198: as tentativas de cada fórmula (o id sem o nível); cada uma sobe a chance do 2º e do 1º nível. */
+  tentativasFusao?: Record<string, number>;
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -316,6 +328,8 @@ export interface Estudo {
   /** D-075: velocidade em doze avos e resto do progresso, sem arredondar cada tick. */
   velocidade12?: number;
   fracao12?: number;
+  /** Marco 50 (D-196): o rank em que a fusão nasce (a média das partes); ausente = 1. */
+  rank?: number;
 }
 
 /**
@@ -474,6 +488,8 @@ export interface Entidade {
   ultimaSinergia: string | null;
   /** 18/10/2026: um encontro por visita à fase, iniciado na primeira agressão hostil. */
   encontro?: { faseId: string; inicioTick: number };
+  /** Marco 49 (21/11/2026, D-194): a rajada ou o feixe em curso (combat/entrega/canal.ts). */
+  canal?: CanalAtivo;
   auraFracoes?: Record<string, number>;
   auraCuraFracao?: number;
   /** Marco 23 (D-092): a afinidade elemental do inimigo (absorve o elemento, fraco ao oposto). */
@@ -712,6 +728,10 @@ function clonarBolsa(b: Bolsa): Bolsa {
     ...(b.azarDePeca ? { azarDePeca: { ...b.azarDePeca } } : {}),
     ...(b.runas ? { runas: { ...b.runas } } : {}),
     ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
+    ...(b.compreensao ? { compreensao: { ...b.compreensao } } : {}),
+    ...(b.compreensaoAcelerada ? { compreensaoAcelerada: [...b.compreensaoAcelerada] } : {}),
+    ...(b.consumidas ? { consumidas: { ...b.consumidas } } : {}),
+    ...(b.tentativasFusao ? { tentativasFusao: { ...b.tentativasFusao } } : {}),
   };
 }
 
@@ -720,6 +740,7 @@ export function clonarEntidade(e: Entidade): Entidade {
   return {
     ...e,
     ...(e.encontro ? { encontro: { ...e.encontro } } : {}),
+    ...(e.canal ? { canal: { ...e.canal, exposicao: { ...e.canal.exposicao } } } : {}),
     ...(e.escalada ? { escalada: { ...e.escalada } } : {}),
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),

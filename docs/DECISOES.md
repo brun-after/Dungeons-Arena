@@ -1,8 +1,13 @@
 # Decisões de projeto
 
-**Versão:** 1.45 · **Data:** 20/11/2026
+**Versão:** 1.50 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.50 (21/11/2026)**: D-198, adendo: a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez; cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível; o inferior nunca toma o lugar do superior, nem ao fim do estudo.
+> - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
+> - **1.48 (21/11/2026)**: D-197: marco 51, a forja por receita (o item `receita_<id>` cai das criaturas e parte de peça pronta), os engastes de 1 a 3 no id `en_`, os materiais na arma e no equipamento, engastar e extrair, e a mesa da forja com a cena.
+> - **1.47 (21/11/2026)**: D-196: marco 50, as fusões abertas (o id é a receita), a compreensão, as runas elementais, o material na magia e a aba Alquimia; saem as 4 fusões fixas.
+> - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
 > - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
 > - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
 > - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
@@ -6188,3 +6193,244 @@ pela resistência do alvo. Os números dos estados saíam brancos, iguais aos do
 
 **Resultado.** 202/202 metas em docs/BALANCEAMENTO.md. O PvP do Aventureiro contra ele mesmo fica em 5,5 s (meta por
 classe de 5 s, D-188); o teste de ritmo passa a usar o piso por classe, como o relatório.
+
+## D-194 — Marco 49: as formas de lançamento, um motor de entrega em sete eixos (21/11/2026)
+
+**Problema.** Todo projétil andava em linha reta. O "parabólico" (`porCima`) era reto, o "curvo" (`desvioGraus`) só
+girava a saída, e não havia feixe nem canalização no núcleo. As skills se diferenciavam pelo número e pelo efeito, não
+pela forma, e a fusão do marco 50 precisa de formas para combinar.
+
+**Decisão.** A skill ganha um campo `entrega` (dados, lido por `lerEntrega` em `combat/entrega/tipos.ts`), com sete
+eixos que se combinam livremente:
+
+| Eixo | Valores |
+|---|---|
+| Origem | mão, chão (brota e corre até o alvo), céu (cai), sob o alvo (coluna), círculos atrás, círculos à frente |
+| Trajetória | reta, parábola, espiral, par convergente, caótica (dobras pela semente), órbita |
+| Cadência | golpe, salva (N tiros em intervalo), rajada (canal que dispara), feixe (canal contínuo) |
+| Marca | nenhuma, chão amaldiçoado no impacto, trilha pelo caminho |
+| Permanência | nenhuma, gira em volta do alvo, pulsa no alvo, erupção periódica sob o alvo |
+| Sentido | ida, volta (fere e traz vida ou escudo), invocação no usuário, invocação no alvo |
+| Corpo | médio, grãos (muitos pequenos), grande (lento, pesado, respinga e empurra) |
+
+- **Uma rota só, no núcleo e na tela.** `pontoEm(rota, t)` (`combat/entrega/rota.ts`) dá `{x, y, z}` determinístico
+  pela semente do projétil. O núcleo anda o `t` pelo comprimento da curva e colide pelo ponto; a tela desenha o mesmo
+  ponto (`render/entrega-tela.ts`), com o `z` erguendo o corpo e a sombra no chão. O que voa alto (parábola antes de
+  80% do caminho, o que cai do céu) passa por cima de quem está no caminho e das paredes.
+- **O canal fica na entidade** (`Entidade.canal`), então viaja nos patches sem mensagem nova. A rajada dispara um
+  projétil por pulso e o feixe acerta o primeiro hostil da linha (ou todos, se perfura). A **exposição** soma
+  `exposicaoPorPulsoPct` por pulso no mesmo alvo, até `exposicaoMaxPct`, e multiplica o pulso. Custa mana por pulso
+  depois do primeiro; acaba no fim do tempo, ao soltar a tecla de novo, ao começar outra ação, ao ser impedido, com o
+  alvo morto ou fora do alcance. Quem canaliza anda mais devagar (`andarPct`).
+- **Marca e erupção são solos** (`combat/solos.ts`, `Solo.entrega`); gira e pulsa são projéteis presos ao alvo
+  (`perm`); a volta é um projétil com `traz`. O impacto em área saiu de `acao.ts` para `combat/impacto-area.ts`.
+- **O poder se divide, não se soma.** Salvas, grãos, círculos e pares dividem o golpe (N × (100/N + extra)%); a
+  parábola, a caótica, o chão e a marca custam um pouco do golpe direto pelo que dão; o corpo grande bate 260% mas é
+  lento. Todos os números em `balance.entrega` (e `maxTiros` 24 por lançamento).
+- **O catálogo já usa as formas.** Vinte e duas variantes de `nucleos.json` ganham `sobre.entrega` (bola de fogo em
+  parábola, trovão do céu, lança de gelo em três círculos atrás, sopro gélido em feixe, granizo em grãos do céu,
+  explosão sagrada sob o alvo, cadeia de trevas em espiral, entre outras). As skills sem `entrega` seguem idênticas.
+
+**Na tela.** Círculos rúnicos nos pontos de origem, sombra da parábola e da queda, aviso rúnico de onde o céu cai,
+coluna de luz sob o alvo, feixe em três camadas na cor do elemento que respira e engrossa com a exposição, anel da
+rajada, anel que gira e onda que pulsa, chão tomado pelo elemento e a erupção. Grãos deixam rastro só em um de cada
+três. Para rever, `?jogo=campanha&slot=0&skills=a,b` põe essas skills na barra do jogo sem salvar.
+
+**Ajustes depois do teste na tela (21/11/2026).**
+- **Sem clarão.** O chão da entrega deixou de repetir o acerto inteiro da skill a cada pulso, e a área que voa estoura
+  quando chega, não no lançamento (os grãos não estouram). O acerto inteiro de uma entrega sai uma vez por alvo a cada
+  0,9 s. As luzes de magia (`ui/luzes-magia.ts`) deixavam um rastro por quadro por projétil; agora é um a cada 60 ms, o
+  grão ilumina 20%, o tiro que espera não ilumina e o clarão do mesmo golpe no mesmo alvo se renova em vez de empilhar.
+- **O chão com a matéria do elemento** (`render/chao-da-entrega.ts`): o gelo congela e levanta cristais que crescem do
+  centro para fora; a terra, lascas de pedra; o fogo racha em brasa com chamas baixas; o veneno borbulha; a erupção
+  acende as runas e sobe um jorro a cada pulso.
+- **A pose dura a magia.** Enquanto a magia lançada vive (o canal, os projéteis no ar ou esperando, ou 0,35 s numa área
+  instantânea; até 3 s), quem lançou segue na pose de conjurar, virado para o alvo mesmo andando para outro lado
+  (`render/quadros-personagem.ts`: `magiaViva`, `anguloDaMagia`).
+- **O feixe troca de alvo e não apaga quando o alvo cai.** Escolher outro alvo (ou pedir o feixe num alvo diferente)
+  troca o alvo no alcance; se o alvo cai, o feixe salta para o hostil mais perto de onde ele caiu, até
+  `feixe.saltoRaio` (3) e dentro do alcance. Sem ninguém, acaba.
+- **Balanceamento.** O que fica no alvo parado (o chefe) dobrava o golpe: a marca somava 210%, a erupção 200%, o pulso
+  178% e o giro 190%. Os pulsos caíram (marca 8%, erupção 12%, pulsa 8%, gira 5% por volta), e as divisões perderam o
+  extra (círculos 4%, salva 3%, grão 11%).
+
+## D-195 — Marco 49: o psíquico toma a mente (21/11/2026)
+
+**Problema.** O psíquico só ecoava o golpe no exposto. Era o único elemento sem um efeito que mudasse a luta.
+
+**Decisão.** O golpe psíquico que fere tem `mente.chancePct` (30%) de tomar a mente do alvo, com espera por alvo de
+`mente.intervaloMs` (5 s). O estado é sorteado entre cinco (`combat/mente.ts`, números em `balance.elementosFerem.mente`):
+
+| Estado | O que faz |
+|---|---|
+| Enfeitiçado | Vira contra os seus: a relação (`modos/relacao.ts`) fica hostil aos antigos aliados e neutra aos de fora. A IA ataca os aliados, que revidam. |
+| Confuso | Só anda (a IA vaga), sem agir. |
+| Aterrorizado | Foge de quem o aterrorizou, sem agir. |
+| Iludido | As skills ofensivas caem nele mesmo. O jogador iludido que usa uma skill seleciona a si mesmo. |
+| Sem visão | Ninguém é alvo para ele (`alvoOfensivoValido`); a IA vaga sem atacar, e na tela do jogador os outros somem. |
+
+- A hostilidade continua decidida só por `relacao()`: o enfeitiçado vira a relação ali, pelo estado ativo, sem olhar o
+  tipo da entidade.
+- Entre personagens, o estado dura metade (`entrePersonagensPct`).
+- A natureza da criatura resiste pelo elemento, como antes (o constructo, 50% de resistência ao psíquico, é ferido
+  menos; a mente, fraca, mais).
+
+## D-196 — Marco 50: fusões abertas, compreensão, runas elementais e a aba Alquimia (21/11/2026)
+
+**Problema.** A fusão eram 4 skills fixas em `skills.json`, uma por personagem. Duas eram inalcançáveis, porque uma
+parte tinha saído pelo legado do marco 40, e não dava para fundir de novo. O loot trazia muitas magias que não iam a
+lugar nenhum.
+
+**Decisão.** Qualquer skill comum (ou fusão) se funde com outras, até 3, pela bancada da aba Alquimia. Detalhes em
+[docs/ALQUIMIA.md](ALQUIMIA.md).
+
+- **O id é a receita.** `f__<núcleo>__<forma>[__<eco>][__rr_<el>_<el>][__mm_<material>]` (`combat/fusao/receita.ts`).
+  A ficha guarda só o id, como no `g_` das skills geradas. Cliente, servidor e certificado refazem a mesma definição
+  por `definicaoDe`, sem campo novo na bolsa e sem catálogo no servidor. A fusão de fusão é achatada: (A+B)+C vira
+  A+B+C, e mais de 3 não fecha.
+- **Cada posição dá uma coisa** (`combat/fusao/fundir.ts`):
+  - o **núcleo** dá o papel, a fórmula, o elemento e o visual;
+  - a **forma** dá o desenho do golpe e a entrega, a própria ou a forma natural do núcleo dela em `alquimia.json`;
+  - o **eco** dá os estados, a marca e a permanência.
+  As combinações que o motor de entrega não aceita se acertam pela ordem (o feixe anda em reta, o céu não anda de lado).
+- **Orçamento** (`balance.alquimia`):
+  - o par põe 112% em 2 funções; o trio, 130% em 3, sempre grau S, com custo ×1,35 e recarga ×1,25;
+  - a ressonância (+15%) vale com todos os pares de elementos harmônicos, e cada par instável encarece;
+  - o dano soma a fatia de cada parte que fere, e os estados das partes saem na fatia delas;
+  - as assinaturas (15 misturas com nome) somam poder e trocam a forma.
+  `compilarHabilidade` passou a multiplicar o `multDano`/`multCura` da base (os do catálogo continuam 1).
+- **Compreensão** (`progression/compreensao.ts`):
+  - cada acerto no primeiro alvo de um inimigo de nível igual ou maior que o do personagem − 10 soma 2% numa skill
+    comum e 1% numa fusão;
+  - para entrar numa fórmula, a parte precisa de 100%;
+  - a essência da família acelera em 25%, uma vez por skill;
+  - fica em `bolsa.compreensao`, copiada por `clonarBolsa` e conferida por `conferirExtras`.
+- **O comando `fundir`** (`progression/alquimia.ts`):
+  - confere as partes, a compreensão, as runas e o material, e recusa em combate ou com outro estudo em curso;
+  - consome tudo e começa o estudo da fusão, que nasce no rank da média das partes (`Estudo.rank`);
+  - não se desfaz;
+  - vale no grupo e no Mundo (`comandosDeRede`), não na arena.
+- **Runas elementais.**
+  - Nove itens `runa_<elemento>` caem das criaturas daquele elemento (`balance.alquimia.dropRuna`).
+  - O par leva 1 runa e o trio 2. A runa de um elemento já presente amplifica o estado dele em 25%; a de um elemento
+    novo põe a camada dele a 50%, mesmo além do teto de 3 elementos.
+  - A antiga runa de fusão virou a **runa curinga**, que vale o elemento do núcleo.
+- **Material.** A magia leva um, com o efeito dele em `alquimia.json → materiais` (dano, custo, recarga, duração, salto,
+  perfurar, estados e forma).
+- **As 4 fusões fixas.**
+  - Saem do jogador: `alquimia.json → legado` as troca pela fusão aberta das mesmas partes, no save (migração 31 › 32)
+    e nas fichas que chegam ao servidor.
+  - As definições ficam, sem o campo `fusao`, porque inimigos e visuais as usam.
+  - O diário passa a anotar as assinaturas descobertas.
+- **Na tela** (`ui/alquimia/`):
+  - a bancada tem os orbes das skills, com a compreensão em volta; o círculo vivo dourado, vermelho ou violeta pela
+    mistura; os encaixes de runa e material; a prévia comparada com as partes; e o caderno de fórmulas;
+  - tudo por arrastar ou tocar (pointer events).
+  - As runas de classe saem do `<select>` e viram pedras rúnicas arrastáveis (`ui/seletor-runa.ts`).
+
+## D-197 — Marco 51: a forja por receita, os engastes de 1 a 3 e a mesa da forja (21/11/2026)
+
+**Contexto.** A forja do ferreiro era uma lista de receitas com um botão. Os materiais alquímicos só serviam à magia
+(D-196), e as armas e o equipamento não tinham onde recebê-los. O pedido: receitas como loot, sempre partindo de uma
+peça pronta, materiais de 1 a 3 por peça e uma forja que se veja trabalhar.
+
+**Decisão.**
+- **O engaste no id** (`progression/engaste.ts`):
+  - a peça engastada é `en_<m1>.<m2>.<m3>__<id da peça>`, resolvida sob demanda pelo `CatalogoDeItens`, como o `fu_`;
+  - circula por mochila, banco, loja, troca, mercado e certificado sem campo novo;
+  - a fusão elemental fica por dentro e os engastes por fora (`en_…__fu_…__peça`), e uma peça engastada não funde
+    mais (`fundivel`).
+- **Quantos engastes**: o menor entre a raridade (comum e incomum 1, rara e épica 2, lendária e última 3) e o teto do
+  nível (1 até o 19, 2 do 20 ao 49, 3 do 50 em diante). Números em `balance.engaste`.
+- **O material na arma e na peça**: cada um dos 52 materiais de `alquimia.json` ganhou `elemento`, `dimensao`, `arma` e
+  `peca` (texto e ganchos). Na arma, o efeito vem ao atacar ou ao acertar; no equipamento, é passivo ou ao levar golpe.
+  São 14 materiais novos: 13 com uma ou duas por dimensão de Filo, e um sem dimensão.
+- **Os conjuntos dentro da peça**:
+  - 2 ou 3 do mesmo elemento: os efeitos sobem 25% ou 40%;
+  - 2 ou 3 da mesma dimensão: sobem 15% ou 30%, e com 3 vem o eco da fenda (o estado do elemento da dimensão em
+    volta, às vezes);
+  - um par instável pela matriz da alquimia traz a reação do par, mas os efeitos caem 15%.
+  Como na fusão de skills, dois engastes bem escolhidos competem com três.
+- **As receitas como loot** (`progression/moldes.ts`, `forja.json → moldes`):
+  - as 15 receitas do Grimório viram o item `receita_<id>` (tipo chave), que cai das criaturas que a guardam (preset ou
+    dimensão) ou dos chefes, com o RNG próprio da instância (`balance.engaste.dropReceitaPct`);
+  - toda receita pede uma peça base (o slot, a família de arma e a raridade mínima), às vezes uma segunda peça, os
+    materiais, a runa elemental e ouro;
+  - o resultado é a própria base transformada: a Última forma (ascender), o elemento (`fu_`) e os engastes já postos,
+    sem passar do teto da peça (o que a base já tinha fica);
+  - a criatura da dimensão também deixa um material alquímico da dimensão dela (`dropMaterialPct`).
+- **Engastar e extrair** no ferreiro, sem receita: custam ouro pelo nível da peça, e o material extraído volta 35% das
+  vezes.
+- **Os comandos** `forjarMolde`, `engastar` e `extrair` valem só com a forja aberta (o ferreiro do Mundo ou a loja da
+  campanha). Entram em `comandosDeRede` da campanha, do grupo e do Mundo, e no protocolo.
+- **Na tela** (`ui/forja/`), a mesa da forja no ferreiro:
+  - a cena em canvas, com a fornalha que respira, a bigorna e o círculo rúnico, corre em fases: aquecer (na cor do
+    elemento), martelar (faíscas; tocar acrescenta faíscas), gravar (as runas acendem uma a uma) e temperar (vapor);
+  - o comando sai só no fim, e o resultado vem do núcleo;
+  - a receita aberta mostra os espaços; peças e materiais vão por arrastar ou tocar;
+  - a bancada de engastes mostra os cheios (tocar extrai) e os livres;
+  - com `prefers-reduced-motion`, as fases passam sem animação.
+
+**Mantido.** As receitas antigas da forja (`forja.json → receitas`: itens, ascender, fusão elemental com troféu de
+chefe e as do alquimista) continuam, abaixo da mesa. Elas não partem de peça pronta, e trocá-las mexeria em saves e
+missões sem ganho de jogo. A troca fica para quando houver substitutas para cada uma.
+
+## D-198 — Marco 52: os níveis de raridade da fusão (21/11/2026)
+
+**Contexto.** Toda fusão da mesma fórmula saía igual. O pedido:
+- três níveis de raridade, contados de trás para frente: 3º, 2º e 1º;
+- a mesma magia, mais bonita a cada nível;
+- mais dano, cura e força dos efeitos a cada salto;
+- o comum batendo as metas de hoje;
+- a Inteligência subindo a chance, sem zerar a do nível máximo;
+- as skills consumidas aprendidas de novo, para tentar a mesma fórmula outra vez.
+
+**Decisão.**
+- **O nível no id** (`combat/fusao/receita.ts`): `__g2` ou `__g1` fecha o id, e sem ele a fusão é do 3º nível. As fusões
+  de antes continuam valendo, como 3º nível, sem migração. `formulaDaFusao` tira o nível, para reconhecer a mesma
+  fórmula.
+- **O bônus** (`combat/fusao/fundir.ts`, `balance.alquimia.raridade`):
+  - o 2º nível sobe 10% e o 1º, 22%, no dano, na cura e na força dos estados (o valor do escudo, da queimadura…);
+  - a duração, o custo, a recarga e a forma ficam iguais;
+  - o 3º nível é exatamente a fusão de antes, e o simulador de balanceamento não usa fusões, então as metas de hoje
+    ficam onde estão. O 2º e o 1º matam cerca de 9% e 18% mais rápido.
+- **A chance pela Inteligência** (`progression/fusao-raridade.ts`):
+  - com 10 de Inteligência ou menos: 1º nível 4%, 2º nível 20%, 3º nível 76%;
+  - cada ponto acima de 10 soma 0,3% ao 1º (teto 22%) e 0,5% ao 2º (teto 42%);
+  - com pouca Inteligência, a chance cai à base, nunca a zero;
+  - o sorteio usa o RNG da simulação, no comando `fundir`.
+- **Refazer a fórmula.**
+  - As partes consumidas entram em `liberadas`, e o personagem as aprende de novo com ponto, como depois de achar o
+    livro. Elas voltam do rank 1, com a compreensão a refazer.
+  - A mesma fórmula pode ser transmutada de novo, e fica o melhor nível entre a fusão que o personagem já tem e a
+    nova.
+  - Se não melhorar, a fusão de antes fica como está, e as partes, as runas e o material se gastam na tentativa.
+  - Se melhorar, a nova é estudada, e ao fim toma o lugar da antiga: o maior rank, a tecla e a compreensão.
+  - No 1º nível, a fórmula está no teto (`fusao_maxima`).
+- **Na tela.**
+  - O nome leva o nível (`alquimia.json → nomes.raridade`).
+  - A prévia da bancada mostra as chances pela Inteligência de quem transmuta e avisa quando a fórmula já é conhecida.
+  - O registro diz em que nível a fusão saiu.
+- **No visual** (`render/vfx/manifestacao-raridade.ts`). A assinatura, a forma e a matéria do elemento são as mesmas;
+  cada nível acrescenta camadas por cima.
+  - O 2º lapida o brilho: faíscas na mão, centelhas no rastro, um halo claro e centelhas no acerto, e um anel externo
+    na área.
+  - O 1º soma a filigrana dourada: pontos de luz que orbitam a mão, a esteira dourada, e no acerto o clarão de ouro, a
+    estrela de raios, o glifo rúnico que gira no chão e o segundo halo. Na área, o círculo rúnico dourado e as colunas
+    de luz.
+  - Com movimento reduzido, ficam o halo e o anel.
+
+**Adendo (21/11/2026).** A pedido, tentar de novo ficou mais leve e mais promissor:
+- **Reaprender** (`progression/habilidades-personagem.ts`, `bolsa.consumidas`):
+  - a skill consumida numa fusão volta na hora, no rank 1, sem ponto e sem estudo, mesmo com um estudo em curso;
+  - ela vem com a compreensão adiantada em 20% por vez que já foi consumida, e da 5ª vez em diante nasce
+    compreendida (`balance.alquimia.reaprender`);
+  - o botão diz "Reaprender (sem ponto, na hora)".
+- **A tentativa conta** (`bolsa.tentativasFusao`, pela fórmula sem o nível):
+  - cada tentativa anterior soma +3% à chance do 1º nível e +5% à do 2º, por cima da Inteligência, até 50% e 60%
+    (`balance.alquimia.raridade.tentativa`);
+  - a tentativa que não melhorou também conta;
+  - a prévia mostra quantas vezes a fórmula já foi tentada.
+- **O inferior nunca toma o lugar do superior.** Além do sorteio (fica o melhor dos dois), a troca ao fim do estudo
+  confere o nível. Se a fusão que já está lá for igual ou melhor, a estudada é descartada e a antiga fica.
+- Os dois contadores passam pelo `clonarBolsa` e pela conferência da ficha (`coop/conferir-extras.ts`).

@@ -30,7 +30,7 @@ export const textosDiario = {
   'diario.reacaoCura': 'cura quem lançou em {valor}',
   'diario.estiloComo': 'Pontos em {lista}',
   'diario.marcoComo': '{nome} chega ao nível {n}',
-  'diario.fusaoComo': '{a} + {b} no nível máximo',
+  'diario.fusaoComo': 'Transmute na alquimia: {partes}',
   'diario.itemComo': '{base}, forma {forma}{elemento}',
   'diario.itemElemento': ', de {elemento}',
   'diario.conjuntoComo': 'Peças: {pecas} (forma {forma} ou acima), {n} vestidas',

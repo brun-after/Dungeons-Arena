@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.13 · **Data:** 20/11/2026
+**Versão:** 0.17 · **Data:** 21/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -8,7 +8,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 ## Comandos
 
-- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`,
+- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot (`&slot=0&skills=a,b` põe essas skills na barra, marco 49), `?arena=online`, `?arena=loopback`,
   `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?jogo=mundo` o Mundo (marco 29, guia em docs/MUNDO.md),
   `?bench=carga|padrao|trocas` benchmarks, `?bench=mundo&regiao=<id>&x=&y=&tocha=1` o Mundo local sem servidor (marco 43); no Mundo, `?hora=N` adianta o relógio do dia N minutos e
   `MUNDO_HORA_MIN` faz o mesmo no servidor, marco 42)
@@ -54,6 +54,15 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Elementos que ferem** (marco 48, D-193): a natureza da criatura (fraqueza, imunidade, reação) vem de
   `naturezas.json`, e o que cada elemento faz no golpe, de `combat/elementos-ferem.ts` com os números em
   `balance.elementosFerem`. Estado novo de dano por tempo passa por `escalarEstado` e pelo `fatorDoTique`.
+- **Formas de lançamento em dados** (marco 49, D-194): a forma de uma skill é o campo `entrega` (`combat/entrega/`),
+  nunca `if` por skill; a posição de um projétil com rota vem de `pontoEm`, a mesma no núcleo e na tela.
+- **Fusão pela receita** (marco 50, D-196): o id `f__…` é a receita, e `definicaoDe` refaz a fusão por
+  `combat/fusao/fundir.ts`; nada de fusão fixa em `skills.json` nem campo novo na bolsa para ela. Pares, assinaturas e
+  materiais ficam em `alquimia.json`, o orçamento em `balance.alquimia` (guia em docs/ALQUIMIA.md). O nível de
+  raridade (marco 52, D-198) também está no id (`__g2`, `__g1`); o visual dele lê `Habilidade.raridadeFusao`.
+- **Engaste no id** (marco 51, D-197): a peça engastada é `en_<materiais>__<peça>`, resolvida pelo `CatalogoDeItens`
+  (`progression/engaste.ts`), com a fusão elemental `fu_` por dentro; nada de campo novo no item para engaste. A
+  receita da forja é o item `receita_<id>` com o molde em `forja.json → moldes` (`progression/moldes.ts`).
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

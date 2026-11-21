@@ -73,6 +73,7 @@ import { CorpoEmMovimento } from '../render/movimento/corpo-movimento';
 import { RastrosDeMovimento } from '../render/movimento/rastros-movimento';
 import { brilhoDoOrbeXp } from '../progression/orbe-xp';
 import { COR_ORBE_XP } from '../render/orbe-xp';
+import { EntregaNaTela } from '../render/entrega-tela';
 
 export interface OpcoesApresentacao {
   destinoMapa?: (() => { x: number; y: number } | null) | undefined;
@@ -171,6 +172,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 26 (29/10/2026, D-124): as assinaturas das skills (silhuetas acima, marcas no chão, corpos que deslizam).
   const visualComum = visualDasComuns(ctx.conteudo);
   const diretor = new DiretorVfx({ efeitos: palco.efeitos, chao: palco.chao, particulas, impacto, reduzido });
+  // Marco 49 (21/11/2026, D-194): a entrega na tela (sombras, círculos, o feixe, o giro e o pulso no alvo, o corpo).
+  const entregaTela = new EntregaNaTela({ chao: palco.marcas, ar: palco.efeitos, particulas, habilidades: o.habilidades, reduzido });
   // Marco 40 (13/11/2026, D-164): o movimento da classe no corpo (voo alto, salto, corrida, montaria, névoa) e o que ele
   // deixa no mundo (a nuvem de escuridão, os símbolos de conjuração, a corda, a poeira e as rachaduras).
   const tiposDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
@@ -499,6 +502,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       som.quadro(pos, agoraMs);
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
+      entregaTela.quadro(estado, agoraMs, posicao);
       rastrosMovimento.quadro(estado, agoraMs);
       efeitosClasse.quadro(estado, agoraMs, posicao);
       efeitosDominio.quadro(estado, agoraMs, posicao);

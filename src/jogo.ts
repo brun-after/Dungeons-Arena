@@ -16,6 +16,7 @@ import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
 import { conteudoOficial, type Conteudo } from './core/conteudo';
 import type { ContextoSimulacao } from './core/contexto';
+import { resolverHabilidade } from './combat/compilar-habilidade';
 import { clonarEstado, type Entidade, type EstadoJogo } from './core/estado';
 import type { EventoSimulacao } from './core/eventos-simulacao';
 import { simular } from './core/simulacao';
@@ -61,6 +62,8 @@ export interface OpcoesJogo {
   faseNova?: RefFase;
   /** "Testar agora" do editor: id da aventura do jogador; nunca grava. */
   teste?: string;
+  /** Marco 49 (D-194): no jogo sem salvar, as skills postas na barra (para rever as entregas na tela). */
+  skills?: string[];
   /** Marco 11A: a fase da aventura no teste e se a saída segue para a próxima (testar a aventura inteira). */
   testeIndice?: number;
   testeSeguir?: boolean;
@@ -179,6 +182,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   // Marco 26 (D-113): a fase gravada antes dos quebráveis ganha os seus uma vez (as de depois já os têm).
   if (ctx.modo.objetosDeFase) povoarQuebraveis(estado, ctx);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
+  if (opcoes.skills && slot === null) porNaBarra(estado, ctx, opcoes.skills);
   // Marco 17 (D-063): todo personagem ganha uma identidade (o certificado da arena se prende a ela).
   const bolsaDoJogador = jogadorDoSave(estado)?.bolsa;
   if (bolsaDoJogador && !bolsaDoJogador.personagemId) bolsaDoJogador.personagemId = crypto.randomUUID();
@@ -398,3 +402,12 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   });
 }
 
+/** Marco 49 (21/11/2026, D-194): as skills pedidas (as que existem) ficam conhecidas e na barra do jogo sem salvar. */
+function porNaBarra(estado: EstadoJogo, ctx: ContextoSimulacao, ids: readonly string[]): void {
+  const j = jogadorDoSave(estado);
+  const validas = ids.filter((id) => !!resolverHabilidade(ctx, id));
+  if (!j?.bolsa || validas.length === 0) return;
+  for (const id of validas) if (!j.bolsa.conhecidas.some((c) => c.id === id)) j.bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
+  j.bolsa.barra = Array.from({ length: Math.max(j.bolsa.barra.length, validas.length) }, (_, i) => validas[i] ?? j.bolsa?.barra[i] ?? null);
+  j.habilidades = [...new Set([...j.habilidades, ...validas])];
+}

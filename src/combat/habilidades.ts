@@ -7,6 +7,7 @@
 // forma, tempo, custo, tema e apresentação), o elemento, as etiquetas, o nível mínimo, a passiva e as
 // evoluções. Formas novas (linha, cone, ao redor) e alvos novos (aliado, aliados, célula livre).
 
+import { lerEntrega, type Entrega } from './entrega/tipos';
 import { lerVariacao, type VariacaoBasico } from './variacoes';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { formulaValida } from './dados';
@@ -206,6 +207,10 @@ export interface Habilidade {
   fusao?: string;
   /** Marco 40 (13/11/2026, D-161): o que a skill faz quando abate (as leituras de estilo); progression/morte.ts aplica. */
   aoAbater?: readonly EfeitoCanonico[];
+  /** Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/); ausente = reta, da mão, um golpe. */
+  entrega?: Entrega;
+  /** Marco 52 (21/11/2026, D-198): o 2º ou o 1º nível de raridade da fusão (ausente = o 3º, o comum), para o visual. */
+  raridadeFusao?: 1 | 2;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */
@@ -574,6 +579,10 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   }
   const variacao = lerVariacao(l, o.variacao);
   if (variacao) base.variacao = variacao;
+  // Marco 49 (D-194): a entrega (só nas skills que viajam ou caem numa área).
+  const entrega = lerEntrega(l, o.entrega);
+  if (entrega) base.entrega = entrega;
+  if (entrega && base.politicaImpacto !== 'projetil' && base.politicaImpacto !== 'area') l.erro('entrega só vale com impacto "projetil" ou "area"');
   // Marco 40 (D-157): o papel do núcleo.
   if (o.papel !== undefined) base.papel = l.opcao(o, 'papel', PAPEIS);
   if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
@@ -644,6 +653,8 @@ const CAMPOS_DEFINICAO = [
   'cargas', 'disparoMs', 'lanca', 'runaDe',
   // Marco 40 (D-157, D-159)
   'nucleo', 'papel', 'eixos', 'leituras',
+  // Marco 49 (D-194)
+  'entrega',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
