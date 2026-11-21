@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.60 · **Data:** 21/11/2026
+**Versão do documento:** 3.61 · **Data:** 21/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.61 (21/11/2026)**: marco 52: os níveis de raridade da fusão (3º, 2º e 1º), com a chance pela Inteligência e a fórmula refeita (D-198).
 > - **3.60 (21/11/2026)**: marco 51: a forja por receita, com engastes de 1 a 3 materiais em armas e equipamento e a mesa da forja (D-197).
 > - **3.59 (21/11/2026)**: marco 50: a alquimia, com fusões abertas de 2 a 3 skills, compreensão, runas elementais, material na magia e a aba Alquimia (D-196).
 > - **3.58 (21/11/2026)**: marco 49: as formas de lançamento, num motor de entrega em sete eixos, com canal e feixe, e 22 variantes do catálogo já nelas (D-194, D-195).
@@ -380,6 +381,18 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 52 — a raridade das fusões (21/11/2026)
+
+Toda transmutação agora sai num de três níveis de raridade, do 3º (o comum) ao 1º (o mais raro).
+- **O mesmo feitiço, mais bonito.** O 2º nível lapida o brilho. O 1º soma a filigrana dourada: pontos de luz na mão,
+  uma estrela de raios e um glifo rúnico no acerto, e colunas de luz na área.
+- **Mais forte.** O 2º nível dá +10% de dano, cura e força dos efeitos; o 1º, +22%. O 3º é a fusão de sempre.
+- **A Inteligência ajuda.** Com pouca, o 1º nível sai 4% das vezes e o 2º, 20%. Cada ponto acima de 10 sobe essas
+  chances, até 22% e 42%.
+- **Tente de novo.** As skills consumidas podem ser aprendidas de novo. Refazendo a mesma fórmula, fica o melhor nível.
+
+Detalhes em D-198 e em [docs/ALQUIMIA.md](docs/ALQUIMIA.md).
 
 ### Marco 51 — a forja (21/11/2026)
 

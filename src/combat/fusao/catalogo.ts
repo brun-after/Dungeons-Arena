@@ -54,7 +54,7 @@ export interface CatalogoAlquimia {
   /** A forma natural de cada núcleo (eixos crus da entrega). */
   formas: ReadonlyMap<string, Readonly<Record<string, unknown>>>;
   assinaturas: readonly Assinatura[];
-  nomes: { trajetoria: Readonly<Record<string, string>>; origem: Readonly<Record<string, string>>; cadencia: Readonly<Record<string, string>>; elemento: Readonly<Record<string, string>> };
+  nomes: { trajetoria: Readonly<Record<string, string>>; origem: Readonly<Record<string, string>>; cadencia: Readonly<Record<string, string>>; elemento: Readonly<Record<string, string>>; /** Marco 52 (D-198): o fim do nome no 2º e no 1º nível. */ raridade: Readonly<Record<string, string>> };
   materiais: ReadonlyMap<string, MaterialNaMagia>;
   /** As fusões fixas antigas e a fusão aberta que as substitui (saves e fichas). */
   legado: ReadonlyMap<string, string>;
@@ -126,7 +126,7 @@ export function lerAlquimia(json: unknown, nucleos: ReadonlySet<string>, itens: 
   }
   const n = l.objeto(raiz.nomes, 'nomes');
   const mapa = (v: unknown, onde: string): Record<string, string> => Object.fromEntries(Object.entries(l.objeto(v, onde)).map(([k, x]) => [k, typeof x === 'string' ? x : '']));
-  const nomes = { trajetoria: mapa(n.trajetoria, 'nomes.trajetoria'), origem: mapa(n.origem, 'nomes.origem'), cadencia: mapa(n.cadencia, 'nomes.cadencia'), elemento: mapa(n.elemento, 'nomes.elemento') };
+  const nomes = { trajetoria: mapa(n.trajetoria, 'nomes.trajetoria'), origem: mapa(n.origem, 'nomes.origem'), cadencia: mapa(n.cadencia, 'nomes.cadencia'), elemento: mapa(n.elemento, 'nomes.elemento'), raridade: n.raridade === undefined ? {} : mapa(n.raridade, 'nomes.raridade') };
   const materiais = new Map<string, MaterialNaMagia>();
   for (const [id, v] of Object.entries(l.objeto(raiz.materiais, 'materiais'))) {
     if (!itens.has(id)) l.erro(`materiais: item desconhecido "${id}"`);

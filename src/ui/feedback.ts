@@ -269,6 +269,11 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   });
   // Marco 18 (D-068): o estudo de habilidades.
   const nomeHab = (id: string) => o.nomeHabilidade?.(id) ?? id;
+  // Marco 52 (21/11/2026, D-198): o nível de raridade que a transmutação deu.
+  bus.on('fusaoCriada', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(ev.melhorou ? t('log.fusaoRaridade', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }) : t('log.fusaoSemMelhora', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }));
+  });
   bus.on('estudoIniciado', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.estudoIniciado', { nome: nomeHab(ev.habilidadeId), tempo: duracaoLegivel(ev.totalTicks * DT_MS) }));
   });

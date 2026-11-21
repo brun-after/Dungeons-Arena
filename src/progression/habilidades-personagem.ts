@@ -22,6 +22,7 @@ import { passivosDe } from './ganchos-do-portador';
 import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import { estudoAvanca } from '../modos/regras';
+import { substituirFusaoAntiga } from './fusao-raridade';
 import { acelerarCompreensao } from './compreensao';
 
 /** As habilidades ativas na barra, na ordem das teclas (só as conhecidas). */
@@ -195,7 +196,12 @@ export function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number
   const estudo = bolsa?.estudo;
   if (!bolsa || !estudo) return;
   bolsa.estudo = null;
-  if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
+  // Marco 52 (21/11/2026, D-198): a fusão de nível melhor toma o lugar da antiga da mesma fórmula.
+  const noLugar = bolsa.conhecidas.some((c) => c.id === estudo.id) ? null : substituirFusaoAntiga(bolsa, estudo.id, Math.max(1, estudo.rank ?? 1));
+  if (noLugar !== null) {
+    atualizar(e, ctx);
+    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: noLugar, caminho: null });
+  } else if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
     // Marco 50 (D-196): a fusão nasce no rank da média das partes.
     const rank = Math.min(ctx.balance.habilidades.rankMax, Math.max(1, estudo.rank ?? 1));
     bolsa.conhecidas.push({ id: estudo.id, rank, caminhos: [] });

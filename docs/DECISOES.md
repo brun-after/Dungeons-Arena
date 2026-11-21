@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.48 · **Data:** 21/11/2026
+**Versão:** 1.49 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
 > - **1.48 (21/11/2026)**: D-197: marco 51, a forja por receita (o item `receita_<id>` cai das criaturas e parte de peça pronta), os engastes de 1 a 3 no id `en_`, os materiais na arma e no equipamento, engastar e extrair, e a mesa da forja com a cena.
 > - **1.47 (21/11/2026)**: D-196: marco 50, as fusões abertas (o id é a receita), a compreensão, as runas elementais, o material na magia e a aba Alquimia; saem as 4 fusões fixas.
 > - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
@@ -6372,3 +6373,48 @@ peça pronta, materiais de 1 a 3 por peça e uma forja que se veja trabalhar.
 **Mantido.** As receitas antigas da forja (`forja.json → receitas`: itens, ascender, fusão elemental com troféu de
 chefe e as do alquimista) continuam, abaixo da mesa. Elas não partem de peça pronta, e trocá-las mexeria em saves e
 missões sem ganho de jogo. A troca fica para quando houver substitutas para cada uma.
+
+## D-198 — Marco 52: os níveis de raridade da fusão (21/11/2026)
+
+**Contexto.** Toda fusão da mesma fórmula saía igual. O pedido:
+- três níveis de raridade, contados de trás para frente: 3º, 2º e 1º;
+- a mesma magia, mais bonita a cada nível;
+- mais dano, cura e força dos efeitos a cada salto;
+- o comum batendo as metas de hoje;
+- a Inteligência subindo a chance, sem zerar a do nível máximo;
+- as skills consumidas aprendidas de novo, para tentar a mesma fórmula outra vez.
+
+**Decisão.**
+- **O nível no id** (`combat/fusao/receita.ts`): `__g2` ou `__g1` fecha o id, e sem ele a fusão é do 3º nível. As fusões
+  de antes continuam valendo, como 3º nível, sem migração. `formulaDaFusao` tira o nível, para reconhecer a mesma
+  fórmula.
+- **O bônus** (`combat/fusao/fundir.ts`, `balance.alquimia.raridade`):
+  - o 2º nível sobe 10% e o 1º, 22%, no dano, na cura e na força dos estados (o valor do escudo, da queimadura…);
+  - a duração, o custo, a recarga e a forma ficam iguais;
+  - o 3º nível é exatamente a fusão de antes, e o simulador de balanceamento não usa fusões, então as metas de hoje
+    ficam onde estão. O 2º e o 1º matam cerca de 9% e 18% mais rápido.
+- **A chance pela Inteligência** (`progression/fusao-raridade.ts`):
+  - com 10 de Inteligência ou menos: 1º nível 4%, 2º nível 20%, 3º nível 76%;
+  - cada ponto acima de 10 soma 0,3% ao 1º (teto 22%) e 0,5% ao 2º (teto 42%);
+  - com pouca Inteligência, a chance cai à base, nunca a zero;
+  - o sorteio usa o RNG da simulação, no comando `fundir`.
+- **Refazer a fórmula.**
+  - As partes consumidas entram em `liberadas`, e o personagem as aprende de novo com ponto, como depois de achar o
+    livro. Elas voltam do rank 1, com a compreensão a refazer.
+  - A mesma fórmula pode ser transmutada de novo, e fica o melhor nível entre a fusão que o personagem já tem e a
+    nova.
+  - Se não melhorar, a fusão de antes fica como está, e as partes, as runas e o material se gastam na tentativa.
+  - Se melhorar, a nova é estudada, e ao fim toma o lugar da antiga: o maior rank, a tecla e a compreensão.
+  - No 1º nível, a fórmula está no teto (`fusao_maxima`).
+- **Na tela.**
+  - O nome leva o nível (`alquimia.json → nomes.raridade`).
+  - A prévia da bancada mostra as chances pela Inteligência de quem transmuta e avisa quando a fórmula já é conhecida.
+  - O registro diz em que nível a fusão saiu.
+- **No visual** (`render/vfx/manifestacao-raridade.ts`). A assinatura, a forma e a matéria do elemento são as mesmas;
+  cada nível acrescenta camadas por cima.
+  - O 2º lapida o brilho: faíscas na mão, centelhas no rastro, um halo claro e centelhas no acerto, e um anel externo
+    na área.
+  - O 1º soma a filigrana dourada: pontos de luz que orbitam a mão, a esteira dourada, e no acerto o clarão de ouro, a
+    estrela de raios, o glifo rúnico que gira no chão e o segundo halo. Na área, o círculo rúnico dourado e as colunas
+    de luz.
+  - Com movimento reduzido, ficam o halo e o anel.

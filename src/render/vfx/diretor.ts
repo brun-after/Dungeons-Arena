@@ -22,6 +22,7 @@ import { classeNaUltimate, estiloNaUltimate, toqueDominante, type PalcoDaUltimat
 import { cenaTrocada, emissoesTrocadas, trocaDe, type Troca } from './transmutacao';
 import type { Eixo } from '../../combat/eixos';
 import { gestoDoNucleo, type PalcoDoNucleo } from './nucleo-no-visual';
+import { raridadeNaArea, raridadeNaConjuracao, raridadeNoAcerto, raridadeNoRastro, type NivelVisual } from './manifestacao-raridade';
 import type { Emissao } from '../presets-particula';
 
 export interface OpcoesDiretor {
@@ -184,6 +185,23 @@ export class DiretorVfx {
   /** D-156: a forma no estouro da área. */
   formaNaArea(formas: readonly FormaVisual[], a: AreaVfx): void {
     if (this.ativo) formaNaArea(this.cena(), formas, a);
+  }
+
+  /** Marco 52 (21/11/2026, D-198): o nível de raridade da fusão, em camadas por cima da assinatura. */
+  raridadeNaConjuracao(n: NivelVisual, pos: P, cor: number): void {
+    if (this.ativo) raridadeNaConjuracao(this.cena(), n, pos, cor);
+  }
+
+  raridadeNoAcerto(n: NivelVisual, a: Acerto): void {
+    if (this.ativo) raridadeNoAcerto(this.cena(), n, a);
+  }
+
+  raridadeNaArea(n: NivelVisual, a: AreaVfx): void {
+    if (this.ativo) raridadeNaArea(this.cena(), n, a);
+  }
+
+  raridadeNoRastro(n: NivelVisual, x: number, y: number, cor: number): void {
+    if (this.ativo) raridadeNoRastro(this.cena(), n, x, y, cor);
   }
 
   /** D-151: a runa na mão de quem conjura. */

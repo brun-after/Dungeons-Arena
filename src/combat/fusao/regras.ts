@@ -30,4 +30,21 @@ export interface RegrasAlquimia {
   };
   /** A runa elemental que cai da criatura do elemento (%), na comum e no chefe. */
   dropRuna: { chancePct: number; chefePct: number };
+  /**
+   * Marco 52 (21/11/2026, D-198): os níveis de raridade da fusão. O 3º é o comum (o resto da chance); o 2º e o 1º têm
+   * a chance base, que sobe com a Inteligência acima de 10 até o teto, e o bônus no dano, na cura e nos estados.
+   */
+  raridade: { segundo: NivelDeRaridade; primeiro: NivelDeRaridade };
+}
+
+export interface NivelDeRaridade {
+  bonusPct: number;
+  chancePct: number;
+  porIntPct: number;
+  maxPct: number;
+}
+
+/** O bônus (%) do nível de raridade no dano, na cura e na força dos estados. */
+export function bonusDaRaridade(r: Pick<RegrasAlquimia, 'raridade'>, raridade: 1 | 2 | 3): number {
+  return raridade === 1 ? r.raridade.primeiro.bonusPct : raridade === 2 ? r.raridade.segundo.bonusPct : 0;
 }

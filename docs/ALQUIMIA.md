@@ -1,14 +1,15 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.1 · **Data:** 21/11/2026
+**Versão:** 1.2 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.2 (21/11/2026)**: marco 52 (D-198). Os níveis de raridade da fusão e a fórmula refeita.
 > - **1.1 (21/11/2026)**: marco 51 (D-197). A forja: engastes, receitas como loot e a mesa da forja.
 > - **1.0 (21/11/2026)**: marco 50 (D-196). Fusões abertas, compreensão, runas elementais, material na magia e a aba
 >   Alquimia.
 
 Este guia explica a alquimia como ela está no código. O desenho completo, com exemplos animados, está no Grimório da
-Alquimia (artefato). As decisões ficam em [DECISOES.md](DECISOES.md) (D-192 a D-197).
+Alquimia (artefato). As decisões ficam em [DECISOES.md](DECISOES.md) (D-192 a D-198).
 
 ## Como o jogador funde
 
@@ -106,6 +107,24 @@ As 4 fusões fixas viraram a fusão aberta das mesmas partes (`alquimia.json →
 
 As definições antigas ficam no catálogo, sem o campo `fusao`, porque inimigos e visuais ainda as usam.
 
+## Níveis de raridade
+
+Cada transmutação sai num nível, contado de trás para frente:
+
+| Nível | Chance (Inteligência até 10) | Por ponto acima de 10 | Teto | Dano, cura e estados |
+|---|---|---|---|---|
+| 3º (comum) | 76% | o resto | — | como sempre |
+| 2º | 20% | +0,5% | 42% | +10% |
+| 1º | 4% | +0,3% | 22% | +22% |
+
+- O nível fecha o id: `f__explosao_fisico__explosao_raio__g1`. Sem ele, é o 3º.
+- O visual é a mesma magia com mais camadas: o 2º lapida o brilho, e o 1º soma a filigrana dourada, a estrela, o glifo
+  e as colunas de luz (`render/vfx/manifestacao-raridade.ts`).
+- **Tentar de novo.** As partes consumidas continuam liberadas: aprenda-as de novo com ponto, leve a compreensão a
+  100% e transmute a mesma fórmula. Fica o melhor nível. Se não melhorar, a fusão de antes fica, e o que entrou se
+  gasta. No 1º nível, a fórmula está no teto.
+- Números em `balance.json → alquimia.raridade`.
+
 ## A forja: engastes e receitas
 
 Os mesmos materiais também vão para armas e equipamento, engastados no ferreiro.
@@ -150,6 +169,8 @@ material extraído volta 35% das vezes.
 | A definição da fusão | `src/combat/fusao/fundir.ts` |
 | O comando e as regras de quem pode fundir | `src/progression/alquimia.ts` |
 | A compreensão | `src/progression/compreensao.ts` |
+| Os níveis de raridade (chance, sorteio, troca da antiga) | `src/progression/fusao-raridade.ts`, `balance.json → alquimia.raridade` |
+| O visual dos níveis | `src/render/vfx/manifestacao-raridade.ts` |
 | A aba | `src/ui/alquimia/` (bancada, círculo, prévia, caderno, arrastar) |
 | Engastes, conjuntos e o id `en_` | `src/progression/engaste.ts`, `balance.json → engaste` |
 | As receitas da forja, os comandos e o drop | `src/progression/moldes.ts`, `src/data/forja.json → moldes` |
