@@ -1,7 +1,7 @@
 // Marco 49 (21/11/2026, D-194): a entrega de uma magia em sete eixos que se combinam livremente (o Grimório da
 // Alquimia, capítulo I): de onde nasce (origem), por onde anda (trajetória), em que ritmo sai (cadência), o que deixa
 // no chão (marca), o que fica no alvo (permanência), para onde vai (sentido) e de que é feita (corpo). Tudo em dados
-// (`entrega` na skill); os números em balance.json → `entrega`. Puro.
+// (`entrega` na skill); os números em balance.json, no bloco `entrega`. Puro.
 
 import type { Leitor } from '../../core/validar';
 

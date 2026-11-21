@@ -40,7 +40,7 @@ function retorno(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab
   saida.push({ t: 'projetilLancado', tick: estado.tick, projetilId: p.id, acaoId, donoId: ator.id, habilidadeId: hab.id, chave: hab.chave });
 }
 
-/** Alvo → usuário: a magia nasce no alvo (fere com a parte do golpe) e volta trazendo parte do dano como vida. */
+/** Alvo para usuário: a magia nasce no alvo (fere com a parte do golpe) e volta trazendo parte do dano como vida. */
 function golpeDeVolta(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, base: Omit<Impacto, 'indice'>, alvo: Entidade, saida: EventoSimulacao[]): void {
   const e = hab.entrega;
   if (!e) return;

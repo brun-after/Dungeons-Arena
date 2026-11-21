@@ -67,7 +67,7 @@ export interface Projetil {
   t?: number;
   /** D-194: a salva e os grãos esperam na mão até este tick. */
   saiEm?: number;
-  /** D-194: o retorno (alvo ou servo → quem lançou) não fere; traz vida ou escudo ao chegar. */
+  /** D-194: o retorno (alvo ou servo para quem lançou) não fere; traz vida ou escudo ao chegar. */
   traz?: { tipo: 'vida' | 'escudo'; valor: number };
   /** D-194: o giro e o pulso no alvo depois do acerto. */
   perm?: { alvoId: EntidadeId; ateTick: number; proximoTick: number; voltas: number };

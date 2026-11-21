@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.57 · **Data:** 20/11/2026
+**Versão do documento:** 3.58 · **Data:** 21/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.58 (21/11/2026)**: marco 49: as formas de lançamento, num motor de entrega em sete eixos, com canal e feixe, e 22 variantes do catálogo já nelas (D-194).
 > - **3.57 (20/11/2026)**: marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza, com os números na cor do elemento (D-192, D-193).
 > - **3.56 (20/11/2026)**: marco 47: o ferreiro vende peças de armadura geradas numa vitrine com filtros, que renova a cada dia do Mundo; o loot de armadura usa o mesmo sorteio, com garantia contra azar, e o monstruário mostra a ficha e o loot de cada criatura (D-190).
 > - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-189).
@@ -356,6 +357,24 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 49 — as formas de lançamento (21/11/2026)
+
+Segundo dos quatro marcos da Alquimia. As skills deixam de andar só em linha reta: cada uma pode ter uma **entrega**
+em sete eixos que se combinam.
+- **Origem.** Da mão, brotando do chão, caindo do céu, numa coluna sob o alvo, ou de círculos atrás ou à frente de
+  quem lança.
+- **Trajetória.** Reta, parábola (passa por cima de quem está no caminho), espiral, par que converge, caótica e órbita.
+- **Cadência.** Golpe, salva, rajada contínua e feixe canalizado, que acumula exposição no alvo enquanto dura.
+- **Marca e permanência.** Chão amaldiçoado ou trilha; efeito que gira em volta do alvo, pulsa nele ou entra em
+  erupção sob ele.
+- **Sentido e corpo.** O golpe que volta trazendo vida, a invocação no usuário ou no alvo; muitos grãos pequenos ou
+  uma peça grande e pesada.
+
+O núcleo e a tela usam a mesma curva, então o que se vê é o que acerta. Vinte e duas skills do catálogo já usam as
+formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em feixe, o granizo em grãos).
+
+Detalhes em D-194.
 
 ### Marco 48 — as runas que ficam e os elementos que ferem (20/11/2026)
 

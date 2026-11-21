@@ -40,9 +40,9 @@ export interface RegrasEntrega {
   erupcao: { golpePct: number; pulsoPct: number; intervaloMs: number; pulsos: number };
   /** Quanto dura o giro e o pulso no alvo. */
   permanenciaMs: number;
-  /** Alvo → usuário: % do dano e quanto do dano volta como vida. */
+  /** Alvo para usuário: % do dano e quanto do dano volta como vida. */
   volta: { danoPct: number; trazPct: number; velocidade: number };
-  /** Invocação → usuário: o escudo que o servo manda, em % da vida máxima de quem lançou. */
+  /** Invocação para usuário: o escudo que o servo manda, em % da vida máxima de quem lançou. */
   invocacao: { escudoPctVida: number; escudoMs: number };
   /** Grãos: quantos, % de cada, o espalhamento, o intervalo e o toque. */
   graos: { quantidade: number; pctCada: number; espalhamento: number; intervaloMs: number; toque: number };
