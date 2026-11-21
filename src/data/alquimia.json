@@ -1,0 +1,897 @@
+{
+ "_doc": "Marco 50 (21/11/2026, D-196): a alquimia — os pares de elementos (harmônico, instável, neutro), a forma natural de cada núcleo (a 2ª parte de uma fusão), as assinaturas (misturas com nome e efeito próprios), o nome gerado e o efeito de cada material na magia. Os números do orçamento ficam em balance.alquimia.",
+ "pares": {
+  "fogo+vento": {
+   "tipo": "harmonico",
+   "nome": "Incêndio",
+   "texto": "o fogo corre com o vento: a área queimando cresce 1 célula por pulso"
+  },
+  "fogo+gelo": {
+   "tipo": "instavel",
+   "nome": "Vapor",
+   "texto": "nuvem que cega (−40% precisão) e escalda por 3 s"
+  },
+  "fogo+raio": {
+   "tipo": "instavel",
+   "nome": "Plasma",
+   "texto": "explosão que atravessa resistência (ignora 30%)"
+  },
+  "fogo+terra": {
+   "tipo": "instavel",
+   "nome": "Magma",
+   "texto": "poça que enraíza e queima; os passos ficam lentos"
+  },
+  "fogo+veneno": {
+   "tipo": "instavel",
+   "nome": "Fumaça tóxica",
+   "texto": "o veneno vira gás: camadas em área ao redor do alvo"
+  },
+  "fogo+trevas": {
+   "tipo": "harmonico",
+   "nome": "Chama negra",
+   "texto": "queimadura que não renova a cura do alvo"
+  },
+  "fogo+sagrado": {
+   "tipo": "harmonico",
+   "nome": "Fogo santo",
+   "texto": "queima e consagra: a vida tirada cura aliados próximos"
+  },
+  "fogo+psiquico": {
+   "tipo": "neutro",
+   "nome": "Delírio",
+   "texto": "o queimado ataca a esmo por 0,5 s"
+  },
+  "gelo+raio": {
+   "tipo": "harmonico",
+   "nome": "Supercondução",
+   "texto": "eletrizado + resfriado: a cadeia salta até 4"
+  },
+  "gelo+terra": {
+   "tipo": "harmonico",
+   "nome": "Permafrost",
+   "texto": "enraizado e congelado somam: dura 2×"
+  },
+  "gelo+veneno": {
+   "tipo": "neutro",
+   "nome": "Cristal tóxico",
+   "texto": "estilhaço deixa veneno no chão"
+  },
+  "gelo+trevas": {
+   "tipo": "harmonico",
+   "nome": "Inverno morto",
+   "texto": "congelado drena vida a cada segundo"
+  },
+  "gelo+sagrado": {
+   "tipo": "neutro",
+   "nome": "Prisma",
+   "texto": "o estilhaço cura aliados no raio"
+  },
+  "gelo+psiquico": {
+   "tipo": "instavel",
+   "nome": "Mente congelada",
+   "texto": "atordoa 1 s, mas o gelo some"
+  },
+  "gelo+vento": {
+   "tipo": "harmonico",
+   "nome": "Nevasca",
+   "texto": "arrastado + resfriado: o empurrão congela na parede"
+  },
+  "raio+terra": {
+   "tipo": "instavel",
+   "nome": "Aterramento",
+   "texto": "o raio some na terra, mas atordoa 1,2 s quem está enraizado"
+  },
+  "raio+veneno": {
+   "tipo": "neutro",
+   "nome": "Ácido vivo",
+   "texto": "a descarga espalha 1 camada de veneno"
+  },
+  "raio+trevas": {
+   "tipo": "neutro",
+   "nome": "Raio negro",
+   "texto": "a cadeia marca cada alvo"
+  },
+  "raio+sagrado": {
+   "tipo": "harmonico",
+   "nome": "Juízo",
+   "texto": "raio que cai do céu em quem estiver marcado"
+  },
+  "psiquico+raio": {
+   "tipo": "harmonico",
+   "nome": "Sinapse",
+   "texto": "eco do exposto também descarrega"
+  },
+  "raio+vento": {
+   "tipo": "harmonico",
+   "nome": "Tempestade",
+   "texto": "a cadeia segue o vento: +2 saltos e alcance 2×"
+  },
+  "terra+veneno": {
+   "tipo": "harmonico",
+   "nome": "Lodo",
+   "texto": "o enraizado envenena por camada a cada segundo"
+  },
+  "terra+trevas": {
+   "tipo": "neutro",
+   "nome": "Cova",
+   "texto": "o enraizado afunda: −30% de defesa"
+  },
+  "sagrado+terra": {
+   "tipo": "harmonico",
+   "nome": "Santuário",
+   "texto": "pedra consagrada: o chão cura aliados e fere profanos"
+  },
+  "psiquico+terra": {
+   "tipo": "neutro",
+   "nome": "Peso da mente",
+   "texto": "exposto também fica lento"
+  },
+  "terra+vento": {
+   "tipo": "instavel",
+   "nome": "Tempestade de areia",
+   "texto": "cega em área; o vento perde o empurrão"
+  },
+  "trevas+veneno": {
+   "tipo": "harmonico",
+   "nome": "Peste",
+   "texto": "o veneno salta para vizinhos quando o alvo morre"
+  },
+  "sagrado+veneno": {
+   "tipo": "instavel",
+   "nome": "Purgação",
+   "texto": "consome o veneno de uma vez: 70% do que faltava, num golpe"
+  },
+  "psiquico+veneno": {
+   "tipo": "harmonico",
+   "nome": "Febre",
+   "texto": "o exposto envenenado ecoa as camadas"
+  },
+  "veneno+vento": {
+   "tipo": "harmonico",
+   "nome": "Miasma",
+   "texto": "nuvem que anda com o vento e arrasta camadas"
+  },
+  "sagrado+trevas": {
+   "tipo": "instavel",
+   "nome": "Eclipse",
+   "texto": "alterna marcado e consagrado: +50% no próximo golpe, sem cura"
+  },
+  "psiquico+trevas": {
+   "tipo": "harmonico",
+   "nome": "Loucura",
+   "texto": "o marcado foge de quem o marcou"
+  },
+  "trevas+vento": {
+   "tipo": "neutro",
+   "nome": "Sopro frio",
+   "texto": "o arrastado perde o próximo ataque"
+  },
+  "psiquico+sagrado": {
+   "tipo": "harmonico",
+   "nome": "Revelação",
+   "texto": "revela invisíveis e cópias no raio"
+  },
+  "sagrado+vento": {
+   "tipo": "neutro",
+   "nome": "Bênção do vento",
+   "texto": "aliados no caminho ganham +20% de velocidade"
+  },
+  "psiquico+vento": {
+   "tipo": "instavel",
+   "nome": "Vertigem",
+   "texto": "arrastado em direção aleatória; dobra o eco"
+  }
+ },
+ "formas": {
+  "projetil": {},
+  "explosao": {
+   "origem": "sob_alvo",
+   "marca": "chao"
+  },
+  "feixe": {
+   "cadencia": "feixe",
+   "duracaoMs": 2000
+  },
+  "cadeia": {
+   "trajetoria": "caotica",
+   "corpo": "graos"
+  },
+  "campo": {
+   "origem": "sob_alvo",
+   "marca": "chao",
+   "permanencia": "erupcao"
+  },
+  "nova": {
+   "trajetoria": "orbita",
+   "corpo": "graos"
+  },
+  "investida": {
+   "origem": "chao",
+   "marca": "trilha",
+   "corpo": "grande"
+  },
+  "recuo": {
+   "sentido": "volta"
+  },
+  "maldicao": {
+   "origem": "sob_alvo",
+   "permanencia": "pulsa"
+  },
+  "prisao": {
+   "origem": "sob_alvo",
+   "permanencia": "gira",
+   "corpo": "graos"
+  },
+  "muro": {
+   "origem": "circulos_frente",
+   "circulos": 3
+  },
+  "escudo": {
+   "trajetoria": "orbita",
+   "permanencia": "gira"
+  },
+  "cura": {
+   "trajetoria": "convergente",
+   "permanencia": "pulsa"
+  },
+  "dreno": {
+   "sentido": "volta"
+  },
+  "invocar": {
+   "origem": "circulos_atras",
+   "cadencia": "salva",
+   "quantidade": 3
+  },
+  "armadilha": {
+   "origem": "sob_alvo",
+   "marca": "chao",
+   "permanencia": "erupcao"
+  },
+  "marca": {
+   "origem": "sob_alvo",
+   "permanencia": "pulsa"
+  },
+  "grito": {
+   "origem": "circulos_frente",
+   "cadencia": "salva",
+   "corpo": "graos"
+  },
+  "chuva": {
+   "origem": "ceu",
+   "marca": "chao",
+   "corpo": "graos"
+  },
+  "postura": {
+   "trajetoria": "espiral",
+   "marca": "trilha"
+  }
+ },
+ "assinaturas": [
+  {
+   "id": "tempestade_viva",
+   "nome": "Tempestade viva",
+   "nucleos": [
+    "chuva",
+    "cadeia"
+   ],
+   "texto": "A chuva cai e cada gota salta para o vizinho. Uma tempestade que caça.",
+   "danoPct": 10,
+   "entrega": {
+    "origem": "ceu",
+    "cadencia": "salva",
+    "quantidade": 5,
+    "corpo": "graos"
+   },
+   "saltos": 1
+  },
+  {
+   "id": "sol_cativo",
+   "nome": "Sol cativo",
+   "nucleos": [
+    "feixe",
+    "escudo"
+   ],
+   "texto": "O feixe orbita quem lança como um anel de sol e queima tudo o que encosta.",
+   "danoPct": 10,
+   "entrega": {
+    "trajetoria": "orbita",
+    "permanencia": "gira",
+    "corpo": "grande"
+   }
+  },
+  {
+   "id": "coracao_de_inverno",
+   "nome": "Coração de inverno",
+   "nucleos": [
+    "prisao",
+    "nova",
+    "explosao"
+   ],
+   "texto": "A jaula implode em estilhaços quando se fecha.",
+   "danoPct": 15,
+   "entrega": {
+    "origem": "sob_alvo",
+    "permanencia": "erupcao",
+    "corpo": "graos"
+   }
+  },
+  {
+   "id": "ceifa_das_almas",
+   "nome": "Ceifa das almas",
+   "nucleos": [
+    "dreno",
+    "invocar"
+   ],
+   "texto": "O dreno ergue um servo de cada vítima e devolve a vida a quem lançou.",
+   "danoPct": 10,
+   "entrega": {
+    "sentido": "volta",
+    "permanencia": "pulsa"
+   }
+  },
+  {
+   "id": "prece_ardente",
+   "nome": "Prece ardente",
+   "nucleos": [
+    "cura",
+    "projetil"
+   ],
+   "texto": "Duas chamas saem em par e se encontram no alvo.",
+   "danoPct": 10,
+   "entrega": {
+    "trajetoria": "convergente"
+   }
+  },
+  {
+   "id": "labirinto_mental",
+   "nome": "Labirinto mental",
+   "nucleos": [
+    "maldicao",
+    "muro"
+   ],
+   "texto": "Muros que só o alvo vê: ele se perde entre paredes de mentira.",
+   "danoPct": 5,
+   "entrega": {
+    "origem": "sob_alvo",
+    "permanencia": "gira"
+   }
+  },
+  {
+   "id": "rio_de_lodo",
+   "nome": "Rio de lodo",
+   "nucleos": [
+    "armadilha",
+    "investida"
+   ],
+   "texto": "A investida deixa uma trilha de lodo que prende e envenena.",
+   "danoPct": 10,
+   "entrega": {
+    "origem": "chao",
+    "marca": "trilha"
+   }
+  },
+  {
+   "id": "juizo_final",
+   "nome": "Juízo final",
+   "nucleos": [
+    "explosao",
+    "marca",
+    "grito"
+   ],
+   "texto": "Os marcados recebem um raio do céu.",
+   "danoPct": 15,
+   "entrega": {
+    "origem": "ceu",
+    "cadencia": "salva",
+    "quantidade": 3
+   }
+  },
+  {
+   "id": "furacao_de_laminas",
+   "nome": "Furacão de lâminas",
+   "nucleos": [
+    "postura",
+    "projetil"
+   ],
+   "texto": "Lâminas em espiral que voltam a quem lançou.",
+   "danoPct": 10,
+   "entrega": {
+    "trajetoria": "espiral",
+    "sentido": "volta"
+   }
+  },
+  {
+   "id": "eclipse",
+   "nome": "Eclipse",
+   "nucleos": [
+    "feixe",
+    "feixe"
+   ],
+   "texto": "Dois feixes que se cruzam no alvo: luz e sombra se anulam e explodem.",
+   "danoPct": 15,
+   "entrega": {
+    "trajetoria": "convergente",
+    "corpo": "grande"
+   }
+  },
+  {
+   "id": "colmeia",
+   "nome": "Colmeia",
+   "nucleos": [
+    "invocar",
+    "chuva"
+   ],
+   "texto": "Insetos que caem do céu e perseguem os envenenados.",
+   "danoPct": 10,
+   "entrega": {
+    "origem": "ceu",
+    "corpo": "graos",
+    "permanencia": "pulsa"
+   }
+  },
+  {
+   "id": "vulcao",
+   "nome": "Vulcão",
+   "nucleos": [
+    "explosao",
+    "nova"
+   ],
+   "texto": "Um círculo sob o alvo vira cratera: sobe magma e chovem pedras.",
+   "danoPct": 15,
+   "entrega": {
+    "origem": "sob_alvo",
+    "marca": "chao",
+    "permanencia": "erupcao"
+   }
+  },
+  {
+   "id": "coroa_de_granizo",
+   "nome": "Coroa de granizo",
+   "nucleos": [
+    "nova",
+    "prisao"
+   ],
+   "texto": "Pedrinhas giram em volta do alvo, uma camada a cada volta.",
+   "danoPct": 10,
+   "entrega": {
+    "trajetoria": "orbita",
+    "permanencia": "gira",
+    "corpo": "graos"
+   }
+  },
+  {
+   "id": "sino_dos_mortos",
+   "nome": "Sino dos mortos",
+   "nucleos": [
+    "invocar",
+    "dreno"
+   ],
+   "texto": "O servo suga o alvo e manda a vida a quem lançou.",
+   "danoPct": 10,
+   "entrega": {
+    "sentido": "volta",
+    "permanencia": "pulsa"
+   }
+  },
+  {
+   "id": "geiser",
+   "nome": "Gêiser",
+   "nucleos": [
+    "campo",
+    "feixe"
+   ],
+   "texto": "Um círculo fica sob o alvo e, a cada pulso, sobe dele um jato.",
+   "danoPct": 10,
+   "entrega": {
+    "origem": "sob_alvo",
+    "permanencia": "erupcao"
+   }
+  }
+ ],
+ "nomes": {
+  "trajetoria": {
+   "reta": "",
+   "parabola": " em arco",
+   "espiral": " em espiral",
+   "convergente": " gêmea",
+   "caotica": " errante",
+   "orbita": " orbital"
+  },
+  "origem": {
+   "mao": "",
+   "chao": " que rompe o chão",
+   "ceu": " celeste",
+   "sob_alvo": " do círculo",
+   "circulos_atras": " dos círculos",
+   "circulos_frente": " dos canhões"
+  },
+  "cadencia": {
+   "golpe": "",
+   "salva": " em salva",
+   "rajada": " em rajada",
+   "feixe": " em feixe"
+  },
+  "elemento": {
+   "fogo": "fogo",
+   "gelo": "gelo",
+   "raio": "raio",
+   "veneno": "veneno",
+   "psiquico": "mente",
+   "terra": "pedra",
+   "trevas": "sombra",
+   "sagrado": "luz",
+   "vento": "vento"
+  }
+ },
+ "materiais": {
+  "minerio_ferro": {
+   "texto": "+10% de dano do golpe",
+   "danoPct": 10
+  },
+  "minerio_prata": {
+   "texto": "+25% contra mortos-vivos (a luz da prata expõe)",
+   "efeitos": [
+    {
+     "tipo": "exposto",
+     "em": "alvo",
+     "duracaoMs": 2000,
+     "valor": 0,
+     "pct": 15
+    }
+   ]
+  },
+  "cristal_arcano": {
+   "texto": "−12% de mana",
+   "custoPct": -12
+  },
+  "erva_curativa": {
+   "texto": "cura 4% da vida ao lançar",
+   "efeitos": [
+    {
+     "tipo": "cura",
+     "em": "conjurador",
+     "duracaoMs": 0,
+     "valor": 6,
+     "pct": 0
+    }
+   ]
+  },
+  "erva_lunar": {
+   "texto": "os estados duram 20% a mais",
+   "duracaoPct": 20
+  },
+  "flor_de_fogo": {
+   "texto": "queima o alvo por 1 s a mais",
+   "efeitos": [
+    {
+     "tipo": "queimando",
+     "em": "alvo",
+     "duracaoMs": 1000,
+     "valor": 2,
+     "pct": 0
+    }
+   ]
+  },
+  "presa_de_lobo": {
+   "texto": "+15% de dano",
+   "danoPct": 15,
+   "custoPct": 5
+  },
+  "seda_de_aranha": {
+   "texto": "imobiliza 1 s",
+   "efeitos": [
+    {
+     "tipo": "sem_movimento",
+     "em": "alvo",
+     "duracaoMs": 1000,
+     "valor": 0,
+     "pct": 0
+    }
+   ]
+  },
+  "gosma_de_slime": {
+   "texto": "chão pegajoso: lento por 3 s",
+   "efeitos": [
+    {
+     "tipo": "atolado",
+     "em": "alvo",
+     "duracaoMs": 3000,
+     "valor": 0,
+     "pct": 30
+    }
+   ]
+  },
+  "orelha_de_goblin": {
+   "texto": "−8% de recarga",
+   "recargaPct": -8
+  },
+  "osso_antigo": {
+   "texto": "atravessa 1 alvo",
+   "perfura": true
+  },
+  "escama_de_dragao": {
+   "texto": "escudo contra o fogo ao lançar (resistência por 5 s)",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 12,
+     "pct": 0
+    }
+   ]
+  },
+  "fragmento_portal": {
+   "texto": "a magia sai de dois círculos atrás de quem lança",
+   "entrega": {
+    "origem": "circulos_atras",
+    "circulos": 2
+   }
+  },
+  "madeira_antiga": {
+   "texto": "enraíza 0,5 s",
+   "efeitos": [
+    {
+     "tipo": "enraizado",
+     "em": "alvo",
+     "duracaoMs": 500,
+     "valor": 0,
+     "pct": 0
+    }
+   ]
+  },
+  "cristal_de_gelo": {
+   "texto": "chão escorregadio: resfria 3 s",
+   "efeitos": [
+    {
+     "tipo": "resfriado",
+     "em": "alvo",
+     "duracaoMs": 3000,
+     "valor": 0,
+     "pct": 20
+    }
+   ]
+  },
+  "resina_negra": {
+   "texto": "marca o alvo (o próximo golpe fere mais)",
+   "efeitos": [
+    {
+     "tipo": "marcado",
+     "em": "alvo",
+     "duracaoMs": 3000,
+     "valor": 0,
+     "pct": 15
+    }
+   ]
+  },
+  "pedra_runica": {
+   "texto": "+1 encaixe de runa",
+   "encaixes": 1
+  },
+  "areia_vitrea": {
+   "texto": "o impacto vitrifica o chão",
+   "entrega": {
+    "marca": "chao"
+   }
+  },
+  "minerio_obsidiana": {
+   "texto": "+30% no crítico do golpe",
+   "efeitos": [
+    {
+     "tipo": "critico_garantido",
+     "em": "conjurador",
+     "duracaoMs": 2000,
+     "valor": 0,
+     "pct": 0
+    }
+   ]
+  },
+  "couro_de_troll": {
+   "texto": "regenera a vida por 3 s",
+   "efeitos": [
+    {
+     "tipo": "cura_periodica",
+     "em": "conjurador",
+     "duracaoMs": 3000,
+     "valor": 2,
+     "pct": 0
+    }
+   ]
+  },
+  "presa_de_orc": {
+   "texto": "empurra o alvo",
+   "efeitos": [
+    {
+     "tipo": "empurrao",
+     "em": "alvo",
+     "duracaoMs": 0,
+     "valor": 1,
+     "pct": 0
+    }
+   ]
+  },
+  "presa_de_vampiro": {
+   "texto": "rouba vida a cada golpe",
+   "efeitos": [
+    {
+     "tipo": "cura",
+     "em": "conjurador",
+     "duracaoMs": 0,
+     "valor": 3,
+     "pct": 0
+    }
+   ],
+   "danoPct": 3
+  },
+  "pano_cultista": {
+   "texto": "expõe o alvo por 1 s a mais",
+   "efeitos": [
+    {
+     "tipo": "exposto",
+     "em": "alvo",
+     "duracaoMs": 1500,
+     "valor": 0,
+     "pct": 10
+    }
+   ]
+  },
+  "chifre_de_demonio": {
+   "texto": "+30% de dano, pago em vida",
+   "danoPct": 30,
+   "custoVidaPct": 5
+  },
+  "coracao_infernal": {
+   "texto": "a magia explode em volta de quem cai",
+   "efeitos": [
+    {
+     "tipo": "explodir_ao_cair",
+     "em": "alvo",
+     "duracaoMs": 4000,
+     "valor": 8,
+     "pct": 0
+    }
+   ]
+  },
+  "dente_de_ouro": {
+   "texto": "−20% de mana",
+   "custoPct": -20
+  },
+  "olho_da_bruxa": {
+   "texto": "revela e marca os atingidos",
+   "efeitos": [
+    {
+     "tipo": "marca_cacador",
+     "em": "alvo",
+     "duracaoMs": 5000,
+     "valor": 0,
+     "pct": 15
+    }
+   ]
+  },
+  "seiva_venenosa": {
+   "texto": "+2 camadas de veneno",
+   "efeitos": [
+    {
+     "tipo": "envenenado",
+     "em": "alvo",
+     "duracaoMs": 5000,
+     "valor": 2,
+     "pct": 50
+    },
+    {
+     "tipo": "envenenado",
+     "em": "alvo",
+     "duracaoMs": 5000,
+     "valor": 2,
+     "pct": 50
+    }
+   ]
+  },
+  "escama_ignea": {
+   "texto": "escudo de brasa por 5 s ao lançar",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 8,
+     "pct": 0
+    }
+   ]
+  },
+  "nucleo_igneo": {
+   "texto": "queimadura de 2ª camada",
+   "efeitos": [
+    {
+     "tipo": "queimando",
+     "em": "alvo",
+     "duracaoMs": 3000,
+     "valor": 4,
+     "pct": 0
+    }
+   ],
+   "danoPct": 10
+  },
+  "escama_glacial": {
+   "texto": "escudo de gelo por 5 s ao lançar",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 8,
+     "pct": 0
+    }
+   ]
+  },
+  "nucleo_glacial": {
+   "texto": "congela de uma vez",
+   "efeitos": [
+    {
+     "tipo": "congelado",
+     "em": "alvo",
+     "duracaoMs": 1000,
+     "valor": 0,
+     "pct": 0
+    }
+   ]
+  },
+  "escama_trovejante": {
+   "texto": "escudo de raio por 5 s ao lançar",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 8,
+     "pct": 0
+    }
+   ]
+  },
+  "nucleo_trovejante": {
+   "texto": "a magia salta +2",
+   "saltos": 2
+  },
+  "escama_peconhenta": {
+   "texto": "escudo de veneno por 5 s ao lançar",
+   "efeitos": [
+    {
+     "tipo": "escudo",
+     "em": "conjurador",
+     "duracaoMs": 5000,
+     "valor": 8,
+     "pct": 0
+    }
+   ]
+  },
+  "nucleo_peconhento": {
+   "texto": "veneno em dobro",
+   "efeitos": [
+    {
+     "tipo": "envenenado",
+     "em": "alvo",
+     "duracaoMs": 6000,
+     "valor": 3,
+     "pct": 50
+    }
+   ],
+   "danoPct": 10
+  },
+  "cinza_de_alma": {
+   "texto": "a magia atravessa e fere quem estiver atrás",
+   "perfura": true,
+   "danoPct": 5
+  },
+  "filacterio_rachado": {
+   "texto": "−25% de recarga",
+   "recargaPct": -25,
+   "danoPct": 10
+  }
+ },
+ "legado": {
+  "flecha_arcana": "f__projetil_raio__flecha_perfurante",
+  "lanca_tempestuosa": "f__lanca_de_gelo__raio_em_cadeia",
+  "ciclone_flamejante": "f__redemoinho__lamina_em_brasa",
+  "cadeia_sombria": "f__corrente__recuo_psiquico"
+ }
+}

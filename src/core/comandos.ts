@@ -60,6 +60,8 @@ export type Comando =
   | { t: 'atualizarSistema'; pontos: Partial<Record<keyof Atributos, number>> }
   /** Marco 39 (D-151): a runa do encaixe de uma skill de classe ou ultimate (null = volta para a padrão). */
   | { t: 'escolherRuna'; habilidade: string; runa: 'fisico' | Elemento | null }
+  /** Marco 50 (21/11/2026, D-196): transmuta 2 ou 3 skills (núcleo, forma, eco), com runas (invIds) e 1 material (invId). */
+  | { t: 'fundir'; partes: string[]; runas: string[]; material: string | null }
   /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
   | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
   /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
@@ -101,6 +103,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'skin',
   'atualizarSistema',
   'escolherRuna',
+  'fundir',
   'usarUltimate',
   'ativarPassiva',
   'desativarPassiva',

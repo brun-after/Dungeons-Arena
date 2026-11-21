@@ -85,6 +85,20 @@ export function conferirExtras(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balanc
   if (Array.isArray(b.diario)) {
     bolsa.diario = [...new Set(b.diario.filter((x): x is string => typeof x === 'string' && x.length > 0 && x.length <= MAX_TEXTO))].slice(0, MAX_DIARIO);
   }
+  // Marco 50 (21/11/2026, D-196): a compreensão (0 a 100) e as acelerações, só das skills que a bolsa conhece.
+  const conhece = (id: string) => bolsa.conhecidas.some((c) => c.id === id);
+  if (ehObjeto(b.compreensao)) {
+    const compreensao: Record<string, number> = {};
+    for (const [k, n] of Object.entries(b.compreensao)) {
+      const c = inteiroEntre(n, 0, 100);
+      if (conhece(k) && c) compreensao[k] = c;
+    }
+    if (Object.keys(compreensao).length) bolsa.compreensao = compreensao;
+  }
+  if (Array.isArray(b.compreensaoAcelerada)) {
+    const aceleradas = [...new Set(b.compreensaoAcelerada.filter((x): x is string => typeof x === 'string' && conhece(x)))];
+    if (aceleradas.length) bolsa.compreensaoAcelerada = aceleradas;
+  }
   if (ehObjeto(b.vitorias)) {
     const vitorias: Record<string, number> = {};
     for (const [k, n] of Object.entries(b.vitorias)) {

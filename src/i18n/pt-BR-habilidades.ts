@@ -262,16 +262,12 @@ export const textosHabilidades = {
   'habilidades.motivo.estudando': 'Você já está estudando outra habilidade',
   'habilidades.motivo.sem_estudo': 'Nenhum estudo em andamento',
   'habilidades.motivo.aceleracoes_esgotadas': 'Este estudo já foi acelerado ao máximo',
-  'habilidades.motivo.fusao_runa': 'Precisa da Runa de fusão (missão "Mestre de duas escolas")',
-  'habilidades.motivo.fusao_niveis': 'As duas habilidades precisam estar no nível máximo',
-  'habilidades.motivo.fusao_unica': 'Cada personagem tem uma fusão só',
   'habilidades.fusoes': 'Fusões',
   // 08/11/2026: a ultimate no topo da aba e a receita das fusões.
   'habilidades.ultimate': 'Ultimate',
   'habilidades.ultimatePar': 'Do par nas teclas 1 e 2: {a} + {b}',
   'habilidades.ultimateCarga': 'Enche lutando com as skills da classe; sai pela tecla da ultimate quando a barra está cheia',
   'habilidades.semUltimate': 'Ponha duas skills da classe nas teclas 1 e 2: o par decide a sua ultimate.',
-  'habilidades.receitaFusao': 'Receita: {partes} no nível {nivel} e uma {runa}',
   'habilidades.fusaoDe': 'Fusão de {a} e {b}',
   'habilidades.marco': 'Nível {n}: {texto}',
   // Marco 40 (D-159): as leituras de estilo das skills de classe.

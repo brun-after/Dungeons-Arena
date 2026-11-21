@@ -5,6 +5,7 @@ import { lerHistoricoXp, unirHistoricosXp } from '../progression/xp-antifarm';
 // e a lista do que mudou volta para o jogador. Vida, mana, defesa e atributos efetivos são sempre derivados.
 
 import { definicaoDe } from '../combat/compilar-habilidade';
+import { ehFusao } from '../combat/fusao/receita';
 import type { ContextoSimulacao } from '../core/contexto';
 import { hash53, serializarCanonico } from '../core/digest';
 import { clonarEntidade, clonarEstado } from '../core/estado';
@@ -216,6 +217,9 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
       ticksDe(Math.max(ctx.balance.habilidades.estudo.B, ctx.balance.habilidades.estudo.A, ctx.balance.habilidades.estudo.S)));
     bolsa.estudo = { id: estudoPedido.id, totalTicks, restanteTicks: limitar(inteiro(estudoPedido.restanteTicks) ?? totalTicks, 1, totalTicks), aceleracoes: 0,
       velocidade12: limitar(inteiro(estudoPedido.velocidade12) ?? 12, 12, 12_000_000), fracao12: limitar(inteiro(estudoPedido.fracao12) ?? 0, 0, 11) };
+    // Marco 50 (D-196): o rank em que a fusão nasce (só fusão, até o máximo).
+    const rank = inteiro(estudoPedido.rank);
+    if (rank !== null && rank > 1 && ehFusao(estudoPedido.id)) bolsa.estudo.rank = limitar(rank, 1, ctx.balance.habilidades.rankMax);
   }
   e.hp = e.hpMax;
   e.mana = e.manaMax;
