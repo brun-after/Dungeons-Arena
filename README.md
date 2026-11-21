@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.58 · **Data:** 21/11/2026
+**Versão do documento:** 3.59 · **Data:** 21/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.59 (21/11/2026)**: marco 50: a alquimia, com fusões abertas de 2 a 3 skills, compreensão, runas elementais, material na magia e a aba Alquimia (D-196).
 > - **3.58 (21/11/2026)**: marco 49: as formas de lançamento, num motor de entrega em sete eixos, com canal e feixe, e 22 variantes do catálogo já nelas (D-194, D-195).
 > - **3.57 (20/11/2026)**: marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza, com os números na cor do elemento (D-192, D-193).
 > - **3.56 (20/11/2026)**: marco 47: o ferreiro vende peças de armadura geradas numa vitrine com filtros, que renova a cada dia do Mundo; o loot de armadura usa o mesmo sorteio, com garantia contra azar, e o monstruário mostra a ficha e o loot de cada criatura (D-190).
@@ -378,6 +379,25 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 50 — a alquimia (21/11/2026)
+
+Terceiro dos quatro marcos da Alquimia. As 4 fusões fixas dão lugar a **fusões abertas**: qualquer skill comum se
+funde com outras, até 3, na nova aba **Alquimia** da mochila.
+- **Compreensão.** Usar a skill em inimigos do seu nível a ensina. Com 100%, ela pode entrar numa fórmula.
+- **A bancada.**
+  - As skills aparecem como orbes na cor do elemento. Você os arrasta para o núcleo, a forma e o eco de um círculo vivo,
+    que fica dourado na ressonância e vermelho na instabilidade.
+  - Ao lado vão as runas elementais e um material, e a prévia compara a magia nova com as partes.
+  - Transmutar consome tudo, e a fusão nasce no rank da média das partes.
+- **Equilíbrio.** O par põe 112% do poder em duas funções; o par harmônico chega a 127%; o trio, 130% em três, mais caro
+  e sempre grau S.
+- **Assinaturas.** Quinze misturas com nome e efeito próprios, anotadas no diário e no caderno de fórmulas quando
+  descobertas.
+- **Runas.** Nove runas elementais caem das criaturas do elemento. As runas de classe viram pedras rúnicas por
+  arrastar.
+
+Guia em [docs/ALQUIMIA.md](docs/ALQUIMIA.md); detalhes em D-196.
 
 ### Marco 48 — as runas que ficam e os elementos que ferem (20/11/2026)
 

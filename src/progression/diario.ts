@@ -9,6 +9,8 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Entidade } from '../entities/entidade';
 import { bonusAtivos } from './conjuntos';
 import { variacoesDeItem } from './gerar-item-base';
+import { definicaoDe } from '../combat/compilar-habilidade';
+import { assinaturaDaFusao } from '../combat/fusao/fundir';
 
 // Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
 export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento', 'criatura'] as const;
@@ -41,8 +43,9 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   for (const lista of c.estilos.values()) for (const s of lista) saida.push(e('estilo', s.id));
   for (const d of c.definicoes.values()) {
     for (const n of Object.keys(d.marcos)) saida.push(e('marco', `${d.base.id}:${n}`));
-    if (d.fusao) saida.push(e('fusao', d.base.id));
   }
+  // Marco 50 (21/11/2026, D-196): as fusões do diário são as assinaturas (as misturas com nome próprio).
+  for (const a of c.alquimia.assinaturas) saida.push(e('fusao', a.id));
   for (const v of variacoesDeItem(c.itensComFormas)) saida.push(e('item', `${v.base}:${v.forma}:${v.elemento ?? 'n'}`));
   for (const cj of c.conjuntos.values()) for (const n of Object.keys(cj.bonus)) saida.push(e('conjunto', `${cj.id}:${n}`));
   for (const id of c.regrasDeBuff.keys()) saida.push(e('buff', id));
@@ -97,7 +100,12 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
         const quem = porId(ev.id);
         const def = ctx.conteudo.definicoes.get(ev.habilidadeId);
         if (quem && def?.marcos[ev.rank]) anotar(estado, quem, `marco:${ev.habilidadeId}:${ev.rank}`, saida);
-        if (quem && def?.fusao) anotar(estado, quem, `fusao:${ev.habilidadeId}`, saida);
+        break;
+      }
+      case 'fusaoCriada': {
+        const quem = porId(ev.id);
+        const a = quem ? assinaturaDaFusao(ctx, ev.habilidadeId, (p) => definicaoDe(ctx, p)) : null;
+        if (quem && a) anotar(estado, quem, `fusao:${a.id}`, saida);
         break;
       }
       case 'buffInteragiu': {

@@ -33,6 +33,7 @@ import { entreJogadores, escalarEstado, prepararDaReacao } from './estado-do-gol
 import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 import { chebyshev } from './geometria';
 import { podeAjudar, podeFerir } from '../modos/relacao';
+import { compreender } from '../progression/compreensao';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { resistenciaPct, sinergiasAtivas } from './elementos';
 import { reagir } from './reacoes';
@@ -292,6 +293,8 @@ export function aplicarImpacto(
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };
       if (atacante) registrarDardo(ctx, atacante, alvo, hab, tick, Math.min(hpAntes, dano));
+      // Marco 50 (21/11/2026, D-196): o acerto ensina a skill (a compreensão para a alquimia).
+      compreender(ctx, atacante, alvo, hab, impacto.indice);
       // Marco 22 (D-089): o Mago encarnado em gelo resfria quem o golpeia de perto.
       if (hab.politicaImpacto === 'contato') reagirAoGolpe(estado, ctx, alvo, atacante, saida);
       // Marco 27 (D-126): a Rapieira deixa a riposta pronta em quem levou o golpe.

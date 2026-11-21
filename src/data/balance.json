@@ -237,6 +237,16 @@
     "entrePersonagensReacaoPct": 60,
     "mente": { "chancePct": 30, "intervaloMs": 5000, "entrePersonagensPct": 50, "duracaoMs": { "enfeiticado": 2500, "confuso": 2000, "aterrorizado": 1800, "iludido": 3000, "sem_visao": 2500 } }
   },
+  "alquimia": {
+    "_doc": "Marco 50 (21/11/2026, D-196): o orçamento das fusões abertas (combat/fusao/), a compreensão e a runa elemental que cai das criaturas.",
+    "par": { "orcamentoPct": 112, "custo": 1.1, "recarga": 1, "runas": 1 },
+    "trio": { "orcamentoPct": 130, "custo": 1.35, "recarga": 1.25, "runas": 2 },
+    "ressonanciaPct": 15,
+    "instavel": { "custoParPct": 20, "custoTrioPct": 10, "recargaPct": 15 },
+    "runa": { "amplificaPct": 25, "camadaPct": 50 },
+    "compreensao": { "comumPct": 2, "fusaoPct": 1, "faixaNivel": 10, "essenciaPct": 25 },
+    "dropRuna": { "chancePct": 4, "chefePct": 60 }
+  },
   "entrega": {
     "_doc": "Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/), com o custo e a compensação de cada escolha do Grimório da Alquimia.",
     "maxTiros": 24,

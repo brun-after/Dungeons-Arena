@@ -19,7 +19,7 @@ import { migrarSkillsDeNucleo } from './migracao-40';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 31;
+export const VERSAO_SCHEMA = 32;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -414,6 +414,9 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // Marco 40 (12/11/2026, D-158): as gerais antigas viram as skills comuns de núcleo; os ranks acima do 1 voltam.
   // D-159: e as skills de classe que saíram do kit deixam o personagem.
   30: (r) => migrarSkillsDeNucleo(r, conteudoOficial().legadoDeSkills, conteudoOficial().skillsQueSairam),
+  // Marco 50 (21/11/2026, D-196): as 4 fusões fixas viram a fusão aberta das mesmas partes (o mesmo mapa do legado,
+  // que agora traz também elas); a runa de fusão fica na mochila como a runa curinga.
+  31: (r) => migrarSkillsDeNucleo(r, conteudoOficial().legadoDeSkills, conteudoOficial().skillsQueSairam),
 };
 
 /** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */

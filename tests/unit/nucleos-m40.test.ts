@@ -98,7 +98,7 @@ describe('as gerais antigas saem do jogador (save 30 › 31 e fichas)', () => {
   });
 
   it('a migração do save passa por todos os jogadores, na fase atual e nas visitadas', () => {
-    expect(VERSAO_SCHEMA).toBe(31);
+    expect(VERSAO_SCHEMA).toBe(32);
     const jogador = { id: 'j', tipo: 'jogador', habilidades: ['bola_de_fogo'], bolsa };
     const r = migrarSkillsDeNucleo({ estado: { entidades: [jogador] }, fasesVisitadas: { f1: { entidades: [jogador] } } }, legado);
     const ent = (v: unknown) => (v as { entidades: { habilidades: string[]; bolsa: { conhecidas: { id: string }[] } }[] }).entidades[0];

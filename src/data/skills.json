@@ -2270,10 +2270,6 @@
       "mods": [
         "atravessar"
       ],
-      "fusao": [
-        "seta_arcana",
-        "flecha_perfurante"
-      ],
       "tags": [
         "flechas"
       ],
@@ -2314,10 +2310,6 @@
         }
       ],
       "elemento": "raio",
-      "fusao": [
-        "lanca_de_gelo",
-        "raio_em_cadeia"
-      ],
       "visual": {
         "cor": "#f9e79f",
         "conjuracao": "faiscas",
@@ -2348,10 +2340,6 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "elemento": "fogo",
-      "fusao": [
-        "redemoinho",
-        "lamina_em_brasa"
-      ],
       "visual": {
         "cor": "#ff7b39",
         "conjuracao": "chamas",
@@ -2392,10 +2380,6 @@
         }
       ],
       "elemento": "trevas",
-      "fusao": [
-        "corrente",
-        "troca_sombria"
-      ],
       "visual": {
         "cor": "#6c3483",
         "impacto": "sombra",

@@ -25,6 +25,7 @@ import { aplicarSecundario, type TabelaDePapeis } from './papeis';
 import { aplicarLeituras } from './leituras';
 import { aplicarFios, type FiosDaUltimate } from './fios-ultimate';
 import type { Fusao, Ultimate, Veiculo } from './ultimates';
+import { definicaoDaFusaoMemo } from './fusao/fundir';
 
 export interface Caminho {
   id: string;
@@ -182,8 +183,9 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   const b = def.base;
   const rank = Math.max(1, Math.min(regras.rankMax, Math.floor(op.rank)));
   const r = regras.ranks[rank - 1] ?? regras.ranks.at(-1) ?? { nivelMinimo: 1, danoPct: 0, efeitoPct: 0 };
-  let multDano = 1 + r.danoPct / 100;
-  let multCura = 1 + r.danoPct / 100;
+  // Marco 50 (21/11/2026, D-196): a base traz o orçamento da fusão (as do catálogo trazem 1).
+  let multDano = b.multDano * (1 + r.danoPct / 100);
+  let multCura = b.multCura * (1 + r.danoPct / 100);
   const escalaEfeito = 1 + r.efeitoPct / 100;
   let custo = 1;
   let recarga = 1;
@@ -356,9 +358,9 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
 /** O contexto que a resolução precisa (conteúdo e regras de rank). */
 export type ContextoHabilidades = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
-/** A definição do catálogo ou, para os ids `g_`, a gerada pela semente. */
+/** A definição do catálogo ou, para os ids `g_`, a gerada pela semente; Marco 50 (D-196): para os `f__`, a da receita. */
 export function definicaoDe(ctx: ContextoHabilidades, id: string): DefinicaoHabilidade | null {
-  return ctx.conteudo.definicoes.get(id) ?? gerarDefinicao(id, ctx);
+  return ctx.conteudo.definicoes.get(id) ?? gerarDefinicao(id, ctx) ?? definicaoDaFusaoMemo(ctx, id, (p) => ctx.conteudo.definicoes.get(p) ?? gerarDefinicao(p, ctx));
 }
 
 const memoria = new WeakMap<object, WeakMap<object, Map<string, Habilidade | null>>>();

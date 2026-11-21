@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.46 · **Data:** 21/11/2026
+**Versão:** 1.47 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.47 (21/11/2026)**: D-196: marco 50, as fusões abertas (o id é a receita), a compreensão, as runas elementais, o material na magia e a aba Alquimia; saem as 4 fusões fixas.
 > - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
 > - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
 > - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
@@ -6270,3 +6271,56 @@ três. Para rever, `?jogo=campanha&slot=0&skills=a,b` põe essas skills na barra
 - Entre personagens, o estado dura metade (`entrePersonagensPct`).
 - A natureza da criatura resiste pelo elemento, como antes (o constructo, 50% de resistência ao psíquico, é ferido
   menos; a mente, fraca, mais).
+
+## D-196 — Marco 50: fusões abertas, compreensão, runas elementais e a aba Alquimia (21/11/2026)
+
+**Problema.** A fusão eram 4 skills fixas em `skills.json`, uma por personagem. Duas eram inalcançáveis, porque uma
+parte tinha saído pelo legado do marco 40, e não dava para fundir de novo. O loot trazia muitas magias que não iam a
+lugar nenhum.
+
+**Decisão.** Qualquer skill comum (ou fusão) se funde com outras, até 3, pela bancada da aba Alquimia. Detalhes em
+[docs/ALQUIMIA.md](ALQUIMIA.md).
+
+- **O id é a receita.** `f__<núcleo>__<forma>[__<eco>][__rr_<el>_<el>][__mm_<material>]` (`combat/fusao/receita.ts`).
+  A ficha guarda só o id, como no `g_` das skills geradas. Cliente, servidor e certificado refazem a mesma definição
+  por `definicaoDe`, sem campo novo na bolsa e sem catálogo no servidor. A fusão de fusão é achatada: (A+B)+C vira
+  A+B+C, e mais de 3 não fecha.
+- **Cada posição dá uma coisa** (`combat/fusao/fundir.ts`):
+  - o **núcleo** dá o papel, a fórmula, o elemento e o visual;
+  - a **forma** dá o desenho do golpe e a entrega, a própria ou a forma natural do núcleo dela em `alquimia.json`;
+  - o **eco** dá os estados, a marca e a permanência.
+  As combinações que o motor de entrega não aceita se acertam pela ordem (o feixe anda em reta, o céu não anda de lado).
+- **Orçamento** (`balance.alquimia`):
+  - o par põe 112% em 2 funções; o trio, 130% em 3, sempre grau S, com custo ×1,35 e recarga ×1,25;
+  - a ressonância (+15%) vale com todos os pares de elementos harmônicos, e cada par instável encarece;
+  - o dano soma a fatia de cada parte que fere, e os estados das partes saem na fatia delas;
+  - as assinaturas (15 misturas com nome) somam poder e trocam a forma.
+  `compilarHabilidade` passou a multiplicar o `multDano`/`multCura` da base (os do catálogo continuam 1).
+- **Compreensão** (`progression/compreensao.ts`):
+  - cada acerto no primeiro alvo de um inimigo de nível igual ou maior que o do personagem − 10 soma 2% numa skill
+    comum e 1% numa fusão;
+  - para entrar numa fórmula, a parte precisa de 100%;
+  - a essência da família acelera em 25%, uma vez por skill;
+  - fica em `bolsa.compreensao`, copiada por `clonarBolsa` e conferida por `conferirExtras`.
+- **O comando `fundir`** (`progression/alquimia.ts`):
+  - confere as partes, a compreensão, as runas e o material, e recusa em combate ou com outro estudo em curso;
+  - consome tudo e começa o estudo da fusão, que nasce no rank da média das partes (`Estudo.rank`);
+  - não se desfaz;
+  - vale no grupo e no Mundo (`comandosDeRede`), não na arena.
+- **Runas elementais.**
+  - Nove itens `runa_<elemento>` caem das criaturas daquele elemento (`balance.alquimia.dropRuna`).
+  - O par leva 1 runa e o trio 2. A runa de um elemento já presente amplifica o estado dele em 25%; a de um elemento
+    novo põe a camada dele a 50%, mesmo além do teto de 3 elementos.
+  - A antiga runa de fusão virou a **runa curinga**, que vale o elemento do núcleo.
+- **Material.** A magia leva um, com o efeito dele em `alquimia.json → materiais` (dano, custo, recarga, duração, salto,
+  perfurar, estados e forma).
+- **As 4 fusões fixas.**
+  - Saem do jogador: `alquimia.json → legado` as troca pela fusão aberta das mesmas partes, no save (migração 31 › 32)
+    e nas fichas que chegam ao servidor.
+  - As definições ficam, sem o campo `fusao`, porque inimigos e visuais as usam.
+  - O diário passa a anotar as assinaturas descobertas.
+- **Na tela** (`ui/alquimia/`):
+  - a bancada tem os orbes das skills, com a compreensão em volta; o círculo vivo dourado, vermelho ou violeta pela
+    mistura; os encaixes de runa e material; a prévia comparada com as partes; e o caderno de fórmulas;
+  - tudo por arrastar ou tocar (pointer events).
+  - As runas de classe saem do `<select>` e viram pedras rúnicas arrastáveis (`ui/seletor-runa.ts`).

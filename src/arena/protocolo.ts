@@ -216,6 +216,12 @@ export function lerComando(v: unknown): Comando | null {
     // Marco 39 (D-151): a simulação confere se a skill tem encaixe e se há vínculo com a runa.
     case 'escolherRuna':
       return id(v.habilidade) && (v.runa === null || ehPonta(v.runa)) ? { t: 'escolherRuna', habilidade: v.habilidade, runa: v.runa } : null;
+    // Marco 50 (D-196): a simulação confere as partes, a compreensão, as runas e o material.
+    case 'fundir': {
+      const ids = (l: unknown, max: number): l is string[] => Array.isArray(l) && l.length <= max && l.every(id);
+      if (!ids(v.partes, 3) || !ids(v.runas, 2) || !(v.material === null || id(v.material))) return null;
+      return { t: 'fundir', partes: [...v.partes], runas: [...v.runas], material: v.material };
+    }
     default:
       return null;
   }

@@ -61,6 +61,7 @@ import { coletarObjetos, expirarDrops } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
 import { escolherRuna } from '../combat/runas';
+import { fundir } from '../progression/alquimia';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
 import { buscarEntidade, limparRecargasVencidas, type EstadoJogo } from './estado';
@@ -236,6 +237,9 @@ function aplicarComandos(
         break;
       case 'escolherRuna':
         escolherRuna(ctx, ator, cmd.habilidade, cmd.runa, estado.tick);
+        break;
+      case 'fundir':
+        fundir(estado, ator, ctx, { partes: cmd.partes, runas: cmd.runas, material: cmd.material }, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

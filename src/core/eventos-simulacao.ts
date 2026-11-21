@@ -97,10 +97,15 @@ export type MotivoHabilidade =
   | 'estudando'
   | 'sem_estudo'
   | 'aceleracoes_esgotadas'
-  /** Marco 18 (camada 7): fusão sem a runa, sem as duas no nível máximo, ou já tendo outra. */
+  /**
+   * Marco 50 (21/11/2026, D-196): a transmutação recusada: as partes não servem (desconhecida, de classe, repetida, a
+   * fusão já existe), falta compreensão, passa de 3 skills, a runa não serve ou não cabe, o material não serve.
+   */
+  | 'fusao_partes'
+  | 'fusao_compreensao'
+  | 'fusao_teto'
   | 'fusao_runa'
-  | 'fusao_niveis'
-  | 'fusao_unica'
+  | 'fusao_material'
   /** Marco 24 (D-094): a tecla não aceita esse tipo (1–2 só de classe, 3–6 só gerais); a geral ainda não foi liberada
    *  por livro; a skill de classe não se aprende nem sobe com ponto (vem do livro e do nível). */
   | 'tecla_errada'
@@ -183,6 +188,8 @@ export type EventoSimulacao =
   | { t: 'passivaDefinida'; tick: number; id: EntidadeId; habilidadeId: string; ligada: boolean }
   // Marco 18 (D-068): o estudo de uma habilidade nova.
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
+  /** Marco 50 (D-196): a transmutação consumiu as partes e a fusão começou a ser estudada. */
+  | { t: 'fusaoCriada'; tick: number; id: EntidadeId; habilidadeId: string; partes: string[] }
   /** Marco 24 (D-094): o livro de uma geral a liberou (aprender custa um ponto). */
   | { t: 'habilidadeLiberada'; tick: number; id: EntidadeId; habilidadeId: string }
   | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }

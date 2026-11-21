@@ -28,6 +28,8 @@ import { consumiveisComAtalho } from '../progression/inventario';
 import { tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
+import { desenharAlquimia } from './alquimia/bancada';
+import { bancadaVazia } from './alquimia/bancada-estado';
 import { desenharDiario } from './mochila-diario';
 import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
@@ -59,7 +61,7 @@ export interface Mochila {
   atualizar: () => void;
 }
 
-type Aba = 'geral' | 'itens' | 'ficha' | 'habilidades' | 'diario';
+type Aba = 'geral' | 'itens' | 'ficha' | 'habilidades' | 'alquimia' | 'diario';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -128,6 +130,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   let dica: DicaAtributo | null = null;
   let assinatura = '';
   const estadoHabilidades: EstadoAbaHabilidades = { escolhendo: null };
+  // Marco 50 (21/11/2026, D-196): o que está na bancada da alquimia (fica entre um redesenho e outro).
+  const bancada = bancadaVazia();
   let rotuloBotao = '';
   let abaDesenhada: Aba = aba;
   const rolagens = new Map<Aba, number[]>();
@@ -466,6 +470,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       ['itens', 'mochila.abaItens'],
       ['ficha', 'mochila.abaFicha'],
       ['habilidades', 'habilidades.aba'],
+      ['alquimia', 'alquimia.aba'],
       ['diario', 'diario.aba'],
     ] as const) {
       const comPontos = (id === 'ficha' && j.bolsa.pontosAtributo > 0) || (id === 'habilidades' && j.bolsa.pontosHabilidade > 0);
@@ -497,6 +502,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     else if (aba === 'itens') { conteudo.classList.add('inventario-paineis'); desenharItens(j, conteudo); }
     else if (aba === 'ficha') desenharFicha(j, conteudo);
     else if (aba === 'habilidades') desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar, o.estado?.().tick ?? 0);
+    else if (aba === 'alquimia') { conteudo.classList.add('conteudo-alquimia'); desenharAlquimia(conteudo, j, ctx, emitir, bancada, desenhar); }
     else desenharDiario(conteudo, j, ctx);
     corpo.append(conteudo);
     const posicoes = rolagens.get(aba) ?? [];

@@ -18,7 +18,7 @@ import type { MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { DT_MS } from '../core/loop';
-import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo, ticksRestantesDoEstudo, velocidadeDoEstudo } from '../progression/habilidades-personagem';
+import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo, ticksRestantesDoEstudo, velocidadeDoEstudo } from '../progression/habilidades-personagem';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
@@ -27,7 +27,8 @@ import { icone } from './icones';
 import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 import { parDaUltimate, ultimateDe } from '../combat/carga-ultimate';
-import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
+import { compreensaoDe, fundivel } from '../progression/alquimia';
+import { ehFusao } from '../combat/fusao/receita';
 import { seletorDeRuna } from './seletor-runa';
 import { listaDeLeituras } from './leituras-skill';
 import { blocoDaHistoria } from './historia-skill';
@@ -164,9 +165,11 @@ export function desenharHabilidades(
     const primeira = desc.firstElementChild;
     if (primeira instanceof HTMLElement) comRuna(primeira, classeDona, 12);
     textos.append(desc);
-    // 08/11/2026: a fusão mostra a receita (as duas partes no nível máximo e a runa de fusão).
+    // Marco 50 (21/11/2026, D-196): a fusão mostra as partes de que nasceu; a skill que pode entrar numa fórmula, a
+    // compreensão (o sigilo que se completa com os acertos).
     const partes = definicaoDe(ctx, id)?.fusao;
     if (partes) textos.append(el('p', 'detalhe-item receita-fusao', receitaDaFusao(ctx, partes)));
+    if (conhecida && fundivel(ctx, id)) textos.append(sigiloDeCompreensao(compreensaoDe(bolsa, id)));
     // Marco 18 (D-068): os marcos de nível (o do 2 e o do 4); os já alcançados aparecem acesos.
     const marcos = definicaoDe(ctx, id)?.marcos ?? {};
     const listaMarcos = Object.entries(marcos);
@@ -260,15 +263,22 @@ export function desenharHabilidades(
   secao(t('habilidades.passivas'), passivas.map((c) => cartao(c.id, c)));
   const novas = (ui.essenciaInvId ? [] : aprendiveisDa(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
   secao(t('habilidades.aprendiveis'), novas.map((id) => cartao(id, null)));
-  // Marco 18 (camada 7): as fusões aparecem quando as duas partes são conhecidas.
-  const fusoes = (ui.essenciaInvId ? [] : fusoesVisiveis(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
-  secao(t('habilidades.fusoes'), fusoes.map((id) => cartao(id, null)));
+  // Marco 50 (D-196): a fusão em estudo aparece aqui; as novas se fazem na aba Alquimia.
+  const estudo = bolsa.estudo;
+  if (estudo && ehFusao(estudo.id) && !ui.essenciaInvId) secao(t('habilidades.fusoes'), [cartao(estudo.id, null)]);
 }
 
-/** 08/11/2026: a receita de uma fusão, com os nomes das partes. */
+/** Marco 50 (D-196): as partes de que a fusão nasceu, na ordem núcleo, forma e eco. */
 function receitaDaFusao(ctx: ContextoSimulacao, partes: readonly string[]): string {
-  const nomes = partes.map((p) => resolverHabilidade(ctx, p)?.nome ?? p).join(' + ');
-  return t('habilidades.receitaFusao', { partes: nomes, nivel: ctx.balance.habilidades.rankMax, runa: ctx.conteudo.itens.get(ID_RUNA_DE_FUSAO)?.nome ?? ID_RUNA_DE_FUSAO });
+  return t('alquimia.receita', { partes: partes.map((p) => resolverHabilidade(ctx, p)?.nome ?? p).join(' + ') });
+}
+
+/** Marco 50 (D-196): o sigilo da compreensão, um anel que se completa (com o número ao lado). */
+function sigiloDeCompreensao(pct: number): HTMLElement {
+  const caixa = el('div', `sigilo-compreensao${pct >= 100 ? ' completo' : ''}`);
+  caixa.style.setProperty('--compreensao', `${String(pct)}%`);
+  caixa.append(el('span', 'anel-compreensao'), el('span', 'detalhe-item', t(pct >= 100 ? 'alquimia.compreendida' : 'alquimia.compreensao', { pct })));
+  return caixa;
 }
 
 /** 08/11/2026: a ultimate de agora no topo da aba, como a carta de uma skill (o texto, o que faz e o par). */
