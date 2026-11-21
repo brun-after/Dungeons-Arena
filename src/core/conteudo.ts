@@ -71,6 +71,7 @@ import { lerAssinados, type ComboAssinado } from '../combat/combos-assinados';
 import { lerMovimentos, type MovimentoDaClasse } from '../combat/movimento-classe';
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
+import { lerMoldes, type Molde } from '../progression/moldes';
 import { lerItens, type Item } from '../progression/itens';
 import { lerPecas, type RegrasDePecas } from '../progression/pecas';
 import { lerSorteioDePecas, type RegrasDoSorteio } from '../progression/sorteio-pecas';
@@ -128,6 +129,8 @@ export interface Conteudo {
   missoes: Catalogo<Missao>;
   origens: Catalogo<OrigemRara>;
   forja: Catalogo<ReceitaDeForja>;
+  /** Marco 51 (21/11/2026, D-197): as receitas da forja como loot (o item `receita_<id>`), partindo de peça pronta. */
+  moldes: Catalogo<Molde>;
   /** Marco 23 (D-092): os 20 temas de fase e as afinidades elementais dos inimigos. */
   temas: Catalogo<Tema>;
   afinidades: CatalogoAfinidades;
@@ -243,7 +246,13 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const nt = lerNaturezas(fontes.naturezas ?? naturezasJson, new Set(p.presets.keys()));
   const nucleos = new Set([...h.definicoes.values()].map((d) => d.nucleo).filter((n): n is string => !!n));
   const aq = lerAlquimia(fontes.alquimia ?? alquimiaJson, nucleos, new Set(it.itens.keys()));
-  const erros = [...aq.erros, ...nt.erros, ...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...lj.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const md = lerMoldes(fontes.forja, new Set(it.itens.keys()), new Set(aq.alquimia.materiais.keys()));
+  // Marco 51 (D-197): a receita cai de criaturas e dimensões que existem.
+  for (const m of md.moldes.values()) {
+    for (const x of m.cai.presets) if (!p.presets.has(x)) md.erros.push(`forja ${m.id}: preset desconhecido "${x}"`);
+    for (const x of m.cai.dimensoes) if (!dm.dimensoes.has(x)) md.erros.push(`forja ${m.id}: dimensão desconhecida "${x}"`);
+  }
+  const erros = [...aq.erros, ...nt.erros, ...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...lj.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros, ...md.erros];
   // Marco 46 (D-189): o propósito e o estilo escolhidos nos itens fixos existem em pecas.json.
   for (const item of it.itens.values()) {
     if (item.proposito !== undefined && !pc.pecas.propositos.has(item.proposito)) erros.push(`item ${item.id}: propósito desconhecido "${item.proposito}"`);
@@ -354,7 +363,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
-      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos, BALANCE_PADRAO.mundo.fusao, pc.pecas),
+      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos, BALANCE_PADRAO.mundo.fusao, pc.pecas, { alquimia: aq.alquimia, regras: BALANCE_PADRAO.engaste }),
       itensBase: ib.bases,
       elementos: el.elementos,
       interacoes: ia.interacoes,
@@ -373,6 +382,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       missoes: mi.missoes,
       origens: og.origens,
       forja: fj.receitas,
+      moldes: md.moldes,
       temas: tm.temas,
       afinidades: af.afinidades,
       armas: ar.armas,

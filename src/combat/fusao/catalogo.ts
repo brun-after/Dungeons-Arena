@@ -6,6 +6,7 @@ import { Leitor } from '../../core/validar';
 import { ELEMENTOS, type Elemento } from '../elementos';
 import { lerEntrega } from '../entrega/tipos';
 import { ehTipoEfeito, type EfeitoCanonico, type DestinoEfeito } from '../registro-efeitos';
+import { lerGanchos, type Gancho } from '../../progression/ganchos';
 
 export type TipoPar = 'harmonico' | 'instavel' | 'neutro';
 
@@ -40,6 +41,12 @@ export interface MaterialNaMagia {
   encaixes: number;
   efeitos: readonly EfeitoCanonico[];
   entrega: Readonly<Record<string, unknown>> | null;
+  /** Marco 51 (21/11/2026, D-197): o elemento e a dimensão de Filo do material (os conjuntos dentro da peça). */
+  elemento: Elemento | null;
+  dimensao: string | null;
+  /** O que o material faz engastado numa arma e numa peça de equipamento. */
+  arma: { texto: string; ganchos: readonly Gancho[] };
+  peca: { texto: string; ganchos: readonly Gancho[] };
 }
 
 export interface CatalogoAlquimia {
@@ -51,6 +58,12 @@ export interface CatalogoAlquimia {
   materiais: ReadonlyMap<string, MaterialNaMagia>;
   /** As fusões fixas antigas e a fusão aberta que as substitui (saves e fichas). */
   legado: ReadonlyMap<string, string>;
+}
+
+function lerDestino(l: Leitor, v: unknown, onde: string): { texto: string; ganchos: Gancho[] } {
+  if (v === undefined) return { texto: '', ganchos: [] };
+  const o = l.objeto(v, onde);
+  return { texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos) };
 }
 
 /** A chave de um par (os dois elementos em ordem alfabética). */
@@ -130,6 +143,11 @@ export function lerAlquimia(json: unknown, nucleos: ReadonlySet<string>, itens: 
       encaixes: numeroOu(l, o, 'encaixes', 0, 0),
       efeitos: lerEfeitos(l, Array.isArray(o.efeitos) ? o.efeitos : [], `material ${id}`),
       entrega: o.entrega === undefined ? null : conferirEntrega(l, o.entrega, `material ${id}`),
+      // O material físico (ferro, presas, couro) não tem elemento.
+      elemento: o.elemento === undefined || o.elemento === null || o.elemento === 'fisico' ? null : l.opcao(o, 'elemento', ELEMENTOS),
+      dimensao: o.dimensao === undefined ? null : l.texto(o, 'dimensao'),
+      arma: lerDestino(l, o.arma, `material ${id}.arma`),
+      peca: lerDestino(l, o.peca, `material ${id}.peca`),
     });
   }
   const legado = new Map<string, string>();

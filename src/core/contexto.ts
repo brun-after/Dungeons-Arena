@@ -7,6 +7,7 @@ import type { FaixaCritico } from '../combat/critico';
 import type { RegrasElementosFerem } from '../combat/regras-elementos-ferem';
 import type { RegrasEntrega } from '../combat/entrega/regras';
 import type { RegrasAlquimia } from '../combat/fusao/regras';
+import type { RegrasDeEngaste } from '../progression/engaste';
 import type { RegrasOrcamento } from '../combat/orcamento';
 import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dificuldade';
 import type { ModoDeJogo, Raridade } from '../modos/modo';
@@ -282,6 +283,8 @@ export interface Balance {
   entrega: RegrasEntrega;
   /** Marco 50 (21/11/2026, D-196): as fusões abertas, a compreensão e as runas elementais (combat/fusao/). */
   alquimia: RegrasAlquimia;
+  /** Marco 51 (21/11/2026, D-197): os engastes e as receitas da forja como loot (progression/engaste.ts, moldes.ts). */
+  engaste: RegrasDeEngaste;
   /** Economia (§2.10, marco 9A): loja, baús e ouro. */
   economia: {
     /** Ouro de quem começa uma campanha. */

@@ -50,6 +50,7 @@ import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarEstilosDespertos } from '../progression/estilos-despertos';
 import { forjar } from '../progression/forja';
+import { engastar, extrair, forjarMolde } from '../progression/moldes';
 import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
 import { processarEncarnacoes } from '../combat/encarnacao';
@@ -240,6 +241,15 @@ function aplicarComandos(
         break;
       case 'fundir':
         fundir(estado, ator, ctx, { partes: cmd.partes, runas: cmd.runas, material: cmd.material }, saida);
+        break;
+      case 'forjarMolde':
+        forjarMolde(estado, ctx, ator, cmd.receita, cmd.base, cmd.segunda, saida);
+        break;
+      case 'engastar':
+        engastar(estado, ctx, ator, cmd.peca, cmd.material, saida);
+        break;
+      case 'extrair':
+        extrair(estado, ctx, ator, cmd.peca, cmd.indice, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

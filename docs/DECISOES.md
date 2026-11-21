@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.47 · **Data:** 21/11/2026
+**Versão:** 1.48 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.48 (21/11/2026)**: D-197: marco 51, a forja por receita (o item `receita_<id>` cai das criaturas e parte de peça pronta), os engastes de 1 a 3 no id `en_`, os materiais na arma e no equipamento, engastar e extrair, e a mesa da forja com a cena.
 > - **1.47 (21/11/2026)**: D-196: marco 50, as fusões abertas (o id é a receita), a compreensão, as runas elementais, o material na magia e a aba Alquimia; saem as 4 fusões fixas.
 > - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
 > - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
@@ -6324,3 +6325,50 @@ lugar nenhum.
     mistura; os encaixes de runa e material; a prévia comparada com as partes; e o caderno de fórmulas;
   - tudo por arrastar ou tocar (pointer events).
   - As runas de classe saem do `<select>` e viram pedras rúnicas arrastáveis (`ui/seletor-runa.ts`).
+
+## D-197 — Marco 51: a forja por receita, os engastes de 1 a 3 e a mesa da forja (21/11/2026)
+
+**Contexto.** A forja do ferreiro era uma lista de receitas com um botão. Os materiais alquímicos só serviam à magia
+(D-196), e as armas e o equipamento não tinham onde recebê-los. O pedido: receitas como loot, sempre partindo de uma
+peça pronta, materiais de 1 a 3 por peça e uma forja que se veja trabalhar.
+
+**Decisão.**
+- **O engaste no id** (`progression/engaste.ts`):
+  - a peça engastada é `en_<m1>.<m2>.<m3>__<id da peça>`, resolvida sob demanda pelo `CatalogoDeItens`, como o `fu_`;
+  - circula por mochila, banco, loja, troca, mercado e certificado sem campo novo;
+  - a fusão elemental fica por dentro e os engastes por fora (`en_…__fu_…__peça`), e uma peça engastada não funde
+    mais (`fundivel`).
+- **Quantos engastes**: o menor entre a raridade (comum e incomum 1, rara e épica 2, lendária e última 3) e o teto do
+  nível (1 até o 19, 2 do 20 ao 49, 3 do 50 em diante). Números em `balance.engaste`.
+- **O material na arma e na peça**: cada um dos 52 materiais de `alquimia.json` ganhou `elemento`, `dimensao`, `arma` e
+  `peca` (texto e ganchos). Na arma, o efeito vem ao atacar ou ao acertar; no equipamento, é passivo ou ao levar golpe.
+  São 14 materiais novos: 13 com uma ou duas por dimensão de Filo, e um sem dimensão.
+- **Os conjuntos dentro da peça**:
+  - 2 ou 3 do mesmo elemento: os efeitos sobem 25% ou 40%;
+  - 2 ou 3 da mesma dimensão: sobem 15% ou 30%, e com 3 vem o eco da fenda (o estado do elemento da dimensão em
+    volta, às vezes);
+  - um par instável pela matriz da alquimia traz a reação do par, mas os efeitos caem 15%.
+  Como na fusão de skills, dois engastes bem escolhidos competem com três.
+- **As receitas como loot** (`progression/moldes.ts`, `forja.json → moldes`):
+  - as 15 receitas do Grimório viram o item `receita_<id>` (tipo chave), que cai das criaturas que a guardam (preset ou
+    dimensão) ou dos chefes, com o RNG próprio da instância (`balance.engaste.dropReceitaPct`);
+  - toda receita pede uma peça base (o slot, a família de arma e a raridade mínima), às vezes uma segunda peça, os
+    materiais, a runa elemental e ouro;
+  - o resultado é a própria base transformada: a Última forma (ascender), o elemento (`fu_`) e os engastes já postos,
+    sem passar do teto da peça (o que a base já tinha fica);
+  - a criatura da dimensão também deixa um material alquímico da dimensão dela (`dropMaterialPct`).
+- **Engastar e extrair** no ferreiro, sem receita: custam ouro pelo nível da peça, e o material extraído volta 35% das
+  vezes.
+- **Os comandos** `forjarMolde`, `engastar` e `extrair` valem só com a forja aberta (o ferreiro do Mundo ou a loja da
+  campanha). Entram em `comandosDeRede` da campanha, do grupo e do Mundo, e no protocolo.
+- **Na tela** (`ui/forja/`), a mesa da forja no ferreiro:
+  - a cena em canvas, com a fornalha que respira, a bigorna e o círculo rúnico, corre em fases: aquecer (na cor do
+    elemento), martelar (faíscas; tocar acrescenta faíscas), gravar (as runas acendem uma a uma) e temperar (vapor);
+  - o comando sai só no fim, e o resultado vem do núcleo;
+  - a receita aberta mostra os espaços; peças e materiais vão por arrastar ou tocar;
+  - a bancada de engastes mostra os cheios (tocar extrai) e os livres;
+  - com `prefers-reduced-motion`, as fases passam sem animação.
+
+**Mantido.** As receitas antigas da forja (`forja.json → receitas`: itens, ascender, fusão elemental com troféu de
+chefe e as do alquimista) continuam, abaixo da mesa. Elas não partem de peça pronta, e trocá-las mexeria em saves e
+missões sem ganho de jogo. A troca fica para quando houver substitutas para cada uma.
