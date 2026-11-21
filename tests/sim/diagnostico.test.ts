@@ -179,8 +179,9 @@ describe('integridade da execução completa', () => {
     // aventureiro do nível 1 no Difícil, semente 5, cai com 2 abates e nenhuma onda concluída (14/11/2026: com o
     // companheiro seguindo a skill, a semente 3 virou vitória). Marco 45 (16/11/2026, D-182): com os traços das
     // criaturas de Filo, o caso é o do Normal, semente 5 (2 abates, nenhuma onda concluída). D-188 (19/11/2026): com o
-    // fôlego das feras, na semente 4.
-    const base = simularDiagnostico({ ...configuracao, cenario: 'pressao', classe: 'aventureiro', nivel: 1, dificuldade: 'normal', semente: 4, intervencao: 'sem_pocoes' });
+    // fôlego das feras, na semente 4. Marco 48 (20/11/2026, D-193): com os elementos ferindo (o estado sai do golpe), o
+    // caso é o do arqueiro do nível 1, semente 1 (2 abates, nenhuma onda concluída).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'pressao', classe: 'arqueiro', nivel: 1, dificuldade: 'normal', semente: 1, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
     expect(base.abates).toBe(2);
     expect(base.ondasConcluidas).toBe(0);

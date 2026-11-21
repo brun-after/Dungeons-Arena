@@ -53,7 +53,8 @@ describe('ritmo médio (balance.metas)', () => {
   it('PvP no Livre: de 6 a 10 s para cair', () => {
     for (const classe of CLASSES) {
       const t = mediana(SEMENTES_PVP.map((s) => pvpLivre(classe, s, metas.pvpLivre.nivel).tempoS));
-      expect(t, classe).toBeGreaterThanOrEqual(metas.pvpLivre.tempoMinS - 0.5);
+      // Marco 48 (20/11/2026): o piso por classe, como no relatório (`tempoMinSPorClasse`, o Aventureiro da D-188).
+      expect(t, classe).toBeGreaterThanOrEqual((metas.pvpLivre.tempoMinSPorClasse?.[classe] ?? metas.pvpLivre.tempoMinS) - 0.5);
       expect(t, classe).toBeLessThanOrEqual(metas.pvpLivre.tempoMaxS);
     }
   });

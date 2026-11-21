@@ -7,10 +7,12 @@
 
 import type { Elemento } from '../combat/elementos';
 import type { Catalogo } from '../combat/habilidades';
+import { elementoDoEstado } from '../combat/estado-do-golpe';
+import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
-import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
+import { REGISTRO_EFEITOS, type TipoEfeito } from '../combat/registro-efeitos';
 import { DT_MS } from '../core/loop';
 import { t, type ChaveTexto } from '../i18n';
 import { duracaoLegivel } from './tempo';
@@ -40,6 +42,8 @@ export interface OpcoesFeedback {
   dado?: DadoD20;
   /** Marco 23 (D-092): o elemento oposto (a fraqueza) de cada afinidade, para a dica. */
   opostoDe?: (e: Elemento) => Elemento | undefined;
+  /** Marco 48 (D-193): a cor do número de um estado (a do elemento dele); null fica na cor padrão. */
+  corDoEstado?: (tipo: TipoEfeito) => number | null;
 }
 
 /** Intervalo mínimo entre dois avisos do mesmo efeito (marco 14). */
@@ -193,7 +197,9 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('efeitoResultado', (ev) => {
     const alvo = posicao(ev.alvoId);
     if (!alvo) return;
-    if (ev.dano > 0) numeros.mostrar(String(ev.dano), 'dano', alvo.x, alvo.y, o.agora());
+    // Marco 48 (20/11/2026, D-193): o dano do elemento além do golpe sai como reação; o tique, na cor do elemento.
+    if (ev.dano > 0 && ev.tipo === 'dano_direto') numeros.mostrar(String(ev.dano), 'reacao', alvo.x, alvo.y, o.agora(), ESCALONAMENTO_MS);
+    else if (ev.dano > 0) numeros.mostrar(String(ev.dano), 'estado', alvo.x, alvo.y, o.agora(), 0, o.corDoEstado?.(ev.tipo) ?? undefined);
     if (ev.cura > 0) numeros.mostrar(`+${ev.cura}`, 'cura', alvo.x, alvo.y, o.agora());
     if (ev.mana > 0) numeros.mostrar(`+${ev.mana}`, 'recurso', alvo.x, alvo.y, o.agora(), ESCALONAMENTO_MS);
   });
@@ -375,4 +381,21 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   // Registra os nomes iniciais.
   for (const e of estado().entidades) nome(e.id);
   return { impactos: () => impactos, conferirBasico: avisarBasico };
+}
+
+/** Marco 48 (20/11/2026, D-193): o sangramento não tem elemento, mas tem cor. */
+const COR_SANGRANDO = 0xe0524a;
+
+/**
+ * Marco 48 (20/11/2026, D-193): a cor do número do tique, a do elemento do estado (data/elementos.json), clareada
+ * para ler sobre o chão escuro (as trevas, roxo fundo, sumiam).
+ */
+export function corDoNumeroDoEstado(ctx: Pick<ContextoSimulacao, 'conteudo'>, tipo: TipoEfeito): number | null {
+  if (tipo === 'sangrando') return COR_SANGRANDO;
+  const el = elementoDoEstado(ctx, tipo);
+  const def = el ? ctx.conteudo.elementos.get(el) : undefined;
+  if (!def) return null;
+  const c = Number.parseInt(def.cor.slice(1), 16);
+  const clarear = (v: number) => Math.round(v + (255 - v) * 0.3);
+  return (clarear((c >> 16) & 0xff) << 16) | (clarear((c >> 8) & 0xff) << 8) | clarear(c & 0xff);
 }

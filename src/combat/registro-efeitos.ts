@@ -341,7 +341,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
 
   queimando: negativo('fogo', '#ff7b39', ['valor'], { duracaoMs: 3000, valor: 3, pct: 0 }, { periodico: 'dano' }),
   // Marco 42 (D-176): o vento arrasta: menos velocidade por pouco tempo (o empurrão vem da skill).
-  arrastado: negativo('redemoinho', '#cfe8f2', ['pct'], { duracaoMs: 1500, valor: 0, pct: 25 }, { lentidao: true }),
+  // Marco 48 (20/11/2026, D-193): e corta: o `valor` (uma fração do golpe) fere a cada tique.
+  arrastado: negativo('redemoinho', '#cfe8f2', ['valor', 'pct'], { duracaoMs: 1500, valor: 0, pct: 25 }, { lentidao: true, periodico: 'dano' }),
   resfriado: negativo('gelo', '#74b9ff', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { lentidao: true }),
   congelado: negativo('gelo', '#a0d8ef', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas' }),
   eletrizado: negativo('raio', '#f7dc6f', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),

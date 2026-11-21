@@ -4,6 +4,7 @@
 import balanceJson from '../data/balance.json';
 import type { RegrasHabilidades } from '../combat/compilar-habilidade';
 import type { FaixaCritico } from '../combat/critico';
+import type { RegrasElementosFerem } from '../combat/regras-elementos-ferem';
 import type { RegrasOrcamento } from '../combat/orcamento';
 import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dificuldade';
 import type { ModoDeJogo, Raridade } from '../modos/modo';
@@ -273,6 +274,8 @@ export interface Balance {
     /** D-067: imunidade do refúgio ao abrir a mochila ou a loja. */
     refugioMs: number;
   };
+  /** Marco 48 (20/11/2026, D-193): o que os elementos ferem (combat/elementos-ferem.ts). */
+  elementosFerem: RegrasElementosFerem;
   /** Economia (§2.10, marco 9A): loja, baús e ouro. */
   economia: {
     /** Ouro de quem começa uma campanha. */

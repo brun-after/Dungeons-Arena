@@ -10,6 +10,7 @@ import { normalizarEfeito } from './normalizar-efeito';
 import { PRESETS_VISUAIS, type PresetVisual } from './habilidades';
 import type { EfeitoCanonico, TipoEfeito } from './registro-efeitos';
 import { resistenciaDaAfinidade } from './afinidade';
+import { resistenciaDaNatureza } from './naturezas';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { resistenciaPeloVinculo, type PontaElemental } from '../progression/vinculo';
 
@@ -85,13 +86,16 @@ export function resistenciaPct(ctx: ContextoSimulacao, alvo: Entidade, elemento:
   // Marco 39 (12/11/2026, D-150): o vínculo de quem tem ficha resiste (ou é fraco) a cada elemento, o Físico incluído
   // (o golpe sem elemento); fora do golpe (sem `tick`), não conta.
   const doVinculo = tick === undefined ? 0 : resistenciaPeloVinculo(ctx, alvo, elemento, tick);
-  if (!elemento) return Math.min(90, doVinculo);
+  // Marco 48 (20/11/2026, D-193): a natureza da criatura soma resistências e fraquezas (o espírito resiste ao golpe
+  // sem elemento; o morto-vivo arde no sagrado).
+  const daNatureza = resistenciaDaNatureza(ctx, alvo, elemento);
+  if (!elemento) return Math.min(90, doVinculo + daNatureza);
   const daAfinidade = resistenciaDaAfinidade(ctx, alvo, elemento);
   if (daAfinidade !== null) return daAfinidade;
   const doPreset = ctx.conteudo.presets.get(alvo.preset)?.resistencias[elemento] ?? 0;
   // Marco 18 (D-069): o equipamento resiste a todo elemento ou a um só.
   const doEquipamento = alvo.bolsa ? passivosDe(ctx, alvo).resistencias.filter((r) => r.elemento === null || r.elemento === elemento).reduce((s, r) => s + r.pct, 0) : 0;
-  return Math.min(90, doPreset + doEquipamento + doVinculo);
+  return Math.max(-100, Math.min(90, doPreset + doEquipamento + doVinculo + daNatureza));
 }
 
 export interface Sinergia {

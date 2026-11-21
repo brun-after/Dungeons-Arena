@@ -13,6 +13,7 @@ import { vivo, type Entidade } from '../entidade';
 import { aoCairNaArena } from './chefes';
 import { presetDe, reacaoAgora } from './terreno';
 import { criaturaDe, hostis } from './tracos';
+import { naturezaImpedeRemontar } from '../../combat/elementos-ferem';
 
 const PRESA_MS = 3_600_000;
 
@@ -21,7 +22,8 @@ export function antesDeCair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   if (e.controlador !== 'ia') return false;
   const t = presetDe(ctx, e)?.tracos.find((x) => x.tipo === 'remontar');
   const c = criaturaDe(e);
-  if (!t || c.remontou || c.golpeFinal?.area || c.golpeFinal?.sagrado || reacaoAgora(estado, ctx, e).marcas.includes('semRemontar')) return false;
+  // Marco 48 (20/11/2026, D-193): o morto-vivo consagrado (natureza) cai de vez.
+  if (!t || c.remontou || c.golpeFinal?.area || c.golpeFinal?.sagrado || naturezaImpedeRemontar(ctx, e, estado.tick) || reacaoAgora(estado, ctx, e).marcas.includes('semRemontar')) return false;
   c.remontou = true;
   c.remontaTick = estado.tick + ticksDe(t.ms);
   e.hp = 1;

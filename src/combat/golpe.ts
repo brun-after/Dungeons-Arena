@@ -28,6 +28,8 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
 import { absorverEscudo, aplicarEfeito, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido, REGISTRO_EFEITOS } from './efeitos';
+import { ferirPeloElemento } from './elementos-ferem';
+import { entreJogadores, escalarEstado, prepararDaReacao } from './estado-do-golpe';
 import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 import { chebyshev } from './geometria';
 import { podeAjudar, podeFerir } from '../modos/relacao';
@@ -227,6 +229,10 @@ export function aplicarImpacto(
   if (piso > (fonte.d20Minimo ?? 0)) fonte = { ...fonte, d20Minimo: piso };
   // Marco 18: os estados do alvo antes do golpe (os ganchos "se o alvo estava…" olham estes).
   const estadosAntes = alvo.efeitos.filter((f) => f.ateTick > tick).map((f) => f.tipo);
+  // Marco 48 (20/11/2026, D-193): quem marcou o alvo (o marcado sai no golpe; o dreno das trevas vai para ele) e o
+  // golpe antes da resistência do alvo (o que os estados guardam).
+  const marcadorId = alvo.efeitos.find((f) => f.tipo === 'marcado' && f.ateTick > tick)?.origemId ?? null;
+  let golpeBruto = 0;
 
   let absorveu = false;
   // Marco 24 (D-097): pelas costas pelo olhar do alvo; a marca vai no evento para o número na tela.
@@ -235,7 +241,9 @@ export function aplicarImpacto(
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
-    const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
+    // Marco 48 (D-193): entre personagens, a reação soma só parte do bônus (o PvP segue no ritmo de metas.pvpLivre).
+    const reacaoEntrePersonagens = entreJogadores(estado, atacante, alvo) ? ctx.balance.elementosFerem.entrePersonagensReacaoPct / 100 : 1;
+    const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia * reacaoEntrePersonagens;
     // Marco 23 (D-092): o inimigo afim absorve o próprio elemento — o golpe rola igual, mas cura em vez de ferir.
     // Marco 39 (D-150): a penetração do especialista no próprio elemento fura parte da absorção.
     const pen = penetracaoPct(ctx, atacante, hab.elemento, tick);
@@ -256,6 +264,9 @@ export function aplicarImpacto(
       fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) * multiplicadorDasPecas(ctx, atacante, hab) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
+    // Entre personagens o estado guarda menos do golpe (o duelo não vira uma troca de queimaduras).
+    const entrePersonagens = entreJogadores(estado, atacante, alvo) ? ctx.balance.elementosFerem.entrePersonagensPct / 100 : 1;
+    golpeBruto = recebido > 0 && !r.falha ? (r.dano / recebido) * entrePersonagens : 0;
     absorveu = absorve > 0 && !r.falha;
     if (absorveu) {
       const antes = alvo.hp;
@@ -374,7 +385,9 @@ export function aplicarImpacto(
     if (f.tipo === 'acerto_carregado' && f.ateTick > tick && f.interno && dano > 0) aplicarEfeito(estado, ctx, alvo, f.interno, origem, null, saida);
   }
   // Sinergias (marco 14): as reações do golpe (combat/reacoes.ts), antes dos efeitos da habilidade.
-  reagir(estado, ctx, { alvo, conjurador, fonte, origem, danoEfetivo: Math.min(hpAntes, dano), comPotencia }, sinergias, saida);
+  // Marco 48 (D-193): o que a reação aplica sai do golpe (o dano direto e os estados), não de números fixos.
+  const daReacao = (ef: EfeitoCanonico, potencia: number) => prepararDaReacao(ctx, comPotencia(ef, potencia), golpeBruto);
+  reagir(estado, ctx, { alvo, conjurador, fonte, origem, danoEfetivo: Math.min(hpAntes, dano), comPotencia: daReacao }, sinergias, saida);
   // Marco 18: o marcado sai no golpe; o consagrado cura quem acerta.
   if (dano > 0) {
     const consagrado = alvo.efeitos.find((f) => f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].curaQuemAcerta);
@@ -400,7 +413,8 @@ export function aplicarImpacto(
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
     // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).
     const final = efeitoDaSinergia(ctx, conjurador, hab, reforco > 1 ? { ...efeito, valor: Math.round(efeito.valor * reforco) } : efeito);
-    const pronto = estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia)));
+    // Marco 48 (D-193): o estado elemental guarda uma fração deste golpe.
+    const pronto = escalarEstado(ctx, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia))), golpeBruto);
     // Marco 40 (12/11/2026, D-157): `aliados` cai em cada aliado em volta de quem conjurou (pela relação, nunca pelo tipo).
     if (efeito.em === 'aliados') {
       for (const a of aliadosEmVolta(estado, ctx, conjurador ?? null)) aplicarEfeito(estado, ctx, a, { ...pronto, em: 'alvo' }, origem, mira, saida);
@@ -410,6 +424,10 @@ export function aplicarImpacto(
     if (sobre) aplicarEfeito(estado, ctx, sobre, pronto, origem, mira, saida);
   }
   aposEfeitosDaCriatura(estado, ctx, alvo, atacante, hab);
+  // Marco 48 (D-193): o que cada elemento faz com o estado que já estava no alvo, e a natureza dele reagindo.
+  if (hab.formulaDano !== null && conjurador && conjurador !== alvo) {
+    ferirPeloElemento(estado, ctx, { alvo, conjurador, hab, golpe: golpeBruto, dano, critico, estadosAntes, marcadorId, origem, entrePersonagens: entreJogadores(estado, conjurador, alvo) }, saida);
+  }
   // Marco 40 (D-157): a forma de controle passa os estados de controle ao vizinho hostil mais perto do alvo.
   if (hab.controleVizinho && conjurador && conjurador !== alvo) controleNoVizinho(estado, ctx, conjurador, alvo, hab, origem, mira, saida);
   if (conjurador) {
