@@ -18,7 +18,8 @@ import { habilidadeDoAtor } from '../combat/perfil';
 import type { PerfilIa } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
 import { passavel } from '../world/fase';
-import { celulaLivre } from '../world/movimento';
+import { celulaDeParada } from '../world/movimento';
+import { temTronco } from '../world/troncos';
 import { areaAfimMaisProxima, emPerigo, mapaDePerigo, sorteioPct } from '../world/perigos';
 import { vivo, type Entidade, type EstadoIa } from './entidade';
 
@@ -56,8 +57,8 @@ export function fugaDoAviso(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
     for (let y = minha.y - 2; y <= minha.y + 2; y++) {
       for (let x = minha.x - 2; x <= minha.x + 2; x++) {
         const passos = Math.abs(x - minha.x) + Math.abs(y - minha.y);
-        if (passos === 0 || passos > 2 || dentro(x, y) || !celulaLivre(e, x, y, estado, ctx) || emPerigo(estado, ctx, e, x, y)) continue;
-        if (passos === 2 && !VIZINHAS.slice(0, 4).some(([dx, dy]) => Math.abs(x - minha.x - dx) + Math.abs(y - minha.y - dy) === 1 && celulaLivre(e, minha.x + dx, minha.y + dy, estado, ctx))) continue;
+        if (passos === 0 || passos > 2 || dentro(x, y) || !celulaDeParada(e, x, y, estado, ctx) || emPerigo(estado, ctx, e, x, y)) continue;
+        if (passos === 2 && !VIZINHAS.slice(0, 4).some(([dx, dy]) => Math.abs(x - minha.x - dx) + Math.abs(y - minha.y - dy) === 1 && celulaDeParada(e, minha.x + dx, minha.y + dy, estado, ctx))) continue;
         const d = (x - acao.alvoX) ** 2 + (y - acao.alvoY) ** 2;
         if (!melhor || passos < melhor.passos || (passos === melhor.passos && d > melhor.d)) melhor = { c: { x, y }, passos, d };
       }
@@ -73,7 +74,7 @@ export function fugaDoAviso(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
  */
 export function celulaDeCerco(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, alvo: Entidade): Celula | null {
   const centro = celulaOcupada(alvo);
-  const livres = VIZINHAS.map(([dx, dy]) => ({ x: centro.x + dx, y: centro.y + dy })).filter((c) => passavel(ctx.fase, c.x, c.y));
+  const livres = VIZINHAS.map(([dx, dy]) => ({ x: centro.x + dx, y: centro.y + dy })).filter((c) => passavel(ctx.fase, c.x, c.y) && !temTronco(ctx.fase, c.x, c.y));
   const perseguidores = estado.entidades
     .filter((o) => o.ia?.modo === 'perseguindo' && o.ia.alvoId === alvo.id && vivo(o) && o.arquetipo !== 'atirador' && o.arquetipo !== 'controlador')
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

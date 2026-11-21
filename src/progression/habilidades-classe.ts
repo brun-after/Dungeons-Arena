@@ -43,14 +43,40 @@ export function fixarSkillDaClasse(ctx: Ctx, bolsa: Bolsa): void {
  */
 function tirarSkillsQueSairam(ctx: Ctx, bolsa: Bolsa): void {
   const sairam = ctx.conteudo.skillsQueSairam;
-  if (!bolsa.barra.some((id) => id !== null && sairam.has(id)) && !bolsa.conhecidas.some((c) => sairam.has(c.id))) return;
-  bolsa.barra = bolsa.barra.map((id) => (id !== null && sairam.has(id) ? null : id));
-  bolsa.conhecidas = bolsa.conhecidas.filter((c) => !sairam.has(c.id));
+  if (bolsa.barra.some((id) => id !== null && sairam.has(id)) || bolsa.conhecidas.some((c) => sairam.has(c.id))) {
+    bolsa.barra = bolsa.barra.map((id) => (id !== null && sairam.has(id) ? null : id));
+    bolsa.conhecidas = bolsa.conhecidas.filter((c) => !sairam.has(c.id));
+    preencherTeclasDeClasse(ctx, bolsa);
+  }
+  completarSkillsDeClasse(ctx, bolsa);
+}
+
+/** Põe uma skill de classe conhecida e fora da barra em cada tecla de classe vazia. */
+function preencherTeclasDeClasse(ctx: Ctx, bolsa: Bolsa): void {
   for (let slot = 0; slot < SLOTS_CLASSE; slot++) {
     if (bolsa.barra[slot] !== null && bolsa.barra[slot] !== undefined) continue;
     const livre = bolsa.conhecidas.find((c) => ehDaClasse(ctx, bolsa, c.id) && !bolsa.barra.includes(c.id) && !definicaoDe(ctx, c.id)?.base.passiva);
     if (livre) bolsa.barra[slot] = livre.id;
   }
+}
+
+/**
+ * 20/11/2026 (D-188, adendo): toda classe conhece ao menos 2 skills de classe. Personagens que perderam skills no ajuste
+ * do kit ficaram com 1 (ou 0): as iniciais que faltam entram nas conhecidas no rank 1 (o nível sobe o rank depois) e vão
+ * para as teclas de classe vazias. Só age abaixo de 2 conhecidas: quem tem 2 e tirou uma da barra de propósito
+ * (`equiparHabilidade` com `id: null`) fica como está. Idempotente.
+ */
+function completarSkillsDeClasse(ctx: Ctx, bolsa: Bolsa): void {
+  if (bolsa.barra.length < SLOTS_CLASSE) return;
+  const classe = ctx.conteudo.classes.get(bolsa.classeId);
+  if (!classe) return;
+  const deClasse = () => bolsa.conhecidas.filter((c) => ehDaClasse(ctx, bolsa, c.id) && !definicaoDe(ctx, c.id)?.base.passiva).length;
+  if (deClasse() >= SLOTS_CLASSE) return;
+  for (const id of classe.iniciais) {
+    if (deClasse() >= SLOTS_CLASSE) break;
+    if (!bolsa.conhecidas.some((c) => c.id === id)) bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
+  }
+  preencherTeclasDeClasse(ctx, bolsa);
 }
 
 /** Por que a tecla não aceita a skill (null = aceita): 1–2 só de classe, 3–6 só ativas gerais (ou fusões). */
