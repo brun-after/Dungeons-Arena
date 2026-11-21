@@ -107,6 +107,8 @@ const CASA_ABANDONADA = { largura: 6, altura: 5 } as const;
 const QUADRANTES = [[1, 1], [-1, 1], [-1, -1], [1, -1]] as const;
 const CASAS_NA_VILA = 12;
 /** Desloca a semente das casas (o outro gerador de números). */
+/** O raio plano em volta da chegada de cada passagem (cobre a boca do corredor). */
+const BOCA_DA_PASSAGEM = 6;
 const SEMENTE_CASAS = 7919;
 /** 06/11/2026 (D-135): o RNG das armadilhas do exterior (separado: mudar a densidade não mexe no resto). */
 const SEMENTE_ARMADILHAS = 15_013;
@@ -402,10 +404,12 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     reservadas: [...spawns, ...entradas, ...pontos.flatMap((p) => (p.tipo === 'estrutura' ? [p.frente, p.porta] : p.tipo === 'npc' ? [p] : []))],
   });
   // Marco 42 (15/11/2026, D-176): o relevo (RNG próprio), antes do alcance: os monstros e a coleta só onde se anda.
+  // 20/11/2026 (D-191): a boca de cada passagem fica na altura da passagem (0) e a saia de encosta sobe dali até o
+  // chão da região. Antes a passagem descia a 0 e a região seguia na altura dela: um muro de 3 a 8 níveis na saída.
   const naPassagemDaRegiao = (c: Celula) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y);
   const alturas = gerarRelevo({
     n, base: geo.alturas, em: (x, y) => g.em(x, y),
-    planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 }))],
+    planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 })), ...entradas.map((c) => ({ x: c.x, y: c.y, raio: BOCA_DA_PASSAGEM, nivel: 0 }))],
     retangulos: [...telhados, ...regiao.estruturas], passagem: naPassagemDaRegiao, origens: spawns, encostaMax: BALANCE_PADRAO.relevo.encostaMax,
     encostas: regiao.estruturas.filter((e) => !e.escondida && (e.tipo === 'caverna' || e.tipo === 'mina')), alturaDoMorro: BALANCE_PADRAO.relevo.muroAltoMax - 1,
   });

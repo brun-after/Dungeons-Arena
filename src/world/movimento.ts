@@ -1,5 +1,5 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
-import { troncoBarra } from './troncos';
+import { renteAoTronco, temTronco, troncoBarra } from './troncos';
 import { alturaEm, barraPorAltura, fatorDeSubida } from './relevo';
 import { apagarLuz } from '../combat/luz-propria';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
@@ -15,6 +15,7 @@ import { passoDoCompanheiro } from '../combat/pets-estilos';
 import { passoDoPet, petDoCompanheiro, pressaDaCaca } from '../combat/pets';
 import { atravessaCorpos, emMontaria, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
 import { andarCabeNoDeslize } from '../combat/deslize';
+import { andarNaTravessia, iniciarTravessia } from './escalar';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
 // - a direção mantida (`mover`) é um vetor quantizado em ±1000 (o teclado e a IA mandam um dos 8 octantes);
@@ -185,6 +186,14 @@ export function celulaLivre(e: Entidade, x: number, y: number, estado: EstadoJog
   return !muralhaEm(estado, x, y) && (ehDragao(e.preset)?corpoCabe(ctx.fase,x,y,raioNoTerreno(e,ctx)):passavel(ctx.fase,x,y)) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
+/**
+ * 20/11/2026: a célula livre onde o corpo pode parar no centro (a patrulha, o recuo, o flanco): sem o tronco de uma
+ * árvore. Mirar o centro da árvore fazia o monstro girar em volta dela até alguém bater nele.
+ */
+export function celulaDeParada(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
+  return celulaLivre(e, x, y, estado, ctx) && (noAr(e) || !temTronco(ctx.fase, x, y));
+}
+
 export function moverEntidades(
   estado: EstadoJogo,
   ctx: ContextoSimulacao,
@@ -296,7 +305,10 @@ function ajustarImpulso(e: Entidade, andou: boolean, freio: number, dtMs: number
 
 /** Integra o movimento de uma única entidade por um tick (usado também pela predição do cliente). */
 export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos) {
-  if (e.morto) return;
+  if (e.morto) {
+    if (e.escalada) e.escalada = null;
+    return;
+  }
   sincronizarPosicao(e);
   // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060); e perde o impulso (D-132).
   const arranque = temArranque(e);
@@ -310,6 +322,14 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   if (noSalto(e)) {
     andarNoSalto(e, estado, ctx, saida, dtMs);
     return;
+  }
+  // 20/11/2026 (D-191): escalando o muro ou no pulo curto da queda, o corpo segue a travessia (quem levanta voo sai dela).
+  if (e.escalada) {
+    if (noAr(e)) e.escalada = null;
+    else {
+      if (andarNaTravessia(e, estado, ctx)) trocarDeCelula(e, estado, ctx, saida);
+      return;
+    }
   }
   if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) {
     if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
@@ -396,6 +416,8 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
       if (proximo) e.waypoints.push(proximo);
     }
     const wp = e.waypoints[0];
+    // 20/11/2026: o ponto dentro do tronco (a patrulha, o recuo, o alvo encostado na árvore) vai para rente a ele.
+    if (wp && !noAr(e)) renteAoTronco(ctx.fase, { x: e.px, y: e.py }, wp, raioNoTerreno(e, ctx), ctx.balance.movimento.raioTronco);
     let ux: number;
     let uy: number;
     let trecho: number;
@@ -425,10 +447,19 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
     if (olhar) e.olhando = olhar;
     // Marco 42 (15/11/2026, D-176): subir a encosta custa velocidade (a montaria sente menos).
     const subida = noAr(e) ? 1 : fatorDeSubida(ctx.fase, ctx.balance.relevo, { x: e.px, y: e.py }, { x: e.px + ux, y: e.py + uy }, emMontaria(e));
-    const andou = andar(e, ux * trecho * subida, uy * trecho * subida, estado, ctx, saida, grade);
+    const antes = wp ? Math.sqrt((wp.x - e.px) ** 2 + (wp.y - e.py) ** 2) : 0;
+    const andou = andar(e, ux * trecho * subida, uy * trecho * subida, estado, ctx, saida, grade, vel);
     e.relogioAndar += (1000 * andou) / vel;
     total += andou;
     restante -= trecho;
+    // D-191: o muro da frente virou escalada (ou a queda, pulo): o caminho fica, e o resto do tick é dela.
+    if (e.escalada) return total;
+    // 20/11/2026: andou sem chegar mais perto de um ponto já colado no corpo (escorregou em volta do que barra): o
+    // ponto não se alcança daqui; desiste dele em vez de girar em volta. Contra outro corpo, segue esperando.
+    if (wp && andou >= EPS && semProgresso(e, wp, antes, andou, ctx) &&!bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) {
+      e.waypoints.shift();
+      return total;
+    }
     if (andou < EPS) {
       // Preso: atrás de quem bloqueia, espera mantendo o caminho; contra a parede, desiste do ponto.
       if (wp && !bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) e.waypoints.shift();
@@ -439,10 +470,19 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
 }
 
 /**
+ * 20/11/2026: o corpo andou `andou` mas chegou menos de 10% disso mais perto do ponto, que já está a um tronco e um
+ * corpo dele (o que o barra está entre os dois: a órbita em volta do tronco, o degrau em volta do ponto).
+ */
+function semProgresso(e: Entidade, wp: Celula, antes: number, andou: number, ctx: ContextoSimulacao): boolean {
+  const depois = Math.sqrt((wp.x - e.px) ** 2 + (wp.y - e.py) ** 2);
+  return depois <= raioNoTerreno(e, ctx) + ctx.balance.movimento.raioTronco + SUBPASSO && antes - depois < 0.1 * andou;
+}
+
+/**
  * Anda (dx, dy) em subpassos, um eixo de cada vez: o eixo que bate na parede (ou em quem bloqueia) fica, o outro
  * segue — o corpo desliza. Devolve a distância de fato andada.
  */
-function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], grade?: GradeDeCorpos): number {
+function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], grade?: GradeDeCorpos, vel = 0): number {
   const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / SUBPASSO));
   const sx = dx / n;
   const sy = dy / n;
@@ -455,6 +495,9 @@ function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: Con
     if (cabe(e, e.px + sx, e.py + sy, estado, ctx, grade)) {
       e.px += sx;
       e.py += sy;
+    } else if (vel > 0 && !noAr(e) && !naTirolesa(e) && iniciarTravessia(e, sx, sy, estado, ctx, raioNoTerreno(e, ctx), vel, (x, y, h0) => cabe(e, x, y, estado, ctx, grade, false, h0))) {
+      // 20/11/2026 (D-191): de frente para o muro que se escala (ou a queda que se desce), começa a travessia.
+      break;
     } else {
       avancarEixo(e, sx, 0, estado, ctx, grade);
       avancarEixo(e, 0, sy, estado, ctx, grade);
@@ -575,11 +618,12 @@ function escorregar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx
 }
 
 /** O corpo da entidade cabe em (x, y): terreno, muralhas e quem a bloqueia (só barra quem se aproxima). */
-function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos, semTronco = false): boolean {
+function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos, semTronco = false, h0?: number): boolean {
   const r = raioNoTerreno(e,ctx);
   // Marco 40 (D-164): quem voa passa por cima dos telhados das casas.
-  // Marco 42 (15/11/2026, D-176): o relevo barra pelo desnível desde onde o corpo está (a pé ou voando).
-  const relevo = barraPorAltura(ctx.fase, ctx.balance.relevo, alturaEm(ctx.fase, e.px, e.py), noAr(e) ? 'voar' : naTirolesa(e) ? 'saltar' : 'andar');
+  // Marco 42 (15/11/2026, D-176): o relevo barra pelo desnível desde onde o corpo está (a pé ou voando); D-191: ou da
+  // altura de chegada da escalada (`h0`).
+  const relevo = barraPorAltura(ctx.fase, ctx.balance.relevo, h0 ?? alturaEm(ctx.fase, e.px, e.py), noAr(e) ? 'voar' : naTirolesa(e) ? 'saltar' : 'andar');
   if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined || (relevo?.(i, j) ?? false), noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null, { x: e.px, y: e.py })) return false;
   // Marco 44 (15/11/2026, D-178): só o tronco fino da árvore barra (quem voa passa por cima).
   if (!noAr(e) && !semTronco && troncoBarra(ctx.fase, e.px, e.py, x, y, r, ctx.balance.movimento.raioTronco)) return false;

@@ -1,14 +1,16 @@
 // O relevo (marco 42, 15/11/2026, D-176). Cada célula do exterior do Mundo tem uma altura inteira (`Fase.alturas`); a
 // regra é pelo desnível entre a célula de onde se sai e a de destino, com os limiares em `balance.relevo`:
 // - encosta (desnível até `encostaMax`): anda, mais devagar na subida (`subidaPctPorNivel` por nível);
-// - muro baixo (até `muroBaixoMax`): andando não passa; o salto passa; o tiro passa;
-// - muro alto (até `muroAltoMax`): só o voo passa; o tiro que sobe para;
+// - muro baixo (até `muroBaixoMax`): o salto passa; o tiro passa;
+// - muro alto (até `muroAltoMax`): o voo passa; o tiro que sobe para;
 // - montanha (acima): ninguém passa, nem voando.
-// Descer pelo salto ou pelo voo vale qualquer altura; andando, descer também para no muro (é a mesma parede).
+// Descer pelo salto ou pelo voo vale qualquer altura. 20/11/2026 (D-191): a pé, o muro se escala e a queda se desce
+// num pulo curto (world/escalada.ts); o modo `andar` daqui é o passo sem escalar.
 // Sem `alturas` (as masmorras, a arena, a campanha), tudo é plano e nada muda. Puro.
 
 import { BALANCE_PADRAO } from '../core/contexto';
 import type { Fase } from './fase';
+import { travessiaAPe, type RegrasEscalada } from './escalada';
 
 export interface RegrasRelevo {
   encostaMax: number;
@@ -18,6 +20,8 @@ export interface RegrasRelevo {
   subidaPctPorNivel: number;
   /** A montaria sobe com esta fração da penalidade. */
   montariaFator: number;
+  /** 20/11/2026 (D-191): a escalada e o pulo curto de quem anda. */
+  escalada: RegrasEscalada;
 }
 
 /** O modo de quem atravessa: a pé, saltando ou voando. */
@@ -65,10 +69,13 @@ export function tiroPassaRelevo(fase: Fase, r: RegrasRelevo, de: { x: number; y:
   return desnivel(fase, de, para) <= r.muroBaixoMax;
 }
 
-/** A pé, de uma célula para a vizinha (a navegação; os limiares do balance padrão, iguais no cliente e no servidor). */
+/**
+ * A pé, de uma célula para a vizinha (a navegação; os limiares do balance padrão, iguais no cliente e no servidor).
+ * 20/11/2026 (D-191): escalando o muro e descendo a queda num pulo curto também se passa.
+ */
 export function andavelEntre(fase: Fase, ax: number, ay: number, bx: number, by: number): boolean {
   if (!fase.alturas) return true;
-  return passaDesnivel(BALANCE_PADRAO.relevo, alturaEm(fase, bx, by) - alturaEm(fase, ax, ay), 'andar');
+  return travessiaAPe(BALANCE_PADRAO.relevo, alturaEm(fase, bx, by) - alturaEm(fase, ax, ay)) !== null;
 }
 
 /** Quantos níveis sobe de uma célula para a vizinha (0 no plano e na descida). */

@@ -54,9 +54,11 @@ describe('o jogador não trava (16/11/2026)', () => {
         if (![...alturas].some((h0) => corpoCabe(f, px, py, r, barraPorAltura(f, m.ctx.balance.relevo, h0, 'andar')))) continue;
         const saiu = DIRS.some((d) => {
           posicionar(eu, px, py);
+          eu.escalada = null;
           definirDirecao(eu, d);
           integrarEntidade(eu, m.estado, m.ctx, [], DT_MS * 3);
-          return Math.hypot(eu.px - px, eu.py - py) > 0.05;
+          // 20/11/2026 (D-191): começar a escalar o muro (ou o pulo da queda) também é sair do lugar.
+          return Math.hypot(eu.px - px, eu.py - py) > 0.05 || !!eu.escalada;
         });
         if (!saiu) presos.push(`(${px.toFixed(2)}, ${py.toFixed(2)})`);
       }

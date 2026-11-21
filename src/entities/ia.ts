@@ -17,7 +17,8 @@ import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
-import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
+import { temTronco } from '../world/troncos';
+import { celulaDeParada, celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
 import { emCamuflagem } from '../combat/movimento-classe';
 import { podeFerir } from '../modos/relacao';
@@ -300,7 +301,7 @@ function patrulhar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: 
   const [dx, dy] = VETOR_DIR[ia.direcaoPatrulha];
   const destino = { x: e.x + dx, y: e.y + dy };
   // Marco 25 (25/10/2026, D-100): a patrulha não pisa em chão que fere (antes pisava, mesmo sem perseguir).
-  if (!celulaLivre(e, destino.x, destino.y, estado, ctx) || emPerigo(estado, ctx, e, destino.x, destino.y)) {
+  if (!celulaDeParada(e, destino.x, destino.y, estado, ctx) || emPerigo(estado, ctx, e, destino.x, destino.y)) {
     ia.direcaoPatrulha = null;
     return;
   }
@@ -329,7 +330,7 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
   const andaveis = CARDINAIS.filter((d) => {
     const [dx, dy] = VETOR_DIR[d];
     const c = { x: e.x + dx, y: e.y + dy };
-    return passavel(ctx.fase, c.x, c.y) && !ia.recentes.some((r) => r.x === c.x && r.y === c.y);
+    return passavel(ctx.fase, c.x, c.y) && !temTronco(ctx.fase, c.x, c.y) && !ia.recentes.some((r) => r.x === c.x && r.y === c.y);
   });
   // Marco 25 (D-100): fora do perigo; só se não houver outra saída (nasceu no meio das brasas) passa por ele.
   const seguras = andaveis.filter((d) => !emPerigo(estado, ctx, e, e.x + VETOR_DIR[d][0], e.y + VETOR_DIR[d][1]));
@@ -513,7 +514,7 @@ function recuar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, celulaA
   for (const d of CARDINAIS) {
     const [dx, dy] = VETOR_DIR[d];
     const c = { x: e.x + dx, y: e.y + dy };
-    if (!celulaLivre(e, c.x, c.y, estado, ctx)) continue;
+    if (!celulaDeParada(e, c.x, c.y, estado, ctx)) continue;
     const cheb = chebyshev(c, celulaAlvo);
     const man = manhattan(c, celulaAlvo);
     if (cheb > melhorCheb || (cheb === melhorCheb && man > melhorMan)) {
