@@ -14,7 +14,12 @@ export interface Lado {
   invocacao?: { donoId: EntidadeId } | null;
   /** Marco 30 (D-129): o grupo do Mundo; quem é do mesmo grupo nunca se fere, nem com fogo amigo. */
   grupo?: string | null;
+  /** Marco 49 (D-195): os estados ativos (o enfeitiçado vira a relação). */
+  efeitos?: readonly { tipo: string }[];
 }
+
+/** Marco 49 (21/11/2026, D-195): a mente tomada pelo psíquico. */
+const enfeiticado = (l: Lado): boolean => !!l.efeitos?.some((f) => f.tipo === 'enfeiticado');
 
 /**
  * - `todos_hostis` (Livre): todos contra todos, exceto o próprio jogador e seus subordinados, que
@@ -24,6 +29,13 @@ export interface Lado {
  */
 export function relacao(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao'>): Relacao {
   if (a.id === b.id) return 'proprio';
+  const r = relacaoDaEquipe(a, b, modo);
+  // Marco 49 (D-195): o enfeitiçado (só um dos lados) vira contra os seus e deixa de ver os de fora como inimigos.
+  if (enfeiticado(a) !== enfeiticado(b)) return r === 'aliado' ? 'hostil' : 'neutro';
+  return r;
+}
+
+function relacaoDaEquipe(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao'>): Relacao {
   switch (modo.politicaRelacao) {
     case 'todos_aliados':
       return 'aliado';

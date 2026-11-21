@@ -71,8 +71,9 @@ import { semLinha } from './linha-de-tiro';
 import { registrarRecarga } from './cargas';
 import { lancasDosMortos, temMortos } from './lanca-de-ossos';
 import { impactoEmArea } from './impacto-area';
+import { contraSi, semVisao } from './mente';
 import { lancarEntrega } from './entrega/lancar';
-import { soltarCanal } from './entrega/canal';
+import { soltarCanal, trocarAlvoDoFeixe } from './entrega/canal';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -180,7 +181,8 @@ export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, a
   // combate com eles; e quem está dentro, sem combate, não fere o monstro de fora.
   const refugiado = refugioProtege(estado, ctx, ator, alvo);
   // Marco 40 (14/11/2026, D-168): o servo do Posto dos Mortos não chama a atenção dos monstros.
-  return vivo(alvo) && visivel && !falcaoFora && !refugiado && !ocultoDosMonstros(ator, alvo) && podeFerir(ator, alvo, ctx.modo);
+  // Marco 49 (D-195): sem visão, ninguém é alvo.
+  return vivo(alvo) && visivel && !falcaoFora && !refugiado && !ocultoDosMonstros(ator, alvo) && !semVisao(ator, estado.tick) && podeFerir(ator, alvo, ctx.modo);
 }
 
 /** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */
@@ -261,8 +263,9 @@ export function iniciarAcao(
     return false;
   };
   if (!vivo(ator)) return false;
-  // Marco 49 (21/11/2026, D-194): pedir a skill do canal de novo solta a rajada ou o feixe na hora.
-  if (ator.canal?.habilidadeId === habilidadeId) return soltarCanal(ator);
+  // Marco 49 (21/11/2026, D-194): pedir a skill do canal de novo solta a rajada ou o feixe na hora; o feixe pedido
+  // num alvo diferente troca de alvo.
+  if (ator.canal?.habilidadeId === habilidadeId) return trocarAlvoDoFeixe(estado, ctx, ator, typeof alvoPedido === 'string' ? alvoPedido : null) || soltarCanal(ator);
   // Marco 27 (D-126): o 3º básico sai pela arma da mão secundária (quando o alvo está no alcance dela).
   if (!ultimate) {
     const pedido = habilidadeId;
@@ -635,6 +638,11 @@ function lancar(
     lancasDosMortos(estado, ctx, ator, hab, base, saida);
     // 08/11/2026 (D-137): com `junto` (o Juízo das trevas), o impacto normal vem depois das lanças.
     if (!hab.lanca.junto) return;
+  }
+  // Marco 49 (D-195): o iludido mira em si mesmo — a skill ofensiva cai nele (o jogador também: seleciona a si mesmo).
+  if (contraSi(ator, estado.tick) && !deSuporte(hab)) {
+    aplicarImpacto(estado, ctx, ator, { ...base, indice: 0 }, saida);
+    return;
   }
   // Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/) assume o lançamento.
   if (hab.entrega && lancarEntrega(estado, ctx, ator, hab, base, partida, alvo, mira, saida)) return;

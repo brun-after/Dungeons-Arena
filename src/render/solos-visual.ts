@@ -23,12 +23,16 @@ export function ligarSolos(
   estado: () => EstadoJogo,
   diretor: DiretorVfx,
   habilidade: (chave: string) => Habilidade | undefined,
+  aoPulsarEntrega: (chave: string, tick: number) => void = () => undefined,
 ): void {
-  const solos = new Map<number, { chave: string; donoId: string; raio: number; forma: 'quadrado' | 'cone' }>();
+  const solos = new Map<number, { chave: string; donoId: string; raio: number; forma: 'quadrado' | 'cone'; entrega?: 'marca' | 'erupcao' }>();
   bus.on('soloCriado', (ev) => {
-    solos.set(ev.soloId, { chave: ev.chave, donoId: ev.donoId, raio: ev.raio, forma: ev.forma });
+    // Marco 49 (21/11/2026, D-194): o chão da entrega (marca e erupção) desenha a própria matéria em entrega-tela.ts;
+    // aqui ele não repete a rajada da skill no nascimento nem o acerto dela a cada pulso (somados, viravam um clarão).
+    const entrega = estado().solos?.find((s) => s.id === ev.soloId)?.entrega;
+    solos.set(ev.soloId, { chave: ev.chave, donoId: ev.donoId, raio: ev.raio, forma: ev.forma, ...(entrega && { entrega }) });
     const h = habilidade(ev.chave);
-    if (!h) return;
+    if (!h || entrega) return;
     const cor = visualDe(h).cor;
     const celulas: { x: number; y: number }[] = [];
     for (let dy = -ev.raio; dy <= ev.raio; dy++) for (let dx = -ev.raio; dx <= ev.raio; dx++) celulas.push({ x: ev.x + dx, y: ev.y + dy });
@@ -40,6 +44,10 @@ export function ligarSolos(
     const s = solos.get(ev.soloId);
     const h = s ? habilidade(s.chave) : undefined;
     if (!s || !h) return;
+    if (s.entrega) {
+      aoPulsarEntrega(s.chave, ev.tick);
+      return;
+    }
     const dono = estado().entidades.find((e) => e.id === s.donoId);
     diretor.naRuna(assinaturaDe(h), h.runa, visualDe(h).cor, (cor) => { diretor.acertar(assinaturaDe(h), { chave: s.chave, fonteId: s.donoId, alvoId: '', de: null, ate: { x: ev.x, y: ev.y }, cor, escala: 0.8 + 0.25 * ev.raio, critico: false, indice: 0, tier: tierDaArma(dono) }, h.visual?.variante, true); });
   });

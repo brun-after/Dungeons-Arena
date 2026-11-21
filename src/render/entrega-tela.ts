@@ -10,6 +10,7 @@ import type { Habilidade } from '../combat/habilidades';
 import type { EstadoJogo, Projetil } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import { CELULA_PX } from './camera-calculo';
+import { ChaoDaEntrega } from './chao-da-entrega';
 import type { SistemaParticulas } from './particulas';
 import { centroDaCelula } from './projecao';
 import { visualDe } from './visual-habilidade';
@@ -34,9 +35,12 @@ export class EntregaNaTela {
   private readonly ar = new Graphics();
   private readonly ultimaFagulha = new Map<string, number>();
 
+  private readonly chaoDaEntrega: ChaoDaEntrega;
+
   constructor(private readonly o: Opcoes) {
     o.chao.addChild(this.chao);
     o.ar.addChild(this.ar);
+    this.chaoDaEntrega = new ChaoDaEntrega({ chao: this.chao, ar: this.ar, particulas: o.particulas });
   }
 
   /** O ponto na tela de uma célula, erguido `z` células acima do voo comum. */
@@ -55,11 +59,16 @@ export class EntregaNaTela {
     this.ar.clear();
     for (const p of estado.projeteis) if (p.rota) this.projetil(p, estado, agoraMs);
     for (const e of estado.entidades) if (e.canal) this.canal(e, estado, agoraMs, posicao);
+    // 21/11/2026: o chão da entrega com a matéria do elemento (cristais, brasa, bolhas), não um clarão chapado.
+    const vivos = new Set<number>();
     for (const s of estado.solos ?? []) {
       if (!s.entrega) continue;
       const c = this.cor(s.chave);
-      if (c) this.circuloNoChao(s.x, s.y, 0.45 + s.raio, c.cor, agoraMs, s.entrega === 'erupcao' ? 'runas' : 'chao');
+      if (!c) continue;
+      vivos.add(s.id);
+      this.chaoDaEntrega.desenhar(s, c.h.runa ?? c.h.elemento, c.cor, agoraMs);
     }
+    this.chaoDaEntrega.limpar(vivos);
     if (this.ultimaFagulha.size > 64) this.ultimaFagulha.clear();
   }
 

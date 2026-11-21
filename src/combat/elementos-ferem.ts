@@ -21,6 +21,7 @@ import { aplicarEfeito } from './efeitos';
 import { escalarEstado } from './estado-do-golpe';
 import { chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
+import { tomarAMente } from './mente';
 import { naturezaDe } from './naturezas';
 import { construirEfeito, type TipoEfeito } from './registro-efeitos';
 
@@ -99,6 +100,8 @@ export function ferirPeloElemento(estado: EstadoJogo, ctx: ContextoSimulacao, g:
       const valor = Math.round((Math.min(g.dano, g.golpe) * r.ecoDoExpostoPct) / 100);
       if (valor >= 1) aplicarEfeito(estado, ctx, alvo, construirEfeito('efeito_atrasado', { duracaoMs: 500, interno: construirEfeito('dano_direto', { valor }) }), origem, null, saida);
     }
+    // Marco 49 (D-195): o golpe psíquico pode tomar a mente (combat/mente.ts).
+    if (g.hab.elemento === 'psiquico') tomarAMente(estado, ctx, alvo, origem, g.entrePersonagens, saida);
     // Físico: o crítico sem elemento abre um sangramento.
     // Sem piso fixo: o sangramento é todo do golpe (entre jogadores, pouco).
     const sangra = g.critico && g.hab.elemento === null && g.hab.tipoAtaque === 'fisico'

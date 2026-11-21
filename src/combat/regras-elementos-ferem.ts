@@ -28,4 +28,6 @@ export interface RegrasElementosFerem {
   entrePersonagensPct: number;
   /** Entre dois personagens, a reação soma só este % do bônus dela. */
   entrePersonagensReacaoPct: number;
+  /** Marco 49 (D-195): o golpe psíquico toma a mente (chance por golpe, espera por alvo, duração de cada estado). */
+  mente: { chancePct: number; intervaloMs: number; entrePersonagensPct: number; duracaoMs: Record<'enfeiticado' | 'confuso' | 'aterrorizado' | 'iludido' | 'sem_visao', number> };
 }

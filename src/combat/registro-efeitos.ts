@@ -103,6 +103,8 @@ export const TIPOS_EFEITO = [
   'arrastado',
   // Marco 42 (D-176): a rajada leva os projéteis hostis a até `valor` células de quem a recebe (em: conjurador).
   'dispersar_tiros',
+  // Marco 49 (21/11/2026, D-195): a mente tomada pelo psíquico — vira contra os seus, mira em si mesmo, não enxerga ninguém.
+  'enfeiticado', 'iludido', 'sem_visao',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -214,6 +216,10 @@ export interface DefinicaoEfeito {
   revelaArmadilhas: boolean;
   /** Marco 42 (15/11/2026, D-176): o portador leva luz própria (a tocha); a água e o vento apagam. */
   ilumina: boolean;
+  /** Marco 49 (D-195): as skills de quem tem o efeito caem nele mesmo (iludido). */
+  contraSi: boolean;
+  /** Marco 49 (D-195): quem tem o efeito não enxerga ninguém (nenhum alvo é válido; na tela, os outros somem). */
+  semVisao: boolean;
   /** Marco 40 (D-157): o `valor` conta as marcas (somam até `balance.habilidades.eixos.marca.max`); cada uma soma `pct` ao dano recebido. */
   marcas: boolean;
 }
@@ -260,6 +266,8 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   revelaArmadilhas: false,
   ilumina: false,
   marcas: false,
+  contraSi: false,
+  semVisao: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -369,6 +377,11 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   acerto_carregado: { ...BASE, icone: 'pedra', cor: '#8d6e63', positivo: true, campos: [], padrao: { duracaoMs: 3000, valor: 0, pct: 0 }, exige: ['interno'] },
   petrificado: negativo('pedra', '#95a5a6', ['pct'], { duracaoMs: 1500, valor: 0, pct: 50 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas', danoRecebido: -1 }),
   aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
+  // Marco 49 (D-195): enfeitiçado, a relação vira (modos/relacao.ts): hostil aos seus, neutro aos de fora; iludido, as
+  // skills caem nele; sem visão, ninguém é alvo e a IA vaga (sem atacar, mas sem travar as ações).
+  enfeiticado: negativo('coroa', '#e84393', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),
+  iludido: negativo('eco', '#a29bfe', [], { duracaoMs: 3000, valor: 0, pct: 0 }, { contraSi: true }),
+  sem_visao: negativo('olho', '#2d3436', [], { duracaoMs: 2500, valor: 0, pct: 0 }, { semVisao: true, ia: 'vaga' }),
   confuso: negativo('estrela', '#c39bd3', [], { duracaoMs: 2000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'vaga' }),
   desafiado: negativo('alvo', '#e74c3c', ['pct'], { duracaoMs: 3000, valor: 0, pct: 15 }, { ia: 'persegue', danoDaOrigem: true }),
   marca_cacador: negativo('alvo', '#d4ac0d', ['pct'], { duracaoMs: 8000, valor: 0, pct: 20 }, { danoDaOrigem: true, revela: true }),

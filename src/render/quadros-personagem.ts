@@ -1,6 +1,8 @@
 // Os quadros dos personagens pré-renderizados (marco 32, 31/10/2026, D-131): a direção pelo rumo e o quadro de cada
 // estado pelo tempo. À parte de personagens-3d.ts (que carrega os atlas pelo Vite), para quem só desenha.
 
+import type { EstadoJogo } from '../core/estado';
+import type { Entidade } from '../entities/entidade';
 import type { Golpe } from './caminhada';
 
 /** Os golpes de cada tipo de arma no atlas das classes (tools/sprites/receitas.ts). */
@@ -196,4 +198,43 @@ export function progressoDoGolpe(p: PerfilDoGolpe, preparo: number | null, desde
   }
   const real = x + (p.desloc ?? 0);
   return Math.min(0.999, real > 1 ? real - 1 : real);
+}
+
+// --- 21/11/2026 (marco 49, D-194): a pose da magia dura o quanto a magia dura. Antes, o braço estendido do lançamento
+// voltava em meio segundo, enquanto o projétil ainda voava, o feixe queimava ou a salva caía. Agora, enquanto a magia
+// do lançamento vive (o canal, os projéteis dela no ar ou esperando a vez, ou o mínimo de uma área instantânea), o
+// golpe segura no impacto; quando ela acaba, a volta sai dali sem pressa.
+
+/** O mínimo que a pose segura numa magia sem projétil (a área que cai na hora) e o teto de qualquer uma (ms). */
+const SUSTENTA_MIN_MS = 350;
+const SUSTENTA_MAX_MS = 3000;
+
+/** O instante, desde o lançamento, em que o golpe está no impacto (ms). */
+export function instanteDoImpacto(comPreparo: boolean): number {
+  return (comPreparo ? 0 : GOLPE_RAPIDO_MS) + PAUSA_DO_IMPACTO_MS;
+}
+
+/** A magia lançada na ação `acaoId` ainda está viva (o canal, ou um projétil dela que não ficou preso no alvo). */
+export function magiaViva(e: Entidade, estado: EstadoJogo, acaoId: number, desdeMs: number): boolean {
+  if (desdeMs > SUSTENTA_MAX_MS) return false;
+  if (desdeMs < SUSTENTA_MIN_MS || e.canal?.acaoId === acaoId) return true;
+  return estado.projeteis.some((p) => p.donoId === e.id && p.acaoId === acaoId && !p.perm && !p.traz);
+}
+
+/**
+ * O início do golpe ajustado para a pose segurar no impacto enquanto `segura`: devolve o `ataqueDesdeMs` que mantém
+ * o tempo do golpe parado no impacto (ou o mesmo, quando não segura ou ainda não chegou nele).
+ */
+export function sustentarGolpe(ataqueDesdeMs: number, agoraMs: number, comPreparo: boolean, segura: boolean): number {
+  const impacto = instanteDoImpacto(comPreparo);
+  return segura && agoraMs - ataqueDesdeMs > impacto ? agoraMs - impacto : ataqueDesdeMs;
+}
+
+/** Para onde a pose olha enquanto a magia vive: o alvo do feixe (que pode trocar) ou a mira do lançamento. */
+export function anguloDaMagia(e: Entidade, estado: EstadoJogo, doLancamento: number): number {
+  const c = e.canal;
+  if (!c) return doLancamento;
+  const alvo = c.alvoId ? estado.entidades.find((x) => x.id === c.alvoId) : undefined;
+  const [x, y] = alvo ? [alvo.px, alvo.py] : [c.miraX, c.miraY];
+  return Math.atan2(y - e.py, x - e.px) || doLancamento;
 }

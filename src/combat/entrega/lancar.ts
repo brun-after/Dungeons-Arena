@@ -16,6 +16,7 @@ import { iniciarCanal } from './canal';
 import { deixarNoChao } from './no-alvo';
 import { criarProjetil, fatorDaEntrega, ligarPares, planejarTiros, rotaDe } from './projetil';
 import { direcaoEm } from './rota';
+import { areaVoa } from './tipos';
 
 /** O servo de quem lança mais perto do destino (a origem do sentido da invocação). */
 function servoDe(estado: EstadoJogo, ator: Entidade, destino: Celula): Entidade | undefined {
@@ -87,8 +88,7 @@ export function lancarEntrega(estado: EstadoJogo, ctx: ContextoSimulacao, ator: 
     }
   }
   // A área da mão em reta cai na hora; a que voa (outra trajetória, o céu, o círculo, o chão) chega por um projétil.
-  const voa = e.trajetoria !== 'reta' || e.origem === 'ceu' || e.origem === 'sob_alvo' || e.origem === 'chao';
-  if (hab.politicaImpacto === 'area' && !voa) {
+  if (hab.politicaImpacto === 'area' && !areaVoa(e)) {
     areaNaHora(estado, ctx, ator, hab, base, de, mira, saida);
     return true;
   }

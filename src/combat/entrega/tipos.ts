@@ -108,4 +108,11 @@ export interface CanalAtivo {
   multCura: number;
   /** O feixe: a exposição de cada alvo, em % (cresce por pulso, até o teto). */
   exposicao: Record<string, number>;
+  /** O alvo que o jogador tinha escolhido no tick anterior: o feixe troca quando ele escolhe outro (D-194). */
+  escolhido?: string | null;
+}
+
+/** A área desta entrega voa até a mira (outra trajetória, o céu, o chão, sob o alvo); a da mão em reta cai na hora. */
+export function areaVoa(e: Entrega): boolean {
+  return e.trajetoria !== 'reta' || e.origem === 'ceu' || e.origem === 'sob_alvo' || e.origem === 'chao';
 }

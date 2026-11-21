@@ -3,7 +3,7 @@
 **Versão:** 1.46 · **Data:** 21/11/2026
 
 > **Histórico**
-> - **1.46 (21/11/2026)**: D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
+> - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
 > - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
 > - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
 > - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
@@ -6231,3 +6231,42 @@ eixos que se combinam livremente:
 coluna de luz sob o alvo, feixe em três camadas na cor do elemento que respira e engrossa com a exposição, anel da
 rajada, anel que gira e onda que pulsa, chão tomado pelo elemento e a erupção. Grãos deixam rastro só em um de cada
 três. Para rever, `?jogo=campanha&slot=0&skills=a,b` põe essas skills na barra do jogo sem salvar.
+
+**Ajustes depois do teste na tela (21/11/2026).**
+- **Sem clarão.** O chão da entrega deixou de repetir o acerto inteiro da skill a cada pulso, e a área que voa estoura
+  quando chega, não no lançamento (os grãos não estouram). O acerto inteiro de uma entrega sai uma vez por alvo a cada
+  0,9 s. As luzes de magia (`ui/luzes-magia.ts`) deixavam um rastro por quadro por projétil; agora é um a cada 60 ms, o
+  grão ilumina 20%, o tiro que espera não ilumina e o clarão do mesmo golpe no mesmo alvo se renova em vez de empilhar.
+- **O chão com a matéria do elemento** (`render/chao-da-entrega.ts`): o gelo congela e levanta cristais que crescem do
+  centro para fora; a terra, lascas de pedra; o fogo racha em brasa com chamas baixas; o veneno borbulha; a erupção
+  acende as runas e sobe um jorro a cada pulso.
+- **A pose dura a magia.** Enquanto a magia lançada vive (o canal, os projéteis no ar ou esperando, ou 0,35 s numa área
+  instantânea; até 3 s), quem lançou segue na pose de conjurar, virado para o alvo mesmo andando para outro lado
+  (`render/quadros-personagem.ts`: `magiaViva`, `anguloDaMagia`).
+- **O feixe troca de alvo e não apaga quando o alvo cai.** Escolher outro alvo (ou pedir o feixe num alvo diferente)
+  troca o alvo no alcance; se o alvo cai, o feixe salta para o hostil mais perto de onde ele caiu, até
+  `feixe.saltoRaio` (3) e dentro do alcance. Sem ninguém, acaba.
+- **Balanceamento.** O que fica no alvo parado (o chefe) dobrava o golpe: a marca somava 210%, a erupção 200%, o pulso
+  178% e o giro 190%. Os pulsos caíram (marca 8%, erupção 12%, pulsa 8%, gira 5% por volta), e as divisões perderam o
+  extra (círculos 4%, salva 3%, grão 11%).
+
+## D-195 — Marco 49: o psíquico toma a mente (21/11/2026)
+
+**Problema.** O psíquico só ecoava o golpe no exposto. Era o único elemento sem um efeito que mudasse a luta.
+
+**Decisão.** O golpe psíquico que fere tem `mente.chancePct` (30%) de tomar a mente do alvo, com espera por alvo de
+`mente.intervaloMs` (5 s). O estado é sorteado entre cinco (`combat/mente.ts`, números em `balance.elementosFerem.mente`):
+
+| Estado | O que faz |
+|---|---|
+| Enfeitiçado | Vira contra os seus: a relação (`modos/relacao.ts`) fica hostil aos antigos aliados e neutra aos de fora. A IA ataca os aliados, que revidam. |
+| Confuso | Só anda (a IA vaga), sem agir. |
+| Aterrorizado | Foge de quem o aterrorizou, sem agir. |
+| Iludido | As skills ofensivas caem nele mesmo. O jogador iludido que usa uma skill seleciona a si mesmo. |
+| Sem visão | Ninguém é alvo para ele (`alvoOfensivoValido`); a IA vaga sem atacar, e na tela do jogador os outros somem. |
+
+- A hostilidade continua decidida só por `relacao()`: o enfeitiçado vira a relação ali, pelo estado ativo, sem olhar o
+  tipo da entidade.
+- Entre personagens, o estado dura metade (`entrePersonagensPct`).
+- A natureza da criatura resiste pelo elemento, como antes (o constructo, 50% de resistência ao psíquico, é ferido
+  menos; a mente, fraca, mais).

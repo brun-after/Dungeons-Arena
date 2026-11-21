@@ -198,6 +198,29 @@ describe('a entrega no núcleo', () => {
     expect(c.j.canal).toBeUndefined();
   });
 
+  it('o feixe troca para o alvo que o jogador escolhe e salta, quando o alvo cai, para o mais perto dele', () => {
+    const c = cena({ cadencia: 'feixe', duracaoMs: 3000 });
+    const a = c.inimigo('a', 6, 5);
+    const b = c.inimigo('b', 5, 8);
+    const perto = c.inimigo('c', 6, 7);
+    const longe = c.inimigo('d', 2, 10);
+    c.j.alvoSelecionado = a.id;
+    c.lancar(a);
+    c.passar(300);
+    c.j.alvoSelecionado = b.id;
+    c.passar(300);
+    expect(obter(c.j.canal).alvoId).toBe(b.id);
+    const antes = impactosEm(c.saida, b.id).length;
+    c.passar(500);
+    expect(impactosEm(c.saida, b.id).length).toBeGreaterThan(antes);
+    // O alvo cai: o feixe segue no mais perto de onde ele estava (c, a 1 célula), não apaga nem vai ao longe.
+    b.hp = 0;
+    b.morto = true;
+    c.passar(300);
+    expect(obter(c.j.canal).alvoId).toBe(perto.id);
+    expect(impactosEm(c.saida, longe.id)).toHaveLength(0);
+  });
+
   it('o efeito que gira fica no alvo e fere a cada volta', () => {
     const c = cena({ permanencia: 'gira' });
     const alvo = c.inimigo('b', 6, 5);

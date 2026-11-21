@@ -27,7 +27,7 @@ export interface RegrasEntrega {
   /** Rajada: um projétil por pulso, com % do golpe e % do custo por pulso. */
   rajada: { intervaloMs: number; pulsoPct: number; custoPorPulsoPct: number };
   /** Feixe: % do golpe por pulso, a exposição por pulso e o teto, o custo por pulso e o andar de quem canaliza. */
-  feixe: { intervaloMs: number; pulsoPct: number; exposicaoPorPulsoPct: number; exposicaoMaxPct: number; custoPorPulsoPct: number; andarPct: number };
+  feixe: { intervaloMs: number; pulsoPct: number; exposicaoPorPulsoPct: number; exposicaoMaxPct: number; custoPorPulsoPct: number; andarPct: number; saltoRaio: number };
   /** Chão amaldiçoado: % do golpe que fica no impacto e % de cada pulso, o intervalo e quantos pulsos. */
   marca: { golpePct: number; pulsoPct: number; intervaloMs: number; pulsos: number; raio: number };
   /** Trilha: o caminho fica marcado (dano por célula, em % do golpe médio) por um tempo. */

@@ -34,7 +34,7 @@ import { existeArma3d, existeAtlas, type AtlasDePersonagens } from './personagen
 import { Figura3d } from './figura-3d';
 import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
-import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado , type MovimentoDoAtlas } from './quadros-personagem';
+import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, anguloDaMagia, magiaViva, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado, sustentarGolpe, type MovimentoDoAtlas } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao, arcoNaElipse, desenharFolego } from './anel-invocacao';
 import { petDoCompanheiro } from '../combat/pets';
@@ -235,6 +235,9 @@ interface Marcador {
   andandoAteMs: number;
   acaoId: number | null;
   ataqueDesdeMs: number;
+  /** D-194: a última ação lançada, quando e para onde, para a pose segurar (e olhar para lá) enquanto a magia vive. */
+  lancada: { acaoId: number; emMs: number; angulo: number; viva?: boolean } | null;
+  anguloAcao: number;
   /** Marco 24 (D-098): o golpe da última ação (pela chave), que a pose anima. */
   golpe: Golpe | null;
   chaveGolpe: string;
@@ -294,7 +297,7 @@ export class CamadaEntidades {
     return {
       raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, acomp3d: null, vivo: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
-      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', golpes: 0, conjuraMs: 0, fisico: false, preparoAcao: null, runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
+      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, lancada: null, anguloAcao: 0, golpe: null, chaveGolpe: '', golpes: 0, conjuraMs: 0, fisico: false, preparoAcao: null, runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
@@ -358,15 +361,19 @@ export class CamadaEntidades {
       const dx = e.px - m.ultimoX;
       const dy = e.py - m.ultimoY;
       if (dx * dx + dy * dy > 1e-6) m.angulo = Math.atan2(dy, dx);
-      if (e.acao) m.angulo = Math.atan2(e.acao.alvoY - e.py, e.acao.alvoX - e.px) || m.angulo;
+      if (e.acao) m.anguloAcao = m.angulo = Math.atan2(e.acao.alvoY - e.py, e.acao.alvoX - e.px) || m.angulo;
       m.ultimoX = e.px;
       m.ultimoY = e.py;
 
       // O ataque sai no lançamento: a ação em curso some (ou troca) e o empurrão começa.
       const acaoAtual = e.acao?.acaoId ?? null;
-      if (m.acaoId !== null && acaoAtual !== m.acaoId) m.ataqueDesdeMs = agoraMs;
+      if (m.acaoId !== null && acaoAtual !== m.acaoId) [m.ataqueDesdeMs, m.lancada] = [agoraMs, { acaoId: m.acaoId, emMs: agoraMs, angulo: m.anguloAcao }];
       if (acaoAtual !== null && acaoAtual !== m.acaoId) m.golpes++;
       m.acaoId = acaoAtual;
+      // 21/11/2026 (D-194): a mão segue estendida, virada para o alvo (mesmo andando para outro lado), enquanto a magia
+      // lançada vive (quadros-personagem.ts).
+      const viva = acaoAtual === null && !!m.lancada && !e.morto && !m.fisico && magiaViva(e, estado, m.lancada.acaoId, agoraMs - m.lancada.emMs);
+      if (m.lancada) [m.lancada.viva, m.ataqueDesdeMs, m.angulo] = [viva, sustentarGolpe(m.ataqueDesdeMs, agoraMs, m.conjuraMs >= 150, viva), viva ? anguloDaMagia(e, estado, m.lancada.angulo) : m.angulo];
 
       const p = posicao(e);
       // Marco 26 (25/10/2026, D-108): o primeiro quadro só guarda a posição (com NaN, nunca contava como andando).
@@ -560,7 +567,7 @@ export class CamadaEntidades {
     // modelos; a criatura sem arma de classe prepara o golpe físico dela (não a pose de magia).
     const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
     const comPreparo = m.conjuraMs >= 150;
-    const preparando = m.preparoAcao !== null && m.preparoAcao < 1;
+    const preparando = (m.preparoAcao !== null && m.preparoAcao < 1) || !!m.lancada?.viva; // D-194: a magia viva conjura
     const estadoBase = estadoDoPersonagem({ morto: e.morto, golpeando: false, conjurando: preparando, andando: q.andando, golpe: m.golpe, fisico: m.fisico, movimento: q.ajuste?.estado });
     const perfil = perfilDoAtlas(peloGolpe(estadoBase) ? estadoBase : estadoDoPersonagem({ morto: false, golpeando: true, conjurando: false, andando: false, golpe: m.golpe }), escolha.modelo);
     const golpeando = !preparando && ataqueMs < duracaoVisualDoGolpe(perfil, comPreparo);
