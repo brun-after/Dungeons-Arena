@@ -12,6 +12,7 @@ import type { Elemento } from '../combat/elementos';
 import type { PontaElemental } from '../progression/vinculo';
 import type { EstadoFera, EstadoMovimento } from './movimento-estado';
 import type { Escalada } from '../world/escalada';
+import type { CanalAtivo } from '../combat/entrega/tipos';
 export type { EstadoFera, EstadoMovimento, ModoDeMovimento } from './movimento-estado';
 import type { Slot } from '../modos/modo';
 
@@ -474,6 +475,8 @@ export interface Entidade {
   ultimaSinergia: string | null;
   /** 18/10/2026: um encontro por visita à fase, iniciado na primeira agressão hostil. */
   encontro?: { faseId: string; inicioTick: number };
+  /** Marco 49 (21/11/2026, D-194): a rajada ou o feixe em curso (combat/entrega/canal.ts). */
+  canal?: CanalAtivo;
   auraFracoes?: Record<string, number>;
   auraCuraFracao?: number;
   /** Marco 23 (D-092): a afinidade elemental do inimigo (absorve o elemento, fraco ao oposto). */
@@ -720,6 +723,7 @@ export function clonarEntidade(e: Entidade): Entidade {
   return {
     ...e,
     ...(e.encontro ? { encontro: { ...e.encontro } } : {}),
+    ...(e.canal ? { canal: { ...e.canal, exposicao: { ...e.canal.exposicao } } } : {}),
     ...(e.escalada ? { escalada: { ...e.escalada } } : {}),
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),

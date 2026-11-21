@@ -32,8 +32,7 @@ import { resolverHabilidade } from './compilar-habilidade';
 import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
 import { excedeLimite } from './efeitos-fluxo';
-import { alvosDaForma, celulasDaForma, celulasDaLinha, deSuporte, deslocaQuemConjura } from './formas';
-import { muralhaEm } from './tatica';
+import { alvosDaForma, celulasDaLinha, deSuporte } from './formas';
 import { quebrarEm } from './quebraveis';
 import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
@@ -50,7 +49,6 @@ import { ehDaClasse } from '../progression/habilidades-classe';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { adiantarMiraPorSkill, consumirMira, miraCheia, temMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
-import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
 import { papelDe } from './combos-papel';
 import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
@@ -72,6 +70,9 @@ import { refugioProtege } from '../world/refugio';
 import { semLinha } from './linha-de-tiro';
 import { registrarRecarga } from './cargas';
 import { lancasDosMortos, temMortos } from './lanca-de-ossos';
+import { impactoEmArea } from './impacto-area';
+import { lancarEntrega } from './entrega/lancar';
+import { soltarCanal } from './entrega/canal';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -260,6 +261,8 @@ export function iniciarAcao(
     return false;
   };
   if (!vivo(ator)) return false;
+  // Marco 49 (21/11/2026, D-194): pedir a skill do canal de novo solta a rajada ou o feixe na hora.
+  if (ator.canal?.habilidadeId === habilidadeId) return soltarCanal(ator);
   // Marco 27 (D-126): o 3º básico sai pela arma da mão secundária (quando o alvo está no alcance dela).
   if (!ultimate) {
     const pedido = habilidadeId;
@@ -633,6 +636,8 @@ function lancar(
     // 08/11/2026 (D-137): com `junto` (o Juízo das trevas), o impacto normal vem depois das lanças.
     if (!hab.lanca.junto) return;
   }
+  // Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/) assume o lançamento.
+  if (hab.entrega && lancarEntrega(estado, ctx, ator, hab, base, partida, alvo, mira, saida)) return;
   switch (hab.politicaImpacto) {
     case 'proprio':
       aplicarImpacto(estado, ctx, ator, { ...base, indice: 0 }, saida);
@@ -667,23 +672,9 @@ function lancar(
       if (saltos > 0) saltar(estado, ctx, ator, hab, alvo, saltos, base, atingidos, saida);
       break;
     }
-    case 'area': {
-      // Marco 24 (D-095): o Mago encarnado em terra alcança +1 de raio nas magias de área.
-      // D-125: a investida acerta a trajetória toda, a partir de onde saiu, passando pelas paredes como o dash.
-      const atravessa = ctx.balance.movimento.dashAtravessaParedes && deslocaQuemConjura(hab);
-      const barreira = atravessa ? (c: Celula) => c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || !!muralhaEm(estado, c.x, c.y) : undefined;
-      const celulas = celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), partida, mira, ctx.fase, barreira);
-      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulas);
-      // Marco 26 (D-113): a área quebra os quebráveis que pega.
-      if (!deSuporte(hab)) quebrarEm(estado, ctx, celulas, ator, saida);
-      const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
-      atingidos.forEach((e, indice) => {
-        aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
-      });
-      // Marco 40 (13/11/2026, D-161): a área que salta (as leituras de estilo) pula do alvo principal para os de fora.
-      if (principal && hab.saltos) saltar(estado, ctx, ator, hab, principal, hab.saltos.quantidade, base, atingidos.map((e) => e.id), saida);
+    case 'area':
+      impactoEmArea(estado, ctx, ator, hab, base, partida, mira, saida);
       break;
-    }
     case 'projetil': {
       // Mira na célula do alvo no lançamento; daí em diante segue em linha reta e pode ser esquivado.
       // Marco 22 (D-089): com a Mira firme cheia, o tiro sai carregado (crítico garantido, atravessa, alcance máximo).
@@ -716,7 +707,7 @@ function lancar(
 export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!ator.autoAtaque || !vivo(ator) || ator.acao || nadando(ctx, ator)) continue;
+    if (!ator.autoAtaque || !vivo(ator) || ator.acao || ator.canal || nadando(ctx, ator)) continue;
     const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
     if (!hab || motivoDoMovimento(ator) || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;

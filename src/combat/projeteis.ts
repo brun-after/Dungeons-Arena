@@ -27,6 +27,7 @@ import { aoAcertarTiroCheio, aoFimDoTiroCheio, noCaminhoDoTiroCheio } from './si
 import { quebrar, quebraQuem, quebravelEm } from './quebraveis';
 import { aindaNoAr, aoAcertarVariacao, aoChegarNaMao, guiar, iniciarVolta, naParede, orbitar, prepararVariacao } from './projeteis-variacoes';
 import { aoPararOTiroCarregado, cacadaEmCadeia } from './marcos-arqueiro';
+import { alvoPerto, andarNaRota, antesDoAcerto, chegar, depoisDoAcerto, noArDaEntrega, passaPorCima, permanecer, toqueDaEntrega, trilhar } from './entrega/no-alvo';
 
 /** Sub-passo máximo da integração, em células: nenhum alvo é atravessado sem teste. */
 const SUBPASSO = 0.25;
@@ -135,6 +136,12 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       restantes.push(p);
       continue;
     }
+    // Marco 49 (21/11/2026, D-194): a salva e os grãos esperam a vez; o que gira ou pulsa no alvo fica nele.
+    if ((p.saiEm ?? 0) > estado.tick || (p.perm && permanecer(estado, ctx, p, hab, saida) === 'segue')) {
+      restantes.push(p);
+      continue;
+    }
+    if (p.perm) fim = 'expirou';
     if (p.var?.fase === 'orbita' && orbitar(estado, ctx, p, hab, saida) === 'fim') fim = 'expirou';
     let ultimoPasso = 0;
     // Marco 42 (15/11/2026, D-176): a parede do relevo que sobe além do muro baixo para o tiro.
@@ -145,7 +152,8 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       const subiuDemais = !tiroPassaEntre(ctx.fase, antes, { x: cx, y: cy });
       antes = { x: cx, y: cy };
       // O bumerangue volta à mão por cima de tudo; a tabela quica.
-      if (p.var?.fase !== 'volta' && (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy) || subiuDemais)) {
+      // D-194: a parábola no alto, a queda e a coluna passam por cima das paredes.
+      if (p.var?.fase !== 'volta' && !passaPorCima(p) && (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy) || subiuDemais)) {
         if (variacao && naParede(estado, ctx, p, variacao, ultimoPasso, saida)) {
           ultimoPasso = 0;
           continue;
@@ -155,14 +163,16 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       }
       // Marco 24 (D-095): o tiro cheio do Arqueiro deixa fogo e cura aliados no caminho, conforme a sintonia.
       if (p.carregado) noCaminhoDoTiroCheio(estado, ctx, p, cx, cy, saida);
-      const noAr = !!variacao && aindaNoAr(p, variacao);
+      const noAr = (!!variacao && aindaNoAr(p, variacao)) || noArDaEntrega(ctx, p, hab);
       // Marco 26 (D-113): o tiro do lado do jogador quebra o quebrável no caminho e para nele (o que atravessa segue).
       if (!noAr && quebrouNoCaminho(estado, ctx, p, cx, cy, saida) && !p.atravessa && !variacao?.retorna) {
         fim = 'acertou';
         break;
       }
       // Marco 27 (D-126): o tiro parabólico passa por cima de quem está no caminho.
-      const alvo = noAr ? null : alvoNaCelula(estado, ctx, p, cx, cy);
+      // D-194: a espiral e o corpo grande tocam quem está perto da linha.
+      const toque = p.rota ? toqueDaEntrega(ctx, hab) : 0;
+      const alvo = noAr ? null : toque > 0.5 ? alvoPerto(estado, ctx, p, toque) : alvoNaCelula(estado, ctx, p, cx, cy);
       // Marco 24 (D-094): quem intercepta (Vigia, Investida de escudo) gasta uma carga e o projétil para nele.
       const escudo = alvo?.efeitos.find((f) => f.ateTick > estado.tick && f.valor > 0 && REGISTRO_EFEITOS[f.tipo].intercepta);
       if (alvo && escudo) {
@@ -185,6 +195,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
           ...(p.d20Minimo ? { d20Minimo: p.d20Minimo } : {}),
         };
         const volta = p.var?.fase === 'volta';
+        if (p.rota) antesDoAcerto(ctx, estado, p, alvo);
         const saltos = p.atingidos.length === 0 && !volta ? quantidadeDeSaltos(hab, alvo, estado.tick, dono, ctx) : 0;
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length, ...(volta && { secundario: true }) }, saida);
         p.atingidos.push(alvo.id);
@@ -193,6 +204,8 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         if (p.carregado) cacadaEmCadeia(estado, ctx, p, alvo, saida);
         // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).
         if (saltos > 0) saltar(estado, ctx, dono ?? { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
+        // D-194: o encontro do par, o corpo grande, o chão e o que fica no alvo (girando ou pulsando: o projétil segue nele).
+        if (p.rota && depoisDoAcerto(estado, ctx, p, alvo, hab, saida) === 'continua') break;
         // Marco 27 (D-126): a variação decide se o projétil segue (ricochete, órbita, volta do bumerangue).
         if (variacao && aoAcertarVariacao(estado, ctx, p, alvo, hab, saida) === 'continua') continue;
         // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.
@@ -212,15 +225,23 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       if (p.restante <= 1e-9) {
         // O bumerangue que chegou ao fim da ida vira e volta.
         if (variacao && iniciarVolta(estado, p, variacao, saida)) continue;
+        // D-194: o fim da rota (a área que cai, o retorno que traz, o chão que fica).
+        if (p.rota) chegar(estado, ctx, p, hab, saida);
         fim = 'expirou';
         break;
       }
       if (distancia <= 1e-9) break;
       const passo = Math.min(SUBPASSO, distancia, p.restante);
-      p.x += p.dirX * passo;
-      p.y += p.dirY * passo;
+      // D-194: o projétil da entrega anda pela rota (a curva, a altura); o comum, em linha reta.
+      if (p.rota) {
+        andarNaRota(p, passo);
+        trilhar(estado, ctx, p, hab);
+      } else {
+        p.x += p.dirX * passo;
+        p.y += p.dirY * passo;
+        p.restante -= passo;
+      }
       distancia -= passo;
-      p.restante -= passo;
       ultimoPasso = passo;
     }
     if (fim) saida.push({ t: 'projetilFim', tick: estado.tick, projetilId: p.id, motivo: fim });

@@ -41,6 +41,7 @@ import { passavel, tipoEm } from './fase';
 import { podePisarNoRefugio } from './refugio';
 import { GradeDeCorpos } from './grade-corpos';
 import { alcancavelMaisPerto, caminho, caminhoComCusto } from './navegacao';
+import { andarNoCanal } from '../combat/entrega/canal';
 
 export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
   N: [0, -1],
@@ -682,6 +683,8 @@ const guerreiroConjuraAndando = (e: Entidade, ctx: ContextoSimulacao): boolean =
 
 /** O quanto a conjuração em curso freia (0 a 1); 08/11/2026 (D-141): o guerreiro sofre só parte dela. */
 function freioDaConjuracao(e: Entidade, ctx: ContextoSimulacao): number {
+  // Marco 49 (21/11/2026, D-194): quem canaliza o feixe anda devagar.
+  if (e.canal && !e.acao) return 1 - andarNoCanal(ctx, e);
   if (mobilidadeDaAcao(e, ctx) !== 'lenta') return 0;
   const freio = 1 - ctx.balance.habilidades.velocidadeConjurandoLenta;
   return guerreiroConjuraAndando(e, ctx) ? freio * ctx.balance.ajustesClasses.guerreiro.lentidaoConjuracaoMult : freio;
