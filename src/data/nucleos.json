@@ -63,7 +63,7 @@
       "viagem": "brasas",
       "assinatura": "bola_de_fogo_projetil",
       "variante": "brasas"
-     }
+     }, "sobre": { "entrega": { "marca": "chao" } }
     },
     {
      "elemento": "gelo",
@@ -77,7 +77,7 @@
       "viagem": "cristais",
       "assinatura": "estilhaco_de_gelo"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "circulos_atras", "circulos": 3 },
       "velocidadeProjetil": 16
      }
     },
@@ -93,7 +93,7 @@
       "viagem": "relampago",
       "assinatura": "relampago"
      },
-     "sobre": {
+     "sobre": { "entrega": { "trajetoria": "caotica" },
       "velocidadeProjetil": 20,
       "formulaDano": "1d6",
       "recargaMs": 3000
@@ -111,7 +111,7 @@
       "viagem": "sombra",
       "assinatura": "golpe_sombrio"
      },
-     "sobre": {
+     "sobre": { "entrega": { "sentido": "volta" },
       "velocidadeProjetil": 8,
       "alcanceCelulas": 7
      }
@@ -129,7 +129,7 @@
       "assinatura": "arma_bumerangue",
       "projetil": "flecha"
      },
-     "sobre": {
+     "sobre": { "entrega": { "trajetoria": "orbita" },
       "alcanceCelulas": 5,
       "tipoAtaque": "fisico"
      }
@@ -196,7 +196,7 @@
       "camera": "forte",
       "assinatura": "explosao_de_fogo",
       "variante": "brasas"
-     }
+     }, "sobre": { "entrega": { "trajetoria": "parabola" } }
     },
     {
      "elemento": "raio",
@@ -210,7 +210,7 @@
       "camera": "leve",
       "assinatura": "mergulho_do_trovao"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "ceu" },
       "conjuracaoMs": 1100,
       "formulaDano": "2d8"
      }
@@ -225,7 +225,7 @@
       "impacto": "estrelas",
       "som": "psiquico",
       "assinatura": "mente_partida"
-     }
+     }, "sobre": { "entrega": { "permanencia": "erupcao" } }
     },
     {
      "elemento": "sagrado",
@@ -237,7 +237,7 @@
       "impacto": "sagrado",
       "som": "sagrado",
       "assinatura": "chuva_de_estrelas"
-     }
+     }, "sobre": { "entrega": { "origem": "sob_alvo" } }
     },
     {
      "elemento": "fisico",
@@ -251,7 +251,7 @@
       "camera": "leve",
       "assinatura": "abalo_sismico"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "chao" },
       "alcanceCelulas": 5,
       "tipoAtaque": "fisico"
      }
@@ -318,7 +318,7 @@
       "assinatura": "lanca_chamas",
       "variante": "brasas"
      },
-     "sobre": {
+     "sobre": { "entrega": { "cadencia": "rajada", "duracaoMs": 1500 },
       "alcanceCelulas": 3,
       "formulaDano": "2d8",
       "recargaMs": 6300
@@ -334,7 +334,7 @@
       "impacto": "cristais",
       "som": "gelo",
       "assinatura": "cone_de_gelo"
-     }
+     }, "sobre": { "entrega": { "cadencia": "feixe", "duracaoMs": 2000 } }
     },
     {
      "elemento": "raio",
@@ -362,7 +362,7 @@
       "impacto": "sagrado",
       "som": "sagrado",
       "assinatura": "lanca_radiante"
-     }
+     }, "sobre": { "entrega": { "cadencia": "feixe", "duracaoMs": 2500 } }
     }
    ]
   },
@@ -441,7 +441,7 @@
       "som": "trevas",
       "viagem": "sombra",
       "assinatura": "corrente_sombria"
-     }
+     }, "sobre": { "entrega": { "trajetoria": "espiral" } }
     },
     {
      "elemento": "veneno",
@@ -454,7 +454,7 @@
       "som": "veneno",
       "viagem": "bolhas",
       "assinatura": "peste"
-     }
+     }, "sobre": { "entrega": { "corpo": "graos" } }
     },
     {
      "elemento": "psiquico",
@@ -467,7 +467,7 @@
       "som": "psiquico",
       "viagem": "runas",
       "assinatura": "eco_arcano"
-     }
+     }, "sobre": { "entrega": { "permanencia": "pulsa" } }
     }
    ]
   },
@@ -709,7 +709,7 @@
       "impacto": "cristais",
       "som": "gelo",
       "assinatura": "nova_glacial"
-     }
+     }, "sobre": { "entrega": { "marca": "chao" } }
     },
     {
      "elemento": "raio",
@@ -2657,7 +2657,7 @@
       "assinatura": "meteoro",
       "variante": "brasas"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "ceu", "marca": "chao" },
       "raioArea": 1,
       "formulaDano": "2d6"
      }
@@ -2672,7 +2672,7 @@
       "impacto": "cristais",
       "som": "gelo",
       "assinatura": "tempestade_de_gelo"
-     }
+     }, "sobre": { "entrega": { "origem": "ceu", "corpo": "graos" } }
     },
     {
      "elemento": "raio",
@@ -2685,7 +2685,7 @@
       "som": "raio",
       "camera": "leve",
       "assinatura": "tempestade_de_raios"
-     }
+     }, "sobre": { "entrega": { "origem": "ceu", "cadencia": "salva", "quantidade": 4 } }
     },
     {
      "elemento": "veneno",
@@ -2698,7 +2698,7 @@
       "som": "veneno",
       "assinatura": "cone_toxico"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "ceu", "marca": "chao" },
       "efeitos": [
        {
         "tipo": "exposto",
@@ -2719,7 +2719,7 @@
       "som": "lamina",
       "assinatura": "chuva_de_laminas"
      },
-     "sobre": {
+     "sobre": { "entrega": { "origem": "ceu", "corpo": "graos" },
       "conjuracaoMs": 600,
       "tipoAtaque": "fisico"
      }

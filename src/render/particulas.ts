@@ -257,6 +257,22 @@ export class SistemaParticulas {
     return { x: p.x, y: p.y - (proj.visao === 'iso' ? CELULA_PX * ALTURA_NO_AR : 0) };
   }
 
+  /**
+   * Marco 49 (21/11/2026, D-194): a célula equivalente a (x, y) erguida `z` células (a parábola, a queda), para as
+   * emissões de quem voa alto saírem na altura dele.
+   */
+  elevar(x: number, y: number, z: number): { x: number; y: number } {
+    if (Math.abs(z) < 1e-3) return { x, y };
+    const proj = this.projecao();
+    const iso = proj.visao === 'iso';
+    const c0 = centroDaCelula(x, y);
+    const c1 = iso ? centroDaCelula(x + 1, y + 1) : centroDaCelula(x, y + 1);
+    const porUnidade = proj.projetar(c1.x, c1.y).y - proj.projetar(c0.x, c0.y).y;
+    if (porUnidade <= 1e-6) return { x, y };
+    const k = (z * CELULA_PX * 0.6) / porUnidade;
+    return iso ? { x: x - k, y: y - k } : { x, y: y - k };
+  }
+
   /** O centro de uma célula no chão (sem a altura do corpo): as marcas e o que brota. */
   noChao(x: number, y: number): { x: number; y: number } {
     const c = centroDaCelula(x, y);

@@ -92,7 +92,7 @@ export function lancarEntrega(estado: EstadoJogo, ctx: ContextoSimulacao, ator: 
     areaNaHora(estado, ctx, ator, hab, base, de, mira, saida);
     return true;
   }
-  const plano = planejarTiros(e, r, de, hab.politicaImpacto === 'area' ? mira : destino, base.acaoId);
+  const plano = planejarTiros(e, r, de, hab.politicaImpacto === 'area' ? mira : destino, base.acaoId, hab.politicaImpacto === 'area' ? hab.raioArea : 0);
   const criados = plano.map((t) => criarProjetil(estado, ctx, ator, hab, base.acaoId, base.fonte, t, saida));
   ligarPares(criados, plano);
   return true;

@@ -67,7 +67,7 @@ export function pontosDeOrigem(e: Entrega, r: RegrasEntrega, partida: Celula, de
 }
 
 /** O plano dos projéteis de um lançamento (origens × par convergente × salva × grãos), com o teto do balance. */
-export function planejarTiros(e: Entrega, r: RegrasEntrega, partida: Celula, destino: Celula, semente: number): TiroPlanejado[] {
+export function planejarTiros(e: Entrega, r: RegrasEntrega, partida: Celula, destino: Celula, semente: number, raioArea = 0): TiroPlanejado[] {
   const tipo: TipoRota = e.origem === 'ceu' ? 'queda' : e.origem === 'sob_alvo' ? 'coluna' : e.trajetoria;
   const origens = e.origem === 'ceu' || e.origem === 'sob_alvo' ? [{ x: destino.x, y: destino.y }] : pontosDeOrigem(e, r, partida, destino);
   const lados: (1 | -1)[] = e.trajetoria === 'convergente' ? [1, -1] : [1];
@@ -83,8 +83,13 @@ export function planejarTiros(e: Entrega, r: RegrasEntrega, partida: Celula, des
         const desvio = graos > 1 ? (hash01(semente, plano.length + 7) * 2 - 1) * r.graos.espalhamento : 0;
         const saiEmMs = k * r.salva.intervaloMs + g * (graos > 1 ? r.graos.intervaloMs : 0);
         const inicio = plano.length;
+        // Os grãos que caem do céu ou sobem do círculo se espalham pela área (cada um cai numa célula).
+        const espalha = graos > 1 && (tipo === 'queda' || tipo === 'coluna') ? Math.max(1, raioArea) : 0;
+        const para = espalha > 0
+          ? { x: destino.x + Math.round((hash01(semente, plano.length + 31) * 2 - 1) * espalha), y: destino.y + Math.round((hash01(semente, plano.length + 53) * 2 - 1) * espalha) }
+          : destino;
         for (const lado of lados) {
-          plano.push({ de, para: destino, tipo, lado, desvio, mult: multBase, saiEmMs, ...(lados.length > 1 && { par: lado === 1 ? inicio + 1 : inicio }) });
+          plano.push({ de: espalha > 0 ? para : de, para, tipo, lado, desvio, mult: multBase, saiEmMs, ...(lados.length > 1 && { par: lado === 1 ? inicio + 1 : inicio }) });
         }
       }
     }

@@ -42,7 +42,7 @@ export const alturaNaRota = (p: Projetil): number => (p.rota ? pontoEm(p.rota, p
 
 /** A área da skill que chega no fim da rota (o céu, o círculo sob o alvo e a magia de área que voa). */
 const chegaEmArea = (p: Projetil, hab: Habilidade): boolean =>
-  hab.politicaImpacto === 'area' || p.rota?.tipo === 'queda' || p.rota?.tipo === 'coluna';
+  (hab.politicaImpacto === 'area' && hab.entrega?.cadencia !== 'rajada') || p.rota?.tipo === 'queda' || p.rota?.tipo === 'coluna';
 
 /** Ainda não fere: o retorno, a magia de área que voa (fora o chão), a queda e a coluna, e a parábola subindo. */
 export function noArDaEntrega(ctx: ContextoSimulacao, p: Projetil, hab: Habilidade | undefined): boolean {
@@ -219,10 +219,11 @@ export function chegar(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, 
   if (chegaEmArea(p, hab)) {
     if (!dono) return;
     const r = ctx.balance.entrega;
-    const extra = p.rota.tipo === 'queda' ? r.ceu.raioExtra : 0;
-    const area: Habilidade = hab.politicaImpacto === 'area'
-      ? { ...hab, raioArea: hab.raioArea + extra }
-      : { ...hab, politicaImpacto: 'area', tipoArea: 'quadrado', raioArea: extra };
+    // Cada grão fere só a célula onde cai; a linha e o cone que chegam voando viram o quadrado do ponto.
+    const graos = hab.entrega?.corpo === 'graos';
+    const extra = p.rota.tipo === 'queda' && !graos ? r.ceu.raioExtra : 0;
+    const raio = (hab.politicaImpacto === 'area' && hab.tipoArea === 'quadrado' && !graos ? hab.raioArea : 0) + extra;
+    const area: Habilidade = { ...hab, politicaImpacto: 'area', tipoArea: 'quadrado', raioArea: raio };
     impactoEmArea(estado, ctx, dono, area, { acaoId: p.acaoId, fonte: fonteDoProjetil(estado, p), hab: area, mira: destino }, destino, destino, saida);
   }
   deixarNoChao(estado, ctx, hab, destino, { id: p.donoId, equipe: p.equipeDono }, p.acaoId, fonteDoProjetil(estado, p), saida);

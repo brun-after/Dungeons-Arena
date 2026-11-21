@@ -28,6 +28,7 @@ import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import { encarnacaoDe, type ElementoEncarnado } from '../combat/encarnacao';
+import { pontoEm } from '../combat/entrega/rota';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
@@ -320,14 +321,18 @@ export class EfeitosDeHabilidade {
       this.explodirArea(a);
     }
     for (const pr of estado.projeteis) {
+      // Marco 49 (21/11/2026, D-194): o tiro da salva que ainda espera não deixa rastro; da nuvem de grãos, um em três.
+      if ((pr.saiEm ?? 0) > estado.tick || (pr.rota && this.o.habilidades(pr.chave)?.entrega?.corpo === 'graos' && pr.id % 3 !== 0)) continue;
       if (agoraMs - (this.ultimoRastro.get(pr.id) ?? 0) < INTERVALO_RASTRO_MS) continue;
       this.ultimoRastro.set(pr.id, agoraMs);
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
+      // D-194: o rastro sai na altura da rota (a parábola sobe, a queda desce).
+      const no = pr.rota ? p.elevar(pr.x, pr.y, pontoEm(pr.rota, pr.t ?? 0).z) : pr;
       // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
-      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), pr.x, pr.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), no.x, no.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, no.x, no.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
-      if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', pr.x, pr.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
+      if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', no.x, no.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
     if (this.carregados.size > 0) for (const id of this.carregados) if (!estado.projeteis.some((pr) => pr.id === id)) this.carregados.delete(id);

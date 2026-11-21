@@ -1,6 +1,6 @@
 // Ponto de entrada do cliente: registra o Service Worker no bootstrap (§3.8; no app Android, não há) e escolhe a tela pela URL:
 //   (nada)            menu inicial
-//   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar)
+//   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar; com &skills=a,b, essas na barra)
 //   ?jogo=grupo&slot=N&criar=1 | &codigo=XXXXXX   campanha cooperativa (marco 15)
 //   ?jogo=mundo       o Mundo aberto (marco 29): personagens no servidor, regiões, vilas e dungeons
 //   ?arena=online     lobby e arena no servidor real (marco 5)
@@ -96,6 +96,8 @@ function rotear(raiz: HTMLElement): void {
         slot: slot === 0 ? null : slot,
         ...(faseNova && { faseNova }),
         ...(classe && { classe }),
+        // Marco 49 (21/11/2026, D-194): `skills=a,b` põe essas skills na barra do jogo sem salvar (rever as entregas).
+        ...(slot === 0 && params.get('skills') && { skills: (params.get('skills') ?? '').split(',').filter(Boolean).slice(0, 6) }),
         ...(ehDificuldade(dificuldade) && { dificuldade }),
       });
     } else void mostrarSlots(raiz);
