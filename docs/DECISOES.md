@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.45 · **Data:** 20/11/2026
+**Versão:** 1.46 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.46 (21/11/2026)**: D-195: o psíquico toma a mente (enfeitiçado, confuso, aterrorizado, iludido, sem visão). D-194: marco 49, o motor de entrega em sete eixos (origem, trajetória, cadência, marca, permanência, sentido e corpo), com canal e feixe no núcleo e as formas na tela.
 > - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
 > - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
 > - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
@@ -6188,3 +6189,84 @@ pela resistência do alvo. Os números dos estados saíam brancos, iguais aos do
 
 **Resultado.** 202/202 metas em docs/BALANCEAMENTO.md. O PvP do Aventureiro contra ele mesmo fica em 5,5 s (meta por
 classe de 5 s, D-188); o teste de ritmo passa a usar o piso por classe, como o relatório.
+
+## D-194 — Marco 49: as formas de lançamento, um motor de entrega em sete eixos (21/11/2026)
+
+**Problema.** Todo projétil andava em linha reta. O "parabólico" (`porCima`) era reto, o "curvo" (`desvioGraus`) só
+girava a saída, e não havia feixe nem canalização no núcleo. As skills se diferenciavam pelo número e pelo efeito, não
+pela forma, e a fusão do marco 50 precisa de formas para combinar.
+
+**Decisão.** A skill ganha um campo `entrega` (dados, lido por `lerEntrega` em `combat/entrega/tipos.ts`), com sete
+eixos que se combinam livremente:
+
+| Eixo | Valores |
+|---|---|
+| Origem | mão, chão (brota e corre até o alvo), céu (cai), sob o alvo (coluna), círculos atrás, círculos à frente |
+| Trajetória | reta, parábola, espiral, par convergente, caótica (dobras pela semente), órbita |
+| Cadência | golpe, salva (N tiros em intervalo), rajada (canal que dispara), feixe (canal contínuo) |
+| Marca | nenhuma, chão amaldiçoado no impacto, trilha pelo caminho |
+| Permanência | nenhuma, gira em volta do alvo, pulsa no alvo, erupção periódica sob o alvo |
+| Sentido | ida, volta (fere e traz vida ou escudo), invocação no usuário, invocação no alvo |
+| Corpo | médio, grãos (muitos pequenos), grande (lento, pesado, respinga e empurra) |
+
+- **Uma rota só, no núcleo e na tela.** `pontoEm(rota, t)` (`combat/entrega/rota.ts`) dá `{x, y, z}` determinístico
+  pela semente do projétil. O núcleo anda o `t` pelo comprimento da curva e colide pelo ponto; a tela desenha o mesmo
+  ponto (`render/entrega-tela.ts`), com o `z` erguendo o corpo e a sombra no chão. O que voa alto (parábola antes de
+  80% do caminho, o que cai do céu) passa por cima de quem está no caminho e das paredes.
+- **O canal fica na entidade** (`Entidade.canal`), então viaja nos patches sem mensagem nova. A rajada dispara um
+  projétil por pulso e o feixe acerta o primeiro hostil da linha (ou todos, se perfura). A **exposição** soma
+  `exposicaoPorPulsoPct` por pulso no mesmo alvo, até `exposicaoMaxPct`, e multiplica o pulso. Custa mana por pulso
+  depois do primeiro; acaba no fim do tempo, ao soltar a tecla de novo, ao começar outra ação, ao ser impedido, com o
+  alvo morto ou fora do alcance. Quem canaliza anda mais devagar (`andarPct`).
+- **Marca e erupção são solos** (`combat/solos.ts`, `Solo.entrega`); gira e pulsa são projéteis presos ao alvo
+  (`perm`); a volta é um projétil com `traz`. O impacto em área saiu de `acao.ts` para `combat/impacto-area.ts`.
+- **O poder se divide, não se soma.** Salvas, grãos, círculos e pares dividem o golpe (N × (100/N + extra)%); a
+  parábola, a caótica, o chão e a marca custam um pouco do golpe direto pelo que dão; o corpo grande bate 260% mas é
+  lento. Todos os números em `balance.entrega` (e `maxTiros` 24 por lançamento).
+- **O catálogo já usa as formas.** Vinte e duas variantes de `nucleos.json` ganham `sobre.entrega` (bola de fogo em
+  parábola, trovão do céu, lança de gelo em três círculos atrás, sopro gélido em feixe, granizo em grãos do céu,
+  explosão sagrada sob o alvo, cadeia de trevas em espiral, entre outras). As skills sem `entrega` seguem idênticas.
+
+**Na tela.** Círculos rúnicos nos pontos de origem, sombra da parábola e da queda, aviso rúnico de onde o céu cai,
+coluna de luz sob o alvo, feixe em três camadas na cor do elemento que respira e engrossa com a exposição, anel da
+rajada, anel que gira e onda que pulsa, chão tomado pelo elemento e a erupção. Grãos deixam rastro só em um de cada
+três. Para rever, `?jogo=campanha&slot=0&skills=a,b` põe essas skills na barra do jogo sem salvar.
+
+**Ajustes depois do teste na tela (21/11/2026).**
+- **Sem clarão.** O chão da entrega deixou de repetir o acerto inteiro da skill a cada pulso, e a área que voa estoura
+  quando chega, não no lançamento (os grãos não estouram). O acerto inteiro de uma entrega sai uma vez por alvo a cada
+  0,9 s. As luzes de magia (`ui/luzes-magia.ts`) deixavam um rastro por quadro por projétil; agora é um a cada 60 ms, o
+  grão ilumina 20%, o tiro que espera não ilumina e o clarão do mesmo golpe no mesmo alvo se renova em vez de empilhar.
+- **O chão com a matéria do elemento** (`render/chao-da-entrega.ts`): o gelo congela e levanta cristais que crescem do
+  centro para fora; a terra, lascas de pedra; o fogo racha em brasa com chamas baixas; o veneno borbulha; a erupção
+  acende as runas e sobe um jorro a cada pulso.
+- **A pose dura a magia.** Enquanto a magia lançada vive (o canal, os projéteis no ar ou esperando, ou 0,35 s numa área
+  instantânea; até 3 s), quem lançou segue na pose de conjurar, virado para o alvo mesmo andando para outro lado
+  (`render/quadros-personagem.ts`: `magiaViva`, `anguloDaMagia`).
+- **O feixe troca de alvo e não apaga quando o alvo cai.** Escolher outro alvo (ou pedir o feixe num alvo diferente)
+  troca o alvo no alcance; se o alvo cai, o feixe salta para o hostil mais perto de onde ele caiu, até
+  `feixe.saltoRaio` (3) e dentro do alcance. Sem ninguém, acaba.
+- **Balanceamento.** O que fica no alvo parado (o chefe) dobrava o golpe: a marca somava 210%, a erupção 200%, o pulso
+  178% e o giro 190%. Os pulsos caíram (marca 8%, erupção 12%, pulsa 8%, gira 5% por volta), e as divisões perderam o
+  extra (círculos 4%, salva 3%, grão 11%).
+
+## D-195 — Marco 49: o psíquico toma a mente (21/11/2026)
+
+**Problema.** O psíquico só ecoava o golpe no exposto. Era o único elemento sem um efeito que mudasse a luta.
+
+**Decisão.** O golpe psíquico que fere tem `mente.chancePct` (30%) de tomar a mente do alvo, com espera por alvo de
+`mente.intervaloMs` (5 s). O estado é sorteado entre cinco (`combat/mente.ts`, números em `balance.elementosFerem.mente`):
+
+| Estado | O que faz |
+|---|---|
+| Enfeitiçado | Vira contra os seus: a relação (`modos/relacao.ts`) fica hostil aos antigos aliados e neutra aos de fora. A IA ataca os aliados, que revidam. |
+| Confuso | Só anda (a IA vaga), sem agir. |
+| Aterrorizado | Foge de quem o aterrorizou, sem agir. |
+| Iludido | As skills ofensivas caem nele mesmo. O jogador iludido que usa uma skill seleciona a si mesmo. |
+| Sem visão | Ninguém é alvo para ele (`alvoOfensivoValido`); a IA vaga sem atacar, e na tela do jogador os outros somem. |
+
+- A hostilidade continua decidida só por `relacao()`: o enfeitiçado vira a relação ali, pelo estado ativo, sem olhar o
+  tipo da entidade.
+- Entre personagens, o estado dura metade (`entrePersonagensPct`).
+- A natureza da criatura resiste pelo elemento, como antes (o constructo, 50% de resistência ao psíquico, é ferido
+  menos; a mente, fraca, mais).

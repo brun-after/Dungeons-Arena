@@ -1,5 +1,6 @@
 import type { CampoTatico } from '../combat/estado-tatico';
 import type { EstadoVariacao } from '../combat/projeteis-variacoes';
+import type { Rota } from '../combat/entrega/rota';
 import type { Solo } from '../combat/solos';
 import type { TerrenoVivo } from '../world/ambiente-tipos';
 // Estado raiz da simulação (§3.3). Um único objeto tipado, só com dados: sem classes,
@@ -61,6 +62,22 @@ export interface Projetil {
   curados?: EntidadeId[];
   /** Marco 27 (29/10/2026, D-126): o estado da variação do básico em voo (bumerangue, ricochetes, órbita…). */
   var?: EstadoVariacao;
+  /** Marco 49 (21/11/2026, D-194): a rota da entrega (combat/entrega/rota.ts) e o progresso nela (0 a 1). */
+  rota?: Rota;
+  t?: number;
+  /** D-194: a salva e os grãos esperam na mão até este tick. */
+  saiEm?: number;
+  /** D-194: o retorno (alvo ou servo para quem lançou) não fere; traz vida ou escudo ao chegar. */
+  traz?: { tipo: 'vida' | 'escudo'; valor: number };
+  /** D-194: o giro e o pulso no alvo depois do acerto. */
+  perm?: { alvoId: EntidadeId; ateTick: number; proximoTick: number; voltas: number };
+  /** D-194: o par convergente (o irmão) e o alvo e o tick em que o irmão acertou. */
+  parId?: number;
+  parAlvoId?: EntidadeId;
+  parTick?: number;
+  /** D-194: a última célula da trilha. */
+  trilhaX?: number;
+  trilhaY?: number;
 }
 
 /**
@@ -312,7 +329,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     rng: clonarRng(estado.rng),
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
-    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos], ...(p.curados && { curados: [...p.curados] }), ...(p.var && { var: { ...p.var } }) })),
+    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos], ...(p.curados && { curados: [...p.curados] }), ...(p.var && { var: { ...p.var } }), ...(p.rota && { rota: { ...p.rota } }), ...(p.traz && { traz: { ...p.traz } }), ...(p.perm && { perm: { ...p.perm } }) })),
     objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),

@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.13 · **Data:** 20/11/2026
+**Versão:** 0.14 · **Data:** 21/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -8,7 +8,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 ## Comandos
 
-- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`,
+- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot (`&slot=0&skills=a,b` põe essas skills na barra, marco 49), `?arena=online`, `?arena=loopback`,
   `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?jogo=mundo` o Mundo (marco 29, guia em docs/MUNDO.md),
   `?bench=carga|padrao|trocas` benchmarks, `?bench=mundo&regiao=<id>&x=&y=&tocha=1` o Mundo local sem servidor (marco 43); no Mundo, `?hora=N` adianta o relógio do dia N minutos e
   `MUNDO_HORA_MIN` faz o mesmo no servidor, marco 42)
@@ -54,6 +54,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Elementos que ferem** (marco 48, D-193): a natureza da criatura (fraqueza, imunidade, reação) vem de
   `naturezas.json`, e o que cada elemento faz no golpe, de `combat/elementos-ferem.ts` com os números em
   `balance.elementosFerem`. Estado novo de dano por tempo passa por `escalarEstado` e pelo `fatorDoTique`.
+- **Formas de lançamento em dados** (marco 49, D-194): a forma de uma skill é o campo `entrega` (`combat/entrega/`),
+  nunca `if` por skill; a posição de um projétil com rota vem de `pontoEm`, a mesma no núcleo e na tela.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

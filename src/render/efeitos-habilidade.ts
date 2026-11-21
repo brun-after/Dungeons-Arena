@@ -18,6 +18,7 @@
 // saem dela, com silhuetas (a corrente que estica, a bola de fogo, o relâmpago) e marcas no chão. A ultimate conjura no
 // círculo com a runa da classe, e o puxão, o empurrão e o arremesso deslizam o corpo (evento `deslocado`).
 
+import { areaVoa } from '../combat/entrega/tipos';
 import { ligarGestos } from './vfx/gestos';
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
@@ -28,6 +29,7 @@ import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import { encarnacaoDe, type ElementoEncarnado } from '../combat/encarnacao';
+import { pontoEm } from '../combat/entrega/rota';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
@@ -114,6 +116,9 @@ export interface OpcoesEfeitos {
   perfilVisual?: (atorId: string) => PerfilVisual | null;
 }
 
+/** D-194: o intervalo entre dois acertos inteiros da mesma entrega no mesmo alvo. */
+const ACERTO_DA_ENTREGA_MS = 900;
+
 export class EfeitosDeHabilidade {
   private readonly conjurando = new Map<number, { atorId: string; chave: string; ateTick: number; ultimoMs: number }>();
   /** Ações de área (e as em si mesmo, D-124) esperando o lançamento: de onde saem e onde caem. */
@@ -122,6 +127,13 @@ export class EfeitosDeHabilidade {
   private readonly skillDaAcao = new Map<number, string>();
   private readonly ultimoRastro = new Map<number, number>();
   private readonly ultimaAura = new Map<string, number>();
+  /** D-194: o tick do último pulso de chão de entrega por chave (os golpes dele não repetem a assinatura). */
+  private readonly pulsoDoChao = new Map<string, number>();
+  /** D-194: o tick do último acerto inteiro de uma entrega por chave e alvo (grãos, feixe e órbita não estouram). */
+  private readonly acertoDaEntrega = new Map<string, number>();
+  /** D-194: os projéteis de área que voam, com onde caem; e o tick do último estouro por lançamento. */
+  private readonly chegadas = new Map<number, { chave: string; atorId: string; acaoId: number; origem: PontoVisual; mira: PontoVisual }>();
+  private readonly estourouAcao = new Map<number, number>();
   private ultimaPoeira = 0;
   private ultimoChao = 0;
   /** Posições em células conhecidas no quadro anterior (para eventos de quem já saiu do mundo). */
@@ -154,7 +166,8 @@ export class EfeitosDeHabilidade {
       if (this.skillDaAcao.size > 64) this.skillDaAcao.clear();
       this.skillDaAcao.set(ev.acaoId, ev.chave);
       const classe = this.o.classeDaUltimate?.(ev.habilidadeId, ev.atorId) ?? null;
-      if (h && ator && (h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio')) {
+      // D-194: a área que voa (o céu, a parábola, o chão) estoura quando chega, não no lançamento (projetilFim).
+      if (h && ator && (h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio') && !(h.entrega && areaVoa(h.entrega))) {
         this.areas.set(ev.acaoId, { chave: ev.chave, atorId: lancador, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick, ...(h.politicaImpacto === 'proprio' ? { emSi: true } : {}), ...(classe ? { ultimate: true } : {}) });
       }
       if (!h) return;
@@ -166,6 +179,7 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(ev.chave);
       const alvo = pos(ev.alvoId);
       if (!h || !alvo) return;
+      if (h.entrega && this.repeteEntrega(ev.chave, ev.alvoId, ev.tick)) return;
       const v = visualDe(h);
       // 06/11/2026: as skills do falcão (o grito, por exemplo) saem do falcão, onde ele está desenhado (no voo), não do dono
       const falcao = h.tags.includes('falcao') ? estado().entidades.find((e) => e.invocacao?.companheiro === true && e.invocacao.donoId === ev.fonteId && !e.morto) : undefined;
@@ -264,7 +278,7 @@ export class EfeitosDeHabilidade {
       if (p) this.o.particulas.emitir('estrelas', p.x, p.y, COR_MIRA);
     });
     // Marco 27 (D-126): o solo amaldiçoado e a runa.
-    ligarSolos(bus, estado, this.o.diretor, (chave) => this.o.habilidades(chave));
+    ligarSolos(bus, estado, this.o.diretor, (chave) => this.o.habilidades(chave), (chave, tick) => this.pulsoDoChao.set(chave, tick));
     // 07/11/2026 (D-136): as lanças de osso dos mortos do Necromante.
     ligarLancas(bus, this.o.diretor, (chave) => this.o.habilidades(chave));
     bus.on('projetilLancado', (ev) => {
@@ -276,6 +290,17 @@ export class EfeitosDeHabilidade {
       const falcao = estado().entidades.find((x) => !x.morto && x.invocacao?.companheiro === true && x.invocacao.donoId === ev.donoId);
       const p = falcao && dono && ev.habilidadeId !== dono.ataqueBasico ? pos(falcao.id) : null;
       if (p) this.o.particulas.emitir('vento', p.x, p.y, COR_PENAS);
+      this.guardarChegada(ev.projetilId, ev.chave, ev.donoId, ev.acaoId, estado());
+    });
+    bus.on('projetilFim', (ev) => {
+      const c = this.chegadas.get(ev.projetilId);
+      if (!c) return;
+      this.chegadas.delete(ev.projetilId);
+      // Uma explosão por lançamento a cada ACERTO_DA_ENTREGA_MS (a salva do céu não empilha quatro estouros).
+      const ultimo = this.estourouAcao.get(c.acaoId);
+      if (ev.motivo === 'parede' || (ultimo !== undefined && (ev.tick - ultimo) * DT_MS < ACERTO_DA_ENTREGA_MS)) return;
+      this.estourouAcao.set(c.acaoId, ev.tick);
+      this.explodirArea({ chave: c.chave, atorId: c.atorId, origem: c.origem, mira: c.mira });
     });
   }
 
@@ -320,14 +345,18 @@ export class EfeitosDeHabilidade {
       this.explodirArea(a);
     }
     for (const pr of estado.projeteis) {
+      // Marco 49 (21/11/2026, D-194): o tiro da salva que ainda espera não deixa rastro; da nuvem de grãos, um em três.
+      if ((pr.saiEm ?? 0) > estado.tick || (pr.rota && this.o.habilidades(pr.chave)?.entrega?.corpo === 'graos' && pr.id % 3 !== 0)) continue;
       if (agoraMs - (this.ultimoRastro.get(pr.id) ?? 0) < INTERVALO_RASTRO_MS) continue;
       this.ultimoRastro.set(pr.id, agoraMs);
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
+      // D-194: o rastro sai na altura da rota (a parábola sobe, a queda desce).
+      const no = pr.rota ? p.elevar(pr.x, pr.y, pontoEm(pr.rota, pr.t ?? 0).z) : pr;
       // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
-      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), pr.x, pr.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), no.x, no.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, no.x, no.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
-      if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', pr.x, pr.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
+      if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', no.x, no.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
     if (this.carregados.size > 0) for (const id of this.carregados) if (!estado.projeteis.some((pr) => pr.id === id)) this.carregados.delete(id);
@@ -375,6 +404,35 @@ export class EfeitosDeHabilidade {
     const estilo = perfil?.eixo ? { eixo: perfil.eixo, faixa: perfil.faixaEstilo } : null;
     const dominante = perfil?.dominante && perfil.dominante.runa !== h.runa ? perfil.dominante : null;
     this.o.diretor.ultimateDeQuem(classe, { centro, raio, cor, intensidade: (h.faixaRuna ?? 0) / 10 }, estilo, dominante);
+  }
+
+  /**
+   * Marco 49 (21/11/2026, D-194): a entrega acerta muitas vezes (grãos, salva, pulsos do feixe, chão e órbita). O
+   * acerto inteiro da assinatura sai uma vez por alvo a cada `ACERTO_DA_ENTREGA_MS`; o pulso do chão nunca o repete
+   * (o chão desenha a própria matéria em entrega-tela.ts). Sem isso, os acertos se somam num clarão.
+   */
+  /**
+   * D-194: a área que voa guarda onde vai cair, para estourar a assinatura da área quando o projétil chegar. Os grãos
+   * não estouram (cada um é pequeno; o acerto deles já aparece), nem o que fica no alvo ou volta.
+   */
+  private guardarChegada(projetilId: number, chave: string, atorId: string, acaoId: number, estado: EstadoJogo): void {
+    const h = this.o.habilidades(chave);
+    if (!h?.entrega || h.politicaImpacto !== 'area' || !areaVoa(h.entrega) || h.entrega.corpo === 'graos') return;
+    const p = estado.projeteis.find((x) => x.id === projetilId);
+    if (!p?.rota || p.traz || p.perm) return;
+    if (this.chegadas.size > 64) this.chegadas.clear();
+    if (this.estourouAcao.size > 64) this.estourouAcao.clear();
+    this.chegadas.set(projetilId, { chave, atorId, acaoId, origem: { x: p.rota.ox, y: p.rota.oy }, mira: { x: p.rota.dx, y: p.rota.dy } });
+  }
+
+  private repeteEntrega(chave: string, alvoId: string, tick: number): boolean {
+    if (this.pulsoDoChao.get(chave) === tick) return true;
+    const k = `${chave}|${alvoId}`;
+    const ultimo = this.acertoDaEntrega.get(k);
+    if (ultimo !== undefined && (tick - ultimo) * DT_MS < ACERTO_DA_ENTREGA_MS) return true;
+    if (this.acertoDaEntrega.size > 256) this.acertoDaEntrega.clear();
+    this.acertoDaEntrega.set(k, tick);
+    return false;
   }
 
   private desenharArea(a: { chave: string; atorId: string; origem: PontoVisual; mira: PontoVisual; emSi?: boolean; ultimate?: boolean }, h: Habilidade, nome: AssinaturaVisual, cor: number, escala: number, agoraPos: PontoVisual): void {

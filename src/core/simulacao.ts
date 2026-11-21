@@ -29,6 +29,7 @@ import { dispararGanchosDosEventos } from '../progression/ganchos-do-portador';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { processarSolos } from '../combat/solos';
+import { processarCanais } from '../combat/entrega/canal';
 import { vivo } from '../entities/entidade';
 import { skinValida } from '../entities/skins';
 import { filtroDeAtivacao, processarIa } from '../entities/ia';
@@ -88,6 +89,8 @@ export function simular(
   processarTracos(estado, ctx, acordada, saida);
   processarChefes(estado, ctx, acordada, saida);
   processarAcoes(estado, ctx, saida);
+  // Marco 49 (21/11/2026, D-194): a rajada e o feixe pulsam.
+  processarCanais(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   // Marco 27 (D-126): o solo amaldiçoado e a runa pulsam.
   processarSolos(estado, ctx, saida);

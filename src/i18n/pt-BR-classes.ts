@@ -15,6 +15,13 @@ export const textosClasses = {
   'desc.efeito.petrificado': 'Virou pedra: não age nem anda por {s} s, e o dano recebido cai {pct}%',
   'efeito.aterrorizado': 'Aterrorizado',
   'desc.efeito.aterrorizado': 'Foge de quem aterrorizou e não ataca por {s} s',
+  // Marco 49 (D-195): a mente tomada pelo psíquico.
+  'efeito.enfeiticado': 'Enfeitiçado',
+  'desc.efeito.enfeiticado': 'Vira contra os aliados e ignora os inimigos por {s} s',
+  'efeito.iludido': 'Iludido',
+  'desc.efeito.iludido': 'As próprias skills ofensivas caem nele mesmo por {s} s',
+  'efeito.sem_visao': 'Sem visão',
+  'desc.efeito.sem_visao': 'Não enxerga ninguém por {s} s: todos os alvos somem para ele',
   'efeito.confuso': 'Confuso',
   'desc.efeito.confuso': 'Vaga sem rumo e não ataca por {s} s',
   'efeito.desafiado': 'Desafiado',

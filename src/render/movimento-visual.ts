@@ -1,12 +1,15 @@
 // Marco 40 (13/11/2026, D-164): a transparência de base do corpo desenhado. A altura do voo e do salto, a névoa e a
 // montaria saem de render/movimento/corpo-movimento.ts (o ajuste do corpo), que multiplica esta transparência.
 
+import { semVisao } from '../combat/mente';
 import type { Entidade } from '../entities/entidade';
 import type { ModoDeJogo } from '../modos/modo';
 import { relacao } from '../modos/relacao';
 
 /** D-170: o invisível (o Arqueiro camuflado) some para o jogador hostil; o aliado o vê translúcido. */
 export function sumidoPara(e: Entidade, local: Entidade | undefined, tick: number, modo: ModoDeJogo): boolean {
+  // Marco 49 (21/11/2026, D-195): sem visão, todos os outros somem para o jogador.
+  if (local && local.id !== e.id && semVisao(local, tick)) return true;
   return e.invisivelAteTick > tick && !!local && local.id !== e.id && relacao(local, e, modo) === 'hostil';
 }
 
