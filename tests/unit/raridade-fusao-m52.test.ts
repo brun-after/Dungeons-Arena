@@ -9,8 +9,8 @@ import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { criarRng } from '../../src/core/rng';
 import { criarJogador } from '../../src/entities/fabrica';
 import { fundir, montarFusao } from '../../src/progression/alquimia';
-import { chancesDeRaridade, sortearRaridade, substituirFusaoAntiga } from '../../src/progression/fusao-raridade';
-import { avancarEstudos } from '../../src/progression/habilidades-personagem';
+import { chancesDeRaridade, sortearRaridade, substituirFusaoAntiga, tentativasDaFormula } from '../../src/progression/fusao-raridade';
+import { avancarEstudos, subirRank } from '../../src/progression/habilidades-personagem';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 const obter = <T,>(v: T | undefined | null): T => {
@@ -140,5 +140,47 @@ describe('refazer a mesma fórmula (D-198)', () => {
     expect(c.b.barra[2]).toBe(`${BASE}__g2`);
     expect(c.b.compreensao[`${BASE}__g2`]).toBe(40);
     expect(c.b.compreensao[BASE]).toBeUndefined();
+  });
+});
+
+describe('reaprender e tentar de novo (D-198)', () => {
+  it('a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez, até nascer compreendida', () => {
+    const c = mago({ explosao_fisico: 1, explosao_raio: 1 });
+    c.b.pontosHabilidade = 0;
+    expect(fundir(c.estado, c.j, ctx, { partes: ['explosao_fisico', 'explosao_raio'], runas: [], material: null }, c.saida)).toBe(true);
+    expect(c.b.consumidas?.explosao_fisico).toBe(1);
+    // Mesmo com o estudo da fusão em curso e sem ponto.
+    expect(subirRank(c.j, ctx, 'explosao_fisico', undefined, c.estado.tick, c.saida)).toBe(true);
+    expect(c.b.conhecidas.find((k) => k.id === 'explosao_fisico')?.rank).toBe(1);
+    expect(c.b.pontosHabilidade).toBe(0);
+    expect(c.b.compreensao?.explosao_fisico).toBe(r.reaprender.compreensaoPorVezPct);
+    c.b.consumidas = { ...c.b.consumidas, explosao_raio: 5 };
+    expect(subirRank(c.j, ctx, 'explosao_raio', undefined, c.estado.tick, c.saida)).toBe(true);
+    expect(c.b.compreensao?.explosao_raio).toBe(100);
+  });
+
+  it('cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível, até o teto', () => {
+    const zero = chancesDeRaridade(r, { inteligencia: 10 }, 0);
+    const tres = chancesDeRaridade(r, { inteligencia: 10 }, 3);
+    expect(tres[1]).toBeCloseTo(zero[1] + 3 * r.raridade.tentativa.primeiroPct, 5);
+    expect(tres[2]).toBeCloseTo(zero[2] + 3 * r.raridade.tentativa.segundoPct, 5);
+    const muitas = chancesDeRaridade(r, { inteligencia: 10 }, 100);
+    expect(muitas[1]).toBe(r.raridade.tentativa.primeiroTetoPct);
+    expect(muitas[1] + muitas[2] + muitas[3]).toBeCloseTo(100, 5);
+    const c = mago({ explosao_fisico: 1, explosao_raio: 1 });
+    fundir(c.estado, c.j, ctx, { partes: ['explosao_fisico', 'explosao_raio'], runas: [], material: null }, c.saida);
+    expect(tentativasDaFormula(c.b, `${BASE}__g1`)).toBe(1);
+  });
+
+  it('um resultado inferior (ou igual) nunca toma o lugar do superior', () => {
+    const c = mago({});
+    c.b.conhecidas.push({ id: `${BASE}__g1`, rank: 2, caminhos: [] });
+    expect(substituirFusaoAntiga(c.b, `${BASE}__g2`, 4)).toBe('descartada');
+    expect(substituirFusaoAntiga(c.b, BASE, 4)).toBe('descartada');
+    expect(c.b.conhecidas.map((k) => k.id).filter((id) => id.startsWith('f__'))).toEqual([`${BASE}__g1`]);
+    // Nem quando um estudo de nível pior termina.
+    c.b.estudo = { id: `${BASE}__g2`, totalTicks: 1, restanteTicks: 1, aceleracoes: 0, velocidade12: 12, fracao12: 0 };
+    avancarEstudos(c.estado, ctx, c.saida);
+    expect(c.b.conhecidas.map((k) => k.id).filter((id) => id.startsWith('f__'))).toEqual([`${BASE}__g1`]);
   });
 });

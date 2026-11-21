@@ -97,7 +97,9 @@ export const textosAlquimia = {
   'runa.atual': 'Encaixe: {nome}',
   // Marco 52 (21/11/2026, D-198): os níveis de raridade da fusão.
   'alquimia.raridades': 'Raridade (pela Inteligência): 3º nível {p3}% · 2º nível {p2}% (+{b2}%) · 1º nível {p1}% (+{b1}%)',
-  'alquimia.refazer': 'Você já tem esta fórmula no {n}º nível. Transmutar de novo só fica se sair melhor; as partes, as runas e o material se gastam de qualquer jeito.',
+  'alquimia.refazer': 'Você já tem esta fórmula no {n}º nível. Um resultado pior nunca toma o lugar dela; as partes, as runas e o material se gastam de qualquer jeito.',
+  'alquimia.tentativas': 'Já tentada {n} vez(es): as chances do 2º e do 1º nível subiram.',
+  'habilidades.reaprender': 'Reaprender (sem ponto, na hora)',
   'log.fusaoRaridade': '{nome}: saiu no {n}º nível de raridade.',
   'log.fusaoSemMelhora': 'A transmutação não superou o {n}º nível de {nome}; a fusão continua como estava.',
   // Marco 51 (21/11/2026, D-197): a mesa da forja no ferreiro.

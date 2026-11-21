@@ -1,8 +1,9 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.2 · **Data:** 21/11/2026
+**Versão:** 1.3 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.3 (21/11/2026)**: D-198, adendo. Reaprender de graça e na hora, e a chance que sobe a cada tentativa.
 > - **1.2 (21/11/2026)**: marco 52 (D-198). Os níveis de raridade da fusão e a fórmula refeita.
 > - **1.1 (21/11/2026)**: marco 51 (D-197). A forja: engastes, receitas como loot e a mesa da forja.
 > - **1.0 (21/11/2026)**: marco 50 (D-196). Fusões abertas, compreensão, runas elementais, material na magia e a aba
@@ -120,9 +121,13 @@ Cada transmutação sai num nível, contado de trás para frente:
 - O nível fecha o id: `f__explosao_fisico__explosao_raio__g1`. Sem ele, é o 3º.
 - O visual é a mesma magia com mais camadas: o 2º lapida o brilho, e o 1º soma a filigrana dourada, a estrela, o glifo
   e as colunas de luz (`render/vfx/manifestacao-raridade.ts`).
-- **Tentar de novo.** As partes consumidas continuam liberadas: aprenda-as de novo com ponto, leve a compreensão a
-  100% e transmute a mesma fórmula. Fica o melhor nível. Se não melhorar, a fusão de antes fica, e o que entrou se
-  gasta. No 1º nível, a fórmula está no teto.
+- **Tentar de novo.**
+  - As partes consumidas voltam na hora, sem ponto e sem estudo, no rank 1, com a compreensão adiantada em 20% por
+    vez que já foram consumidas. Da 5ª vez em diante, nascem compreendidas.
+  - Cada tentativa anterior da mesma fórmula soma +3% ao 1º nível e +5% ao 2º, até 50% e 60%.
+  - Fica sempre o melhor nível: um resultado inferior nunca toma o lugar do superior. Se não melhorar, a fusão de
+    antes fica, e o que entrou se gasta.
+  - No 1º nível, a fórmula está no teto.
 - Números em `balance.json → alquimia.raridade`.
 
 ## A forja: engastes e receitas

@@ -68,15 +68,18 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   if (!conhecida && ehDeAlgumaClasse(ctx, id)) return 'nao_aprendivel';
   // Marco 50 (21/11/2026, D-196): a fusão nasce só na bancada de transmutação (progression/alquimia.ts), nunca por ponto.
   if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_liberada';
+  // Marco 52 (21/11/2026, D-198): a skill consumida numa fusão volta sem ponto e sem estudo.
+  const reaprende = !conhecida && reaprendivel(bolsa, id);
   // Marco 18 (D-068): um estudo por vez (e a própria habilidade em estudo não se aprende de novo).
-  if (!conhecida && bolsa.estudo) return 'estudando';
+  if (!conhecida && bolsa.estudo && !reaprende) return 'estudando';
+  if (!conhecida && bolsa.estudo?.id === id) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
   if (novo > ctx.balance.habilidades.rankMax) return 'rank_maximo';
   if (invId !== undefined) {
     const entrada = bolsa.mochila.find((i) => i.invId === invId && i.qtd > 0);
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!conhecida || item?.progressao?.tipo !== 'rank' || item.progressao.familia !== familiaDaHabilidade(ctx, id)) return 'essencia_incompativel';
-  } else if (bolsa.pontosHabilidade <= 0) return 'sem_pontos';
+  } else if (bolsa.pontosHabilidade <= 0 && !reaprende) return 'sem_pontos';
   if (e.nivel < nivelParaRank(ctx, id, novo)) return 'nivel_baixo';
   const opcoes = caminhosDoRank(ctx, id, novo);
   if (caminho !== undefined && opcoes.length > 0 && !opcoes.includes(caminho)) return 'caminho_invalido';
@@ -96,6 +99,10 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     return false;
   }
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
+  if (!conhecida && reaprendivel(bolsa, id)) {
+    reaprender(e, ctx, id, tick, saida);
+    return true;
+  }
   if (!conhecida) {
     // Marco 18 (D-068): aprender não é instantâneo — gasta o ponto e começa o estudo (um por vez).
     if (bolsa.estudo) {
@@ -173,6 +180,25 @@ export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string
   return 'ok';
 }
 
+/** Marco 52 (D-198): a skill foi consumida numa fusão (e por isso volta de graça)? */
+export const reaprendivel = (bolsa: Pick<Bolsa, 'consumidas'>, id: string): boolean => (bolsa.consumidas?.[id] ?? 0) > 0;
+
+/** D-198: reaprende na hora, no rank 1, com a compreensão adiantada pelas vezes que a skill foi consumida. */
+function reaprender(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): void {
+  const bolsa = e.bolsa;
+  if (!bolsa) return;
+  bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
+  const adiantada = Math.min(100, (bolsa.consumidas?.[id] ?? 0) * ctx.balance.alquimia.reaprender.compreensaoPorVezPct);
+  if (adiantada > 0) {
+    const compreensao = (bolsa.compreensao ??= {});
+    compreensao[id] = Math.max(adiantada, compreensao[id] ?? 0);
+  }
+  ocuparTeclaLivre(ctx, bolsa, id);
+  ligarAoAprender(ctx, bolsa, id);
+  atualizar(e, ctx);
+  saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: id, rank: 1, caminho: null });
+}
+
 /** Marco 18 (D-068): o tempo de estudo de uma habilidade para quem estuda, em ticks (grau e Inteligência). */
 export function ticksDeEstudo(ctx: ContextoSimulacao, e: Entidade, id: string): number {
   const grau = definicaoDe(ctx, id)?.base.grau ?? 'B';
@@ -198,7 +224,9 @@ export function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number
   bolsa.estudo = null;
   // Marco 52 (21/11/2026, D-198): a fusão de nível melhor toma o lugar da antiga da mesma fórmula.
   const noLugar = bolsa.conhecidas.some((c) => c.id === estudo.id) ? null : substituirFusaoAntiga(bolsa, estudo.id, Math.max(1, estudo.rank ?? 1));
-  if (noLugar !== null) {
+  if (noLugar === 'descartada') {
+    // Um resultado inferior (ou igual) nunca toma o lugar do superior: o estudo termina e a antiga fica.
+  } else if (noLugar !== null) {
     atualizar(e, ctx);
     saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: noLugar, caminho: null });
   } else if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {

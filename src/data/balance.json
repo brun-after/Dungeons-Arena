@@ -249,8 +249,11 @@
     "raridade": {
       "_doc": "Marco 52 (21/11/2026, D-198): o 2º e o 1º nível de raridade da fusão. A chance base sobe com a Inteligência acima de 10 (porIntPct por ponto) até maxPct; o resto é o 3º nível, o comum, sem bônus.",
       "segundo": { "bonusPct": 10, "chancePct": 20, "porIntPct": 0.5, "maxPct": 42 },
-      "primeiro": { "bonusPct": 22, "chancePct": 4, "porIntPct": 0.3, "maxPct": 22 }
-    }
+      "primeiro": { "bonusPct": 22, "chancePct": 4, "porIntPct": 0.3, "maxPct": 22 },
+      "_tentativa": "A cada tentativa anterior da mesma fórmula, a chance do 2º e do 1º sobe tanto (por cima da Inteligência), até o teto da tentativa.",
+      "tentativa": { "segundoPct": 5, "primeiroPct": 3, "segundoTetoPct": 60, "primeiroTetoPct": 50 }
+    },
+    "reaprender": { "_doc": "Marco 52 (D-198): a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada tanto por vez que foi consumida (5 vezes: nasce compreendida).", "compreensaoPorVezPct": 20 }
   },
   "engaste": {
     "_doc": "Marco 51 (21/11/2026, D-197): os engastes de arma e equipamento (progression/engaste.ts) e as receitas da forja como loot (progression/moldes.ts).",

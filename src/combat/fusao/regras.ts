@@ -34,7 +34,14 @@ export interface RegrasAlquimia {
    * Marco 52 (21/11/2026, D-198): os níveis de raridade da fusão. O 3º é o comum (o resto da chance); o 2º e o 1º têm
    * a chance base, que sobe com a Inteligência acima de 10 até o teto, e o bônus no dano, na cura e nos estados.
    */
-  raridade: { segundo: NivelDeRaridade; primeiro: NivelDeRaridade };
+  raridade: {
+    segundo: NivelDeRaridade;
+    primeiro: NivelDeRaridade;
+    /** D-198: o que cada tentativa anterior da mesma fórmula soma à chance (%), até o teto. */
+    tentativa: { segundoPct: number; primeiroPct: number; segundoTetoPct: number; primeiroTetoPct: number };
+  };
+  /** D-198: a compreensão adiantada (%) por vez que a skill foi consumida, ao reaprendê-la. */
+  reaprender: { compreensaoPorVezPct: number };
 }
 
 export interface NivelDeRaridade {

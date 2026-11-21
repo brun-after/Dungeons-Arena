@@ -309,6 +309,13 @@ export interface Bolsa {
   compreensao?: Record<string, number>;
   /** D-196: as skills que já levaram a essência que acelera a compreensão (uma vez cada). */
   compreensaoAcelerada?: string[];
+  /**
+   * Marco 52 (21/11/2026, D-198): quantas vezes cada skill foi consumida numa fusão. Reaprendê-la não gasta ponto nem
+   * estudo, e ela volta com a compreensão adiantada (20% por vez, até nascer compreendida).
+   */
+  consumidas?: Record<string, number>;
+  /** D-198: as tentativas de cada fórmula (o id sem o nível); cada uma sobe a chance do 2º e do 1º nível. */
+  tentativasFusao?: Record<string, number>;
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -723,6 +730,8 @@ function clonarBolsa(b: Bolsa): Bolsa {
     ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
     ...(b.compreensao ? { compreensao: { ...b.compreensao } } : {}),
     ...(b.compreensaoAcelerada ? { compreensaoAcelerada: [...b.compreensaoAcelerada] } : {}),
+    ...(b.consumidas ? { consumidas: { ...b.consumidas } } : {}),
+    ...(b.tentativasFusao ? { tentativasFusao: { ...b.tentativasFusao } } : {}),
   };
 }
 

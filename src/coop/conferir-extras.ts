@@ -8,6 +8,7 @@ import { ehPonta } from '../combat/runas';
 import type { ContextoSimulacao } from '../core/contexto';
 import { ehObjeto } from '../core/validar';
 import type { Bolsa } from '../entities/entidade';
+import { formulaDaFusao } from '../combat/fusao/receita';
 import { PONTAS_ELEMENTAIS, usoAtual } from '../progression/vinculo';
 
 const PETS = ['falcao', 'lobo', 'urso'] as const;
@@ -99,6 +100,20 @@ export function conferirExtras(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balanc
     const aceleradas = [...new Set(b.compreensaoAcelerada.filter((x): x is string => typeof x === 'string' && conhece(x)))];
     if (aceleradas.length) bolsa.compreensaoAcelerada = aceleradas;
   }
+  // Marco 52 (21/11/2026, D-198): as skills consumidas (das que existem) e as tentativas de cada fórmula.
+  const contagem = (v: unknown, vale: (k: string) => boolean): Record<string, number> | null => {
+    if (!ehObjeto(v)) return null;
+    const saida: Record<string, number> = {};
+    for (const [k, n] of Object.entries(v)) {
+      const c = inteiroEntre(n, 1, 1000);
+      if (c && vale(k)) saida[k] = c;
+    }
+    return Object.keys(saida).length ? saida : null;
+  };
+  const consumidas = contagem(b.consumidas, (k) => ctx.conteudo.definicoes.has(k));
+  if (consumidas) bolsa.consumidas = consumidas;
+  const tentativas = contagem(b.tentativasFusao, (k) => formulaDaFusao(k) === k);
+  if (tentativas) bolsa.tentativasFusao = tentativas;
   if (ehObjeto(b.vitorias)) {
     const vitorias: Record<string, number> = {};
     for (const [k, n] of Object.entries(b.vitorias)) {

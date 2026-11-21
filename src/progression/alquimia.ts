@@ -17,7 +17,7 @@ import { emCombate } from './buffs';
 import { recalcularFicha } from './derivados';
 import { ehDeAlgumaClasse } from './habilidades-classe';
 import { ticksDeEstudo } from './habilidades-personagem';
-import { chancesDeRaridade, mesmaFormulaConhecida, sortearRaridade } from './fusao-raridade';
+import { chancesDeRaridade, mesmaFormulaConhecida, sortearRaridade, tentativasDaFormula } from './fusao-raridade';
 
 type Ctx = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
@@ -130,6 +130,11 @@ export function fundir(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao, 
   // As partes saem do personagem (das conhecidas, da barra e da compreensão), mas ficam liberadas para aprender de novo.
   for (const p of pedido.partes) {
     if (!ehFusao(p) && !(bolsa.liberadas ?? []).includes(p)) (bolsa.liberadas ??= []).push(p);
+    // D-198: a vez que a skill foi consumida (reaprendê-la sai de graça e com a compreensão adiantada).
+    if (!ehFusao(p)) {
+      const consumidas = (bolsa.consumidas ??= {});
+      consumidas[p] = (consumidas[p] ?? 0) + 1;
+    }
     bolsa.conhecidas = bolsa.conhecidas.filter((c) => c.id !== p);
     bolsa.barra = bolsa.barra.map((b) => (b === p ? null : b));
     if (bolsa.compreensao) bolsa.compreensao = Object.fromEntries(Object.entries(bolsa.compreensao).filter(([k]) => k !== p));
@@ -137,7 +142,11 @@ export function fundir(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao, 
   for (const invId of m.runasInv) gastar(bolsa, invId);
   if (m.materialInv) gastar(bolsa, m.materialInv);
   // D-198: o nível de raridade, sorteado pela Inteligência; refazendo a fórmula, fica o melhor dos dois.
-  const sorteado = sortearRaridade(estado.rng, chancesDeRaridade(ctx.balance.alquimia, e.atributos));
+  // D-198: cada tentativa anterior da mesma fórmula sobe a chance do 2º e do 1º nível.
+  const formula = idDaFusao(m.receita);
+  const tentativas = tentativasDaFormula(bolsa, formula);
+  (bolsa.tentativasFusao ??= {})[formula] = tentativas + 1;
+  const sorteado = sortearRaridade(estado.rng, chancesDeRaridade(ctx.balance.alquimia, e.atributos, tentativas));
   const antes: RaridadeFusao | null = m.existente ? raridadeDaFusao(m.existente) : null;
   const raridade = antes === null ? sorteado : (Math.min(antes, sorteado) as RaridadeFusao);
   const id = idDaFusao({ ...m.receita, raridade });

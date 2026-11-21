@@ -5,17 +5,24 @@
 // Refazer a mesma fórmula é tentar de novo: o que fica é o melhor nível entre a fusão que o personagem já tem e a nova.
 // Quando o estudo da melhor termina, ela toma o lugar da antiga (o maior rank, a tecla e a compreensão). Puro.
 
-import { formulaDaFusao, type RaridadeFusao } from '../combat/fusao/receita';
+import { formulaDaFusao, raridadeDaFusao, type RaridadeFusao } from '../combat/fusao/receita';
 import type { RegrasAlquimia } from '../combat/fusao/regras';
 import { aleatorio, type EstadoRng } from '../core/rng';
 import type { Atributos, Bolsa } from '../entities/entidade';
 
-/** As chances (%) de cada nível para esta Inteligência; somam 100. */
-export function chancesDeRaridade(r: Pick<RegrasAlquimia, 'raridade'>, atributos: Pick<Atributos, 'inteligencia'>): Record<RaridadeFusao, number> {
+/**
+ * As chances (%) de cada nível para esta Inteligência e para as tentativas anteriores da mesma fórmula; somam 100.
+ * Cada tentativa soma por cima da Inteligência, até o teto da tentativa (nunca abaixo do que a Inteligência já dá).
+ */
+export function chancesDeRaridade(r: Pick<RegrasAlquimia, 'raridade'>, atributos: Pick<Atributos, 'inteligencia'>, tentativas = 0): Record<RaridadeFusao, number> {
   const acima = Math.max(0, atributos.inteligencia - 10);
-  const chance = (n: RegrasAlquimia['raridade']['primeiro']) => Math.max(n.chancePct, Math.min(n.maxPct, n.chancePct + acima * n.porIntPct));
-  const primeiro = chance(r.raridade.primeiro);
-  const segundo = Math.min(100 - primeiro, chance(r.raridade.segundo));
+  const t = r.raridade.tentativa;
+  const chance = (n: RegrasAlquimia['raridade']['primeiro'], porTentativa: number, teto: number) => {
+    const pelaInt = Math.max(n.chancePct, Math.min(n.maxPct, n.chancePct + acima * n.porIntPct));
+    return Math.max(pelaInt, Math.min(teto, pelaInt + Math.max(0, tentativas) * porTentativa));
+  };
+  const primeiro = chance(r.raridade.primeiro, t.primeiroPct, t.primeiroTetoPct);
+  const segundo = Math.min(100 - primeiro, chance(r.raridade.segundo, t.segundoPct, t.segundoTetoPct));
   return { 1: primeiro, 2: segundo, 3: Math.max(0, 100 - primeiro - segundo) };
 }
 
@@ -34,14 +41,22 @@ export function mesmaFormulaConhecida(bolsa: Pick<Bolsa, 'conhecidas'>, id: stri
   return bolsa.conhecidas.find((c) => c.id !== id && formulaDaFusao(c.id) === formula)?.id ?? null;
 }
 
+/** As tentativas já feitas da fórmula (pelo id, com ou sem o nível). */
+export function tentativasDaFormula(bolsa: Pick<Bolsa, 'tentativasFusao'>, id: string): number {
+  const f = formulaDaFusao(id);
+  return f ? (bolsa.tentativasFusao?.[f] ?? 0) : 0;
+}
+
 /**
  * Quando a fusão de nível melhor termina o estudo, a antiga da mesma fórmula sai: a nova fica com o maior rank, os
- * caminhos dela, a tecla dela e a compreensão dela. Devolve o rank com que a nova entra (null = não havia antiga).
+ * caminhos dela, a tecla dela e a compreensão dela. Devolve o rank com que a nova entra (null = não havia antiga;
+ * 'descartada' = a antiga é de nível igual ou melhor, e fica: um resultado inferior nunca toma o lugar do superior).
  */
-export function substituirFusaoAntiga(bolsa: Bolsa, novoId: string, rankNovo: number): number | null {
+export function substituirFusaoAntiga(bolsa: Bolsa, novoId: string, rankNovo: number): number | 'descartada' | null {
   const antigoId = mesmaFormulaConhecida(bolsa, novoId);
   const antiga = antigoId ? bolsa.conhecidas.find((c) => c.id === antigoId) : undefined;
   if (!antigoId || !antiga) return null;
+  if (raridadeDaFusao(antigoId) <= raridadeDaFusao(novoId)) return 'descartada';
   const rank = Math.max(rankNovo, antiga.rank);
   const i = bolsa.conhecidas.indexOf(antiga);
   bolsa.conhecidas[i] = { id: novoId, rank, caminhos: rank === antiga.rank ? [...antiga.caminhos] : [] };

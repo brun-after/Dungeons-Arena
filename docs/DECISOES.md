@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.49 · **Data:** 21/11/2026
+**Versão:** 1.50 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.50 (21/11/2026)**: D-198, adendo: a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez; cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível; o inferior nunca toma o lugar do superior, nem ao fim do estudo.
 > - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
 > - **1.48 (21/11/2026)**: D-197: marco 51, a forja por receita (o item `receita_<id>` cai das criaturas e parte de peça pronta), os engastes de 1 a 3 no id `en_`, os materiais na arma e no equipamento, engastar e extrair, e a mesa da forja com a cena.
 > - **1.47 (21/11/2026)**: D-196: marco 50, as fusões abertas (o id é a receita), a compreensão, as runas elementais, o material na magia e a aba Alquimia; saem as 4 fusões fixas.
@@ -6418,3 +6419,18 @@ missões sem ganho de jogo. A troca fica para quando houver substitutas para cad
     estrela de raios, o glifo rúnico que gira no chão e o segundo halo. Na área, o círculo rúnico dourado e as colunas
     de luz.
   - Com movimento reduzido, ficam o halo e o anel.
+
+**Adendo (21/11/2026).** A pedido, tentar de novo ficou mais leve e mais promissor:
+- **Reaprender** (`progression/habilidades-personagem.ts`, `bolsa.consumidas`):
+  - a skill consumida numa fusão volta na hora, no rank 1, sem ponto e sem estudo, mesmo com um estudo em curso;
+  - ela vem com a compreensão adiantada em 20% por vez que já foi consumida, e da 5ª vez em diante nasce
+    compreendida (`balance.alquimia.reaprender`);
+  - o botão diz "Reaprender (sem ponto, na hora)".
+- **A tentativa conta** (`bolsa.tentativasFusao`, pela fórmula sem o nível):
+  - cada tentativa anterior soma +3% à chance do 1º nível e +5% à do 2º, por cima da Inteligência, até 50% e 60%
+    (`balance.alquimia.raridade.tentativa`);
+  - a tentativa que não melhorou também conta;
+  - a prévia mostra quantas vezes a fórmula já foi tentada.
+- **O inferior nunca toma o lugar do superior.** Além do sorteio (fica o melhor dos dois), a troca ao fim do estudo
+  confere o nível. Se a fusão que já está lá for igual ou melhor, a estudada é descartada e a antiga fica.
+- Os dois contadores passam pelo `clonarBolsa` e pela conferência da ficha (`coop/conferir-extras.ts`).

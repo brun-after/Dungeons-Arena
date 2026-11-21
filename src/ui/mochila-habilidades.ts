@@ -18,7 +18,7 @@ import type { MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { DT_MS } from '../core/loop';
-import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo, ticksRestantesDoEstudo, velocidadeDoEstudo } from '../progression/habilidades-personagem';
+import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, reaprendivel, nivelParaRank, ticksDeEstudo, ticksRestantesDoEstudo, velocidadeDoEstudo } from '../progression/habilidades-personagem';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
@@ -212,7 +212,7 @@ export function desenharHabilidades(
       for (const invId of pagamentos) {
         const entrada = invId ? bolsa.mochila.find((i) => i.invId === invId) : undefined;
         const rotulo = entrada ? t('progressao.usarEssencia', { nome: ctx.conteudo.itens.get(entrada.itemId)?.nome ?? '', rank: proximo })
-          : conhecida ? t('progressao.usarPonto', { rank: proximo }) : t('habilidades.estudar', { tempo: duracaoLegivel(ticksDeEstudo(ctx, j, id) * DT_MS) });
+          : conhecida ? t('progressao.usarPonto', { rank: proximo }) : reaprendivel(bolsa, id) ? t('habilidades.reaprender') : t('habilidades.estudar', { tempo: duracaoLegivel(ticksDeEstudo(ctx, j, id) * DT_MS) });
         const emitirSubida = (caminho?: string) => {
           emitir({ t: 'subirRank', id, rankEsperado: proximo, ...(caminho ? { caminho } : {}), ...(invId ? { invId } : {}) });
           ui.essenciaInvId = null;
