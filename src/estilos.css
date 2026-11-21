@@ -3643,3 +3643,59 @@ body:not(.toque) .botao-acao.centralizar.flutuante {
 .aviso-teclas {
   min-height: 1.4em;
 }
+
+/* Marco 50 (21/11/2026, D-196): a aba Alquimia (a bancada de transmutação, a bandeja e o caderno) e as pedras rúnicas. */
+.bancada-alquimia { display: grid; grid-template-columns: minmax(150px, 1fr) auto minmax(200px, 1.3fr); gap: 14px; align-items: start; margin: 8px 0 14px; }
+.grimorio-alquimia, .previa-alquimia, .bandeja-alquimia, .caderno-formulas { background: rgba(20, 16, 28, 0.6); border: 1px solid var(--borda); border-radius: 8px; padding: 10px; }
+.orbes-alquimia { display: flex; flex-wrap: wrap; gap: 8px; max-height: 340px; overflow: auto; padding: 4px; }
+.orbe-skill { --compreensao: 0%; position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 76px; padding: 8px 4px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--cor-elemento) 60%, transparent); background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--cor-elemento) 35%, transparent), rgba(10, 8, 14, 0.9) 70%); color: var(--texto); cursor: grab; font: inherit; font-size: 0.75rem; }
+.orbe-skill::before { content: ''; position: absolute; inset: -3px; border-radius: 14px; padding: 2px; background: conic-gradient(var(--cor-elemento) var(--compreensao), transparent 0); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.orbe-skill .icone { width: 26px; height: 26px; filter: drop-shadow(0 0 6px var(--cor-elemento)); }
+.orbe-skill.bloqueado { opacity: 0.6; }
+.orbe-skill.na-bancada { outline: 2px solid var(--cor-elemento); }
+.orbe-skill.orbe-fusao { border-style: double; border-width: 3px; }
+.nome-orbe { text-align: center; line-height: 1.1; }
+.roda-alquimia { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.palco-circulo { position: relative; width: var(--tamanho); height: var(--tamanho); max-width: 80vw; max-height: 80vw; }
+.circulo-alquimia { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+.vertice-alquimia { position: absolute; transform: translate(-50%, -50%); width: 64px; height: 64px; border-radius: 50%; border: 2px dashed var(--borda); background: rgba(12, 10, 18, 0.85); color: var(--texto); display: flex; flex-direction: column; align-items: center; justify-content: center; font: inherit; font-size: 0.68rem; cursor: pointer; }
+.vertice-alquimia.ocupado { border: 2px solid var(--cor-elemento); box-shadow: 0 0 14px color-mix(in srgb, var(--cor-elemento) 70%, transparent); }
+.vertice-alquimia .icone { width: 26px; height: 26px; }
+.rotulo-vertice { opacity: 0.85; }
+.alvo-ativo { box-shadow: 0 0 0 3px var(--destaque) !important; }
+.encaixes-alquimia { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.grupo-encaixe { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rotulo-encaixe { font-size: 0.8rem; color: var(--texto-suave); }
+.encaixe-alquimia { min-width: 92px; min-height: 40px; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; border: 1px dashed var(--borda); background: rgba(12, 10, 18, 0.7); color: var(--texto); font: inherit; }
+.encaixe-alquimia.ocupado { border-style: solid; border-color: var(--destaque); }
+.acoes-alquimia { display: flex; gap: 8px; }
+.botao-transmutar:not(:disabled) { border-color: #f2c14e; box-shadow: 0 0 10px rgba(242, 193, 78, 0.45); }
+.bancada-alquimia[data-tom='instavel'] .botao-transmutar:not(:disabled) { border-color: #e0503c; box-shadow: 0 0 10px rgba(224, 80, 60, 0.5); }
+.nome-fusao { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+.linha-assinatura { color: #f7e9a0; }
+.linha-ressonante { color: #f2c14e; }
+.linha-instavel, .motivo-fusao { color: #ff8a7a; }
+.aviso-alquimia { color: var(--destaque); }
+.bandeja-alquimia { display: grid; gap: 8px; margin-bottom: 14px; }
+.linha-bandeja { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.linha-bandeja > h4 { flex-basis: 100%; margin: 0; }
+.peca-alquimia { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--cor-elemento, #c9b38a) 70%, transparent); background: rgba(12, 10, 18, 0.8); color: var(--texto); font: inherit; font-size: 0.8rem; cursor: grab; }
+.peca-alquimia.usada { opacity: 0.4; }
+.peca-fantasma { position: fixed; z-index: 9999; pointer-events: none; transform: translate(-50%, -50%) scale(1.08); opacity: 0.9; }
+.paginas-caderno { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.pagina-caderno { padding: 8px; border-radius: 6px; background: linear-gradient(160deg, #2a2219, #17120d); border: 1px solid color-mix(in srgb, var(--cor-elemento, #8a7350) 60%, transparent); }
+.pagina-caderno.em-branco { display: flex; align-items: center; justify-content: center; min-height: 70px; opacity: 0.5; font-style: italic; }
+.sigilo-compreensao { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.anel-compreensao { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(var(--destaque) var(--compreensao), rgba(255, 255, 255, 0.12) 0); }
+.sigilo-compreensao.completo .anel-compreensao { box-shadow: 0 0 8px var(--destaque); }
+.encaixe-pedra { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--cor-elemento); box-shadow: 0 0 12px color-mix(in srgb, var(--cor-elemento) 60%, transparent); background: rgba(10, 8, 14, 0.9); }
+.bandeja-pedras { display: flex; flex-wrap: wrap; gap: 4px; flex-basis: 100%; }
+.pedra-runica { width: 32px; height: 32px; border-radius: 40% 40% 48% 48%; border: 1px solid color-mix(in srgb, var(--cor-elemento) 50%, transparent); background: linear-gradient(160deg, #3a3640, #1a181d); color: var(--cor-elemento); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: grab; }
+.pedra-runica.acesa { box-shadow: 0 0 8px color-mix(in srgb, var(--cor-elemento) 55%, transparent); }
+.pedra-runica.apagada { opacity: 0.3; filter: grayscale(0.8); cursor: not-allowed; }
+.pedra-runica.no-encaixe { outline: 2px solid var(--cor-elemento); }
+.pedra-runica .icone, .encaixe-pedra .icone { width: 20px; height: 20px; }
+@media (max-width: 860px) {
+  .bancada-alquimia { grid-template-columns: 1fr; }
+  .roda-alquimia { order: -1; }
+}

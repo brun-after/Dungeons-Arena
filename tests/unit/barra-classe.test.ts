@@ -42,7 +42,7 @@ describe('migração 23 para 24', () => {
 
   it('renomeia o Guerreiro v1.2 e organiza a barra de 6 (1–2 de classe, 3–6 gerais)', () => {
     const { e, bolsa, recargas } = migrado();
-    expect(VERSAO_SCHEMA).toBe(31);
+    expect(VERSAO_SCHEMA).toBe(32);
     const ids = (bolsa.conhecidas as { id: string }[]).map((c) => c.id);
     // Marco 40 (D-159): a Corrente saiu do kit do Guerreiro e não entra mais.
     expect(ids).toEqual(expect.arrayContaining(['brado', 'investida_de_escudo', 'redemoinho', 'investida', 'pele_de_pedra']));

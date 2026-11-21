@@ -71,12 +71,12 @@ export function montarFusao(ctx: Ctx, bolsa: Bolsa, pedido: PedidoDeFusao): Mont
   if (new Set(partes).size !== partes.length || !partes.every((p) => fundivel(ctx, p) && !ehFusao(p))) return 'fusao_partes';
   // As runas: os itens pedidos existem, são runas, e cabem nos encaixes (somadas às que já vêm dentro da fusão).
   const heranca = herancaDasFusoes(ids);
-  if (new Set(pedido.runas).size !== pedido.runas.length) return 'fusao_runa';
   const nucleo = definicaoDe(ctx, partes[0] ?? '')?.base.elemento ?? null;
   const runas: Elemento[] = [...heranca.runas];
   for (const invId of pedido.runas) {
-    const item = bolsa.mochila.find((i) => i.invId === invId && i.qtd > 0);
-    if (!item) return 'fusao_runa';
+    // A mesma pilha pode dar duas runas, se tiver duas.
+    const item = bolsa.mochila.find((i) => i.invId === invId);
+    if (!item || item.qtd < pedido.runas.filter((x) => x === invId).length) return 'fusao_runa';
     const el = item.itemId === ID_RUNA_CURINGA ? (nucleo ?? partes.map((p) => definicaoDe(ctx, p)?.base.elemento).find((x) => !!x) ?? null) : elementoDaRuna(item.itemId);
     if (!el) return 'fusao_runa';
     runas.push(el);
@@ -122,7 +122,7 @@ export function fundir(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao, 
   for (const p of pedido.partes) {
     bolsa.conhecidas = bolsa.conhecidas.filter((c) => c.id !== p);
     bolsa.barra = bolsa.barra.map((b) => (b === p ? null : b));
-    if (bolsa.compreensao) delete bolsa.compreensao[p];
+    if (bolsa.compreensao) bolsa.compreensao = Object.fromEntries(Object.entries(bolsa.compreensao).filter(([k]) => k !== p));
   }
   for (const invId of m.runasInv) gastar(bolsa, invId);
   if (m.materialInv) gastar(bolsa, m.materialInv);

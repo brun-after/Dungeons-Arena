@@ -139,7 +139,7 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
   // Os estados: os de cada parte na fatia; os elementos a mais, como a camada deles; as runas por cima; o material.
   const efeitos: EfeitoCanonico[] = [];
   defs.forEach((d, i) => {
-    for (const e of d.base.efeitos) if (i === 0 || !e.em || e.em === 'alvo' || e.em === 'conjurador') efeitos.push(naFatia(e, fatia));
+    for (const e of d.base.efeitos) if (i === 0 || e.em === 'alvo' || e.em === 'conjurador') efeitos.push(naFatia(e, fatia));
   });
   const camada = (el: Elemento, f: number) => {
     const estado = ctx.conteudo.elementos.get(el)?.estado;
@@ -218,12 +218,20 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
   };
 }
 
+/** A assinatura em que a fusão caiu (null quando é uma mistura comum ou o id não fecha). */
+export function assinaturaDaFusao(ctx: Ctx, id: string, resolver: Resolver): Assinatura | null {
+  const receita = lerIdDaFusao(id);
+  const defs = receita?.partes.map(resolver);
+  if (!receita || !defs?.every((d): d is DefinicaoHabilidade => !!d)) return null;
+  return misturar(ctx, receita, defs).assinatura;
+}
+
 /** A memória por catálogo: a mesma receita não se refaz a cada golpe. */
 const MEMORIA = new WeakMap<object, Map<string, DefinicaoHabilidade | null>>();
 
 export function definicaoDaFusaoMemo(ctx: Ctx, id: string, resolver: Resolver): DefinicaoHabilidade | null {
   let porId = MEMORIA.get(ctx.conteudo);
-  if (!porId) MEMORIA.set(ctx.conteudo, (porId = new Map()));
+  if (!porId) MEMORIA.set(ctx.conteudo, (porId = new Map<string, DefinicaoHabilidade | null>()));
   const pronto = porId.get(id);
   if (pronto !== undefined) return pronto;
   const def = definicaoDaFusao(ctx, id, resolver);
