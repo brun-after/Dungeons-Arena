@@ -178,6 +178,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const petsDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.pet] as const));
   const corpoMovimento = new CorpoEmMovimento({
     tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), petDoMovimento: (id) => petsDoMovimento.get(id) ?? null,
+    // D-191: a altura do chão desenhado (a escalada sobe rente ao muro).
+    chaoPx: (x, y) => {
+      const c = centroDaCelula(x, y);
+      return camera.projecaoAtual.alturaDoChao(c.x, c.y);
+    },
   });
   // Marco 40 (14/11/2026): o companheiro que é o veículo do dono (a montaria, o falcão que carrega) vai com ele.
   const comVeiculo = (p: (e: Entidade) => PontoVisual) => (e: Entidade) => corpoMovimento.posicaoForcada(e, o.estado(), p) ?? p(e);

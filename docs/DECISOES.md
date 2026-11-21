@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.43 · **Data:** 20/11/2026
+**Versão:** 1.44 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
 > - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
 > - **1.42 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
 > - **1.41 (20/11/2026)**: D-188, adendo: montados, o Aventureiro e a fera têm uma vida só (10%, 10% e 20% menos dano no falcão, no lobo e no urso), a fera montada ataca a caça marcada, as pernas abraçam o lobo e o urso e o simulador conta as feras que saíram de campo como companheiras.
@@ -6068,3 +6069,41 @@ Puxar o propósito pela classe de quem abate foi recusado: a peça para outra cl
 
 **Observação.** Os pesos, as chances e os preços são a primeira calibragem; o simulador de balanceamento ainda não compra
 na vitrine nem veste o loot de armadura.
+
+## D-191 — Escalar o muro e descer a queda (20/11/2026)
+
+**Contexto.** Na saída de várias passagens entre regiões havia um muro de relevo: a passagem ficava na altura 0 e a
+região, logo depois, seguia na altura do terreno (3 a 8 níveis). Eram 31 corredores com degrau acima da encosta. Além
+disso, todo desnível acima da encosta (2 níveis) parava quem andava, e o corpo travava de frente para o degrau.
+
+**Decisão.**
+- **A boca da passagem.** A chegada de cada passagem (`entradaDoLado`) entra nas áreas planas do relevo com raio 6 e
+  altura 0 (`world/gerador-exterior.ts`). A saia de encosta, um nível por célula, sobe dali até o chão da região. A
+  passagem segue igual dos dois lados. O teste `relevo` confere, em todas as regiões, o meio de cada corredor da borda
+  até 6 células além da saída.
+- **Escalar** (`world/escalada.ts`, `world/escalar.ts`). A pé, o desnível de subida acima da encosta e até
+  `alturaCorpoNiveis × fatorAltura` (4 × 1,5 = 6 níveis: a altura do personagem e mais metade dela) não barra mais. O
+  corpo que bate de frente no muro para de andar e sobe até um pouco dentro da célula de cima (`entradaNaCelula`). A
+  subida leva `subirMsBase + subirMsPorNivel × níveis` (350 + 230 por nível). Cada ponto de Vontade e de Destreza acima de
+  10 encurta 1% desse tempo, entre 0,55× e 1,4×.
+- **Descer.** O desnível de descida acima da encosta e até `quedaMaxNiveis` (10) vira um pulo curto, mais lento que o
+  passo: de 10% (logo além da encosta) a 20% (na queda máxima). O impacto segura a mesma lentidão por `impactoMs`
+  (600 ms) depois do pouso, pela lentidão do recuo (`recuoPct`).
+- **O que segue barrando.** A subida acima de 6 níveis e a queda acima de 10. O cenário segue barrando pela célula:
+  árvore, rocha, cerca, casa. Só a célula de chão andável vira escalada, e nunca a do tronco.
+- **Quem.** Todo corpo que anda: o jogador, os monstros e as invocações. Quem voa, salta ou desce a tirolesa segue as
+  regras de antes. A navegação (`andavelEntre`) passa pelo muro que se escala e pela queda que se desce. O caminho com
+  custo continua cobrando um passo por nível de subida, então a IA ainda prefere a rampa quando ela está perto.
+- **Estado.** `Entidade.escalada` guarda a travessia: tipo, começo, fim, ticks e níveis. O integrador interpola entre
+  os ticks, sem relógio de parede. Ao acabar vira `null` (o patch não leva chave apagada). O clone copia o objeto.
+- **Tela** (`render/movimento/corpo-movimento.ts`). Subindo, o corpo ganha a altura antes de avançar, inclinado contra
+  o muro, com o puxão de cada braço. Descendo, faz um arco curto. Os dois usam a pose do salto e a altura do chão
+  desenhado (`chaoPx`).
+
+**Alternativas descartadas.** Rebaixar o relevo em volta de toda passagem resolveria a saída, mas não o jogador que trava
+nos muros do resto do mapa. Escalar pela borda do corpo (qualquer célula alta encostada) fazia a quina de uma encosta
+diagonal virar escalada. Por isso a escalada só começa com a frente do corpo na célula de cima.
+
+**Observação.** Os tempos são a primeira calibragem. A pose usa a do salto, porque o atlas ainda não tem quadros de
+escalada.
+

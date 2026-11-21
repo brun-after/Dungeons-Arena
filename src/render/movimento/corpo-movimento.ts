@@ -40,6 +40,8 @@ export interface OpcoesCorpoMovimento {
   posicao: (e: Entidade) => PontoVisual;
   /** Marco 40 (14/11/2026): o companheiro dono da mecânica (o falcão, o lobo, o urso do Aventureiro), ou null. */
   petDoMovimento: (mov: string) => string | null;
+  /** 20/11/2026 (D-191): a altura do chão desenhado num ponto (em células), em px de tela; sem ela, plano. */
+  chaoPx?: (x: number, y: number) => number;
 }
 
 /** Alturas em px de tela. */
@@ -221,6 +223,8 @@ export class CorpoEmMovimento {
         a.alfa = suave((agoraMs - l.fimMs) / 320);
       }
     }
+    // 20/11/2026 (D-191): a escalada do muro e o pulo curto da queda.
+    if (!m && e.escalada && !e.morto) mudou = this.travessia(e, pos, estado, angulo, agoraMs, a) || mudou;
     const chegada = this.chegadas.get(e.id);
     if (chegada && agoraMs - chegada.ms < MATERIALIZAR_MS) {
       mudou = true;
@@ -229,6 +233,42 @@ export class CorpoEmMovimento {
       a.escala = 0.82 + 0.18 * u;
     }
     return mudou ? a : null;
+  }
+
+  /**
+   * 20/11/2026 (D-191): o corpo na travessia do relevo. Subindo, as mãos acham a borda e o corpo se ergue rente à face
+   * do muro (a altura sobe antes de o corpo avançar), com o balanço do esforço; descendo, o pulo curto em arco.
+   */
+  private travessia(e: Entidade, pos: PontoVisual, estado: EstadoJogo, angulo: number, agoraMs: number, a: AjusteVisual): boolean {
+    const s = e.escalada;
+    const chao = this.o.chaoPx;
+    if (!s || !chao) return false;
+    const dx = s.paraX - s.deX;
+    const dy = s.paraY - s.deY;
+    const d2 = dx * dx + dy * dy;
+    // O avanço visto pela posição desenhada (a mesma interpolação do corpo); o tempo, pelos ticks.
+    const avanco = d2 > 0 ? Math.min(1, Math.max(0, ((pos.x - s.deX) * dx + (pos.y - s.deY) * dy) / d2)) : 1;
+    const total = Math.max(1, s.ateTick - s.desdeTick);
+    const tempo = Math.min(1, Math.max(0, (estado.tick - s.desdeTick) / total));
+    const de = chao(s.deX, s.deY);
+    const para = chao(s.paraX, s.paraY);
+    const aqui = chao(pos.x, pos.y);
+    const lado = Math.cos(angulo) >= 0 ? 1 : -1;
+    if (s.tipo === 'subir') {
+      const sobe = suave(Math.min(1, tempo / 0.8));
+      a.alturaPx = Math.max(0, de + (para - de) * sobe - aqui);
+      // Inclinado contra o muro, com o puxão de cada braço (some ao chegar em cima).
+      a.inclina = (0.22 + 0.05 * Math.sin(agoraMs / 90)) * (1 - sobe * 0.7) * lado;
+      a.escala = 1 + 0.03 * Math.sin(agoraMs / 90);
+      a.estado = 'saltar';
+      a.desdeMs = 0;
+    } else {
+      const arco = 10 + 2 * s.niveis;
+      a.alturaPx = Math.max(0, de + (para - de) * avanco - aqui + 4 * arco * avanco * (1 - avanco));
+      a.inclina = 0.12 * (1 - 2 * avanco) * lado;
+      a.estado = 'saltar';
+    }
+    return true;
   }
 
   /**

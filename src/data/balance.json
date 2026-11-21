@@ -365,7 +365,8 @@
     "chanceSecundario": 0.4,
     "chanceLivroRaro": 0.04
   },
-  "relevo": { "pxPorNivel": 12, "encostaMax": 2, "muroBaixoMax": 3, "muroAltoMax": 6, "subidaPctPorNivel": 15, "montariaFator": 0.5, "vantagemAlcancePorNivel": 0.5, "vantagemAlcanceMax": 2 },
+  "relevo": { "pxPorNivel": 12, "encostaMax": 2, "muroBaixoMax": 3, "muroAltoMax": 6, "subidaPctPorNivel": 15, "montariaFator": 0.5, "vantagemAlcancePorNivel": 0.5, "vantagemAlcanceMax": 2,
+    "escalada": { "alturaCorpoNiveis": 4, "fatorAltura": 1.5, "subirMsBase": 350, "subirMsPorNivel": 230, "atributoPctPorPonto": 1, "multMin": 0.55, "multMax": 1.4, "quedaMaxNiveis": 10, "quedaLentidaoMinPct": 10, "quedaLentidaoMaxPct": 20, "impactoMs": 600, "entradaNaCelula": 0.35 } },
   "visual": {
     "luz": { "raioJogador": 6, "raioSemTocha": 3.3, "intensidadeTocha": 0.42, "intensidadeSemTocha": 0.24, "haloSemTocha": [0.3, 0.2, 0.1], "intensidadeFogo": 0.55, "intensidadeJanela": 0.4, "intensidadeVila": 0.11, "raioJanela": 3, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
     "ouroMontes": [3, 20, 100],

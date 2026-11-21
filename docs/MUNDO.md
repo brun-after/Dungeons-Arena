@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.6 · **Data:** 16/11/2026
+**Versão:** 1.7 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.7 (20/11/2026)**: D-191: a pé, o muro até 6 níveis se escala e a queda até 10 se desce num pulo curto; a saída das passagens sem muro.
 > - **1.6 (16/11/2026)**: marco 45: as criaturas de Filo, as fendas, as reações aos terrenos e o monstruário.
 > - **1.5 (15/11/2026)**: marco 44: a noite, a tocha, a fogueira de acampamento, a caça noturna e a vila pela hora.
 > - **1.4 (15/11/2026)**: marco 43: relevo na geometria, geografia nova, cenário composto e tochas reais.
@@ -285,6 +286,9 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - **Relevo** (`world/relevo.ts`, `balance.relevo`). Desnível até 2: encosta (subir é mais lento); 3: muro baixo (salto);
   4 a 6: muro alto (voo); acima: montanha. A geração (`world/relevo-exterior.ts`) deixa a vila e as passagens planas,
   faz rampas nas estradas e garante que tudo continua alcançável a pé. Cavernas e minas ficam no penhasco de um morro.
+  D-191 (20/11/2026): a pé, o muro até 6 níveis (a altura do corpo e mais metade) se escala, mais devagar quanto mais
+  alto e mais rápido com Vontade e Destreza (`world/escalada.ts`); a queda até 10 níveis se desce num pulo curto, 10% a
+  20% mais lento, com o impacto. A boca de cada passagem fica na altura dela, e a encosta sobe dali até a região.
 
 ## Paisagem e cenário (marco 43, 15/11/2026)
 
