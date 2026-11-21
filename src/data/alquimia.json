@@ -521,6 +521,10 @@
    "trevas": "sombra",
    "sagrado": "luz",
    "vento": "vento"
+  },
+  "raridade": {
+   "2": ", 2º nível",
+   "1": ", 1º nível"
   }
  },
  "materiais": {

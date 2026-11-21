@@ -8,7 +8,9 @@
 // encarece. O dano soma a fatia de cada parte que fere (dois golpes num par dão 112%); os estados de cada parte saem na
 // fatia dela. Os elementos além do principal entram como a camada do estado deles. A runa de um elemento presente
 // amplifica os estados dele; a de um elemento novo põe a camada dele (mesmo além de 3). O material soma o efeito dele na
-// magia. Assinaturas (misturas com nome) somam poder e trocam a forma. Puro.
+// magia. Assinaturas (misturas com nome) somam poder e trocam a forma.
+// Marco 52 (21/11/2026, D-198): o 2º e o 1º nível de raridade sobem o dano, a cura e a força dos estados (escudo,
+// queimadura…) pelo `balance.alquimia.raridade`; a duração e a forma ficam as mesmas. Puro.
 
 import type { ContextoSimulacao } from '../../core/contexto';
 import { Leitor } from '../../core/validar';
@@ -18,6 +20,7 @@ import { GRAUS, type DefinicaoHabilidade, type Grau, type Habilidade } from '../
 import type { EfeitoCanonico } from '../registro-efeitos';
 import { chaveDoPar, type Assinatura, type TipoPar } from './catalogo';
 import { lerIdDaFusao, type Receita } from './receita';
+import { bonusDaRaridade } from './regras';
 
 type Ctx = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 type Resolver = (id: string) => DefinicaoHabilidade | null;
@@ -173,6 +176,10 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
   const maior = (f: (h: Habilidade) => number) => Math.max(...defs.map((d) => f(d.base)));
   const custo = Math.round(maior((h) => h.custoRecurso) * m.custoMult * (1 + (material?.custoPct ?? 0) / 100));
   const recarga = Math.round(maior((h) => h.recargaMs) * m.recargaMult * (1 + (material?.recargaPct ?? 0) / 100));
+  // D-198: a raridade multiplica o dano, a cura e a força dos estados.
+  const raro = receita.raridade ?? 3;
+  const mRaro = 1 + bonusDaRaridade(r, raro) / 100;
+  const comRaridade = mRaro === 1 ? finais : finais.map((e) => ({ ...e, valor: e.valor > 0 ? Math.max(1, Math.round(e.valor * mRaro)) : 0 }));
   const saltosBase = desenho.saltos ?? nucleo.saltos;
   const saltosExtra = (material?.saltos ?? 0) + (m.assinatura?.saltos ?? 0);
   const base: Habilidade = {
@@ -189,20 +196,21 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
     saltos: saltosBase ? { ...saltosBase, quantidade: saltosBase.quantidade + saltosExtra } : saltosExtra > 0 ? { quantidade: saltosExtra, raio: 3, pct: 75 } : null,
     formulaDano,
     formulaCura,
-    multDano: nucleo.multDano * fatia * ferem * (1 + (material?.danoPct ?? 0) / 100),
-    multCura: nucleo.multCura * fatia * curam,
+    multDano: nucleo.multDano * fatia * ferem * (1 + (material?.danoPct ?? 0) / 100) * mRaro,
+    multCura: nucleo.multCura * fatia * curam * mRaro,
     custoRecurso: Math.max(1, custo),
     custoVida: nucleo.custoVida + (material?.custoVidaPct ?? 0),
     recargaMs: Math.max(500, recarga),
     conjuracaoMs: maior((h) => h.conjuracaoMs),
-    efeitos: finais,
+    efeitos: comRaridade,
     tags: [...new Set([...defs.flatMap((d) => d.base.tags), 'fusao'])],
     nivelMinimo: maior((h) => h.nivelMinimo),
     grau: receita.partes.length === 3 ? 'S' : grauMaior(defs.map((d) => d.base.grau)),
     ...(entrega ? { entrega } : {}),
+    ...(raro !== 3 && { raridadeFusao: raro }),
   };
   if (!entrega) delete base.entrega;
-  base.nome = nomeDa(ctx, m, nucleo, entrega);
+  base.nome = `${nomeDa(ctx, m, nucleo, entrega)}${raro === 3 ? '' : (ctx.conteudo.alquimia.nomes.raridade[String(raro)] ?? '')}`;
   return {
     familiaEvolucao: 'fusao',
     base,

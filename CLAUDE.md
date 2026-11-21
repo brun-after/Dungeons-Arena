@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.16 · **Data:** 21/11/2026
+**Versão:** 0.17 · **Data:** 21/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -58,7 +58,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   nunca `if` por skill; a posição de um projétil com rota vem de `pontoEm`, a mesma no núcleo e na tela.
 - **Fusão pela receita** (marco 50, D-196): o id `f__…` é a receita, e `definicaoDe` refaz a fusão por
   `combat/fusao/fundir.ts`; nada de fusão fixa em `skills.json` nem campo novo na bolsa para ela. Pares, assinaturas e
-  materiais ficam em `alquimia.json`, o orçamento em `balance.alquimia` (guia em docs/ALQUIMIA.md).
+  materiais ficam em `alquimia.json`, o orçamento em `balance.alquimia` (guia em docs/ALQUIMIA.md). O nível de
+  raridade (marco 52, D-198) também está no id (`__g2`, `__g1`); o visual dele lê `Habilidade.raridadeFusao`.
 - **Engaste no id** (marco 51, D-197): a peça engastada é `en_<materiais>__<peça>`, resolvida pelo `CatalogoDeItens`
   (`progression/engaste.ts`), com a fusão elemental `fu_` por dentro; nada de campo novo no item para engaste. A
   receita da forja é o item `receita_<id>` com o molde em `forja.json → moldes` (`progression/moldes.ts`).

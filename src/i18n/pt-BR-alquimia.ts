@@ -87,6 +87,7 @@ export const textosAlquimia = {
   'habilidades.motivo.fusao_compreensao': 'Cada parte precisa de 100% de compreensão',
   'habilidades.motivo.fusao_teto': 'Uma fusão leva no máximo 3 skills',
   'habilidades.motivo.fusao_runa': 'A runa não serve ou não cabe nos encaixes',
+  'habilidades.motivo.fusao_maxima': 'Esta fórmula já está no 1º nível de raridade',
   'habilidades.motivo.fusao_material': 'O material não serve (a magia leva um só)',
   'runa.bandeja': 'Pedras rúnicas',
   'runa.arraste': 'Arraste uma pedra acesa até o encaixe, ou toque nela.',
@@ -94,6 +95,11 @@ export const textosAlquimia = {
   'runa.pedraPadrao': '{nome}, padrão',
   'runa.pedraBloqueada': '{nome}: falta vínculo',
   'runa.atual': 'Encaixe: {nome}',
+  // Marco 52 (21/11/2026, D-198): os níveis de raridade da fusão.
+  'alquimia.raridades': 'Raridade (pela Inteligência): 3º nível {p3}% · 2º nível {p2}% (+{b2}%) · 1º nível {p1}% (+{b1}%)',
+  'alquimia.refazer': 'Você já tem esta fórmula no {n}º nível. Transmutar de novo só fica se sair melhor; as partes, as runas e o material se gastam de qualquer jeito.',
+  'log.fusaoRaridade': '{nome}: saiu no {n}º nível de raridade.',
+  'log.fusaoSemMelhora': 'A transmutação não superou o {n}º nível de {nome}; a fusão continua como estava.',
   // Marco 51 (21/11/2026, D-197): a mesa da forja no ferreiro.
   'forja.titulo': 'A forja',
   'forja.intro': 'Ponha a receita na mesa e arraste a peça que ela pede. A forja aquece, martela, grava as runas e tempera.',

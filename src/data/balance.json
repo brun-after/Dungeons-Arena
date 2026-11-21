@@ -245,7 +245,12 @@
     "instavel": { "custoParPct": 20, "custoTrioPct": 10, "recargaPct": 15 },
     "runa": { "amplificaPct": 25, "camadaPct": 50 },
     "compreensao": { "comumPct": 2, "fusaoPct": 1, "faixaNivel": 10, "essenciaPct": 25 },
-    "dropRuna": { "chancePct": 4, "chefePct": 60 }
+    "dropRuna": { "chancePct": 4, "chefePct": 60 },
+    "raridade": {
+      "_doc": "Marco 52 (21/11/2026, D-198): o 2º e o 1º nível de raridade da fusão. A chance base sobe com a Inteligência acima de 10 (porIntPct por ponto) até maxPct; o resto é o 3º nível, o comum, sem bônus.",
+      "segundo": { "bonusPct": 10, "chancePct": 20, "porIntPct": 0.5, "maxPct": 42 },
+      "primeiro": { "bonusPct": 22, "chancePct": 4, "porIntPct": 0.3, "maxPct": 22 }
+    }
   },
   "engaste": {
     "_doc": "Marco 51 (21/11/2026, D-197): os engastes de arma e equipamento (progression/engaste.ts) e as receitas da forja como loot (progression/moldes.ts).",

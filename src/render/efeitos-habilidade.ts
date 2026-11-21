@@ -202,6 +202,8 @@ export class EfeitosDeHabilidade {
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNoAcerto(quem?.classeId ?? quem?.bolsa?.classeId, h.runa, h.faixaRuna, acerto, comParticulas);
       // Marco 39 (D-156): a forma do estilo conta o que faz com o golpe, mais forte a cada faixa.
       if (h.formas) this.o.diretor.formaNoAcerto(h.formas, acerto);
+      // Marco 52 (D-198): o 2º e o 1º nível da fusão, por cima do acerto.
+      if (h.raridadeFusao) this.o.diretor.raridadeNoAcerto(h.raridadeFusao, acerto);
       if (ev.indice > 0) return;
       // D-175: o gesto do núcleo da skill comum (as de área e em si desenham no lançamento).
       const comum = h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio' ? null : this.o.comum?.(h.id);
@@ -333,6 +335,7 @@ export class EfeitosDeHabilidade {
       // Marco 39 (D-151): o fio da runa na mão, além da conjuração da assinatura.
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNaConjuracao(h.runa, h.faixaRuna, pos);
       if (h.formas) this.o.diretor.formaNaConjuracao(h.formas, pos, v.cor);
+      if (h.raridadeFusao) this.o.diretor.raridadeNaConjuracao(h.raridadeFusao, pos, v.cor);
       // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
       if (this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.conjurar(assinaturaDe(h), pos, cor))) continue;
       if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
@@ -355,6 +358,7 @@ export class EfeitosDeHabilidade {
       const no = pr.rota ? p.elevar(pr.x, pr.y, pontoEm(pr.rota, pr.t ?? 0).z) : pr;
       // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
       if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), no.x, no.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, no.x, no.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (h?.raridadeFusao && v) this.o.diretor.raridadeNoRastro(h.raridadeFusao, no.x, no.y, v.cor);
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
       if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', no.x, no.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
@@ -458,6 +462,7 @@ export class EfeitosDeHabilidade {
     if (h.visual?.animacao === 'giro') this.o.aoGirar?.(a.origem, v.cor);
     // Marco 39 (D-156): o anel pesado da forma de área maior, por cima da área da assinatura.
     if (h.formas) this.o.diretor.formaNaArea(h.formas, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea });
+    if (h.raridadeFusao) this.o.diretor.raridadeNaArea(h.raridadeFusao, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea });
     // D-124: a área da assinatura (a bola de fogo voando, o meteoro, a nova, a chuva, o leque…).
     if (this.o.diretor.area(nome, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea }, h.visual?.variante)) return;
     if (h.visual?.animacao === 'giro') return;

@@ -209,6 +209,8 @@ export interface Habilidade {
   aoAbater?: readonly EfeitoCanonico[];
   /** Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/); ausente = reta, da mão, um golpe. */
   entrega?: Entrega;
+  /** Marco 52 (21/11/2026, D-198): o 2º ou o 1º nível de raridade da fusão (ausente = o 3º, o comum), para o visual. */
+  raridadeFusao?: 1 | 2;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */

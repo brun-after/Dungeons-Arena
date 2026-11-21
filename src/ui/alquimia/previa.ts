@@ -11,6 +11,9 @@ import type { MotivoHabilidade } from '../../core/eventos-simulacao';
 import type { Entidade } from '../../entities/entidade';
 import { t, type ChaveTexto } from '../../i18n';
 import { ticksDeEstudo } from '../../progression/habilidades-personagem';
+import { chancesDeRaridade, mesmaFormulaConhecida } from '../../progression/fusao-raridade';
+import { raridadeDaFusao } from '../../combat/fusao/receita';
+import { bonusDaRaridade } from '../../combat/fusao/regras';
 import { DT_MS } from '../../core/loop';
 import { descreverHabilidade, nomeDoEfeito } from '../descrever';
 import type { Provisoria } from './bancada-estado';
@@ -76,6 +79,12 @@ export function desenharPrevia(ctx: ContextoSimulacao, j: Entidade, p: Provisori
   const ranks = p.receita.partes.map((x) => j.bolsa?.conhecidas.find((c) => c.id === x)?.rank ?? 1);
   const rank = Math.max(1, Math.floor(ranks.reduce((a, b) => a + b, 0) / Math.max(1, ranks.length)));
   linha(t('alquimia.nascimento', { rank, grau: h.grau, min: Math.round((ticksDeEstudo(ctx, j, p.id) * DT_MS) / 60000) }));
+  // Marco 52 (21/11/2026, D-198): as chances de cada nível de raridade, pela Inteligência de quem transmuta.
+  const ch = chancesDeRaridade(ctx.balance.alquimia, j.atributos);
+  const r = ctx.balance.alquimia;
+  linha(t('alquimia.raridades', { p3: Math.round(ch[3]), p2: Math.round(ch[2]), b2: bonusDaRaridade(r, 2), p1: Math.round(ch[1]), b1: bonusDaRaridade(r, 1) }), 'linha-raridade');
+  const ja = j.bolsa ? (j.bolsa.conhecidas.some((c) => c.id === p.id) ? p.id : mesmaFormulaConhecida(j.bolsa, p.id)) : null;
+  if (ja) linha(t('alquimia.refazer', { n: raridadeDaFusao(ja) }), 'linha-instavel');
   const material = p.receita.material ? ctx.conteudo.alquimia.materiais.get(p.receita.material) : undefined;
   if (material && p.receita.material) linha(t('alquimia.materialNaMagia', { nome: ctx.conteudo.itens.get(p.receita.material)?.nome ?? p.receita.material, texto: material.texto }));
   caixa.append(ul);

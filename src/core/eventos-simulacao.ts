@@ -106,6 +106,8 @@ export type MotivoHabilidade =
   | 'fusao_teto'
   | 'fusao_runa'
   | 'fusao_material'
+  /** Marco 52 (D-198): a fusão desta fórmula já está no 1º nível de raridade. */
+  | 'fusao_maxima'
   /** Marco 24 (D-094): a tecla não aceita esse tipo (1–2 só de classe, 3–6 só gerais); a geral ainda não foi liberada
    *  por livro; a skill de classe não se aprende nem sobe com ponto (vem do livro e do nível). */
   | 'tecla_errada'
@@ -189,7 +191,7 @@ export type EventoSimulacao =
   // Marco 18 (D-068): o estudo de uma habilidade nova.
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
   /** Marco 50 (D-196): a transmutação consumiu as partes e a fusão começou a ser estudada. */
-  | { t: 'fusaoCriada'; tick: number; id: EntidadeId; habilidadeId: string; partes: string[] }
+  | { t: 'fusaoCriada'; tick: number; id: EntidadeId; habilidadeId: string; partes: string[]; /** Marco 52 (D-198): o nível (3 comum, 1 o mais raro) e se melhorou a fusão da mesma fórmula. */ raridade: 1 | 2 | 3; melhorou: boolean }
   /** Marco 24 (D-094): o livro de uma geral a liberou (aprender custa um ponto). */
   | { t: 'habilidadeLiberada'; tick: number; id: EntidadeId; habilidadeId: string }
   | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }
