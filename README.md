@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.56 · **Data:** 20/11/2026
+**Versão do documento:** 3.57 · **Data:** 20/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.57 (20/11/2026)**: marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza, com os números na cor do elemento (D-192, D-193).
 > - **3.56 (20/11/2026)**: marco 47: o ferreiro vende peças de armadura geradas numa vitrine com filtros, que renova a cada dia do Mundo; o loot de armadura usa o mesmo sorteio, com garantia contra azar, e o monstruário mostra a ficha e o loot de cada criatura (D-190).
 > - **3.55 (19/11/2026)**: marco 46: a armadura por propósito, estilo, grau e elemento, e cada peça com efeitos próprios (D-189).
 > - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-182).
@@ -355,6 +356,41 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 48 — as runas que ficam e os elementos que ferem (20/11/2026)
+
+Primeiro dos quatro marcos da Alquimia (48 a 51; o desenho está no Grimório da Alquimia).
+
+**As runas ficam.** A runa escolhida numa skill de classe ou numa ultimate deixou de voltar à padrão depois de passar
+pelo Mundo, pela campanha em grupo ou pela arena. A conferência da ficha copiava a bolsa sem as runas e sem o uso do
+vínculo. Agora ela confere e copia esses campos, e também o companheiro, as missões, o diário e as vitórias. O uso do
+vínculo é reancorado no relógio da sala nova.
+
+**Os elementos ferem.**
+- **Escala com o golpe.** O estado guarda uma fração do golpe que o aplicou (a queimadura, 5% por tique), e o tique
+  passa pela resistência do alvo.
+- **Cada elemento do seu jeito.**
+  - O fogo se espalha de quem morre queimando.
+  - O veneno soma até 4 camadas.
+  - O gelo estilhaça o congelado em volta.
+  - O raio descarrega o eletrizado nos vizinhos.
+  - A terra esmaga o enraizado.
+  - As trevas drenam o marcado para quem marcou.
+  - O vento fere quem é arrastado.
+  - O sagrado impede o morto-vivo de se reerguer.
+  - O psíquico ecoa o golpe no exposto.
+  - O crítico físico abre um sangramento.
+- **Reações.** As que não somavam nada passam a somar.
+- **Ritmo.** Para os elementos pesarem sem encurtar as lutas, a vida dos inimigos subiu de 120% para 130%.
+
+**As criaturas reagem pela natureza.** Doze naturezas (morto-vivo, besta, constructo, elemental, demônio, planta,
+enxame, mente, voador, ágil, espírito e humanoide), em `data/naturezas.json`, dão fraquezas, imunidades e reações. A
+besta foge do fogo, o ágil resfriado tropeça e o voador arrastado cai. Entre jogadores, o efeito é bem menor, e o PvP
+segue no ritmo.
+
+**Na tela.** O tique sai na cor do elemento, e o dano extra do elemento sai separado, maior e em dourado.
+
+Detalhes em D-192 e D-193.
 
 ### Marco 47 — a vitrine de armaduras e o loot de armadura (20/11/2026)
 

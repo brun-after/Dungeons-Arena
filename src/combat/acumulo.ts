@@ -1,6 +1,7 @@
 // Interações entre efeitos (D-057, D-059). Marco 14 (14/10/2026). Tudo vem de src/data/interacoes.json:
 // - acúmulo por tipo: `mais_forte` (o padrão da D-048: maior duração e maior valor), `renova` (recomeça com o
-//   novo), `soma` (conta acúmulos e soma o valor) e `ignora` (quem já tem fica como está);
+//   novo), `soma` (conta acúmulos e soma o valor) e `ignora` (quem já tem fica como está); marco 48 (20/11/2026,
+//   D-193): `camadas` soma o valor até `balance.elementosFerem.camadasMax` camadas e renova a duração (o veneno);
 // - transformações: N acúmulos viram outro efeito (resfriado ×3 -> congelado);
 // - oposições: aplicar um efeito tira os opostos (queimando tira o frio, e o frio tira o fogo);
 // - teto de efeitos por entidade: passando dele, sai o que acaba primeiro;
@@ -12,11 +13,12 @@ import { ticksDe } from '../core/tempo';
 import { Leitor } from '../core/validar';
 import type { EfeitoAtivo, Entidade } from '../entities/entidade';
 import type { Sinergia } from './elementos';
+import { imunePelaNatureza } from './naturezas';
 import { PONTAS_DE_REACAO, type PontaElemental } from '../progression/vinculo';
 import { normalizarEfeito, normalizarEfeitos } from './normalizar-efeito';
 import { ehTipoEfeito, REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
-export const REGRAS_ACUMULO = ['mais_forte', 'renova', 'soma', 'ignora'] as const;
+export const REGRAS_ACUMULO = ['mais_forte', 'renova', 'soma', 'ignora', 'camadas'] as const;
 export type RegraAcumulo = (typeof REGRAS_ACUMULO)[number];
 
 export interface Transformacao {
@@ -111,7 +113,8 @@ export function regraDe(interacoes: Interacoes, tipo: TipoEfeito): RegraAcumulo 
 
 /** O preset da entidade é imune a este tipo de efeito? */
 export function imuneAoEfeito(ctx: ContextoSimulacao, alvo: Entidade, tipo: TipoEfeito): boolean {
-  return ctx.conteudo.presets.get(alvo.preset)?.imunidades.includes(tipo) ?? false;
+  // Marco 48 (20/11/2026, D-193): e as imunidades da natureza (o constructo não sangra, o voador não se enraíza).
+  return (ctx.conteudo.presets.get(alvo.preset)?.imunidades.includes(tipo) ?? false) || imunePelaNatureza(ctx, alvo, tipo);
 }
 
 /**
@@ -154,6 +157,16 @@ export function registrarEfeitoAtivo(
           ativo.inicioTick = tick;
         }
         break;
+      case 'camadas': {
+        // Cada camada soma o valor dela (a média das camadas, para a mais forte não se perder) até o teto.
+        const max = Math.max(1, ctx.balance.elementosFerem.camadasMax[ef.tipo] ?? 1);
+        const porCamada = Math.max(ef.valor, Math.round(ativo.valor / Math.max(1, ativo.acumulos)));
+        ativo.acumulos = Math.min(max, ativo.acumulos + 1);
+        ativo.valor = porCamada * ativo.acumulos;
+        ativo.pct = Math.max(ativo.pct, ef.pct);
+        ativo.ateTick = Math.max(ativo.ateTick, ateTick);
+        break;
+      }
       case 'mais_forte':
         if (ateTick > ativo.ateTick) {
           ativo.ateTick = ateTick;

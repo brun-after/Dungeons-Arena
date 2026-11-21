@@ -74,6 +74,8 @@ import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
 import { lerPecas, type RegrasDePecas } from '../progression/pecas';
 import { lerSorteioDePecas, type RegrasDoSorteio } from '../progression/sorteio-pecas';
+import naturezasJson from '../data/naturezas.json';
+import { lerNaturezas, type CatalogoNaturezas } from '../combat/naturezas';
 import { BALANCE_PADRAO } from './contexto';
 
 export interface Conteudo {
@@ -83,6 +85,8 @@ export interface Conteudo {
   definicoes: Catalogo<DefinicaoHabilidade>;
   caminhos: Catalogo<Caminho>;
   presets: Catalogo<PresetInimigo>;
+  /** Marco 48 (20/11/2026, D-193): as naturezas das criaturas (fraquezas, imunidades e reações aos estados). */
+  naturezas: CatalogoNaturezas;
   classes: Catalogo<ClasseJogador>;
   modos: Catalogo<ModoDeJogo>;
   modoCampanha: ModoDeJogo;
@@ -185,6 +189,8 @@ export interface FontesDeConteudo {
   sorteio?: unknown;
   /** Marco 45: data/dimensoes.json (opcional nos testes). */
   dimensoes?: unknown;
+  /** Marco 48: data/naturezas.json (opcional: sem ele, o oficial). */
+  naturezas?: unknown;
   /** Marco 29: arquivo -> JSON de cada reino em src/data/mundo (opcional nos testes). */
   reinos?: Readonly<Record<string, unknown>>;
 }
@@ -228,7 +234,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
   const dm = lerDimensoes(fontes.dimensoes ?? dimensoesJson);
-  const erros = [...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...lj.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const nt = lerNaturezas(fontes.naturezas ?? naturezasJson, new Set(p.presets.keys()));
+  const erros = [...nt.erros, ...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...pc.erros, ...lj.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   // Marco 46 (D-189): o propósito e o estilo escolhidos nos itens fixos existem em pecas.json.
   for (const item of it.itens.values()) {
     if (item.proposito !== undefined && !pc.pecas.propositos.has(item.proposito)) erros.push(`item ${item.id}: propósito desconhecido "${item.proposito}"`);
@@ -334,6 +341,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       definicoes: h.definicoes,
       caminhos: cm.caminhos,
       presets: p.presets,
+      naturezas: nt.naturezas,
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,

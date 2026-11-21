@@ -64,7 +64,7 @@ import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
 import { fracaoMira } from '../combat/mira';
-import { ligarFeedback } from './feedback';
+import { corDoNumeroDoEstado, ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
 import { ligarCinematicaUltimate } from './cinematica-ultimate';
 import { nuvemDoBuild } from '../plataforma/nuvem';
@@ -620,6 +620,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
     dado,
     opostoDe: (el) => ctx.conteudo.afinidades.elementos.get(el)?.oposto,
+    corDoEstado: (tipo) => corDoNumeroDoEstado(ctx, tipo),
   });
   // Marco 23 (D-092): o chip do tema e, ao entrar, o aviso do clima.
   const tema = temaDaFase(ctx);

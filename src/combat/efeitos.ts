@@ -37,6 +37,7 @@ import { sustentarLuzComMana } from './luz-propria';
 import { comecarDeslize } from './deslize';
 import { aplicarInstantaneoNovo } from './efeitos-novos';
 import { agendarFase } from './fases';
+import { fatorDoTique } from './estado-do-golpe';
 import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
 
 export { REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
@@ -396,9 +397,10 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         if (!periodico || f.proximoTick === 0 || tick < f.proximoTick) continue;
         f.proximoTick += intervalo;
         if (periodico === 'dano') {
-          if (imuneADano(e, tick)) continue;
+          if (imuneADano(e, tick) || f.valor <= 0) continue;
           const quem = buscarEntidade(estado, f.origemId);
-          const dano = sofrerDano(e, f.valor, tick, (quem ? fatorDoGolpe(estado, ctx, quem, e) * extraGuerreiro(ctx, quem, e) : 1) * protecaoInicial(estado, ctx, e, quem));
+          // Marco 48 (20/11/2026, D-193): o tique passa pela resistência do alvo ao elemento do estado.
+          const dano = sofrerDano(e, f.valor, tick, (quem ? fatorDoGolpe(estado, ctx, quem, e) * extraGuerreiro(ctx, quem, e) : 1) * protecaoInicial(estado, ctx, e, quem) * fatorDoTique(ctx, e, f.tipo, tick));
           if (quem) pulsarAura(estado, ctx, quem, e, dano, saida);
           if (dano > 0) registrarParticipacao(e, f.origemId, tick, ctx);
           resultado(saida, tick, e, f.origemId, f, { dano });

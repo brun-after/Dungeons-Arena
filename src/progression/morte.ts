@@ -49,6 +49,7 @@ import { sortearItem } from './sorteio';
 import { pecasDoAbate } from './loot-pecas';
 import { antesDeCair, aoCair } from '../entities/criaturas/morte';
 import { largarOrbeXp, sorteDoXp, xpVaiAoChao } from './orbe-xp';
+import { espalharAoMorrer } from '../combat/elementos-ferem';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -151,6 +152,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).
     encerrarInteracao(estado, ctx, e, saida);
     saida.push({ t: 'morreu', tick: estado.tick, id: e.id, porId: porId?.id ?? null });
+    // Marco 48 (20/11/2026, D-193): quem morre queimando passa o fogo aos vizinhos.
+    espalharAoMorrer(estado, ctx, e, saida);
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
     if (e.controlador !== 'ia' || e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);

@@ -15,7 +15,9 @@ const VIDA_MS = 900;
 const SUBIDA_PX = 34;
 export const ESCALONAMENTO_MS = 80;
 
-export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'recurso' | 'esquiva' | 'ouro';
+// Marco 48 (20/11/2026, D-193): 'estado' é o tique de um estado (na cor do elemento) e 'reacao' o dano que o
+// elemento faz além do golpe (descarga, estilhaço, eco, reação), maior e separado do número do golpe.
+export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'recurso' | 'esquiva' | 'ouro' | 'estado' | 'reacao';
 
 const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
   dano: { cor: 0xece8f4, tamanho: 18 },
@@ -25,6 +27,8 @@ const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
   recurso: { cor: 0x5dade2, tamanho: 18 },
   esquiva: { cor: 0x8e8a99, tamanho: 14 },
   ouro: { cor: 0xf1c40f, tamanho: 18 },
+  estado: { cor: 0xece8f4, tamanho: 15 },
+  reacao: { cor: 0xffd27a, tamanho: 21 },
 };
 
 /** d20 nos extremos: cor da faixa (dourado no bom, vermelho na falha). */
@@ -57,7 +61,8 @@ export class CamadaNumeros {
   ) {}
 
   /** `celulaX/Y` em células; `atrasoMs` para escalonar números de área. */
-  mostrar(conteudo: string, tipo: TipoNumero, celulaX: number, celulaY: number, agoraMs: number, atrasoMs = 0): void {
+  /** `cor` troca a cor do tipo (o elemento do estado); o texto reaproveitado volta à cor do tipo sem ela. */
+  mostrar(conteudo: string, tipo: TipoNumero, celulaX: number, celulaY: number, agoraMs: number, atrasoMs = 0, cor?: number): void {
     if (this.vivos.reduce((n, v) => n + (v.dado ? 0 : 1), 0) >= MAX_NUMEROS_VIVOS) {
       const i = this.vivos.findIndex((v) => !v.dado);
       const velho = i >= 0 ? this.vivos[i] : undefined;
@@ -68,6 +73,8 @@ export class CamadaNumeros {
     }
     const texto = this.texto(tipo);
     if (texto.text !== conteudo) texto.text = conteudo;
+    const fill = cor ?? ESTILO[tipo].cor;
+    if (texto.style.fill !== fill) texto.style.fill = fill;
     texto.visible = false;
     texto.alpha = 1;
     // Pequeno desvio horizontal para números simultâneos não se sobreporem.

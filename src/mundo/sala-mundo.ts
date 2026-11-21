@@ -169,7 +169,7 @@ export class SalaMundo extends SalaArena {
   protected override criarPersonagem(_msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId, _n: number, identidade: string | null): EntradaDePersonagem {
     const reserva = identidade ? this.reservas.get(identidade) : undefined;
     if (!identidade || !reserva) return { ok: false, motivo: 'personagem_invalido' };
-    const r = conferirPersonagem(reserva.ficha.personagem, this.ctx, entidadeId, jogadorId);
+    const r = conferirPersonagem(reserva.ficha.personagem, this.ctx, entidadeId, jogadorId, this.estado.tick);
     if (!r) return { ok: false, motivo: 'personagem_invalido' };
     this.reservas.delete(identidade);
     const e = r.entidade;

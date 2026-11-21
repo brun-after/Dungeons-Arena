@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.44 · **Data:** 20/11/2026
+**Versão:** 1.45 · **Data:** 20/11/2026
 
 > **Histórico**
+> - **1.45 (20/11/2026)**: D-192 e D-193: marco 48, as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena; os elementos ferem pelo golpe, cada um do seu jeito, e as criaturas reagem pela natureza.
 > - **1.44 (20/11/2026)**: D-191: a saída das passagens entre regiões sem muro de relevo; a pé, o muro até a altura do corpo e mais metade se escala (tempo pela Vontade e pela Destreza) e a queda até 10 níveis se desce num pulo curto (10% a 20% mais lento, com o impacto).
 > - **1.43 (20/11/2026)**: D-188, adendo: personagens que ficaram com 1 skill de classe depois do ajuste do kit voltam a ter 2 (`completarSkillsDeClasse` em `progression/habilidades-classe.ts`, rodada em toda ficha recalculada: quem conhece menos de 2 skills de classe recebe as iniciais que faltam no rank 1, nas teclas vazias; quem tirou uma da barra de propósito com 2 conhecidas não muda).
 > - **1.42 (20/11/2026)**: D-190: marco 47, a vitrine de armaduras geradas do ferreiro, renovada a cada dia do Mundo, com preço pelo grau e pelos efeitos; o loot de armadura no mesmo sorteio, com garantia contra azar, o elemento da criatura e as peças dos chefes; o monstruário mostra a ficha e o loot.
@@ -6107,3 +6108,83 @@ diagonal virar escalada. Por isso a escalada só começa com a frente do corpo n
 **Observação.** Os tempos são a primeira calibragem. A pose usa a do salto, porque o atlas ainda não tem quadros de
 escalada.
 
+## D-192 — Marco 48: as runas e o resto da ficha sobrevivem ao Mundo, ao grupo e à arena (20/11/2026)
+
+**Problema.** A runa escolhida numa skill de classe ou numa ultimate voltava à padrão depois de sair e voltar.
+`conferirPersonagem` (`coop/personagem.ts`) reconstruía a bolsa da ficha trazida para a sala sem `runas` nem
+`vinculoUso`. A sala do Mundo, a campanha em grupo e a arena começavam com a bolsa sem esses campos. Na volta, a ficha
+devolvida gravava a bolsa vazia no slot. O mesmo acontecia com o companheiro (`pet`), as missões em andamento e
+concluídas, o diário e as vitórias.
+
+**Decisão.**
+- `coop/conferir-extras.ts` confere e copia esses campos.
+  - **Runas**: só a chave de um encaixe que leva runa (`levaRuna`, `idDoEncaixe(k) === k`) com um elemento válido.
+  - **Uso do vínculo**: o valor já decaído até o último registro é reancorado no tick da sala nova. Sem isso, a runa
+    sustentada pelo uso caía a zero, porque o tick da sala nova é menor, ou nunca decaía.
+  - **Companheiro**: só falcão, lobo ou urso.
+  - **Missões**: só as conhecidas, com a contagem abaixo da meta.
+  - **Diário**: textos de até 120 caracteres, sem repetição, até 4000.
+  - **Vitórias**: só os presets conhecidos.
+- Na volta (`aplicarRetratoNoSave`, `atualizarPersonagemNoSave`), o uso é reancorado no tick do estado local.
+- O certificado (`registrar`) passa a comparar runas, companheiro e missões concluídas, para acusar a perda.
+
+**Mantido.** A runa sustentada só pelo uso ainda volta à padrão quando o vínculo esfria (D-151). Isso é desenho, não
+perda.
+
+## D-193 — Marco 48: os elementos ferem, cada um do seu jeito, e as criaturas reagem pela natureza (20/11/2026)
+
+**Problema.** Os elementos quase não feriam. Só o fogo e o veneno tinham dano por tempo, fixo em 2 ou 3 por tique e sem
+escala (cerca de 2% da vida de um inimigo de nível 30). Trinta reações tinham `danoExtraPct` 0, e o tique não passava
+pela resistência do alvo. Os números dos estados saíam brancos, iguais aos do golpe.
+
+**Decisão.**
+- **O estado escala com o golpe.** Quem aplica o estado grava em `f.valor` uma fração do golpe que o aplicou, já com
+  estilos, arma, nível e crítico (`balance.elementosFerem.estadoPctDoGolpe`). Exemplos: queimando 5%, envenenado 3% por camada,
+  sangrando 3%, arrastado 8%. O valor nunca fica abaixo do piso do dado (`combat/estado-do-golpe.ts → escalarEstado`).
+  O tique passa pela resistência do alvo ao elemento do estado (`fatorDoTique`); com resistência 100, o tique zera.
+- **O `dano_direto` das reações** vale 3% do golpe por ponto, e as reações que somavam 0 passam a somar de 5% a 15%.
+  Ficam em 0 só as de cura e de proteção (orvalho, solo consagrado, brisa sagrada).
+- **Cada elemento fere do seu jeito** (`combat/elementos-ferem.ts`, no golpe que causa dano):
+
+  | Elemento | Como fere |
+  |---|---|
+  | Fogo | queima pelo golpe; quem morre queimando passa a queimadura aos vizinhos (raio 1, 60% da duração) |
+  | Veneno | soma camadas, até 4 (regra `camadas` em `interacoes.json`); o tique fere o valor somado |
+  | Gelo | o golpe de outro elemento no congelado estilhaça: 25% do golpe em volta, e o gelo sai |
+  | Raio | o eletrizado descarrega no golpe seguinte: 15% do golpe em 2 vizinhos a até 3 células |
+  | Terra | o golpe no enraizado esmaga (10%); se o alvo já estava lento, atordoa 0,5 s |
+  | Trevas | o golpe no marcado cura quem marcou em 30% do dano |
+  | Vento | o arrastado fere por tempo, 8% do golpe |
+  | Sagrado | o consagrado queima os mortos-vivos e os demônios e os impede de se reerguer |
+  | Psíquico | o golpe no exposto ecoa 15% depois de 0,5 s |
+  | Físico | o crítico sem elemento abre um sangramento de 4 s |
+
+  O mesmo efeito só volta no mesmo alvo depois de 1,5 s (`intervaloMs`, em `reacoesAte`).
+- **Natureza das criaturas** (`data/naturezas.json`, `combat/naturezas.ts`). São 12 naturezas: morto-vivo, besta,
+  constructo, elemental, demônio, planta, enxame, mente, voador, ágil, espírito e humanoide. Cada uma traz
+  resistências e fraquezas por elemento, imunidades a estados, reações e `semRemontarCom`.
+  - Exemplos: o morto-vivo leva +50% do sagrado e +25% do fogo, é imune a veneno e sangramento e não se reergue
+    consagrado. A besta foge do fogo (aterrorizada 1,5 s). O ágil resfriado tropeça. O voador não se enraíza e,
+    arrastado, cai atordoado.
+  - O mapa `presets` liga só as criaturas hostis. As feras, os mortos e os servos dos personagens e o boneco de treino
+    ficam de fora.
+  - A resistência da natureza soma à do preset, das peças e do vínculo (`resistenciaPct`), entre −100 e 90.
+  - A reação roda como traço, nunca como `if` por criatura (D-182). `antesDeCair` consulta `naturezaImpedeRemontar`.
+- **Entre jogadores** (o duelo da arena e o PvP das regiões perigosas, contando as invocações de cada um), o estado
+  guarda só 15% da fração e a reação só 60% do bônus. Assim o PvP segue no ritmo de `metas.pvpLivre`.
+- **Na tela.** O tique sai na cor do elemento do estado, um pouco clareada; o sangramento sai em vermelho. O dano do
+  elemento além do golpe (descarga, estilhaço, eco, reação) sai maior, em dourado, separado do número do golpe.
+
+**Alternativas descartadas.**
+- Deixar a parte elemental só como bônus de dano: o usuário pediu que cada elemento fira do seu jeito e que os inimigos
+  reajam pelo tipo.
+- Dar natureza às feras e ao boneco: o boneco virava constructo imune ao veneno, e as feras ficavam frágeis demais no PvP.
+
+- **Calibragem.** A primeira versão (queimando 12%, reações de 10% a 30%, descarga 35%, estilhaço 60%) acelerou as lutas
+  em 20% a 30%: o chefe sozinho caía em 22 s (meta 25–40 s) e o covil da bruxa em grupo, em 25 s (meta 30–60 s).
+  Os estados dos inimigos também escalam contra o jogador, e o mago passou a aguentar 5 golpes (meta 6–8). Com a
+  sonda por parte, os números caíram à metade ou menos, e a vida dos inimigos subiu de 120% para 130%
+  (`inimigos.vidaPct`). Assim os elementos seguem pesando, e o ritmo volta às metas.
+
+**Resultado.** 202/202 metas em docs/BALANCEAMENTO.md. O PvP do Aventureiro contra ele mesmo fica em 5,5 s (meta por
+classe de 5 s, D-188); o teste de ritmo passa a usar o piso por classe, como o relatório.

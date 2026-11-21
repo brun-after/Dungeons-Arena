@@ -220,6 +220,22 @@
     "prazoArmadoMs": 20000,
     "refugioMs": 45000
   },
+  "elementosFerem": {
+    "_doc": "Marco 48 (20/11/2026, D-193): os estados guardam uma fração do golpe que os aplicou (estadoPctDoGolpe, % por tique) e cada tique passa pela resistência do alvo; os 9 elementos e o Físico ferem do seu jeito (combat/elementos-ferem.ts).",
+    "estadoPctDoGolpe": { "queimando": 5, "envenenado": 3, "sangrando": 3, "dano_periodico": 4, "arrastado": 8, "consagrado": 6 },
+    "camadasMax": { "envenenado": 4 },
+    "reacaoDanoDiretoPorPontoPct": 3,
+    "descarga": { "pct": 15, "alvos": 2, "raio": 3 },
+    "estilhaco": { "pct": 25, "raio": 1 },
+    "esmagar": { "pct": 10, "atordoaMs": 500 },
+    "drenoDoMarcadoPct": 30,
+    "ecoDoExpostoPct": 15,
+    "sangramentoNoCritico": { "duracaoMs": 4000 },
+    "espalharQueimando": { "raio": 1, "duracaoPct": 60 },
+    "intervaloMs": 1500,
+    "entrePersonagensPct": 15,
+    "entrePersonagensReacaoPct": 60
+  },
   "economia": {
     "ouroInicial": 15,
     "ouroMax": 999999,
@@ -439,7 +455,7 @@
       { "atributo": "sabedoria", "porNivel": 1, "aPartirDoNivel": 10 }
     ],
     "xpPorNivelPct": 25,
-    "vidaPct": 120
+    "vidaPct": 130
   },
   "armadilhas": {
     "revelarIntervaloMs": 1000,
