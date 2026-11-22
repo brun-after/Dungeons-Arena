@@ -130,6 +130,8 @@ export interface RegiaoDoMundo {
   escuroBase?: number;
   /** Marco 42 (D-176): as matas fechadas (sempre escuras), também dentro das regiões seguras. */
   matas?: readonly { x: number; y: number; raio: number }[];
+  /** Marco 53 (22/11/2026, D-203): os ninhos da criatura que guarda uma receita (uma das `inimigos`; world/ninhos.ts). */
+  ninhos?: readonly { preset: string; nome: string }[];
 }
 
 /** 08/11/2026 (D-138): onde o terreno nasce: livre pela região, em volta do chefe do elemento ou na porta da estrutura. */
@@ -291,6 +293,14 @@ function lerExtrasDaRegiao(l: Leitor, o: Objeto): Partial<RegiaoDoMundo> {
     r.matas = l.lista(o, 'matas').map((x) => {
       const m = l.objeto(x, 'mata');
       return { x: l.numero(m, 'x', { min: 0, inteiro: true }), y: l.numero(m, 'y', { min: 0, inteiro: true }), raio: l.numero(m, 'raio', { min: 4, max: 40, inteiro: true }) };
+    });
+  }
+  if (o.ninhos !== undefined) {
+    r.ninhos = l.lista(o, 'ninhos').map((x) => {
+      const m = l.objeto(x, 'ninho');
+      const preset = l.texto(m, 'preset');
+      if (!l.listaDeTextos(o, 'inimigos').includes(preset)) l.erro(`o ninho de "${preset}" pede a criatura entre os inimigos da região`);
+      return { preset, nome: l.texto(m, 'nome') };
     });
   }
   if (o.andarilhos !== undefined) {

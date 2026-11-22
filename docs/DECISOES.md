@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.59 · **Data:** 22/11/2026
+**Versão:** 1.60 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.60 (22/11/2026)**: D-203: os ninhos das receitas (o lugar da região onde a criatura que guarda uma receita se junta e a deixa cair 4 vezes mais), no mapa e no texto da receita.
 > - **1.59 (22/11/2026)**: D-203: o item solto espera 5 s depois de fechar a mochila para voltar a quem soltou; o Mundo sem o registro lateral (o importante em destaque, o XP subindo do personagem e a faixa do chefe que surge).
 > - **1.58 (22/11/2026)**: D-204: a caça do pet do Aventureiro solta na troca de fera e no Chamado (o X); as ultimates dele trazem cópias da fera da vez no lugar das criaturas, e com uma cópia viva o dano na fera chega ao dono a 1/3.
 > - **1.57 (22/11/2026)**: D-203: o marco 53, o conforto (controles, mapa, avisos, consertos e regras pequenas pedidos depois de jogar).
@@ -6688,6 +6689,20 @@ estado.
 - **O chefe que surge** vira uma faixa vermelha abaixo da do lugar, com o nome e o nível (`ui/anuncio-chefe.ts`). O
   cliente percebe o chefe que aparece no estado (o da noite nasce fora da simulação, sem evento); o que já estava lá na
   chegada não é anunciado, e o mesmo chefe só volta a ser depois de 2 min longe da vista.
+
+**Os ninhos das receitas (1.60).** Antes, a receita só dizia onde a criatura que a guarda vive; não havia um lugar
+melhor para procurá-la. Agora algumas regiões têm o **ninho** dessa criatura (`ninhos` no JSON do reino, com o preset e
+o nome; `world/ninhos.ts`). Por que ali: é a toca delas (a Teia das tecelãs na Floresta Antiga, a Fornalha caída nas
+Ruínas do Norte, a Toca dos trolls no Pico Gelado, a Cripta alagada no Pântano Sombrio, o Teatro dos exilados no
+Eclipse). Assim:
+- O gerador sorteia o centro (RNG próprio, longe da vila, do abrigo e das chegadas; o resto da região sai igual) e põe
+  ali `engaste.ninho.guardioes` (6) delas no topo da faixa, num raio de `engaste.ninho.raio` (8).
+- Quem morre dentro do ninho da sua espécie deixa a receita que guarda `engaste.ninho.receitaMult` (4) vezes mais
+  (de 3% para 12% no comum). A dimensão e o material não mudam.
+- O ninho aparece no minimapa e no mapa do lugar (três garras vermelhas, com o nome), e a receita diz "mais no ninho
+  delas: Teia das tecelãs (Floresta Antiga)".
+- O ninho só pode ser de uma criatura que já vive na região (o leitor do reino recusa o resto). As receitas cujas
+  criaturas não vivem em nenhuma região (o arco da tempestade) e as de chefe ficam sem ninho.
 
 **Fora.** De dia, o andarilho tem o preço de sempre. O condutor não atravessa regiões: seguindo alguém que trocou de
 região, o personagem espera parado até ele voltar.

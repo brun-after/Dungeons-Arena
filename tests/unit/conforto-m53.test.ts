@@ -21,6 +21,10 @@ import { celulaLivrePerto, criarCondutor } from '../../src/ui/condutor';
 import { objetoClicado } from '../../src/ui/clique-objeto';
 import { novoObjeto } from '../../src/world/objeto-novo';
 import { chefesNovos } from '../../src/ui/anuncio-chefe';
+import { ninhoDe } from '../../src/world/ninhos';
+import { dropsDaForja } from '../../src/progression/moldes';
+import { criarRng } from '../../src/core/rng';
+import { linhasDaReceita } from '../../src/ui/forja/texto-receita';
 import { criarInimigo } from '../../src/entities/fabrica';
 
 function vila(noite: number) {
@@ -230,3 +234,46 @@ describe('marco 53: o registro do Mundo e o chefe que surge (D-203)', () => {
     expect(chefesNovos(estado, vistos, 300_000).map((c) => c.id)).toEqual(['b1']);
   });
 });
+
+describe('marco 53: os ninhos das receitas (D-203)', () => {
+  function regiao(id: string) {
+    const reino = CONTEUDO.reinos.get('reino_central');
+    if (!reino) throw new Error('reino');
+    const lugar = lerLugar(reino, `regiao:${id}`);
+    if (lugar?.tipo !== 'regiao') throw new Error('lugar');
+    return montarLugar(CONTEUDO, reino, lugar, modoPorId(CONTEUDO, MODO_MUNDO));
+  }
+
+  it('a Floresta Antiga tem a teia das tecelãs, com as aranhas guardiãs dentro', () => {
+    const m = regiao('floresta_antiga');
+    const ninho = m.ctx.fase.ninhos?.[0];
+    expect(ninho).toMatchObject({ preset: 'aranha', nome: 'Teia das tecelãs' });
+    if (!ninho) throw new Error('ninho');
+    const dentro = m.estado.entidades.filter((e) => e.preset === 'aranha' && ninhoDe(m.ctx.fase.ninhos, 'aranha', e.x, e.y));
+    expect(dentro.length).toBeGreaterThanOrEqual(BALANCE_PADRAO.engaste.ninho.guardioes);
+    expect(ninhoDe(m.ctx.fase.ninhos, 'lobo', ninho.x, ninho.y)).toBeNull();
+    // A mesma região sai igual (o RNG do ninho é próprio e fixo).
+    expect(regiao('floresta_antiga').ctx.fase.ninhos).toEqual(m.ctx.fase.ninhos);
+  });
+
+  it('no ninho, a receita cai várias vezes mais', () => {
+    const ctx = vila(0).ctx;
+    const conta = (noNinho: boolean) => {
+      let n = 0;
+      for (let i = 0; i < 4000; i++) if (dropsDaForja(ctx, 'aranha', false, criarRng(i + 1), noNinho).some((id) => id.startsWith('receita_'))) n++;
+      return n;
+    };
+    const fora = conta(false);
+    const dentro = conta(true);
+    expect(fora).toBeGreaterThan(0);
+    expect(dentro).toBeGreaterThan(fora * 2.5);
+  });
+
+  it('a receita diz o ninho e a região', () => {
+    const ctx = vila(0).ctx;
+    const molde = CONTEUDO.moldes.get('arco_de_seda');
+    if (!molde) throw new Error('molde');
+    expect(linhasDaReceita(ctx, molde, 'arqueiro').join(' ')).toContain('Teia das tecelãs (Floresta Antiga)');
+  });
+});
+

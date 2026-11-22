@@ -272,7 +272,8 @@
     "dropReceitaPct": 3,
     "dropReceitaChefePct": 25,
     "dropMaterialPct": 6,
-    "dropMaterialChefePct": 60
+    "dropMaterialChefePct": 60,
+    "ninho": { "raio": 8, "guardioes": 6, "receitaMult": 4 }
   },
   "entrega": {
     "_doc": "Marco 49 (21/11/2026, D-194): a entrega em sete eixos (combat/entrega/), com o custo e a compensação de cada escolha do Grimório da Alquimia.",

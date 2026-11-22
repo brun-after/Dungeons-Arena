@@ -1,4 +1,5 @@
 import { dropsDaForja } from './moldes';
+import { ninhoDe } from '../world/ninhos';
 import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
 import { morteSemTumulo, PREFIXO_NOITE, recompensaDaNoite } from '../mundo/noite';
 import { criarTumulo } from '../mundo/objetos-mundo';
@@ -359,7 +360,8 @@ function largarRunaElemental(estado: EstadoJogo, ctx: ContextoSimulacao, e: Enti
 function largarDaForja(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   if (!ctx.modo.sobrevivencia.estudoAvanca || e.bolsa) return;
   const rng = criarRng(hashTexto(`${estado.faseId}/${e.id}/${String(e.geracao)}/forja`));
-  for (const id of dropsDaForja(ctx, e.preset, e.arquetipo === 'boss', rng)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, id, x, y, saida));
+  const noNinho = ninhoDe(ctx.fase.ninhos, e.preset, e.x, e.y) !== null; // Marco 53 (D-203)
+  for (const id of dropsDaForja(ctx, e.preset, e.arquetipo === 'boss', rng, noNinho)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, id, x, y, saida));
 }
 
 function celulaLivreParaRenascer(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c: { x: number; y: number }): { x: number; y: number } {
