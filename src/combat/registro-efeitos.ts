@@ -129,6 +129,8 @@ export interface EfeitoCanonico {
   ref: string | null;
   /** Marco 40 (13/11/2026, D-161): na armadilha, o que ela dá ao aliado que pisa (uma vez); `pct` são os rearmes. */
   aliado?: EfeitoCanonico;
+  /** 22/11/2026: na armadilha, o lado do quadrado que ela ocupa (células; sem ele, 1). */
+  lado?: number;
 }
 
 /** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */
@@ -452,6 +454,7 @@ export function construirEfeito(tipo: TipoEfeito, parcial: Partial<Omit<EfeitoCa
     em: parcial.em ?? 'alvo',
     interno: parcial.interno ? { ...parcial.interno, interno: null } : null,
     ref: parcial.ref ?? null,
+    ...(parcial.lado !== undefined && parcial.lado > 1 && { lado: parcial.lado }),
   };
 }
 

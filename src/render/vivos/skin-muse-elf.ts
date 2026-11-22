@@ -1,5 +1,5 @@
-// A skin Valquíria Glacial do arqueiro (21/11/2026), montada a partir das medidas da arte
-// (skin-valquiria-medidas.ts), no mesmo processo da Sombra Rubra: as alturas passam da arte ao rig por marcos (chão,
+// A skin Muse Elf do arqueiro (21/11/2026), montada a partir das medidas da arte
+// (skin-muse-elf-medidas.ts), no mesmo processo da Sombra Rubra: as alturas passam da arte ao rig por marcos (chão,
 // joelho, virilha, ombro e queixo) e os tamanhos e o lado usam a altura do rig. O desenho vai espelhado no lado: na
 // arte o arco está na mão esquerda, aqui na direita, que é a dos golpes. As peças:
 // - o rosto claro com os olhos azuis, o cabelo louro comprido que desce às costas e voa para o lado livre, e a franja
@@ -15,8 +15,8 @@
 // escondido.
 
 import * as THREE from 'three';
-import { altura as alturaNaArte, ASAS, CABELO, CAPA, lado as ladoNaArte, MARCOS, PECAS, RAIZ_DAS_ASAS, tam } from './skin-valquiria-medidas';
-import { materiaisDaValquiria, type MateriaisDaValquiria as M } from './skin-valquiria-texturas';
+import { altura as alturaNaArte, ASAS, CABELO, CAPA, lado as ladoNaArte, MARCOS, PECAS, RAIZ_DAS_ASAS, tam } from './skin-muse-elf-medidas';
+import { materiaisDaMuseElf, type MateriaisDaMuseElf as M } from './skin-muse-elf-texturas';
 import type { Ossos, PecaSombria } from './sombrio-base';
 import { aoLongo, Corpo, sorteio, V } from './sombrio-base';
 import { eixosDoCorpo, mao, mix, pesosDoManto, suave, type Eixos } from './skin-ceifador';
@@ -79,6 +79,18 @@ function tubo(pontos: THREE.Vector3[], raios: number[], ossos: string[], m: THRE
   }, m));
 }
 
+/**
+ * A silhueta feminina (22/11/2026): o fator da largura do tronco pela altura. Os ombros e o peito mais estreitos que o
+ * perfil comum (eixosDoCorpo, que é o de uma veste larga), a cintura bem fina e o quadril que volta a abrir.
+ */
+function silhueta(c: Corpo, e: Eixos, R: Regua): (y: number) => number {
+  const yCintura = R.y(MARCOS.cintura);
+  const cintura = (y: number) => 0.3 * Math.exp(-(((y - yCintura) / (0.075 * c.u)) ** 2));
+  const ombros = (y: number) => 0.14 * suave(c.p('spine_03').y, e.topo, y);
+  const quadril = (y: number) => 0.1 * Math.exp(-(((y - (e.bacia + 0.02 * c.u)) / (0.06 * c.u)) ** 2));
+  return (y) => 0.86 - cintura(y) - ombros(y) + quadril(y);
+}
+
 /** Um espinho de ouro: um cone de `de` até a ponta `ate`, preso ao osso. */
 function espinho(c: Corpo, de: THREE.Vector3, ate: THREE.Vector3, raio: number, m: THREE.Material, osso: string, extras: Obj[]): void {
   const cone = new THREE.Mesh(new THREE.ConeGeometry(raio, 1, 6), m);
@@ -94,18 +106,18 @@ function naAltura(a: THREE.Vector3, b: THREE.Vector3, y: number): THREE.Vector3 
 
 // ---------- o corpo: a roupa de baixo, o peitoral e as tassetes ----------
 function tronco(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
+  const forma = silhueta(c, e, R);
   const N = 10;
   const aneis: Anel[] = [];
   for (let i = 0; i < N; i++) {
     const y = mix(e.topo, e.bacia - 0.06 * c.u, i / (N - 1));
     // a cintura fina da arte: o tronco afina até a cintura e volta a abrir no quadril
-    const cintura = 1 - 0.14 * Math.exp(-(((y - R.y(MARCOS.cintura)) / (0.08 * c.u)) ** 2));
-    aneis.push({ c: V(0, y, e.zDe(y)), rx: e.rx(y) * 0.78 * cintura, rz: e.rz(y) * 0.85 * cintura });
+    aneis.push({ c: V(0, y, e.zDe(y)), rx: e.rx(y) * 0.9 * forma(y), rz: e.rz(y) * 0.85 * (0.4 + 0.6 * forma(y)) });
   }
   extras.push(superficie({ aneis, colunas: 24, pesos: pesosDoManto(c, e) }, m.roupa));
   // o pescoço à mostra e o colar de ouro
   const pesc = c.p('neck_01');
-  tubo([V(pesc.x, e.topo - 0.02 * c.u, pesc.z), c.p('Head').clone().add(V(0, 0.02 * c.u, -0.005 * c.u))], [0.052 * c.u, 0.046 * c.u], ['neck_01', 'Head'], m.pele, extras);
+  tubo([V(pesc.x, e.topo - 0.02 * c.u, pesc.z), c.p('Head').clone().add(V(0, 0.02 * c.u, -0.005 * c.u))], [0.04 * c.u, 0.036 * c.u], ['neck_01', 'Head'], m.pele, extras);
   const colar = new THREE.Mesh(new THREE.TorusGeometry(0.056 * c.u, 0.008 * c.u, 6, 24), m.ouro);
   colar.rotation.x = Math.PI / 2 - 0.35;
   colar.position.set(pesc.x, e.topo + 0.005 * c.u, pesc.z + 0.012 * c.u);
@@ -114,13 +126,12 @@ function tronco(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
 
 /** O peitoral: a prata da cintura ao peito, as taças de borda dourada e os chevrons de ouro da barriga. */
 function peitoral(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
-  const yCintura = R.y(MARCOS.cintura);
+  const forma = silhueta(c, e, R);
   const N = 11;
   const aneis: Anel[] = [];
   for (let i = 0; i < N; i++) {
     const y = mix(e.topo - 0.035 * c.u, e.bacia - 0.02 * c.u, i / (N - 1));
-    const cintura = 1 - 0.12 * Math.exp(-(((y - yCintura) / (0.08 * c.u)) ** 2));
-    aneis.push({ c: V(0, y, e.zDe(y)), rx: e.rx(y) * 0.82 * cintura, rz: e.rz(y) * 0.9 * cintura });
+    aneis.push({ c: V(0, y, e.zDe(y)), rx: e.rx(y) * 0.95 * forma(y), rz: e.rz(y) * 0.9 * (0.4 + 0.6 * forma(y)) });
   }
   // aberto atrás (lá fica a raiz das asas) e com o decote na frente, entre as taças
   extras.push(superficie({
@@ -162,7 +173,7 @@ function peitoral(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
   // o cinto de ouro no quadril
   const cinto = new THREE.Mesh(new THREE.TorusGeometry(1, 0.014 * c.u, 6, 36), m.ouro);
   cinto.rotation.x = Math.PI / 2;
-  cinto.scale.set(e.rx(e.bacia) * 0.86, e.rz(e.bacia) * 0.92, 1);
+  cinto.scale.set(e.rx(e.bacia) * 0.92, e.rz(e.bacia) * 0.92, 1);
   cinto.position.set(0, e.bacia + 0.03 * c.u, e.zDe(e.bacia));
   c.prender('pelvis', cinto, extras);
 }
@@ -190,7 +201,7 @@ function tassetes(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
 
 // ---------- os braços ----------
 function bracos(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
-  const rBraco = R.t(PECAS.bracadeira[2] - PECAS.bracadeira[0]) * 0.36;
+  const rBraco = R.t(PECAS.bracadeira[2] - PECAS.bracadeira[0]) * 0.27;
   for (const lado of ['l', 'r'] as const) {
     const ombro = c.p(`upperarm_${lado}`), cot = c.p(`lowerarm_${lado}`), pulso = c.p(`hand_${lado}`);
     const fora = lado === 'l' ? 1 : -1;
@@ -210,7 +221,7 @@ function bracos(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
       c.prender(`lowerarm_${lado}`, aro, extras);
     }
     // a luva de ouro
-    mao(c, lado, { osso: m.ouro }, extras, 2.3);
+    mao(c, lado, { osso: m.ouro }, extras, 1.6);
     const dedos = c.p(`middle_01_${lado}`);
     const dorso = new THREE.Mesh(new THREE.BoxGeometry(rBraco * 1.7, 1, rBraco * 0.7), m.ouro);
     dorso.scale.y = pulso.distanceTo(dedos) * 1.05;
@@ -221,8 +232,9 @@ function bracos(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
 
 /** As ombreiras: três cascas sobrepostas (prata, ouro, prata) que descem pelo braço, e os espinhos para cima e para fora. */
 function ombreiras(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
-  const raio = R.t(PECAS.ombreira[2] - PECAS.ombreira[0]) * 0.55;
-  const esp = R.t(PECAS.espinhoDaOmbreira[3] - PECAS.espinhoDaOmbreira[1]);
+  // 22/11/2026: menores e com espinhos curtos (as grandes deixavam os ombros largos, masculinos)
+  const raio = R.t(PECAS.ombreira[2] - PECAS.ombreira[0]) * 0.38;
+  const esp = R.t(PECAS.espinhoDaOmbreira[3] - PECAS.espinhoDaOmbreira[1]) * 0.6;
   for (const lado of ['l', 'r'] as const) {
     const ombro = c.p(`upperarm_${lado}`), cot = c.p(`lowerarm_${lado}`);
     const fora = lado === 'l' ? 1 : -1;
@@ -239,15 +251,14 @@ function ombreiras(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
     espinho(c, topo, topo.clone().add(V(fora * esp * 0.35, esp, -esp * 0.1)), raio * 0.18, m.ouro, `upperarm_${lado}`, extras);
     const lateral = ombro.clone().add(V(fora * raio * 0.75, raio * 0.25, 0.01 * c.u));
     espinho(c, lateral, lateral.clone().add(V(fora * esp * 0.8, esp * 0.45, -esp * 0.15)), raio * 0.15, m.ouro, `upperarm_${lado}`, extras);
-    const tras = ombro.clone().add(V(fora * raio * 0.35, raio * 0.45, -raio * 0.55));
-    espinho(c, tras, tras.clone().add(V(fora * esp * 0.4, esp * 0.6, -esp * 0.45)), raio * 0.14, m.ouroEscuro, `upperarm_${lado}`, extras);
   }
 }
 
 // ---------- as pernas ----------
 function pernas(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
   const largura = (k: readonly [number, number, number, number]) => R.t(k[2] - k[0]);
-  const rCoxa = largura(PECAS.coxa) * 0.27, rCanela = largura(PECAS.greva) * 0.34, rPe = largura(PECAS.pe) * 0.4;
+  // 22/11/2026: as pernas finas, a coxa que afina até o joelho e o pé miúdo
+  const rCoxa = largura(PECAS.coxa) * 0.25, rCanela = largura(PECAS.greva) * 0.26, rPe = largura(PECAS.pe) * 0.3;
   const yLiga = R.y(PECAS.coxa[3]), yGreva = R.y(PECAS.joelheira[1]);
   for (const lado of ['l', 'r'] as const) {
     const quadril = c.p(`thigh_${lado}`), joelho = c.p(`calf_${lado}`), tornozelo = c.p(`foot_${lado}`), bola = c.p(`ball_${lado}`);
@@ -330,14 +341,26 @@ function asas(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
         p.z -= Math.abs(p.x) * (0.55 + k * 0.08) + 0.02 * c.u;
         return p;
       };
-      extras.push(lamina({
+      const malha = lamina({
         estacoes: asa.map(([i, o]) => ({ i: ponto(i), o: ponto(o) })),
         colunas: 6,
         barriga: 0.06,
         dobra: (t, u) => V(0, 0, Math.sin(u * Math.PI) * 0.012 * c.u * t),
-        solto: (t) => Math.pow(t, 1.3) * 0.55,
+        solto: (t) => Math.pow(t, 1.3) * 0.35,
         pesos: () => ['spine_03', 'spine_03', 1],
-      }, m.asa));
+      }, m.asa);
+      // 22/11/2026: o bater (skin-pano.ts `batente`): cada asa gira em volta da raiz dela, no eixo de pé (o sentido diz o
+      // lado), e as de baixo batem um pouco depois das de cima
+      const qtd = malha.geometry.getAttribute('position').count;
+      const centro = new Float32Array(qtd * 3), deriva = new Float32Array(qtd * 4);
+      const pivo = ponto(asa[0]?.[0] ?? RAIZ_DAS_ASAS).lerp(ponto(asa[0]?.[1] ?? RAIZ_DAS_ASAS), 0.5);
+      for (let q = 0; q < qtd; q++) {
+        centro.set([pivo.x, pivo.y, pivo.z], q * 3);
+        deriva.set([0.12 * s, s, 0, -k * 0.45], q * 4);
+      }
+      malha.geometry.setAttribute('centro', new THREE.BufferAttribute(centro, 3));
+      malha.geometry.setAttribute('deriva', new THREE.BufferAttribute(deriva, 4));
+      extras.push(malha);
     });
   }
 }
@@ -496,11 +519,11 @@ function elmo(c: Corpo, R: Regua, m: M, h: Cabeca, extras: Obj[]): void {
 }
 
 /** A veste inteira da skin; o palco esconde o corpo do rig (`esconder`) e põe o arco na mão direita. */
-export function vesteDaValquiria(ossos: Ossos): PecaSombria {
+export function vesteDaMuseElf(ossos: Ossos): PecaSombria {
   const c = new Corpo(ossos);
   const e = eixosDoCorpo(c);
   const R = regua(c, e);
-  const m = materiaisDaValquiria();
+  const m = materiaisDaMuseElf();
   const extras: Obj[] = [];
   tronco(c, e, R, m, extras);
   peitoral(c, e, R, m, extras);

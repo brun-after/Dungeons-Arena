@@ -1,5 +1,5 @@
-// As medidas da arte da Valquíria Glacial (21/11/2026), tiradas em pixels sobre a imagem de referência (1024×1536,
-// grade de 50 px) e convertidas em frações da altura. A skin (skin-valquiria.ts) e o arco (skin-arco.ts) se montam
+// As medidas da arte da Muse Elf (21/11/2026), tiradas em pixels sobre a imagem de referência (1024×1536,
+// grade de 50 px) e convertidas em frações da altura. A skin (skin-muse-elf.ts) e o arco (skin-arco.ts) se montam
 // a partir daqui, no mesmo processo da Sombra Rubra (skin-mago-medidas.ts).
 //
 // A régua da arte: o topo do cabelo em y = 342, o calcanhar em y = 1200 (H = 858 px; a ponta do pé esticado desce

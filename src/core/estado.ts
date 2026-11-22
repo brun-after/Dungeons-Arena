@@ -200,6 +200,14 @@ export interface Armadilha {
   rearmes?: number;
   /** D-161: o que dá ao aliado que pisa nela (uma vez). */
   aoAliado?: EfeitoCanonico;
+  /** 22/11/2026: o lado do quadrado que ela ocupa, a partir de (x, y) para +x e +y (sem ele, 1 célula). */
+  lado?: number;
+}
+
+/** A armadilha cobre a célula? (O quadrado de `lado` células a partir de x, y.) */
+export function armadilhaCobre(a: Pick<Armadilha, 'x' | 'y' | 'lado'>, x: number, y: number): boolean {
+  const l = a.lado ?? 1;
+  return x >= a.x && y >= a.y && x < a.x + l && y < a.y + l;
 }
 
 /** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */

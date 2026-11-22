@@ -25,12 +25,12 @@
       "codigo": "znnbtwz9hu"
     },
     {
-      "id": "arqueiro-valquiria-glacial",
+      "id": "arqueiro-muse-elf",
       "classe": "arqueiro",
       "classeNome": "Arqueiro",
-      "nome": "Valquíria Glacial",
-      "descricao": "Uma arqueira de cabelo dourado em armadura de prata e ouro, com o elmo de asas e a pedra rubra, as asas de gelo que flutuam nas costas, a capa de pelo branco e o arco de ouro com a corda de gelo.",
-      "codigo": "2a21f2tgda1"
+      "nome": "Muse Elf",
+      "descricao": "Uma elfa arqueira que voa nas asas de gelo que batem nas costas, de cabelo dourado, armadura de prata e ouro, o elmo de asas com a pedra rubra, a capa de pelo branco e o arco de ouro com a corda de gelo.",
+      "codigo": "17dyb1s9r6a"
     }
   ]
 }

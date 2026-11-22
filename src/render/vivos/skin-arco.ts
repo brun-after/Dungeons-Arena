@@ -1,21 +1,21 @@
-// O arco glacial da skin Valquíria Glacial do arqueiro (21/11/2026), montado a partir das medidas da arte
-// (skin-valquiria-medidas.ts, `ARCO`): os braços de ouro como galhos retorcidos, com espinhos voltados para o punho e as
+// O arco glacial da skin Muse Elf do arqueiro (21/11/2026), montado a partir das medidas da arte
+// (skin-muse-elf-medidas.ts, `ARCO`): os braços de ouro como galhos retorcidos, com espinhos voltados para o punho e as
 // pontas que se curvam para fora; os cristais de gelo no punho e nas pontas e a corda de gelo acesa. Medidas em células
 // como as outras armas (armas3d.ts), no mesmo arranjo do arco comum (`arcoDe`): a corda em x = 0, de ponta a ponta em y,
 // e o punho na barriga do arco, em +x. Registrado em ARMAS_3D como `arco_glacial`.
 
 import * as THREE from 'three';
 import type { Kit } from './armas3d';
-import { ARCO, COMPRIMENTO_DO_ARCO } from './skin-valquiria-medidas';
+import { ARCO, COMPRIMENTO_DO_ARCO } from './skin-muse-elf-medidas';
 import { sorteio } from './sombrio-base';
 
 const V3 = (x: number, y: number, z = 0) => new THREE.Vector3(x, y, z);
 
 /**
- * A metade do arco em células do Kit: o arco mede 0,85 vez a altura do corpo (a arte), o corpo da skin mede 1,08 no
- * mundo (`SKINS_VIVAS`) e a arma do grau 4 cresce 1,14 vez.
+ * A metade do arco em células do Kit: o arco mede 0,85 vez a altura do corpo (a arte), o corpo da skin mede 1,08 × 0,85
+ * no mundo (skins-vivas.ts) e a arma do grau 4 cresce 1,14 vez.
  */
-const METADE = ((COMPRIMENTO_DO_ARCO / 858) * 1.08) / 1.14 / 2;
+const METADE = ((COMPRIMENTO_DO_ARCO / 858) * 1.08 * 0.85) / 1.14 / 2;
 /** A barriga e a grossura, na proporção da arte. */
 const CURVA = (ARCO.curva / COMPRIMENTO_DO_ARCO) * METADE * 2;
 const RAIO = (ARCO.espessura / COMPRIMENTO_DO_ARCO) * METADE * 1.4;

@@ -1,4 +1,4 @@
-// As texturas e os materiais da Valquíria Glacial (21/11/2026), pintados em canvas a partir das cores da arte:
+// As texturas e os materiais da Muse Elf (21/11/2026), pintados em canvas a partir das cores da arte:
 // - a prata das placas com as gavinhas de ouro em relevo (o peitoral, as grevas, as braçadeiras);
 // - as asas de gelo translúcidas: o azul que clareia no meio, os veios brancos, os cacos de cristal e as faíscas;
 // - a capa de pelo branco, com a barra em tufos (o recorte), e o forro azul de gelo estrelado;
@@ -7,7 +7,7 @@
 
 import * as THREE from 'three';
 import { sorteio } from './sombrio-base';
-import { flutuante, ventoso } from './skin-pano';
+import { batente, flutuante, ventoso } from './skin-pano';
 
 const DUPLO = THREE.DoubleSide;
 
@@ -205,7 +205,7 @@ function texturaDoCabelo(semente: number): THREE.CanvasTexture {
   return comoTextura(c);
 }
 
-export function materiaisDaValquiria() {
+export function materiaisDaMuseElf() {
   const prata = (semente: number, gavinhas: number) => new THREE.MeshStandardMaterial({ map: texturaDaPrata(semente, gavinhas), metalness: 0.7, roughness: 0.3, side: DUPLO });
   const asa = texturaDaAsa(1301);
   const recorte = recorteDoPelo(1311);
@@ -224,14 +224,14 @@ export function materiaisDaValquiria() {
     iris: new THREE.MeshBasicMaterial({ color: 0x7fb6e8 }),
     boca: new THREE.MeshBasicMaterial({ color: 0xc0606a }),
     // as asas: translúcidas e acesas por dentro, flutuando devagar mesmo paradas
-    asa: flutuante(ventoso(new THREE.MeshStandardMaterial({
+    asa: batente(flutuante(ventoso(new THREE.MeshStandardMaterial({
       map: asa, emissiveMap: asa, emissive: 0xffffff, emissiveIntensity: 0.38, roughness: 0.2, metalness: 0.1,
       transparent: true, opacity: 0.82, depthWrite: false, side: DUPLO,
-    })), 0.03),
+    })), 0.03), 0.6),
     pelo: ventoso(new THREE.MeshStandardMaterial({ map: texturaDoPelo(1321), alphaMap: recorte, alphaTest: 0.5, roughness: 0.95 })),
     forro: ventoso(new THREE.MeshStandardMaterial({ map: texturaDoForro(1331), alphaMap: recorte, alphaTest: 0.5, emissive: 0x2a6ab0, emissiveIntensity: 0.25, roughness: 0.6 })),
     cabelo: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCabelo(1341), roughness: 0.55, metalness: 0.1, side: DUPLO })), 0.035),
     cranio: new THREE.MeshStandardMaterial({ map: texturaDoCabelo(1351), roughness: 0.55, metalness: 0.1 }),
   };
 }
-export type MateriaisDaValquiria = ReturnType<typeof materiaisDaValquiria>;
+export type MateriaisDaMuseElf = ReturnType<typeof materiaisDaMuseElf>;

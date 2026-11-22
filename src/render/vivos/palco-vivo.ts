@@ -26,8 +26,7 @@ import { CHEFES, CHEFES_DE_GEOMETRIA } from './chefes-vivos';
 import { PROCS_FILO } from './filo';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
-import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
-import { vesteDaSombraRubra } from './skin-mago'; import { vesteDoMagico } from './skin-magico'; import { vesteDaValquiria } from './skin-valquiria'; import { skinPorId } from '../../entities/skins';
+import { SKINS_VIVAS } from './skins-vivas'; import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
 
@@ -57,6 +56,8 @@ interface Classe {
   /** 06/11/2026: o corpo acima do chão (anda no ar) e o ciclo do andar mais longo (cada passo cobre `passada` vezes o chão). */
   elevacao?: number | undefined;
   passada?: number | undefined;
+  /** 22/11/2026: voa em vez de andar (skins-vivas.ts `voo`). */
+  voo?: boolean | undefined;
   /** Marco 40 (13/11/2026, D-165): as feras de geometria (o lobo e o urso do Aventureiro), sem GLB: o corpo e os clipes assados. */
   proc?: (() => { grupo: THREE.Object3D; animacoes: THREE.AnimationClip[] }) | undefined;
 }
@@ -85,20 +86,11 @@ const CLASSES: Record<string, Classe> = {
     glb: c.glb, altura: c.altura, largura: c.largura ?? 1, clipes: { ...HUMANO, parado: c.parado, golpe: c.golpe }, veste: c.veste, arma: c.arma, tingir: c.tingir,
   } satisfies Classe])),
 };
-/**
- * 06/11/2026: as skins com modelo em tempo real (entities/skins.ts tem o catálogo e o código de cada uma). Cada skin é uma
- * "classe" do palco com a chave `skin:<id>`: o rig da classe dela, a veste fixa e a arma própria, sem o equipamento.
- */
-const SKINS_VIVAS: Readonly<Record<string, Pick<Classe, 'altura' | 'veste' | 'arma' | 'elevacao' | 'passada'> & { classe: string; largura?: number }>> = {
-  'necromante-ceifador': { classe: 'necromante', altura: ALTURA_DO_CEIFADOR, largura: 0.9, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } }, // alto e esguio (06/11/2026)
-  // o mago adolescente: 20% mais baixo e 15% mais magro, flutuando com a cabeça na altura de antes; o passo divino cobre 3x o chão
-  'mago-sombra-rubra': { classe: 'mago', altura: 1.12 * 0.8, largura: 0.85, elevacao: 1.12 * 0.2, passada: 3, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
-  'aventureiro-magico': { classe: 'aventureiro', altura: 1.12, veste: vesteDoMagico, arma: null }, // de mãos livres: a magia é a cartola
-  'arqueiro-valquiria-glacial': { classe: 'arqueiro', altura: 1.08, largura: 0.9, elevacao: 0.1, passada: 2, veste: vesteDaValquiria, arma: { modelo: 'arco_glacial', grau: 4 } }, // 21/11/2026: flutua nas asas de gelo
-};
+// As skins (skins-vivas.ts). 22/11/2026: quem voa (`voo`) fica com as pernas paradas no andar, no ritmo da pose parada.
 for (const [id, k] of Object.entries(SKINS_VIVAS)) {
   const base = CLASSES[k.classe];
-  if (base) CLASSES[`skin:${id}`] = { ...base, altura: k.altura, largura: k.largura ?? base.largura, elevacao: k.elevacao, passada: k.passada, veste: k.veste, arma: k.arma };
+  const clipes = base && k.voo ? { ...base.clipes, andar: base.clipes.parado } : base?.clipes;
+  if (base && clipes) CLASSES[`skin:${id}`] = { ...base, clipes, altura: k.altura, largura: k.largura ?? base.largura, elevacao: k.elevacao, passada: k.voo ? 880 / 760 : k.passada, voo: k.voo, veste: k.veste, arma: k.arma };
 }
 /** A chave do palco da skin (só se existir o modelo e a skin for da classe), ou null. */
 export function chaveDaSkin(skin: string | null | undefined, classe: string): string | null {
@@ -563,7 +555,7 @@ export class PalcoVivo {
     const classe = CLASSES[p.modelo];
     if (!classe) return;
     const base = p.estado === 'andarGolpe' ? 'golpe' : p.estado === 'andarConjurar' ? 'conjurar' : p.estado;
-    const doMovimento = CLIPES_DO_MOVIMENTO[p.estado]?.find((n) => a.base.clipes.has(n));
+    const doMovimento = classe.voo && p.estado === 'correr' ? undefined : CLIPES_DO_MOVIMENTO[p.estado]?.find((n) => a.base.clipes.has(n)); // quem voa não corre
     const reserva = SEM_PASSO[p.estado];
     const daClasse = doMovimento ?? (base in classe.clipes ? classe.clipes[base as keyof Classe['clipes']] : reserva in classe.clipes ? classe.clipes[reserva as keyof Classe['clipes']] : classe.clipes.parado);
     const g = p.golpe;
@@ -713,6 +705,8 @@ export class PalcoVivo {
       if (a.vento) avancarVento(a.vento.estado, a.vento.u, p.estado === 'andar' || p.estado === 'andarGolpe' || p.estado === 'andarConjurar', p.angulo, performance.now());
       const giro = p.estado === 'golpeGiro' ? 2 * Math.PI * p.fracao : 0;
       a.raiz.rotation.y = Math.atan2(Math.cos(p.angulo), Math.sin(p.angulo)) + giro;
+      // 22/11/2026: quem voa se inclina para a frente conforme ganha velocidade (o ritmo suavizado do vento)
+      if (CLASSES[p.modelo]?.voo && a.vento) { a.raiz.rotation.order = 'YXZ'; a.raiz.rotation.x = 0.3 * Math.max(0, Math.min(1, a.vento.estado.ritmo)); }
       const col = a.vaga % COLUNAS;
       const lin = Math.floor(a.vaga / COLUNAS);
       a.raiz.position.copy(this.direita).multiplyScalar(col * QL).addScaledVector(this.cima, -lin * QA);

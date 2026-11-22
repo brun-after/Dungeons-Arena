@@ -7,7 +7,7 @@
 
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import type { Armadilha, EstadoJogo } from '../core/estado';
+import { armadilhaCobre, type Armadilha, type EstadoJogo } from '../core/estado';
 import { hashTexto } from '../core/rng';
 import { vivo, type Entidade } from '../entities/entidade';
 import { perfilDaIa } from '../modos/dificuldade';
@@ -36,7 +36,7 @@ export function emPerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   if (areasEfetivas(estado, ctx.fase.ambientes ?? []).some((a) => ambienteFere(e, a) && dentroDaArea(a, x, y))) return true;
   if (estado.rastros.some((r) => r.x === x && r.y === y && r.ateTick > estado.tick && podeFerir({ id: r.donoId, equipe: r.equipeDono }, e, ctx.modo))) return true;
   if (estado.camposTaticos?.some((c) => c.tipo === 'veneno' && c.ateTick > estado.tick && Math.max(Math.abs(c.x - x), Math.abs(c.y - y)) <= c.raio && podeFerir({ id: c.donoId, equipe: c.equipe }, e, ctx.modo))) return true;
-  return estado.armadilhas.some((a) => a.x === x && a.y === y && armadilhaTemida(estado, ctx, e, a));
+  return estado.armadilhas.some((a) => armadilhaCobre(a, x, y) && armadilhaTemida(estado, ctx, e, a));
 }
 
 /** O mapa de perigo da fase para a entidade (1 = perigo), ou null se não há nenhum. */
@@ -58,7 +58,11 @@ export function mapaDePerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Enti
     if (c.tipo !== 'veneno' || c.ateTick <= estado.tick || !podeFerir({ id: c.donoId, equipe: c.equipe }, e, ctx.modo)) continue;
     for (let y = c.y - c.raio; y <= c.y + c.raio; y++) for (let x = c.x - c.raio; x <= c.x + c.raio; x++) marcar(x, y);
   }
-  for (const a of estado.armadilhas) if (armadilhaTemida(estado, ctx, e, a)) marcar(a.x, a.y);
+  for (const a of estado.armadilhas) {
+    if (!armadilhaTemida(estado, ctx, e, a)) continue;
+    const l = a.lado ?? 1;
+    for (let dy = 0; dy < l; dy++) for (let dx = 0; dx < l; dx++) marcar(a.x + dx, a.y + dy);
+  }
   return mapa;
 }
 

@@ -9,7 +9,7 @@
 
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type EstadoJogo } from '../core/estado';
+import { armadilhaCobre, buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { DT_MS } from '../core/loop';
 import { ticksDe } from '../core/tempo';
@@ -123,7 +123,7 @@ export function deixarEco(estado: EstadoJogo, ctx: ContextoSimulacao, mago: Enti
 
 /** A armadilha do Salto para Trás: no ponto de onde saiu, da ponta do Arqueiro (a do Físico explode). */
 export function armadilhaDoRecuo(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, c: Celula, ponta: PontaElemental, saida: EventoSimulacao[]): void {
-  if (!passavel(ctx.fase, c.x, c.y) || estado.armadilhas.some((a) => a.x === c.x && a.y === c.y)) return;
+  if (!passavel(ctx.fase, c.x, c.y) || estado.armadilhas.some((a) => armadilhaCobre(a, c.x, c.y))) return;
   const r = ctx.balance.movimentoClasse.armadilhaRecuo;
   const id = estado.proximoId++;
   estado.armadilhas.push({

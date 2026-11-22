@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.52 · **Data:** 21/11/2026
+**Versão:** 1.53 · **Data:** 22/11/2026
 
 > **Histórico**
-> - **1.52 (21/11/2026)**: D-134: a quarta skin, a Valquíria Glacial do arqueiro (armadura de prata e ouro, elmo de asas, asas de gelo, capa de pelo e o arco glacial).
+> - **1.53 (22/11/2026)**: D-134: a skin do arqueiro vira Muse Elf (voa em vez de andar, as asas batem, mais baixa e de formas femininas). D-200: as armadilhas do núcleo Armadilha (a skill comum inicial do Arqueiro) ocupam um quadrado de 4 células.
+> - **1.52 (21/11/2026)**: D-134: a quarta skin, a Muse Elf do arqueiro (então Valquíria Glacial) (armadura de prata e ouro, elmo de asas, asas de gelo, capa de pelo e o arco glacial).
 > - **1.51 (21/11/2026)**: D-199: no celular, a qualidade automática não cai mais para o mínimo (sem efeitos de skill); abaixo do baixo, aperta a economia (meia resolução e metade das partículas, depois 30 fps). O palco 3D dos personagens no toque desenha até 1,5× e a ~30 quadros por segundo. O computador não muda.
 > - **1.50 (21/11/2026)**: D-198, adendo: a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez; cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível; o inferior nunca toma o lugar do superior, nem ao fim do estudo.
 > - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
@@ -3988,13 +3989,18 @@ O falcão é desenhado como uma cartola que voa (`voo-falcao.ts`, só apresenta�
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
 
-**Quarta skin: Valquíria Glacial (arqueiro, 1.52, 21/11/2026).** Código `ARQ-VALQUIRIA-GELO-5VZ8`. Montada no mesmo processo da Sombra Rubra: as medidas da arte (1024×1536, grade de 50 px, H = 858 px do topo do cabelo ao calcanhar) ficam em `skin-valquiria-medidas.ts`, as texturas e os materiais em `skin-valquiria-texturas.ts`, a veste em `skin-valquiria.ts` e o arco em `skin-arco.ts`. O desenho vai espelhado no lado (a arte segura o arco na esquerda).
+**Quarta skin: Muse Elf (arqueiro, 1.52, 21/11/2026; até a 1.53, Valquíria Glacial).** Código `ARQ-MUSE-ELF-5VZ8`. Montada no mesmo processo da Sombra Rubra: as medidas da arte (1024×1536, grade de 50 px, H = 858 px do topo do cabelo ao calcanhar) ficam em `skin-muse-elf-medidas.ts`, as texturas e os materiais em `skin-muse-elf-texturas.ts`, a veste em `skin-muse-elf.ts` e o arco em `skin-arco.ts`. O desenho vai espelhado no lado (a arte segura o arco na esquerda).
 - **Corpo:** rosto claro de olhos azuis, cabelo louro comprido (a franja repartida, as mechas pelos ombros, a cascata das costas e as que voam para o lado livre), peitoral de prata com gavinhas de ouro, taças de borda dourada e chevrons na barriga, ombreiras em camadas com espinhos, braçadeiras com a ponta no cotovelo, luvas de ouro, tassetes em pontas, a coxa à mostra com a liga escura, grevas de prata e pés de placas em ponta.
 - **Elmo:** o diadema de ouro com a pedra rubra na testa, a crista e as asinhas de penas brancas (com a base de ouro) nas têmporas.
 - **Asas de gelo:** quatro de cada lado, lâminas (`lamina`) pelos contornos medidos na arte (o lado esquerdo da imagem, espelhado no outro, porque a arte é quase simétrica), 18% menores para caberem no quadrinho e recuando para as costas. Translúcidas, com os veios brancos, os cacos de cristal e as faíscas na textura, flutuam como o cabelo (`flutuante`) e levam o vento.
 - **Capa:** de pelo branco, aberta na frente no leque de 240° da Sombra Rubra, com o forro azul estrelado e a barra em tufos (o recorte do material).
 - **Arco glacial** (`arco_glacial`, em `ARMAS_3D` e nos arcos em pé do palco): braços de ouro como galhos retorcidos, com espinhos para o punho e o recurvo nas pontas, cristais de gelo no punho e nas pontas e a corda de gelo acesa. Mede 0,85 vez o corpo, como na arte.
 - **No palco:** a altura do arqueiro (1,08), 10% mais esguia, flutuando 0,1 acima do chão (a arte tem os pés em ponta) e com o passo de 2 vezes o chão.
+
+**Muse Elf: o voo e o corpo (1.53, 22/11/2026).** O nome passou a Muse Elf (id `arqueiro-muse-elf`). Pedidos: o passo cobria muito mais chão que o do arqueiro sem skin, o andar e as formas eram masculinos e ela estava alta demais.
+- **Voa em vez de andar** (`voo` em `skins-vivas.ts`, a tabela das skins que saiu de `palco-vivo.ts`). No andar e na corrida, as pernas ficam na pose parada, no ritmo dela (sem a passada longa). O corpo flutua 0,2 acima do chão, sobe e desce, e se inclina para a frente conforme ganha velocidade (até 0,3 rad, pelo ritmo suavizado do vento).
+- **As asas batem** (`batente` em `skin-pano.ts`). Antes da pele, cada asa gira em volta da raiz dela, no eixo de pé (o sentido diz o lado), de um pouco à frente até 0,6 rad para trás. São ~2 batidas por segundo parada e mais depressa voando, com as de baixo um pouco atrasadas em relação às de cima. A raiz e o eixo vão nos atributos `centro` e `deriva`, que a fusão do palco já preserva.
+- **Corpo:** 15% mais baixa que o arqueiro (1,08 × 0,85) e mais estreita (0,86). O tronco segue uma silhueta própria: ombros e peito mais estreitos, a cintura bem fina e o quadril que volta a abrir. Os braços, as pernas, o pescoço e as mãos ficaram mais finos, e as ombreiras menores, com espinhos curtos (as grandes alargavam os ombros).
 
 ## D-135 — Inimigos novos, porte por nível, armadilhas e linha de tiro (06/11/2026)
 
@@ -6473,3 +6479,22 @@ no Safari e erra para os dois lados; o monitor mede o aparelho de verdade.
 
 **Observação.** Ainda não foi medido num celular real. A conferência é jogar uma luta cheia com o medidor ligado
 (`data-economia` no body mostra o degrau).
+
+## D-200 — A armadilha em quadrado de 4 células (22/11/2026)
+
+**Pedido.** A skill comum inicial do Arqueiro (a Armadilha de dentes, do núcleo Armadilha) deve ocupar um quadrado de 4
+células, para ficar mais fácil acertar o lugar onde o inimigo está ou estará.
+
+**Decisão.**
+- **Em dados:** o efeito `armadilha` aceita `lado` (1 a 3; sem ele, 1 célula). As cinco variantes do núcleo Armadilha
+  (dentes, mina, runa de geada, espinhos e fio elétrico) levam `"lado": 2`, porque são a mesma skill em outros elementos.
+  As outras armadilhas (de fase, do spawner, a teia, as dos monstros) seguem numa célula.
+- **Onde cai:** a célula mirada e as vizinhas do lado de quem armou, em x e em y. Assim o quadrado cobre o caminho do
+  inimigo que vem na direção do arqueiro. A armadilha guarda o canto (`x`, `y`) e o `lado`; `armadilhaCobre` (em
+  `core/estado.ts`) diz se ela cobre uma célula.
+- **Disparo:** no primeiro hostil em qualquer uma das 4 células, uma vez, como antes. O presente ao aliado também vale
+  no quadrado todo. A IA que conhece as armadilhas do dono desvia das 4 células (`world/perigos.ts`). Nenhuma armadilha
+  nova é posta sobre uma célula já coberta.
+- **Tela:** o círculo de conjuração fica no meio do quadrado, do tamanho dele, com a borda das células à mostra.
+
+**Consequências.** O save e a rede não mudam de formato (`lado` é opcional). O dano e a duração não mudam.
