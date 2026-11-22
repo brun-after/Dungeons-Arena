@@ -16,7 +16,6 @@ import { CELULA_PX } from '../camera-calculo';
 import { posarNaSela } from './sela';
 import { fundirPecas, malhasDe } from './fundir-pecas';
 import { BATIDA_DO_VOO_MS, FRACAO_PLANAR, PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
-
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
 import { PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
 import type { Equipamento3d } from '../adornos';
@@ -28,7 +27,7 @@ import { PROCS_FILO } from './filo';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
-import { vesteDaSombraRubra } from './skin-mago'; import { vesteDoMagico } from './skin-magico'; import { skinPorId } from '../../entities/skins';
+import { vesteDaSombraRubra } from './skin-mago'; import { vesteDoMagico } from './skin-magico'; import { vesteDaValquiria } from './skin-valquiria'; import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
 
@@ -95,6 +94,7 @@ const SKINS_VIVAS: Readonly<Record<string, Pick<Classe, 'altura' | 'veste' | 'ar
   // o mago adolescente: 20% mais baixo e 15% mais magro, flutuando com a cabeça na altura de antes; o passo divino cobre 3x o chão
   'mago-sombra-rubra': { classe: 'mago', altura: 1.12 * 0.8, largura: 0.85, elevacao: 1.12 * 0.2, passada: 3, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
   'aventureiro-magico': { classe: 'aventureiro', altura: 1.12, veste: vesteDoMagico, arma: null }, // de mãos livres: a magia é a cartola
+  'arqueiro-valquiria-glacial': { classe: 'arqueiro', altura: 1.08, largura: 0.9, elevacao: 0.1, passada: 2, veste: vesteDaValquiria, arma: { modelo: 'arco_glacial', grau: 4 } }, // 21/11/2026: flutua nas asas de gelo
 };
 for (const [id, k] of Object.entries(SKINS_VIVAS)) {
   const base = CLASSES[k.classe];
@@ -148,7 +148,7 @@ const CLIPES_DO_MOVIMENTO: Readonly<Partial<Record<EstadoPersonagem, readonly st
 };
 /** As armas longas que ficam em pé (o cajado, a lança, o arco): seguem o corpo, não o eixo da mão. */
 const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'cajado_retorcido', 'lanca', 'foice',
-  'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca']);
+  'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca', 'arco_glacial']);
 const ARCOS = /^arco|composto|elfico|chifre/;
 const OSSOS_DAS_PERNAS = /^(root|pelvis|thigh|calf|foot|ball)/i;
 

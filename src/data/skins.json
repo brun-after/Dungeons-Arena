@@ -23,6 +23,14 @@
       "nome": "Mágico",
       "descricao": "Um mágico de terno branco com a cabeça de yin-yang. O falcão é a cartola dele, que voa, tira a varinha nas magias e vira pombo num puff de fumaça.",
       "codigo": "znnbtwz9hu"
+    },
+    {
+      "id": "arqueiro-valquiria-glacial",
+      "classe": "arqueiro",
+      "classeNome": "Arqueiro",
+      "nome": "Valquíria Glacial",
+      "descricao": "Uma arqueira de cabelo dourado em armadura de prata e ouro, com o elmo de asas e a pedra rubra, as asas de gelo que flutuam nas costas, a capa de pelo branco e o arco de ouro com a corda de gelo.",
+      "codigo": "2a21f2tgda1"
     }
   ]
 }

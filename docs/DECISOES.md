@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.51 · **Data:** 21/11/2026
+**Versão:** 1.52 · **Data:** 21/11/2026
 
 > **Histórico**
+> - **1.52 (21/11/2026)**: D-134: a quarta skin, a Valquíria Glacial do arqueiro (armadura de prata e ouro, elmo de asas, asas de gelo, capa de pelo e o arco glacial).
 > - **1.51 (21/11/2026)**: D-199: no celular, a qualidade automática não cai mais para o mínimo (sem efeitos de skill); abaixo do baixo, aperta a economia (meia resolução e metade das partículas, depois 30 fps). O palco 3D dos personagens no toque desenha até 1,5× e a ~30 quadros por segundo. O computador não muda.
 > - **1.50 (21/11/2026)**: D-198, adendo: a skill consumida volta sem ponto e sem estudo, com a compreensão adiantada 20% por vez; cada tentativa da mesma fórmula sobe a chance do 2º e do 1º nível; o inferior nunca toma o lugar do superior, nem ao fim do estudo.
 > - **1.49 (21/11/2026)**: D-198: marco 52, os três níveis de raridade da fusão (3º, 2º e 1º) no id, com o bônus no dano, na cura e nos estados, a chance pela Inteligência, o visual mais rico a cada nível e a fórmula refeita com as partes aprendidas de novo.
@@ -3986,6 +3987,14 @@ O falcão é desenhado como uma cartola que voa (`voo-falcao.ts`, só apresenta�
 - O efeito das skills com a tag `falcao`, como o grito, sai da posição visual do falcão, e não mais do jogador (`efeitos-habilidade.ts`).
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
+
+**Quarta skin: Valquíria Glacial (arqueiro, 1.52, 21/11/2026).** Código `ARQ-VALQUIRIA-GELO-5VZ8`. Montada no mesmo processo da Sombra Rubra: as medidas da arte (1024×1536, grade de 50 px, H = 858 px do topo do cabelo ao calcanhar) ficam em `skin-valquiria-medidas.ts`, as texturas e os materiais em `skin-valquiria-texturas.ts`, a veste em `skin-valquiria.ts` e o arco em `skin-arco.ts`. O desenho vai espelhado no lado (a arte segura o arco na esquerda).
+- **Corpo:** rosto claro de olhos azuis, cabelo louro comprido (a franja repartida, as mechas pelos ombros, a cascata das costas e as que voam para o lado livre), peitoral de prata com gavinhas de ouro, taças de borda dourada e chevrons na barriga, ombreiras em camadas com espinhos, braçadeiras com a ponta no cotovelo, luvas de ouro, tassetes em pontas, a coxa à mostra com a liga escura, grevas de prata e pés de placas em ponta.
+- **Elmo:** o diadema de ouro com a pedra rubra na testa, a crista e as asinhas de penas brancas (com a base de ouro) nas têmporas.
+- **Asas de gelo:** quatro de cada lado, lâminas (`lamina`) pelos contornos medidos na arte (o lado esquerdo da imagem, espelhado no outro, porque a arte é quase simétrica), 18% menores para caberem no quadrinho e recuando para as costas. Translúcidas, com os veios brancos, os cacos de cristal e as faíscas na textura, flutuam como o cabelo (`flutuante`) e levam o vento.
+- **Capa:** de pelo branco, aberta na frente no leque de 240° da Sombra Rubra, com o forro azul estrelado e a barra em tufos (o recorte do material).
+- **Arco glacial** (`arco_glacial`, em `ARMAS_3D` e nos arcos em pé do palco): braços de ouro como galhos retorcidos, com espinhos para o punho e o recurvo nas pontas, cristais de gelo no punho e nas pontas e a corda de gelo acesa. Mede 0,85 vez o corpo, como na arte.
+- **No palco:** a altura do arqueiro (1,08), 10% mais esguia, flutuando 0,1 acima do chão (a arte tem os pés em ponta) e com o passo de 2 vezes o chão.
 
 ## D-135 — Inimigos novos, porte por nível, armadilhas e linha de tiro (06/11/2026)
 
