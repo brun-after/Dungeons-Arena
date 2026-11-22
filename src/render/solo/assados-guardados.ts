@@ -7,6 +7,7 @@
 // a cena com a qualidade reduzida (a da região de antes) não obriga a de agora a assar tudo de novo.
 
 import type { Fase } from '../../world/fase';
+import type { ImagemAssada } from './assador-remoto';
 
 /** Quantos blocos ficam guardados sem uso (≈0,6 a 1,3 MB cada, pela resolução da qualidade). */
 const SEM_USO_MAX = 24;
@@ -14,8 +15,14 @@ const SEM_USO_MAX = 24;
 const BORDA = 2;
 
 interface Guardado {
-  canvas: HTMLCanvasElement;
+  canvas: ImagemAssada;
   usos: number;
+}
+
+/** Solta a memória da imagem (22/11/2026, D-202: a do trabalhador é um ImageBitmap, que se fecha). */
+function apagar(imagem: ImagemAssada): void {
+  if ('close' in imagem) imagem.close();
+  else imagem.width = imagem.height = 0;
 }
 
 const guardados = new Map<string, Guardado>();
@@ -35,7 +42,7 @@ function enxugar(): void {
   for (const [chave, g] of guardados) {
     if (semUso <= SEM_USO_MAX) break;
     if (g.usos > 0) continue;
-    g.canvas.width = g.canvas.height = 0;
+    apagar(g.canvas);
     guardados.delete(chave);
     semUso--;
   }
@@ -47,7 +54,7 @@ export function temAssado(chave: string): boolean {
 }
 
 /** O canvas guardado (passa a contar um uso a mais), ou null. */
-export function pegarAssado(chave: string): HTMLCanvasElement | null {
+export function pegarAssado(chave: string): ImagemAssada | null {
   const g = guardados.get(chave);
   if (!g) return null;
   g.usos++;
@@ -58,9 +65,9 @@ export function pegarAssado(chave: string): HTMLCanvasElement | null {
 }
 
 /** Guarda um canvas recém-assado, já com um uso. */
-export function guardarAssado(chave: string, canvas: HTMLCanvasElement): void {
+export function guardarAssado(chave: string, canvas: ImagemAssada): void {
   const antes = guardados.get(chave);
-  if (antes && antes.canvas !== canvas && antes.usos === 0) antes.canvas.width = antes.canvas.height = 0;
+  if (antes && antes.canvas !== canvas && antes.usos === 0) apagar(antes.canvas);
   guardados.set(chave, { canvas, usos: (antes?.canvas === canvas ? antes.usos : 0) + 1 });
   enxugar();
 }

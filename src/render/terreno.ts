@@ -11,10 +11,10 @@
 // CC0 do tema, sem a grade das células: a cor lisa aparece só até o bloco ser assado (um por quadro) e continua como
 // reserva (sem texturas, editor e tileset do jogador).
 
-import { CanvasSource, Container, Graphics, Sprite, Texture, type MeshSimple } from 'pixi.js';
+import { CanvasSource, Container, Graphics, ImageSource, Sprite, Texture, type MeshSimple } from 'pixi.js';
 import { relevoDaFase } from './relevo-tela';
 import { deslocamentoDaCelula, malhaDoBloco } from './solo/malha-relevo';
-import { AssadorDeSolo } from './solo/assar';
+import { criarAssador, type AssadorDoBloco, type ImagemAssada } from './solo/assador-remoto';
 import { pesosDoBloco, type ConfigSolo } from './solo/mascaras';
 import type { TexturasDoSolo } from './solo/texturas';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
@@ -176,7 +176,7 @@ interface Bloco {
   agua: Graphics | null;
   /** Marco 31 (D-130): o chão assado (embaixo de `g`), com o canvas e a textura dele. */
   /** Marco 43 (D-177): no relevo, a malha erguida no lugar do sprite. */
-  solo: { sprite: Sprite | MeshSimple; canvas: HTMLCanvasElement; chave: string } | null;
+  solo: { sprite: Sprite | MeshSimple; canvas: ImagemAssada; chave: string } | null;
 }
 
 /** Marco 31 (D-130): o chão texturizado da fase (sem ele, as cores lisas de sempre). */
@@ -194,6 +194,8 @@ export interface SoloDoTerreno {
 
 /** Até quantos blocos a fase desenha tudo de uma vez (64×64 células); acima, sob demanda. */
 const BLOCOS_DE_UMA_VEZ = 16;
+/** 22/11/2026 (D-202): quantos blocos ficam no trabalhador ao mesmo tempo (o seguinte já espera, sem fila lá dentro). */
+const PINTANDO_MAX = 2;
 
 /** Margem (px de mundo) em volta da vista: perto dela o bloco é desenhado; além de três, descartado. */
 const MARGEM_BLOCO = BLOCO_CELULAS * CELULA_PX;
@@ -209,8 +211,10 @@ export function criarTerreno(
 ): Terreno {
   const blocos: Bloco[] = [];
   // Marco 31 (D-130): o assador nasce quando as texturas chegam; os blocos desenhados entram na fila.
-  let assador: AssadorDeSolo | null = null;
+  let assador: AssadorDoBloco | null = null;
   const fila = new Set<Bloco>();
+  /** 22/11/2026 (D-202): os blocos no trabalhador, com a chave pedida (o chão chega alguns quadros depois). */
+  const pintando = new Map<Bloco, string>();
   let vistas: readonly (readonly [number, number, number, number])[] = [];
   let assouNoQuadro = false;
   let destruido = false;
@@ -219,12 +223,9 @@ export function criarTerreno(
     void solo.texturas.then((texturas) => {
       soloResolvido = true;
       if (destruido || texturas.size === 0) return;
-      assador = new AssadorDeSolo(texturas, solo.tema, solo.escala, fase.ambientes ?? [], solo.semente);
+      assador = criarAssador(texturas, solo.tema, solo.escala, fase.ambientes ?? [], solo.semente);
       // Marco 41 (14/11/2026, D-169): na fila, um por quadro (assar todos de uma vez travava a tela).
-      for (const b of blocos) if (b.desenhado) {
-        if (temAssado(chaveDe(b))) assarBloco(b);
-        else fila.add(b);
-      }
+      for (const b of blocos) if (b.desenhado && !usarGuardado(b)) fila.add(b);
     });
   }
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
@@ -270,22 +271,12 @@ export function criarTerreno(
   };
   const temaDoSolo = solo ? JSON.stringify(solo.tema) : '';
   const chaveDe = (b: Bloco) => chaveDoAssado(fase, b.bx, b.by, Math.min(fase.largura, b.bx + BLOCO_CELULAS), Math.min(fase.altura, b.by + BLOCO_CELULAS), temaDoSolo);
-  const assarBloco = (b: Bloco) => {
-    if (!assador || !solo) return;
+  /** Põe no bloco o chão pronto (a textura do bitmap do trabalhador ou da tela pintada na página). */
+  const colocarSolo = (b: Bloco, imagem: ImagemAssada, chave: string) => {
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
-    const chave = chaveDe(b);
-    let canvas = pegarAssado(chave);
-    if (!canvas) {
-      const pesos = pesosDoBloco(fase, solo.tema, b.bx, b.by, fimX - b.bx, fimY - b.by, solo.cfg, solo.semente);
-      canvas = document.createElement('canvas');
-      canvas.width = assador.lado(fimX - b.bx);
-      canvas.height = assador.lado(fimY - b.by);
-      assador.assar(canvas, pesos, b.x0, b.y0);
-      guardarAssado(chave, canvas);
-    }
     soltarSolo(b);
-    const textura = new Texture({ source: new CanvasSource({ resource: canvas }) });
+    const textura = new Texture({ source: 'close' in imagem ? new ImageSource({ resource: imagem }) : new CanvasSource({ resource: imagem }) });
     const r = ergue();
     let sprite: Sprite | MeshSimple;
     if (r) sprite = malhaDoBloco(textura, r, { bx: b.bx, by: b.by, fimX, fimY });
@@ -296,8 +287,40 @@ export function criarTerreno(
       sprite.height = b.y1 - b.y0;
     }
     b.c.addChildAt(sprite, 0);
-    b.solo = { sprite, canvas, chave };
+    b.solo = { sprite, canvas: imagem, chave };
     desenharBloco(b);
+  };
+  /** O chão já pronto na guarda (desta cena, da vizinha além da borda ou da região de antes): na hora. */
+  const usarGuardado = (b: Bloco): boolean => {
+    const chave = chaveDe(b);
+    if (!temAssado(chave)) return false;
+    const imagem = pegarAssado(chave);
+    if (!imagem) return false;
+    colocarSolo(b, imagem, chave);
+    return true;
+  };
+  /**
+   * 22/11/2026 (D-202): os pesos saem aqui e a pintura vai para o trabalhador (render/solo/assador-remoto.ts). O que
+   * chega vai para a guarda; se o bloco saiu da vista ou mudou no caminho, fica só lá (a próxima vista o usa).
+   */
+  const pintarBloco = (b: Bloco) => {
+    const a = assador;
+    if (!a || !solo) return;
+    const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
+    const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
+    const chave = chaveDe(b);
+    const pesos = pesosDoBloco(fase, solo.tema, b.bx, b.by, fimX - b.bx, fimY - b.by, solo.cfg, solo.semente);
+    pintando.set(b, chave);
+    void a.assar(pesos, b.x0, b.y0, a.lado(fimX - b.bx), a.lado(fimY - b.by)).then((imagem) => {
+      if (pintando.get(b) === chave) pintando.delete(b);
+      if (!imagem) {
+        if (!destruido && b.desenhado && !b.solo) fila.add(b);
+        return;
+      }
+      guardarAssado(chave, imagem);
+      if (!destruido && b.desenhado && !b.solo && chaveDe(b) === chave) colocarSolo(b, imagem, chave);
+      else soltarAssado(chave);
+    });
   };
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
@@ -308,10 +331,7 @@ export function criarTerreno(
     // mesmo quadro, travava a tela por segundos ao andar e na troca de região).
     if (assador && !b.solo) {
       // Já assado (por esta cena antes, pela vizinha além da borda ou pela cena da região de antes): na hora.
-      if (temAssado(chaveDe(b))) {
-        assarBloco(b);
-        return;
-      }
+      if (usarGuardado(b)) return;
       fila.add(b);
     }
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
@@ -430,7 +450,7 @@ export function criarTerreno(
       : blocos[Math.floor(y / BLOCO_CELULAS) * porLinha + Math.floor(x / BLOCO_CELULAS)];
   return {
     prepararVistas: (novas) => { vistas = novas; assouNoQuadro = false; },
-    pronto: () => soloResolvido && ![...fila].some((f) => f.c.visible),
+    pronto: () => soloResolvido && ![...fila].some((f) => f.c.visible) && ![...pintando.keys()].some((f) => f.c.visible),
     redesenharCelula: (x, y) => {
       // O autotiling olha os 8 vizinhos: redesenha os blocos da vizinhança 3×3 (sem repetir).
       const tocados = new Set<Bloco>();
@@ -463,8 +483,9 @@ export function criarTerreno(
           b.x1 > vx0 - MARGEM_BLOCO * 3 && b.x0 < vx1 + MARGEM_BLOCO * 3 && b.y1 > vy0 - MARGEM_BLOCO * 3 && b.y0 < vy1 + MARGEM_BLOCO * 3)) descartarBloco(b);
         b.c.visible = b.desenhado && dentro(b, 0);
       }
-      // Marco 31 (D-130): um bloco assado por quadro, o visível primeiro.
-      if (fila.size > 0 && !assouNoQuadro) {
+      // Marco 31 (D-130): um bloco por quadro, o visível primeiro. D-202: pintado no trabalhador, até PINTANDO_MAX
+      // de uma vez (o que já está a caminho com a mesma chave não vai de novo).
+      if (fila.size > 0 && !assouNoQuadro && pintando.size < PINTANDO_MAX) {
         let escolhido: Bloco | undefined;
         for (const b of fila) {
           if (b.c.visible) {
@@ -476,7 +497,7 @@ export function criarTerreno(
         if (escolhido) {
           assouNoQuadro = vistas.length > 0;
           fila.delete(escolhido);
-          assarBloco(escolhido);
+          if (!escolhido.solo && pintando.get(escolhido) !== chaveDe(escolhido) && !usarGuardado(escolhido)) pintarBloco(escolhido);
         }
       }
     },
@@ -495,6 +516,7 @@ export function criarTerreno(
     },
     destruir: () => {
       destruido = true;
+      assador?.soltar();
       for (const b of blocos) {
         soltarSolo(b);
         b.c.destroy({ children: true });

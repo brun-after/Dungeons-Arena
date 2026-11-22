@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.54 · **Data:** 22/11/2026
+**Versão:** 1.55 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.55 (22/11/2026)**: D-202: a troca de região sem a travada do cliente (o palco 3D e o do Pixi passam de cena em cena, o chão é pintado num trabalhador, o three.js sem ler o log dos shaders fora do desenvolvimento) e a medida `&troca=` no `?bench=mundo`.
 > - **1.54 (22/11/2026)**: D-201: as regiões sempre abertas no servidor foram tentadas e revertidas (o jogo piorou).
 > - **1.53 (22/11/2026)**: D-134: a skin do arqueiro vira Muse Elf (voa em vez de andar, as asas batem, mais baixa e de formas femininas). D-200: as armadilhas do núcleo Armadilha (a skill comum inicial do Arqueiro) ocupam um quadrado de 4 células.
 > - **1.52 (21/11/2026)**: D-134: a quarta skin, a Muse Elf do arqueiro (então Valquíria Glacial) (armadura de prata e ouro, elmo de asas, asas de gelo, capa de pelo e o arco glacial).
@@ -6511,3 +6512,60 @@ o molde das regiões é montado na subida, a sala abre na entrada ou na passagem
 
 **Para a próxima vez.** Acordadas e vazias, as 24 regiões custavam ~7,7 ms por tick, quase um núcleo. A travada que se
 sente vem da montagem da cena no navegador (D-169), não da sala no servidor.
+
+## D-202 — A troca de região sem a travada do cliente (22/11/2026)
+
+**Pedido.** Depois do D-201 revertido, o usuário perguntou o que dá para acelerar no cliente. A travada que sente é na
+troca de região.
+
+**Medida.** `?bench=mundo&regiao=<id>&troca=<id>[,<id>...]` monta a região de lá por cima da de agora, como a troca do
+Mundo (`mundo-tela.ts`), e mede cada etapa: gerar o mapa, montar a cena, esperar o chão à vista. Mede também o tempo de
+JavaScript de cada quadro e o maior intervalo entre quadros. Com várias regiões, faz as trocas em sequência e tira a
+cena de antes. As medidas ficam em `window.__trocas`. Medido num Chromium com GPU (Intel UHD, Direct3D 11), com o
+perfil de CPU do DevTools. O painel do navegador do app não serve: escondido, ele segura os quadros.
+
+O perfil mostrou para onde ia o tempo:
+- **compilar shaders WebGL** (`getProgramParameter`, `linkProgram`): cada cena criava um `Application` do Pixi e um
+  `PalcoVivo` do three.js novos, cada um com o seu contexto WebGL. A primeira imagem de cada um compila todos os
+  shaders de novo, e no Windows isso passa pelo compilador do Direct3D. Por isso o primeiro quadro levava segundos.
+- **ler o log de cada programa** (`getProgramInfoLog`): o three.js faz isso por padrão (`checkShaderErrors`).
+- **pintar o chão**: ~36 ms por bloco no fio da página (os pesos, mais ~9 ms). A fila pintava um bloco por quadro,
+  então todo quadro até o chão ficar pronto levava 40 a 120 ms, e andando também.
+- **o personagem 3D**: o ambiente, os GLB e os materiais refeitos a cada cena (~1,4 s num quadro só).
+
+**Decisão.**
+- **O Pixi guardado** (`render/stage.ts`). A cena que sai devolve o `Application`: o palco fica vazio e o canvas sai da
+  página. A próxima cena o reaproveita, já com os shaders compilados e as texturas comuns na placa. Ficam no máximo dois,
+  porque na troca as duas cenas ficam na página juntas. Assim, a partir da terceira cena nenhuma cria contexto novo.
+  O que uma cena criou e não soltou sai da placa pelo coletor do Pixi 8 (`GCSystem`, um minuto sem uso).
+- **O palco 3D compartilhado** (`render/vivos/palco-compartilhado.ts`). A cena reserva o `PalcoVivo` e o solta ao sair.
+  Sem uso, ele fica para a próxima cena com a mesma resolução. Os atores ficam: os ids se repetem entre as salas, então
+  outro modelo no mesmo id troca o ator, e quem não é pedido sai em 30 quadros. Outra resolução com o palco ainda em
+  uso cria um palco só para aquela cena, como antes.
+- **O three.js sem o log dos shaders** fora do desenvolvimento (`renderer.debug.checkShaderErrors = import.meta.env.DEV`).
+- **O chão no trabalhador** (`render/solo/assar-trabalhador.ts`, `assador-remoto.ts`). O `AssadorDeSolo` pinta num
+  `OffscreenCanvas` (`novaTela`), o mesmo código na página e no trabalhador. A página calcula os pesos e manda o bloco.
+  O trabalhador devolve um `ImageBitmap`, que vira a textura (`ImageSource`) e entra na guarda (D-169), fechada com
+  `close()` quando sai.
+  - Um bloco sai por quadro, o visível primeiro, e no máximo dois ficam no trabalhador.
+  - O que chega para um bloco que saiu da vista ou mudou no caminho fica só na guarda.
+  - Sem `Worker` ou `OffscreenCanvas` (ou se o trabalhador falhar), a página pinta como antes.
+
+**Resultado** (build de produção, rota Vila do Centro → Campos do Oeste → Floresta Antiga → Ruínas do Norte → Vila do
+Centro → Encosta do Leste, duas rodadas; na medida as duas cenas desenham juntas, então os tempos absolutos são
+maiores que no jogo):
+
+| Troca | Antes | Depois |
+|---|---|---|
+| Média por troca | ~13,9 s | ~7,7 s |
+| Vila do Centro | 6,1 a 6,9 s | 2,8 a 3,3 s |
+| Encosta do Leste | 12,8 a 14,2 s | 4,7 a 5,1 s |
+| Quadros depois do 1º (JS) | 100 a 250 ms, com picos de ~2,2 s | 35 a 80 ms |
+
+O chão pintado no trabalhador é idêntico ao de antes (a mesma cena fotografada nos dois builds).
+
+**O que falta.**
+- As Ruínas do Norte quase não melhoraram: o primeiro quadro delas ainda leva ~4 s de JavaScript. O próximo passo é
+  medir o que essa região tem de diferente.
+- A primeira troca depois de entrar no Mundo ainda cria um `Application`, porque a guarda está vazia.
+- Não foi medido num celular.
