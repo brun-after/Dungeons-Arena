@@ -32,7 +32,8 @@ import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
 import { existeArma3d, existeAtlas, type AtlasDePersonagens } from './personagens-3d';
 import { Figura3d } from './figura-3d';
-import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
+import { chaveDaSkin, chaveDoChefe, type PalcoVivo } from './vivos/palco-vivo';
+import { pedidoVivo } from './vivos/pedido-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
 import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, anguloDaMagia, magiaViva, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado, sustentarGolpe, type MovimentoDoAtlas } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
@@ -415,7 +416,7 @@ export class CamadaEntidades {
       const preparo = m.golpe ? preparoAcao : null;
       m.preparoAcao = preparoAcao;
       if (e.acao) m.conjuraMs = msDe(conjura);
-      this.desenharCorpo(m, e, escolha, {
+      if (m.raiz.visible) this.desenharCorpo(m, e, escolha, { // D-202: escondido (longe ou dentro de casa), sem corpo
         iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo, ajuste, tick: estado.tick,
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),

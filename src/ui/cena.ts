@@ -35,7 +35,7 @@ import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { sincronizarSkin as sincronizarSkinLocal } from './sincronizar-skin';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
-import { criarProjecao } from '../render/projecao';
+import { criarProjecao, longeDaVista } from '../render/projecao';
 import { relevoDaFase } from '../render/relevo-tela';
 import { definirCoresDosElementos } from '../render/adornos';
 import { CamadaNumeros } from '../render/numeros';
@@ -278,7 +278,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
-    oculto: (x, y) => visao?.oculto(x, y) ?? false,
+    oculto: (x, y) => longeDaVista(vistaAtual, x, y) || (visao?.oculto(x, y) ?? false), // D-202: longe, nem desenha
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
     armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
@@ -592,7 +592,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto() || document.querySelector('dialog.modal[open]') !== null,
   });
   // Marco 26 (26/10/2026, D-115): com mouse, segurar o botão guia como o joystick (o vetor até o cursor).
-  let posicaoVisual: { x: number; y: number } | null = null;
+  let posicaoVisual: { x: number; y: number } | null = null; let vistaAtual: readonly number[] = [];
   const ponteiro = ligarPonteiro(palco.canvas, {
     camera,
     aoIrPara: aoTocarCelula,
@@ -712,7 +712,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const desenharVista = (grupo?: Entidade[]) => {
       if (grupo) enquadrarGrupoParty(camera, grupo, palco.largura(), palco.altura(), zoomAntesParty ?? camera.zoom, q.posicao);
       ap.aplicarCamera(q.agoraMs);
-      const vista = camera.retanguloVisivel(palco.altura());
+      const vista = camera.retanguloVisivel(palco.altura()); vistaAtual = vista;
       terreno.atualizarVisibilidade(...vista);
       mundo.desenhar(vista, j ? posicaoVisual : null, q.agoraMs, dtMs, reduzido);
       terreno.animar(q.agoraMs, reduzido);
