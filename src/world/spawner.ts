@@ -9,7 +9,7 @@ import { fatoresDoMundo } from '../modos/dificuldade';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import type { Celula } from '../core/comandos';
 import type { CategoriaSpawner, ContextoSimulacao } from '../core/contexto';
-import { DONO_FASE, type EstadoJogo } from '../core/estado';
+import { armadilhaCobre, DONO_FASE, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio, criarRng, hashTexto, inteiro } from '../core/rng';
 import { ticksDe } from '../core/tempo';
@@ -54,7 +54,7 @@ export function sortearCelula(estado: EstadoJogo, ctx: ContextoSimulacao): Celul
     const y = inteiro(estado.rng, 0, fase.altura - 1);
     if (!passavel(fase, x, y)) continue;
     if (estado.entidades.some((e) => e.x === x && e.y === y)) continue;
-    if (estado.objetos.some((o) => o.x === x && o.y === y) || estado.armadilhas.some((a) => a.x === x && a.y === y)) continue;
+    if (estado.objetos.some((o) => o.x === x && o.y === y) || estado.armadilhas.some((a) => armadilhaCobre(a, x, y))) continue;
     if (jogadores.some((j) => Math.max(Math.abs(j.x - x), Math.abs(j.y - y)) < s.distanciaMinJogador)) continue;
     return { x, y };
   }

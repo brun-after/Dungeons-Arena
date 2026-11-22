@@ -119,6 +119,23 @@ describe('armadilha (§2.11)', () => {
     expect(c.estado.armadilhas).toHaveLength(0);
   });
 
+  it('22/11/2026: a de lado 2 cobre um quadrado de 4 células, do lado de quem armou, e dispara em qualquer uma', () => {
+    const c = cenario();
+    c.aplicar('j', c.ef('armadilha', { valor: 5, lado: 2 }), 'j', { x: 6, y: 5 });
+    expect(c.estado.armadilhas[0]).toMatchObject({ x: 5, y: 5, lado: 2 });
+    c.por(c.ent('b'), 7, 5);
+    c.tick();
+    expect(c.estado.armadilhas).toHaveLength(1);
+    c.por(c.ent('b'), 5, 6);
+    c.tick();
+    expect(c.estado.armadilhas).toHaveLength(0);
+    const l = new Leitor('teste');
+    expect(normalizarEfeito({ tipo: 'armadilha', valor: 6, lado: 2 }, l)[0]?.lado).toBe(2);
+    expect(construirEfeito('armadilha', { valor: 6 }).lado).toBeUndefined();
+    // a skill comum inicial do Arqueiro (a Armadilha de dentes) e as outras do núcleo armadilha
+    expect(CONTEUDO.habilidades.get('armadilha_fisico')?.efeitos.find((e) => e.tipo === 'armadilha')?.lado).toBe(2);
+  });
+
   it('nunca aparece no estado público (invisível para quem não armou)', () => {
     const c = cenario();
     c.aplicar('j', c.ef('armadilha'), 'j', { x: 6, y: 5 });

@@ -43,6 +43,7 @@ function componente(
     const pct = numeroOpcional(l, bruto, 'pct', -100, 1000);
     const duracao = numeroOpcional(l, bruto, 'duracaoMs', 0, 600_000);
     const em = destino(l, bruto);
+    const lado = numeroOpcional(l, bruto, 'lado', 1, 3);
     // Marco 8A-2: efeito carregado (um nível só) e referência a conteúdo (preset do `invocar`).
     // A forma canônica (`interno`, `ref: null`) também é aceita: normalizar de novo não muda nada.
     const carregado = bruto.efeito ?? bruto.interno;
@@ -61,8 +62,9 @@ function componente(
     if (pct !== undefined) parcial.pct = pct;
     if (duracao !== undefined) parcial.duracaoMs = duracao;
     if (em) parcial.em = em;
+    if (lado !== undefined) parcial.lado = Math.round(lado);
     for (const k of Object.keys(bruto)) {
-      if (!['valor', 'pct', 'duracaoMs', 'em', 'efeito', 'interno', 'ref'].includes(k)) l.erro(`efeito ${tipo}: campo desconhecido "${k}"`);
+      if (!['valor', 'pct', 'duracaoMs', 'em', 'efeito', 'interno', 'ref', 'lado'].includes(k)) l.erro(`efeito ${tipo}: campo desconhecido "${k}"`);
     }
   } else if (bruto !== true) {
     l.erro(`efeito ${tipo}: use número, objeto ou true`);

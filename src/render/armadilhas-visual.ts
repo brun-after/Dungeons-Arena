@@ -90,14 +90,17 @@ function sinal(g: Graphics, cx: number, cy: number, r: number, el: Elemento | un
 }
 
 /** O círculo de conjuração no chão (coordenadas do plano). */
-export function circuloDeConjuracao(g: Graphics, brilho: Graphics, a: Pick<Armadilha, 'x' | 'y' | 'id' | 'elemento'>, tMs: number, propria: boolean, inerte: boolean, escala = 1): void {
-  const cx = (a.x + 0.5) * CELULA_PX;
-  const cy = (a.y + 0.5) * CELULA_PX;
-  const R = CELULA_PX * escala;
+export function circuloDeConjuracao(g: Graphics, brilho: Graphics, a: Pick<Armadilha, 'x' | 'y' | 'id' | 'elemento' | 'lado'>, tMs: number, propria: boolean, inerte: boolean, escala = 1): void {
+  // 22/11/2026: a armadilha de quadrado (`lado`) tem o círculo no meio do quadrado, do tamanho dele, e a borda das células
+  const lado = a.lado ?? 1;
+  const cx = (a.x + lado / 2) * CELULA_PX;
+  const cy = (a.y + lado / 2) * CELULA_PX;
+  const R = CELULA_PX * escala * lado;
   const cor = inerte ? COR_INERTE : corDaArmadilha(a);
   const pulso = inerte ? 0 : 0.5 + 0.5 * Math.sin(tMs / 320 + a.id);
   const giro = tMs / 2600;
   const forca = inerte ? 0.35 : 0.85;
+  if (lado > 1) g.rect(a.x * CELULA_PX + 3, a.y * CELULA_PX + 3, lado * CELULA_PX - 6, lado * CELULA_PX - 6).stroke({ width: 1.5, color: cor, alpha: forca * 0.55 });
   if (!inerte) brilho.circle(cx, cy, R * 0.5).fill({ color: cor, alpha: 0.1 + 0.12 * pulso });
   g.circle(cx, cy, R * 0.46).stroke({ width: 2, color: propria ? COR_PROPRIA : cor, alpha: forca });
   g.circle(cx, cy, R * 0.36).stroke({ width: 1.2, color: cor, alpha: forca * 0.8 });
@@ -118,8 +121,8 @@ export function circuloDeConjuracao(g: Graphics, brilho: Graphics, a: Pick<Armad
 
 /** O anel do desarme em curso (o progresso da Sabedoria). */
 export function anelDoDesarme(g: Graphics, a: Armadilha, fracao: number): void {
-  const cx = (a.x + 0.5) * P;
-  const cy = (a.y + 0.5) * P;
+  const cx = (a.x + (a.lado ?? 1) / 2) * P;
+  const cy = (a.y + (a.lado ?? 1) / 2) * P;
   const inicio = -Math.PI / 2;
   g.moveTo(cx + Math.cos(inicio) * P * 0.52, cy + Math.sin(inicio) * P * 0.52);
   g.arc(cx, cy, P * 0.52, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 3, color: COR_DESARME, alpha: 0.95 });

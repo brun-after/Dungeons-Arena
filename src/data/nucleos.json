@@ -2187,6 +2187,7 @@
       "efeitos": [
        {
         "tipo": "armadilha",
+        "lado": 2,
         "valor": 6,
         "duracaoMs": 30000,
         "efeito": {
@@ -2217,6 +2218,7 @@
       "efeitos": [
        {
         "tipo": "armadilha",
+        "lado": 2,
         "valor": 8,
         "duracaoMs": 30000,
         "efeito": {
@@ -2245,6 +2247,7 @@
       "efeitos": [
        {
         "tipo": "armadilha",
+        "lado": 2,
         "valor": 4,
         "duracaoMs": 30000,
         "efeito": {
@@ -2269,6 +2272,7 @@
       "efeitos": [
        {
         "tipo": "armadilha",
+        "lado": 2,
         "valor": 4,
         "duracaoMs": 30000,
         "efeito": {
@@ -2298,6 +2302,7 @@
       "efeitos": [
        {
         "tipo": "armadilha",
+        "lado": 2,
         "valor": 5,
         "duracaoMs": 30000,
         "efeito": {

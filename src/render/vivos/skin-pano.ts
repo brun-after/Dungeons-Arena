@@ -67,6 +67,31 @@ const CODIGO_DO_DESPRENDER = /* glsl */ `
   transformed = centro + (transformed - centro) * (0.3 + 1.1 * ciclo) * (0.4 + 0.6 * anda) + rumo * vai + vec3(0.0, 0.05 * ciclo * ciclo, 0.0);
   vDesfaz = anda * smoothstep(0.0, 0.08, ciclo) * (1.0 - smoothstep(0.6, 1.0, ciclo));`;
 
+/**
+ * O bater das asas (22/11/2026, a Muse Elf). Antes da pele, cada vértice gira em volta da raiz da asa dele (`centro`)
+ * no eixo `deriva.xyz` (o sentido diz o lado), com a fase `deriva.w`. O ângulo vai de um pouco à frente até `uBater`
+ * para trás, num ciclo de ~2 batidas por segundo parado e mais depressa quando voa. A normal gira junto.
+ */
+const CODIGO_DO_BATER = /* glsl */ `
+  float batida = uBater * (0.3 + 0.7 * sin(uTempo * (12.5 + 6.5 * uVento.w) + deriva.w));
+  vec3 eixoDaAsa = normalize(deriva.xyz);
+  float cb = cos(batida), sb = sin(batida);
+  vec3 va = transformed - centro;
+  transformed = centro + va * cb + cross(eixoDaAsa, va) * sb + eixoDaAsa * dot(eixoDaAsa, va) * (1.0 - cb);`;
+const CODIGO_DA_NORMAL_QUE_BATE = /* glsl */ `
+  {
+    float batidaN = uBater * (0.3 + 0.7 * sin(uTempo * (12.5 + 6.5 * uVento.w) + deriva.w));
+    vec3 eixoN = normalize(deriva.xyz);
+    float cn = cos(batidaN), sn = sin(batidaN);
+    objectNormal = objectNormal * cn + cross(eixoN, objectNormal) * sn + eixoN * dot(eixoN, objectNormal) * (1.0 - cn);
+  }`;
+
+/** Marca o material das asas que batem (os atributos `centro` e `deriva`: a raiz, o eixo e a fase), com o ângulo máximo. */
+export function batente<T extends THREE.Material>(m: T, angulo: number): T {
+  m.userData = { ...m.userData, bater: angulo };
+  return m;
+}
+
 /** Marca o material dos pedaços que se desprendem do pano (os atributos `centro` e `deriva`, de skin-trevas.ts). */
 export function desprendido<T extends THREE.Material>(m: T): T {
   m.userData = { ...m.userData, desprender: true };
@@ -100,13 +125,21 @@ export function aplicarVento<T extends THREE.Material>(m: T, u: UniformesDeVento
   const c = m.clone();
   const flutuar = typeof m.userData.flutuar === 'number' ? m.userData.flutuar : 0;
   const solta = m.userData.desprender === true;
+  const bater = typeof m.userData.bater === 'number' ? m.userData.bater : 0;
   c.onBeforeCompile = (sombra) => {
     sombra.uniforms.uVento = u.uVento;
     sombra.uniforms.uTempo = u.uTempo;
     sombra.uniforms.uFlutuar = { value: flutuar };
+    sombra.uniforms.uBater = { value: bater };
     sombra.vertexShader = sombra.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float solto;\nuniform vec4 uVento;\nuniform float uTempo;\nuniform float uFlutuar;')
       .replace('#include <skinning_vertex>', `#include <skinning_vertex>\n${flutuar > 0 ? CODIGO_DA_FLUTUACAO : ''}\n${CODIGO_DO_VENTO}`);
+    if (bater > 0) {
+      sombra.vertexShader = sombra.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute vec3 centro;\nattribute vec4 deriva;\nuniform float uBater;')
+        .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${CODIGO_DA_NORMAL_QUE_BATE}`)
+        .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CODIGO_DO_BATER}`);
+    }
     if (!solta) return;
     sombra.vertexShader = sombra.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec3 centro;\nattribute vec4 deriva;\nvarying float vDesfaz;')
@@ -115,7 +148,7 @@ export function aplicarVento<T extends THREE.Material>(m: T, u: UniformesDeVento
       .replace('#include <common>', '#include <common>\nvarying float vDesfaz;')
       .replace('#include <alphatest_fragment>', 'diffuseColor.a *= vDesfaz;\n#include <alphatest_fragment>');
   };
-  c.customProgramCacheKey = () => (solta ? 'vento-skin-desprende' : flutuar > 0 ? 'vento-skin-flutua' : 'vento-skin-1');
+  c.customProgramCacheKey = () => (solta ? 'vento-skin-desprende' : `vento-skin-${flutuar > 0 ? 'flutua' : '1'}${bater > 0 ? '-bate' : ''}`);
   return c;
 }
 

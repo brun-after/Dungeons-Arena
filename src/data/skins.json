@@ -23,6 +23,14 @@
       "nome": "Mágico",
       "descricao": "Um mágico de terno branco com a cabeça de yin-yang. O falcão é a cartola dele, que voa, tira a varinha nas magias e vira pombo num puff de fumaça.",
       "codigo": "znnbtwz9hu"
+    },
+    {
+      "id": "arqueiro-muse-elf",
+      "classe": "arqueiro",
+      "classeNome": "Arqueiro",
+      "nome": "Muse Elf",
+      "descricao": "Uma elfa arqueira que voa nas asas de gelo que batem nas costas, de cabelo dourado, armadura de prata e ouro, o elmo de asas com a pedra rubra, a capa de pelo branco e o arco de ouro com a corda de gelo.",
+      "codigo": "17dyb1s9r6a"
     }
   ]
 }

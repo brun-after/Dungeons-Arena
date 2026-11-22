@@ -13,6 +13,7 @@ import { TOMOS, tomoFechado } from '../equipamento-3d';
 import { metal } from './sombrio-base';
 import { gadanhaDoCeifador } from './skin-gadanha';
 import { cajadoRetorcido } from './skin-cajado';
+import { arcoGlacial } from './skin-arco';
 
 /** Quanto a arma cresce por grau (0 = comum … 5 = última). */
 export const ESCALA_DO_GRAU = [1, 1.03, 1.06, 1.1, 1.14, 1.18] as const;
@@ -372,6 +373,7 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   // 06/11/2026: a gadanha da skin Ceifador do necromante (skin-gadanha.ts); só a skin a usa.
   gadanha_ceifador: gadanhaDoCeifador,
   cajado_retorcido: cajadoRetorcido,
+  arco_glacial: arcoGlacial,
   // --- As antigas (bipede.ts)
   espada: espadaDeGuerra,
   adaga: (k) => { espadaComum(k, 0.22, 0.05, 0.1); },

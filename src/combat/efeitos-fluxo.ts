@@ -14,7 +14,7 @@ import { classeDe, extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
+import { armadilhaCobre, buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { posicionar, vivo, type Entidade } from '../entities/entidade';
@@ -113,11 +113,18 @@ export function armarArmadilha(
   mira: Celula | null,
   saida: EventoSimulacao[],
 ): void {
-  const ocupada = (x: number, y: number) => estado.armadilhas.some((a) => a.x === x && a.y === y);
+  const ocupada = (x: number, y: number) => estado.armadilhas.some((a) => armadilhaCobre(a, x, y));
   let c = mira ?? { x: dono.x, y: dono.y };
   // Marco 40 (13/11/2026, D-161): na célula que já tem armadilha, a nova vai na seguinte da linha (armadilhas em linha).
   if (ocupada(c.x, c.y)) c = { x: c.x + Math.sign(c.x - dono.x), y: c.y + Math.sign(c.y - dono.y) };
   if (!passavel(ctx.fase, c.x, c.y) || ocupada(c.x, c.y)) return;
+  // 22/11/2026: a armadilha de quadrado (`lado`) cobre a célula mirada e as vizinhas do lado de quem a arma, por onde o
+  // inimigo que vem na direção dele vai passar (fica mais fácil acertar onde ele está ou estará).
+  const lado = ef.lado ?? 1;
+  if (lado > 1) {
+    const recua = (de: number, para: number) => (para < de ? de - (lado - 1) : de);
+    c = { x: recua(c.x, dono.x), y: recua(c.y, dono.y) };
+  }
   const id = estado.proximoId++;
   // 06/11/2026 (D-135): a runa de pé do armadilheiro leva o elemento dele (o estado do elemento no lugar do interno).
   const estilo = estiloDaArmadilha(ctx, dono);
@@ -140,6 +147,7 @@ export function armarArmadilha(
     // Marco 40 (13/11/2026, D-161): os rearmes (`pct`) e o presente ao aliado que pisa.
     ...(ef.pct > 0 && { rearmes: Math.round(ef.pct) }),
     ...(ef.aliado && { aoAliado: { ...ef.aliado } }),
+    ...(lado > 1 && { lado }),
   });
   saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: dono.id, armadilhaId: id, x: c.x, y: c.y });
 }
@@ -337,11 +345,14 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
       }
     }
     const dono = { id: a.donoId, equipe: a.equipeDono };
-    const naCelula = porCelula.get(a.y * ctx.fase.largura + a.x);
-    const alvo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    // 22/11/2026: quem está em qualquer célula do quadrado dela (a de 1 célula olha só a dela)
+    const l = a.lado ?? 1;
+    const naCelula: Entidade[] = [];
+    for (let dy = 0; dy < l; dy++) for (let dx = 0; dx < l; dx++) naCelula.push(...(porCelula.get((a.y + dy) * ctx.fase.largura + a.x + dx) ?? []));
+    const alvo = naCelula.find((e) => vivo(e) && armadilhaCobre(a, e.x, e.y) && podeFerir(dono, e, ctx.modo));
     // Marco 40 (D-161): o aliado que pisa ganha o presente dela, uma vez.
     if (!alvo && a.aoAliado) {
-      const amigo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && !e.invocacao && podeAjudar(dono, e, ctx.modo));
+      const amigo = naCelula.find((e) => vivo(e) && armadilhaCobre(a, e.x, e.y) && !e.invocacao && podeAjudar(dono, e, ctx.modo));
       if (amigo) {
         aplicar(amigo, a.aoAliado, { id: a.donoId, x: a.x, y: a.y }, null);
         delete a.aoAliado;

@@ -61,6 +61,9 @@ describe('catálogo de skins', () => {
     expect(JSON.stringify(SKINS).toUpperCase()).not.toContain('SOMBRARUBRA4KR7');
     expect(skinDoCodigo('AVENT-MAGICO-6TQ2')?.id).toBe('aventureiro-magico');
     expect(skinDoCodigo('avent magico 6tq2')?.classe).toBe('aventureiro');
+    expect(skinDoCodigo('ARQ-MUSE-ELF-5VZ8')?.id).toBe('arqueiro-muse-elf');
+    expect(skinDoCodigo('arq muse elf 5vz8')?.classe).toBe('arqueiro');
+    expect(JSON.stringify(SKINS).toUpperCase()).not.toContain('MUSEELF5VZ8');
   });
 
   it('código errado, curto ou vazio não libera nada', () => {
@@ -74,6 +77,8 @@ describe('catálogo de skins', () => {
     expect(skinValida('necromante', 'mago-sombra-rubra')).toBe(false);
     expect(skinValida('aventureiro', 'aventureiro-magico')).toBe(true);
     expect(skinValida('mago', 'aventureiro-magico')).toBe(false);
+    expect(skinValida('arqueiro', 'arqueiro-muse-elf')).toBe(true);
+    expect(skinValida('mago', 'arqueiro-muse-elf')).toBe(false);
     expect(skinValida('necromante', 'nao-existe')).toBe(false);
     expect(skinsDaClasse('necromante').map((s) => s.id)).toContain('necromante-ceifador');
     expect(skinsDaClasse('guerreiro')).toEqual([]);
