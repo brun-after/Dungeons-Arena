@@ -71,6 +71,8 @@ export interface Preferencias {
   sensibilidadeZoom: number;
   /** Marco 53 (D-203): a câmera olha para onde o mouse aponta. */
   cameraNoMouse: boolean;
+  /** Marco 53 (D-203): no modo janela, o cursor na borda da tela desliza a câmera. */
+  cameraNaBorda: boolean;
   /** A skin vestida em cada classe (classe -> id); sem entrada = o visual do equipamento. */
   skinsEscolhidas: Record<string, string>;
 }
@@ -112,6 +114,7 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   skinsEscolhidas: {},
   sensibilidadeZoom: 1,
   cameraNoMouse: true,
+  cameraNaBorda: true,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -146,6 +149,7 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     estiloNasGeradas: booleano(d.estiloNasGeradas, PADRAO.estiloNasGeradas),
     sensibilidadeZoom: numeroEntre(d.sensibilidadeZoom, 0.25, 2, PADRAO.sensibilidadeZoom),
     cameraNoMouse: booleano(d.cameraNoMouse, PADRAO.cameraNoMouse),
+    cameraNaBorda: booleano(d.cameraNaBorda, PADRAO.cameraNaBorda),
     fps: opcao(d.fps, ['auto', '60', '30'] as const, PADRAO.fps),
     resolucao: opcao(d.resolucao, ['auto', 'alta', 'media', 'baixa'] as const, PADRAO.resolucao),
     medidor: booleano(d.medidor, PADRAO.medidor),

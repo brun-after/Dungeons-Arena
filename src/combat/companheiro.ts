@@ -20,7 +20,7 @@ import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { construirEfeito } from './registro-efeitos';
 import { fatorDeDominio } from '../progression/dominio';
-import { feraAtivaDisponivel, petDe, petDoCompanheiro, presetDoPet } from './pets';
+import { fatorDasCopias, feraAtivaDisponivel, petDe, petDoCompanheiro, presetDoPet } from './pets';
 import { cansacoDoDano, fatorMontado, gastarFolego, montadoEm, repasseDoPet } from './feras';
 
 export const PRESET_FALCAO = 'falcao_companheiro';
@@ -84,9 +84,11 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
     const bruto = Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp);
     // D-188, adendo: montados, uma vida só (o dano inteiro, com a redução da montaria, e a fera não cansa).
     const junto = montadoEm(dono) === pet;
-    const repasse = junto ? fatorMontado(ctx, dono) : repasseDoPet(ctx, dono, pet);
+    // D-204 (22/11/2026): com uma cópia da fera viva, o repasse cai a 1/3 (o cansaço segue o de sempre).
+    const base = repasseDoPet(ctx, dono, pet);
+    const repasse = junto ? fatorMontado(ctx, dono) : base * fatorDasCopias(estado, ctx, dono);
     const dano = Math.round(bruto * repasse);
-    if (bruto > 0 && !junto) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, bruto * (1 - repasse)), saida);
+    if (bruto > 0 && !junto) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, bruto * (1 - base)), saida);
     if (dano > 0) {
       dono.hp = Math.max(0, dono.hp - dano);
       // A autoria dos golpes no falcão passa ao dono (quem derruba o Aventureiro pelo falcão leva o abate).

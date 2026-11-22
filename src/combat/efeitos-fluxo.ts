@@ -1,5 +1,7 @@
 import { prepararReservas, retirarVida } from './reserva-necromante';
+import { chaoAVista } from '../world/geografia';
 import { leituraDoAtivo } from './pets-estilos';
+import { feraAtivaDisponivel, petDe, presetDoPet } from './pets';
 import { noAr } from './movimento-classe';
 import { classeDe, extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
@@ -117,7 +119,8 @@ export function armarArmadilha(
   let c = mira ?? { x: dono.x, y: dono.y };
   // Marco 40 (13/11/2026, D-161): na célula que já tem armadilha, a nova vai na seguinte da linha (armadilhas em linha).
   if (ocupada(c.x, c.y)) c = { x: c.x + Math.sign(c.x - dono.x), y: c.y + Math.sign(c.y - dono.y) };
-  if (!passavel(ctx.fase, c.x, c.y) || ocupada(c.x, c.y)) return;
+  // Marco 53 (22/11/2026, D-203): nunca sob uma árvore, um rochedo ou uma peça do cenário (sumia embaixo do desenho).
+  if (!chaoAVista(ctx.fase, c.x, c.y) || ocupada(c.x, c.y)) return;
   // 22/11/2026: a armadilha de quadrado (`lado`) cobre a célula mirada e as vizinhas do lado de quem a arma, por onde o
   // inimigo que vem na direção dele vai passar (fica mais fácil acertar onde ele está ou estará).
   const lado = ef.lado ?? 1;
@@ -169,12 +172,23 @@ export function vizinhasLivres(estado: EstadoJogo, ctx: ContextoSimulacao, quem:
 }
 
 export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, ef: EfeitoCanonico, saida: EventoSimulacao[]): void {
-  const preset = ef.ref ? ctx.conteudo.presets.get(ef.ref) : undefined;
+  const reserva = ef.ref ? ctx.conteudo.presets.get(ef.ref) : undefined;
+  // D-204 (22/11/2026): a ultimate do Aventureiro traz cópias da fera ativa (com ela cansada, a criatura de reserva).
+  const copia = ef.copiaDoPet === true && !dono.invocacao && feraAtivaDisponivel(dono) ? ctx.conteudo.presets.get(presetDoPet(petDe(dono))) : undefined;
+  const preset = copia ?? reserva;
   if (!preset) return;
   for (let i = 0; i < Math.max(1, ef.valor); i++) {
     const mortoAtivo = ef.tipo === 'invocar_temporario' && (dono.classeId ?? dono.bolsa?.classeId) === 'necromante';
     if (mortoAtivo && contarInvocacoes(estado, dono.id) >= limiteDeInvocacoes(ctx, dono) - 1) return;
     const e = criarInimigo(preset, `v${estado.proximoId++}`, dono.x, dono.y, ctx.balance);
+    // A fera divide a vida do dono (o preset tem 1 de vida); a cópia tem a vida da criatura que substitui, no nível do
+    // dono e com a defesa dele, como a fera.
+    if (copia && reserva) {
+      e.hpMax = e.hp = criarInimigo(reserva, e.id, dono.x, dono.y, ctx.balance).hpMax;
+      e.nivel = dono.nivel;
+      e.defesa = dono.defesa;
+      e.autoAtaque = false;
+    }
     const p = preset.invocacao;
     if (p?.avatar) e.tipo = 'avatar';
     // Marco 28 (30/10/2026, D-127): aliado não bloqueia invocação, então a 1ª vizinha "livre" era a mesma para todas e as
@@ -192,6 +206,7 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
       if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
     }
     if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = !mortoAtivo;
+    if (e.invocacao && copia) e.invocacao.copiaDoPet = true;
     // Marco 39 (D-148): a força das invocações do estilo do dono (dano e vida), fixada ao invocar.
     const estiloInvoc = efeitosDeEstiloDe(ctx, dono).invoc;
     if (e.invocacao && estiloInvoc > 0) {

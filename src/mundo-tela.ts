@@ -35,6 +35,7 @@ import { criarRelogioDoMundo } from './ui/relogio-mundo';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
 import { criarCondutor } from './ui/condutor';
+import { criarEscolhaDeRenascer } from './ui/escolha-renascer';
 import { criarGuiaMundo, criarOrientacaoMundo, esquecerLapide, marcarLapide, type OrientacaoMundo } from './ui/orientacao-mundo';
 import { abrirPortalTemporario } from './ui/portal-mapa';
 import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
@@ -378,6 +379,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     mostrarAviso(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, texto, ms);
   };
   const idDoJogador = () => eu.entidadeId ?? 'p1';
+  const vilaSalvaAgora = (): string | null => ultimoLugar?.vilaSalva ?? vilaSalva;
   const estadoAtual = () => eu.previsto;
   const enviarAcao = (acao: AcaoDoMundo) => {
     eu.acaoDoMundo(acao);
@@ -552,6 +554,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   const c = cena;
   const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
   camada.querySelector('.camada-ui')?.append(faixa.elemento, relogio.elemento, social.elemento, guia.elemento);
+  // Marco 53 (22/11/2026, D-203): morto fora de dungeon, a escolha de onde renascer.
+  const nomeDaRegiao = (id: string | undefined) => reino.regioes.find((r) => r.id === id)?.nome ?? id ?? '';
+  const renascer = criarEscolhaDeRenascer(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, enviarAcao, () => ({
+    save: nomeDaRegiao(vilaSalvaAgora() ?? undefined), central: nomeDaRegiao(reino.inicio),
+  }));
   camada.querySelector('.cabecalho h1')?.remove();
   const mini = camada.querySelector<HTMLElement>('.minimapa');
   if (mini) {
@@ -574,14 +581,19 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {
       c.bus.emitir(ev.t, ev);
-      // Marco 44 (15/11/2026, D-178): na noite fechada não fica túmulo (objetoId vazio).
-      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId && !ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
-      else if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) {
-        // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
-        marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
-        avisar(t('mundo.tumulo'), 6000);
-      } else if (ev.t === 'tumuloAberto' && ev.id === eu.entidadeId) {
-        // Marco 53 (22/11/2026, D-203): recolheu o túmulo: a marca e a seta saem.
+      const meu = 'id' in ev && ev.id === eu.entidadeId;
+      if (ev.t === 'tumuloCriado' && meu) {
+        // Marco 53 (22/11/2026, D-203): a escolha de onde renascer.
+        renascer.abrir();
+        // Marco 44 (15/11/2026, D-178): na noite fechada não fica túmulo (objetoId vazio).
+        if (!ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
+        else {
+          // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
+          marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
+          avisar(t('mundo.tumulo'), 6000);
+        }
+      } else if (ev.t === 'tumuloAberto' && meu) {
+        // Marco 53 (D-203): recolheu o túmulo: a marca e a seta saem.
         esquecerLapide(orientacao);
       }
     }
@@ -631,7 +643,9 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     renderizar: (alpha) => {
       guia.atualizar(eu.previsto, agoraMs());
       const id = eu.entidadeId ?? idLocal;
-      condutor.atualizar(eu.previsto, eu.previsto ? buscarEntidade(eu.previsto, id) : undefined, agoraMs());
+      const euAgora = eu.previsto ? buscarEntidade(eu.previsto, id) : undefined;
+      condutor.atualizar(eu.previsto, euAgora, agoraMs());
+      renascer.atualizar(euAgora?.morto ?? false);
       const conectado = eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id));
       if (monitor.atualizar(agoraMs(), eu.rttMs, conectado)) avisar(t('rede.instavel'));
       c.quadro({

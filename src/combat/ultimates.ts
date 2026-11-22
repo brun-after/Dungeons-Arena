@@ -36,6 +36,11 @@ export interface Veiculo {
   etapasVezes?: number;
   /** As lanças dos mortos vêm junto de toda ultimate que fere. */
   lanca?: LancaDosMortos;
+  /**
+   * D-204 (22/11/2026): as criaturas viram cópias da fera ativa do dono (o Aventureiro), uma por criatura e pelo mesmo
+   * tempo; as `invocacoes` ficam para quando a fera da vez está cansada.
+   */
+  copiasDoPet?: boolean;
 }
 
 /** Marco 40 (D-160): o que o par dos dois estilos mais fortes junta na ultimate, gradual pela faixa do mais fraco. */
@@ -121,7 +126,9 @@ export function lerUltimates(json: unknown): UltimatesLidas {
       lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados'), junto: true };
     }
     const etapasVezes = o.etapasVezes === undefined ? undefined : l.numero(o, 'etapasVezes', { min: 1, max: 6, inteiro: true });
-    veiculos.set(classe, { ...(invocacoes && { invocacoes }), ...(etapas && { etapas }), ...(etapasVezes && { etapasVezes }), ...(lanca && { lanca }) });
+    const copiasDoPet = o.copiasDoPet === undefined ? false : l.booleano(o, 'copiasDoPet');
+    if (copiasDoPet && !invocacoes) l.erro(`veículo ${classe}: "copiasDoPet" precisa de "invocacoes"`);
+    veiculos.set(classe, { ...(invocacoes && { invocacoes }), ...(etapas && { etapas }), ...(etapasVezes && { etapasVezes }), ...(lanca && { lanca }), ...(copiasDoPet && { copiasDoPet }) });
   }
   const h = lerHabilidades({ versao: raiz.versao, habilidades: raiz.habilidades });
   for (const u of ultimates.values()) {

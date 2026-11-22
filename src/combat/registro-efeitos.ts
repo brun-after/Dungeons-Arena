@@ -131,6 +131,8 @@ export interface EfeitoCanonico {
   aliado?: EfeitoCanonico;
   /** 22/11/2026: na armadilha, o lado do quadrado que ela ocupa (células; sem ele, 1). */
   lado?: number;
+  /** D-204 (22/11/2026): na invocação da ultimate do Aventureiro, nascem cópias da fera ativa (`ref` fica de reserva). */
+  copiaDoPet?: boolean;
 }
 
 /** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */

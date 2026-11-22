@@ -174,6 +174,7 @@ export function sonsDoEvento(
       return [{ som: ev.tipo === 'ouro' ? 'moeda' : ev.tipo === 'orbe_hp' || ev.tipo === 'orbe_recurso' ? 'cura' : 'coleta', origemId: null }];
     case 'comprou':
     case 'vendeu':
+    case 'vendaDesfeita':
       return ev.id === idLocal ? [{ som: 'moeda', origemId: null }] : [];
     case 'bauAberto':
       return [{ som: 'coleta', origemId: ev.id }];

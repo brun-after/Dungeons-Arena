@@ -394,6 +394,31 @@ body.toque .faixa-controles {
   background: #5dade2;
 }
 
+/* Marco 53 (22/11/2026, D-203): o XP até o próximo nível, sempre à vista, com o nível e a % ao lado. */
+.barra.xp {
+  height: 5px;
+  overflow: visible;
+  position: relative;
+  margin-top: 1px;
+}
+
+.barra.xp .preenchimento {
+  background: linear-gradient(90deg, #b9892b, #f5d36b);
+  border-radius: 2px;
+}
+
+.barra.xp::after {
+  content: attr(data-pct);
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  color: #f5d36b;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+
 /* Marco 21 (23/10/2026, D-088): fúria do Guerreiro; cheia, pulsa (as curas dobram).
    Marco 22 (23/10/2026, D-089): a mesma barra serve à Mira firme do Arqueiro. */
 .barra.classe {
@@ -873,10 +898,20 @@ body.toque .log-combate.aberto {
 
 .botao-habilidade .tecla {
   position: absolute;
-  right: 4px;
+  right: 2px;
   bottom: 2px;
-  font-size: 0.65rem;
-  color: var(--texto-suave);
+  /* Marco 53 (22/11/2026, D-203): a tecla num selo dourado (era um número pequeno e apagado no canto). */
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: #f5d36b;
+  color: #1a1206;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: 0 1px 3px #000;
+  z-index: 1;
 }
 
 /* 07/11/2026 (D-136): as cargas prontas da skill (o Dardo funesto). */
@@ -1004,6 +1039,50 @@ body.toque .log-combate.aberto {
 .cartao-habilidade {
   flex-wrap: wrap;
   align-items: flex-start;
+}
+
+/* Marco 53 (22/11/2026, D-203): as cartas em grade, compactas; a aberta ocupa a linha inteira. */
+.conteudo-modal .lista-itens:has(> .cartao-habilidade) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 6px;
+}
+.cartao-habilidade.aberta {
+  grid-column: 1 / -1;
+}
+.cartao-habilidade .nome-item {
+  cursor: pointer;
+}
+.cartao-habilidade .abrir-carta {
+  margin-left: 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--borda);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--texto);
+  font-weight: 700;
+  cursor: pointer;
+}
+.cartao-habilidade.compacta {
+  padding: 6px 8px;
+}
+.cartao-habilidade.compacta .descricao-habilidade li:not(:first-child),
+.cartao-habilidade.compacta .historia-habilidade,
+.cartao-habilidade.compacta .marcos-habilidade,
+.cartao-habilidade.compacta .leituras-habilidade,
+.cartao-habilidade.compacta .receita-fusao,
+.cartao-habilidade.compacta .encaixe-runa,
+.cartao-habilidade.compacta .textos-item > .detalhe-item {
+  display: none;
+}
+.cartao-habilidade.compacta .descricao-habilidade {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  list-style: none;
+  padding-left: 0;
 }
 
 .cartao-habilidade .textos-item {
@@ -1961,16 +2040,41 @@ body:not(.toque) .minimapa:hover {
 .prompt-interacao {
   position: absolute;
   left: 50%;
-  bottom: calc(96px + var(--seguro-base));
+  bottom: calc(110px + var(--seguro-base));
   transform: translateX(-50%);
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: var(--painel);
-  border: 1px solid var(--borda);
-  color: var(--texto);
-  font-size: 14px;
+  /* Marco 53 (22/11/2026, D-203): o pergaminho, maior e claro, com a tecla num selo de lacre. */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px 8px 10px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f1e2bd 0%, #e2cc98 55%, #d4b97f 100%);
+  border: 2px solid #7a5a2e;
+  box-shadow: 0 0 0 1px #2a1c0c, 0 6px 18px rgba(0, 0, 0, 0.55), inset 0 0 12px rgba(122, 90, 46, 0.35);
+  color: #2b1d0d;
+  font-size: 16px;
+  font-weight: 700;
   pointer-events: none;
   white-space: nowrap;
+  animation: prompt-surge 220ms ease-out;
+}
+.prompt-interacao .tecla-prompt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d9534f, #8e1f1b);
+  border: 2px solid #5a120f;
+  color: #fff6e0;
+  font: 800 15px/1 sans-serif;
+  text-shadow: 0 1px 1px #000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+@keyframes prompt-surge {
+  from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 body.toque .prompt-interacao {
   bottom: calc(var(--altura-faixa) + 12px + var(--seguro-base));
@@ -2768,10 +2872,13 @@ body.toque .botao-habilidade.de-classe {
   font-size: 1.3rem;
   border-color: var(--cor-movimento, #9aa);
   color: var(--cor-movimento, #dde);
+  /* Marco 53 (22/11/2026, D-203): o fundo opaco (era o vidro de 10% dos outros botões e sumia no cenário). */
+  background: rgba(16, 14, 22, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 .botao-acao.movimento-classe[data-recarga='true'] {
-  opacity: 0.45;
+  opacity: 0.7;
 }
 
 /* D-173: a tecla e os segundos da recarga; no computador, os botões ficam no HUD, ao lado da ultimate. */
@@ -2781,10 +2888,18 @@ body.toque .botao-habilidade.de-classe {
 
 .movimento-classe .tecla {
   position: absolute;
-  right: 3px;
+  right: 1px;
   bottom: 1px;
-  font-size: 0.55rem;
-  color: var(--texto-suave);
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: #f5d36b;
+  color: #1a1206;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 1px 2px #000;
 }
 
 .movimento-classe .resta {
@@ -3213,6 +3328,33 @@ body.movimento-reduzido .cinematica-ultimate {
 .linha-mundo {
   padding: 4px 0;
   border-bottom: 1px solid var(--borda);
+}
+
+/* Marco 53 (22/11/2026, D-203): os botões das linhas (aceitar missão, guardar, tirar) têm sempre o mesmo tamanho,
+   por mais longo que seja o texto ao lado; o texto é que quebra a linha. */
+.linha-mundo > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.linha-mundo > button {
+  flex: 0 0 auto;
+  width: 9.5em;
+  min-height: 2.2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seletor-qtd {
+  flex: 0 0 auto;
+  width: 4.2em;
+  padding: 3px 4px;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--texto);
+  font: inherit;
 }
 
 .log-chat {
@@ -3713,3 +3855,112 @@ body:not(.toque) .botao-acao.centralizar.flutuante {
 @media (max-width: 480px) {
   .espaco-forja { min-width: 0; flex: 1 1 100%; }
 }
+
+/* Marco 53 (22/11/2026, D-203): na ficha, o inicial da classe apagado e os pontos do jogador em destaque. */
+.tabela-ficha .ponto-inicial {
+  color: #9a917f;
+}
+
+.tabela-ficha .ponto-meu {
+  color: #7fd3ff;
+  font-weight: 700;
+}
+
+/* Marco 53 (22/11/2026, D-203): o controle de grupo, claro: o selo no alto do centro e a borda pulsando na cor. */
+.alerta-controle {
+  position: absolute;
+  top: calc(18% + var(--seguro-topo));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px 10px 14px;
+  border-radius: 10px;
+  background: rgba(12, 8, 10, 0.88);
+  border: 2px solid var(--cor-controle, #f1c40f);
+  box-shadow: 0 0 22px var(--cor-controle, #f1c40f);
+  color: #fff;
+  pointer-events: none;
+  z-index: 6;
+  animation: controle-chega 180ms ease-out;
+}
+.alerta-controle-icone {
+  color: var(--cor-controle, #f1c40f);
+  animation: controle-gira 1.4s linear infinite;
+}
+.alerta-controle-textos {
+  display: flex;
+  flex-direction: column;
+}
+.alerta-controle strong {
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  color: var(--cor-controle, #f1c40f);
+}
+.alerta-controle span {
+  font-size: 0.85rem;
+}
+.borda-controle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: inset 0 0 70px 6px var(--cor-controle, #f1c40f);
+  animation: controle-pulsa 700ms ease-in-out infinite alternate;
+}
+@keyframes controle-chega {
+  from { opacity: 0; transform: translate(-50%, -10px) scale(1.15); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+@keyframes controle-gira {
+  to { transform: rotate(360deg); }
+}
+@keyframes controle-pulsa {
+  from { opacity: 0.35; }
+  to { opacity: 0.8; }
+}
+body.movimento-reduzido .alerta-controle,
+body.movimento-reduzido .alerta-controle-icone,
+body.movimento-reduzido .borda-controle {
+  animation: none;
+}
+
+/* Marco 53 (D-203): a tecla da ultimate e dos consumíveis no mesmo selo dourado das skills. */
+.botao-consumivel .tecla,
+.botao-ultimate .tecla {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: #f5d36b;
+  color: #1a1206;
+  font-weight: 800;
+  box-shadow: 0 1px 2px #000;
+}
+
+/* Marco 53 (22/11/2026, D-203): a escolha de onde renascer, abaixo do aviso da morte. */
+.escolha-renascer {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(12, 8, 10, 0.9);
+  border: 1px solid var(--borda);
+  z-index: 7;
+  pointer-events: auto;
+}
+.escolha-renascer .botao-menu[aria-pressed='true'] {
+  outline: 2px solid var(--destaque);
+}
+
+/* Marco 53 (22/11/2026, D-203): a aura do ícone do item na cor da raridade (a mesma do nome). */
+.icone-item.aura-incomum { box-shadow: 0 0 0 1px #2ecc71, 0 0 6px rgba(46, 204, 113, 0.55); }
+.icone-item.aura-raro { box-shadow: 0 0 0 1px #5dade2, 0 0 7px rgba(93, 173, 226, 0.65); }
+.icone-item.aura-epico { box-shadow: 0 0 0 1px #bb8fce, 0 0 8px rgba(187, 143, 206, 0.75); }
+.icone-item.aura-lendario { box-shadow: 0 0 0 1px #f39c12, 0 0 10px rgba(243, 156, 18, 0.85); }
+.icone-item.aura-ultima { box-shadow: 0 0 0 1px #ff5e7a, 0 0 12px rgba(255, 94, 122, 0.9); }

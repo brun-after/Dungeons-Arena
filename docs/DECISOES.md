@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.56 · **Data:** 22/11/2026
+**Versão:** 1.58 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.58 (22/11/2026)**: D-204: a caça do pet do Aventureiro solta na troca de fera e no Chamado (o X); as ultimates dele trazem cópias da fera da vez no lugar das criaturas, e com uma cópia viva o dano na fera chega ao dono a 1/3.
+> - **1.57 (22/11/2026)**: D-203: o marco 53, o conforto (controles, mapa, avisos, consertos e regras pequenas pedidos depois de jogar).
 > - **1.56 (22/11/2026)**: D-202, adendo: as Ruínas do Norte (quem está longe da vista não é desenhado, então o atlas da criatura só sobe à placa quando ela chega perto; os shaders do modelo 3D novo compilam em paralelo).
 > - **1.55 (22/11/2026)**: D-202: a troca de região sem a travada do cliente (o palco 3D e o do Pixi passam de cena em cena, o chão é pintado num trabalhador, o three.js sem ler o log dos shaders fora do desenvolvimento) e a medida `&troca=` no `?bench=mundo`.
 > - **1.54 (22/11/2026)**: D-201: as regiões sempre abertas no servidor foram tentadas e revertidas (o jogo piorou).
@@ -6594,3 +6596,105 @@ Resultado no build de produção (a mesma rota, duas rodadas, contra o build de 
 
 As criaturas perto da tela continuam aparecendo (conferido por foto). O atlas grande agora sobe quando a criatura
 chega perto: o primeiro dragão que aparece ainda pode dar um quadro mais lento, uma vez.
+
+## D-203 — O conforto: controles, mapa, avisos e consertos (22/11/2026)
+
+**Pedido.** Uma lista de ajustes de quem jogou o Mundo: o clique para andar, o mapa, a câmera, os avisos, os menus,
+alguns consertos e regras pequenas. O marco 53 os junta num PR.
+
+**Consertos.**
+- **A seta da lápide** some quando o jogador recolhe o próprio túmulo (`tumuloAberto`) e quando o prazo vence
+  (`conferirLapide`, a cada passada da faixa do guia). Antes, a rota seguia apontando para o túmulo vazio.
+- **O vendedor da noite ao amanhecer.** Quem estava comprando dele ficava congelado: a loja sumia e a janela não tinha o
+  que fechar. `processarInteracoes` fecha a janela da loja que saiu do mundo ou que fechou pela noite.
+- **Parado muito tempo desconectava.** O servidor não expulsa quem está parado, mas a reserva de quem caía era de 30 s,
+  e o notebook que dorme ou a aba suspensa passam disso fácil. No Mundo, a reserva vira `mundo.reconexaoS` (300 s), e o
+  SDK tenta reconectar durante ela toda. Se a sala acabar assim mesmo, o cliente volta sozinho pela vila salva.
+- **O nome do livro raro** (a skill que ele ensina) aparece também na venda, no banco e no caixote
+  (`ui/nome-do-item.ts`), conhecida ou não.
+- **O clique para andar.** O mouse passava a guiar depois de 120 ms segurado, menos que um clique comum, e soltar
+  parava o personagem. Agora são 260 ms, e soltar antes de 400 ms sem arrastar continua sendo ir até o ponto.
+
+**Controles.**
+- **A câmera olha para onde o mouse aponta**: um desvio suave de até 22% da vista, fora de uma zona central, também
+  segurando o clique para andar. O desvio só entra no desenho e nas conversões de tela (`Camera.vx`/`vy`); a janela
+  morta não o vê. Desliga nas Configurações.
+- **O zoom da roda e da pinça do touchpad** é proporcional ao giro (`zoomDaRoda`). A roda comum dá os mesmos ±0,1 de
+  antes. A pinça do touchpad (a roda com Ctrl, dezenas de eventos pequenos) somava ±0,1 a cada evento. A sensibilidade
+  (0,25 a 2) fica nas Configurações e vale também para a pinça dos dedos.
+- **O condutor** (`ui/condutor.ts`): clicar no mapa do lugar leva o personagem andando até o ponto, e o botão Seguir no
+  painel do grupo o leva atrás do companheiro. O `irPara` da simulação vai até 60 passos; o condutor acha o caminho
+  inteiro no cliente e manda um trecho de 40 de cada vez. Qualquer movimento do jogador o desliga. O servidor só vê
+  `irPara` comuns.
+- **A câmera na borda.** No modo janela, o cursor encostado na borda da tela (28 px) desliza a câmera para aquele
+  lado, mais rápido quanto mais perto da beirada, como o arrasto à mão (a câmera fica solta, e o C a recentra). Não
+  vale com o botão segurado (que guia o personagem) nem com o cursor sobre o HUD. Desliga nas Configurações.
+- **Clicar na loja abre a loja** (`ui/clique-objeto.ts`), e também o NPC, o baú, a pedra e a fogueira. Longe, o
+  personagem anda até lá e abre ao chegar. Clicar ao lado da loja continua sendo andar: valem a célula dela e a da
+  frente, que o desenho cobre.
+
+**Mapa.** O minimapa ampliado se arrasta, e o clique sem arrastar abre o mapa grande, como antes. Os dois mapas mostram
+os marcos do lugar (`ui/marcos-do-mapa.ts`): portões nas passagens, com o nome de onde levam se já foi descoberto;
+casinhas nas casas; os serviços da vila (taverna, banco, mercado, ferraria, botica) pela cor do telhado e por um
+sinal; a boca das dungeons; as pedras de save e de portal; as fogueiras e o vendedor da noite. Tudo vem da fase e do
+estado.
+
+**Avisos e menus.**
+- O seu personagem tem uma aura dourada no chão e a barra de vida com moldura dourada.
+- O aviso de interação vira um pergaminho, com a tecla num selo.
+- **O controle de grupo** (`ui/alerta-controle.ts`): preso, atordoado, congelado ou confuso, o jogador vê um selo no
+  alto da tela com o nome do estado, o que ele impede e os segundos que faltam, e a borda da tela pulsa na cor dele.
+  Vale qualquer efeito negativo que bloqueie andar ou agir (o registro dos efeitos), sem lista à mão.
+- A barra de XP fica no HUD, com o nível e a porcentagem.
+- As cartas de skill ficam compactas e em grade (o nome, o grau, a 1ª linha e as teclas); o `+` as abre.
+- Na ficha, o valor inicial da classe e os pontos do jogador vão em colunas separadas.
+- Vender, guardar e tirar escolhem a quantidade da pilha (`vender` ganhou `qtd`; o banco já aceitava).
+- **A venda só fecha ao sair da loja.** Cada venda fica na janela da loja aberta (`Interacao.vendas`), e o comando
+  `desfazerVenda` a desfaz: o ouro volta e o item também, com o mesmo `ref`. Pede o ouro recebido e espaço na mochila.
+  A mesma pilha vendida em seguida soma na mesma linha. Fechada a loja (pelo jogador, pela morte, pela loja que some),
+  a lista vai junto e o negócio está feito.
+- Os botões das linhas (aceitar missão, guardar) têm sempre a mesma largura. Os botões de movimento da classe ficam
+  opacos. As teclas das skills, da ultimate e dos consumíveis vão em selos dourados.
+- **A receita da forja** diz para quem serve (o slot e, na arma, a família e a classe que a usa; a de outra classe
+  também serve, com parte da passiva), a raridade mínima da peça, o que a forja faz e onde a receita cai (as criaturas,
+  as regiões e dungeons onde elas vivem, a dimensão, os chefes). O ícone de todo item tem a aura da cor da raridade.
+  O drop continua o mesmo (pela criatura, pela dimensão e pelos chefes, D-197): o lugar de procurar a receita é onde
+  vivem as criaturas que a guardam, e agora a receita diz qual é.
+
+**Regras.**
+- **A compreensão** sobe com o acerto em inimigo de qualquer nível (antes, só até 10 abaixo do personagem). Ela já
+  chegava em tempo real ao cliente; parecia parada porque os inimigos fracos não contavam.
+- **À noite, o vendedor da noite e o comerciante andarilho cobram mais** (`vilaNoite.sobretaxa`, +50%): são o que fica
+  aberto. A loja mostra o preço pelo relógio do cliente, como o aviso de loja fechada.
+- **Onde renascer** (`mundo/renascer.ts`): morto fora de dungeon, o jogador escolhe o acampamento, a vila salva ou a
+  vila central. Sem escolha, fica como era (o acampamento, se houver, e senão a vila salva).
+- **Nada cai sob árvore, rochedo, arbusto ou peça do cenário** (`chaoAVista`): o item vai para a célula livre mais
+  perto, a até duas células. A armadilha não é posta nessas células.
+- **O recuo do Arqueiro** foge do inimigo mais perto que o persegue (ou que ele tem como alvo), a até
+  `movimentoClasse.fugaRaio` células. Quem fugia de costas para o inimigo era levado pelo "para trás" para cima dele.
+
+**Fora.** De dia, o andarilho tem o preço de sempre. O condutor não atravessa regiões: seguindo alguém que trocou de
+região, o personagem espera parado até ele voltar.
+
+## D-204 — A caça que solta e as cópias da fera (22/11/2026)
+
+**Problema.** A marca da caça ficava no dono (D-166): a fera que chegava na troca seguia mordendo a presa, e o
+Aventureiro que saía da luta perdia vida pelo repasse dos golpes que ela levava. As ultimates do Aventureiro com
+invocação traziam as criaturas da classe (lobo espiritual, coruja, javali), sem ligação com a fera da vez.
+
+**Decisão.**
+- A troca de fera (o Shift e a troca sozinha do cansaço) e o Chamado (o X desmontado) soltam a caça
+  (`soltarACaca`, combat/pets.ts). O lobo e o urso que perseguiam largam o caminho e voltam ao dono; o ataque do dono
+  volta a marcar, como sempre.
+- O veículo do Aventureiro em `ultimates.json` tem `copiasDoPet`: cada criatura da ultimate vira uma cópia da fera
+  ativa (o mesmo preset e o comportamento `companheiro`, com `invocacao.copiaDoPet`), pelo mesmo tempo da criatura
+  que substitui. A cópia caça a marca do dono, segue o dono, o falcão voa como o falcão e o urso provoca. Ela tem vida
+  própria (a da criatura substituída), o nível e a defesa do dono, é atingida pelo que atinge a fera (o falcão, só por
+  projéteis) e não gasta o fôlego da fera. Com a fera da vez cansada, vêm as criaturas de antes.
+- Enquanto uma cópia está viva, o repasse do dano na fera ao dono é dividido por
+  `ajustesClasses.aventureiro.copiasDoPet.repasseDivisor` (3), no golpe e no dano periódico. O cansaço da fera
+  segue o repasse de sempre, e o dano montado não muda.
+
+**Observação.** A ultimate inicial do Aventureiro (Mergulho + Grito do falcão, Execução presa) não invoca. As cópias
+aparecem nas famílias com invocação (Matilha, Exército em fúria, Carcereiros, Guardiões, Muralha viva, Legião), uma
+por criatura.

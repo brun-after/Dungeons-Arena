@@ -232,6 +232,8 @@ export const textosHabilidades = {
   'habilidades.aba': 'Habilidades',
   'habilidades.pontos': 'Pontos de habilidade: {n}',
   'habilidades.conhecidas': 'Conhecidas',
+  'habilidades.abrirCarta': 'Ver tudo de {nome}',
+  'habilidades.fecharCarta': 'Recolher {nome}',
   'habilidades.aprendiveis': 'Para aprender',
   'habilidades.passivas': 'Passivas',
   'habilidades.barra': 'Teclas 1–6 (1 e 2 de classe; R: ultimate)',

@@ -5,6 +5,7 @@
 // Marco 9A (14/10/2026): ouro (vai para a bolsa), loot com quantidade e os interagíveis (baú e loja),
 // que não são coletados ao pisar: abrem pelo comando `interagir` (world/interacao.ts).
 
+import { chaoAVista } from './geografia';
 import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armarBuff, EFEITOS_OFENSIVOS } from '../progression/buffs';
 import { aplicarEfeito } from '../combat/efeitos';
@@ -134,12 +135,22 @@ const VIZINHANCA: readonly (readonly [number, number])[] = [
   [-1, -1],
 ];
 
-/** A célula pode já ter um objeto: tenta ela e as vizinhas passáveis, numa ordem fixa. */
+/**
+ * A célula pode já ter um objeto: tenta ela e as vizinhas passáveis, numa ordem fixa. Marco 53 (22/11/2026, D-203):
+ * nunca sob uma árvore, um rochedo, um arbusto ou uma peça do cenário (o item sumia embaixo dela); sem lugar nas
+ * vizinhas, tenta o anel seguinte.
+ */
 export function largarPerto(ctx: ContextoSimulacao, x0: number, y0: number, largar: (x: number, y: number) => boolean): boolean {
   for (const [dx, dy] of VIZINHANCA) {
     const x = x0 + dx;
     const y = y0 + dy;
-    if (passavel(ctx.fase, x, y) && largar(x, y)) return true;
+    if (chaoAVista(ctx.fase, x, y) && largar(x, y)) return true;
+  }
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== 2) continue;
+      if (chaoAVista(ctx.fase, x0 + dx, y0 + dy) && largar(x0 + dx, y0 + dy)) return true;
+    }
   }
   return false;
 }

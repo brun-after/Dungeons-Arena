@@ -25,6 +25,22 @@ const CACHE_RETANGULO_MS = 100;
  * D-203): eram 120 ms, menos que um clique comum; o clique virava "guiar" e, ao soltar, o personagem parava.
  */
 export const GUIAR_APOS_MS = 260;
+/**
+ * Marco 53 (22/11/2026, D-203): no modo janela, o cursor encostado na borda da tela desliza a câmera para aquele lado
+ * (antes, só arrastando com o botão do meio ou o direito). A faixa da borda (px) e a velocidade máxima (px de tela por
+ * segundo), que cresce quanto mais perto da beirada.
+ */
+export const BORDA_PX = 28;
+export const BORDA_VELOCIDADE = 900;
+
+/** Marco 53 (D-203): quanto a câmera anda num eixo (px de tela por segundo, com sinal) com o cursor em `p` de `lado`. */
+export function velocidadeDaBorda(p: number, lado: number): number {
+  if (lado <= BORDA_PX * 3) return 0;
+  if (p < BORDA_PX) return -BORDA_VELOCIDADE * (1 - Math.max(0, p) / BORDA_PX);
+  if (p > lado - BORDA_PX) return BORDA_VELOCIDADE * (1 - Math.max(0, lado - p) / BORDA_PX);
+  return 0;
+}
+
 /** Marco 53 (D-203): soltar até aqui depois de apertar, sem arrastar, ainda é um clique: segue até o ponto. */
 const CLIQUE_ATE_MS = 400;
 /** D-115: com o cursor a menos disto do personagem (px de tela), ele para. */
@@ -46,6 +62,8 @@ export interface OpcoesPonteiro {
   sensibilidade?: () => number;
   /** Marco 53 (D-203): a câmera olha para onde o mouse aponta (Configurações). */
   cameraNoMouse?: () => boolean;
+  /** Marco 53 (D-203): o cursor na borda desliza a câmera (no modo janela; Configurações). */
+  cameraNaBorda?: () => boolean;
   /** A célula tocada (para achar quem está nela) e o ponto contínuo exato. `false`: não andou (selecionou um alvo). */
   aoIrPara: (celula: Celula, ponto: Celula) => boolean;
   /** D-115: o mouse guiando como o joystick (sem isto, o mouse se comporta como o toque). */
@@ -99,6 +117,9 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   let pinca = { distancia: 1, zoom: 1, meioX: 0, meioY: 0 };
   let mouse: MouseGuiando | null = null;
   let rumo: Rumo = PARADO;
+  /** Marco 53 (D-203): o cursor do mouse sobre o mapa (null fora dele) e o último quadro, para a borda. */
+  let mouseNaTela: { x: number; y: number } | null = null;
+  let quadroAntes = -1;
 
   let retangulo = alvo.getBoundingClientRect();
   let retanguloEm = 0;
@@ -186,6 +207,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
     const p = local(ev);
     if (ev.pointerType === 'mouse') {
       cursor = p;
+      mouseNaTela = p;
       // Marco 53 (D-203): a câmera olha para onde o mouse aponta (no computador, com o mouse guiando).
       if (guiar && (opcoes.cameraNoMouse?.() ?? true)) camera.mirar({ x: (p.x / Math.max(1, retangulo.width)) * 2 - 1, y: (p.y / Math.max(1, retangulo.height)) * 2 - 1 });
     }
@@ -261,7 +283,10 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   };
 
   const aoSairDaTela = (ev: PointerEvent) => {
-    if (ev.pointerType === 'mouse' && !mouse) camera.mirar(null);
+    if (ev.pointerType !== 'mouse') return;
+    // Marco 53 (D-203): o cursor sobre o HUD ou fora da janela não desliza a câmera.
+    mouseNaTela = null;
+    if (!mouse) camera.mirar(null);
   };
   alvo.addEventListener('pointerleave', aoSairDaTela);
   alvo.addEventListener('pointerdown', aoBaixar);
@@ -271,6 +296,14 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   alvo.addEventListener('wheel', aoRolar, { passive: false });
   return {
     atualizar: (agoraMs) => {
+      const dt = quadroAntes < 0 ? 0 : Math.min(0.1, (agoraMs - quadroAntes) / 1000);
+      quadroAntes = agoraMs;
+      // Marco 53 (D-203): a borda desliza a câmera (não com o botão segurado, que guia o personagem).
+      if (guiar && mouseNaTela && !mouse && dt > 0 && camera.modo === 'janela' && (opcoes.cameraNaBorda?.() ?? true)) {
+        const vx = velocidadeDaBorda(mouseNaTela.x, retangulo.width);
+        const vy = velocidadeDaBorda(mouseNaTela.y, retangulo.height);
+        if (vx !== 0 || vy !== 0) camera.arrastar(-vx * dt, -vy * dt);
+      }
       if (!mouse || mouse.semGuiar) return;
       if (!mouse.guiando && agoraMs - mouse.desdeMs >= GUIAR_APOS_MS) mouse.guiando = true;
       if (mouse.guiando) guiarAgora();

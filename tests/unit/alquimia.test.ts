@@ -130,7 +130,7 @@ describe('a transmutação (D-196)', () => {
     expect(montarFusao(ctx, c.b, { partes: ['f__feixe_gelo__nova_raio', 'projetil_fogo'], runas: [], material: null })).not.toBeTypeOf('string');
   });
 
-  it('o acerto no inimigo ensina a skill (2% na comum), e o inimigo fraco não conta', () => {
+  it('o acerto no inimigo ensina a skill (2% na comum), de qualquer nível (marco 53, D-203)', () => {
     const c = mago({ projetil_fogo: 1 }, 0);
     c.j.nivel = 20;
     const forte = criarInimigo(obter(ctx.conteudo.presets.get('goblin')), 'g', 5, 3, ctx.balance);
@@ -145,7 +145,7 @@ describe('a transmutação (D-196)', () => {
     aplicarImpacto(c.estado, ctx, forte, { acaoId: 1, fonte, hab, indice: 0 }, c.saida);
     aplicarImpacto(c.estado, ctx, fraco, { acaoId: 2, fonte, hab, indice: 0 }, c.saida);
     aplicarImpacto(c.estado, ctx, forte, { acaoId: 3, fonte, hab, indice: 1 }, c.saida);
-    expect(compreensaoDe(c.b, 'projetil_fogo')).toBe(2);
+    expect(compreensaoDe(c.b, 'projetil_fogo')).toBe(4);
   });
 });
 

@@ -12,6 +12,8 @@ import type { IdentidadeClasse } from './barra-classe';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { criarPainelEstatisticas, estatisticasDoJogador } from './estatisticas';
+import { xpParaProximo } from '../progression/nivel';
+import { AlertaDeControle } from './alerta-controle';
 
 const MAX_LINHAS_LOG = 6;
 
@@ -41,6 +43,8 @@ export class Hud {
   private readonly mana = barra('mana');
   /** Marco 21 (D-088): a fúria do Guerreiro; marco 22 (D-089): também a Mira firme do Arqueiro. Escondida nas outras. */
   private readonly classe = barra('classe');
+  /** Marco 53 (22/11/2026, D-203): o XP até o próximo nível, sempre à vista (antes, só na Ficha). */
+  private readonly xp = barra('xp');
   /** Marco 22 (D-089): o elemento encarnado do Mago. */
   private readonly encarnacao = document.createElement('span');
   private readonly tema = document.createElement('span');
@@ -56,6 +60,8 @@ export class Hud {
   private ultimo = '';
   /** 15/11/2026: o dano, a velocidade de ataque e a de movimento no canto inferior esquerdo (só no computador). */
   private readonly estatisticas = criarPainelEstatisticas();
+  /** Marco 53 (22/11/2026, D-203): o selo grande do controle de grupo. */
+  private readonly controle: AlertaDeControle;
   private proximaEstatistica = 0;
 
   constructor(
@@ -77,7 +83,9 @@ export class Hud {
     barras.className = 'barras';
     this.classe.raiz.hidden = true;
     this.classe.raiz.setAttribute('aria-valuemax', '100');
-    barras.append(this.vida.raiz, this.mana.raiz, this.classe.raiz);
+    this.xp.raiz.hidden = true;
+    this.xp.raiz.setAttribute('aria-valuemin', '0');
+    barras.append(this.vida.raiz, this.mana.raiz, this.classe.raiz, this.xp.raiz);
     this.encarnacao.className = 'chip-encarnacao';
     this.encarnacao.hidden = true;
     this.efeitos.className = 'chips-efeito';
@@ -118,6 +126,7 @@ export class Hud {
 
     this.estatisticas.elemento.hidden = true;
     raiz.append(this.log, this.morte, this.estatisticas.elemento);
+    this.controle = new AlertaDeControle(raiz);
   }
   /** Marco 16: desmonta o que prende a página (o ouvinte de teclado dos chips de efeito). */
   destruir(): void {
@@ -129,14 +138,16 @@ export class Hud {
   atualizar(jogador: Entidade | undefined, tick = 0, identidade: IdentidadeClasse = { barra: null, encarnacao: null }): void {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
+    this.controle.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
     this.atualizarEstatisticas(jogador, tick);
     const { barra: bc, encarnacao, encarnacaoS = 0, invocacoes: inv = null } = identidade;
     const pct = bc ? Math.round(bc.fracao * 100) : -1;
     const textoInv = inv ? `${inv.vivas}/${inv.limite}${inv.extras > 0 ? ` +${inv.extras}` : ''}` : '';
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}/${textoInv}`;
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}/${textoInv}/${jogador.nivel}/${jogador.xp}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
+    this.atualizarXp(jogador);
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
     this.vida.preenchimento.style.width = `${fracaoVida * 100}%`;
     this.vida.raiz.dataset.faixa = classeDoHp(fracaoVida);
@@ -173,6 +184,23 @@ export class Hud {
       this.invocacoes.dataset.cheio = String(inv.vivas >= inv.limite);
     }
     this.morte.hidden = !jogador.morto;
+  }
+
+  /** Marco 53 (D-203): a barra fina do XP, com o número no título e no leitor de tela. No nível máximo, some. */
+  private atualizarXp(jogador: Entidade): void {
+    const regras = this.mundo?.ctx.balance.xp;
+    const temXp = !!regras && !!jogador.bolsa && jogador.nivel < regras.nivelMax;
+    this.xp.raiz.hidden = !temXp;
+    if (!temXp || !regras) return;
+    const proximo = xpParaProximo(jogador.nivel, regras);
+    const pct = Math.min(100, Math.floor((jogador.xp / Math.max(1, proximo)) * 100));
+    this.xp.preenchimento.style.width = `${pct}%`;
+    const texto = t('hud.xp', { nivel: jogador.nivel, xp: jogador.xp, proximo, pct });
+    this.xp.raiz.title = texto;
+    this.xp.raiz.setAttribute('aria-valuemax', String(proximo));
+    this.xp.raiz.setAttribute('aria-valuenow', String(jogador.xp));
+    this.xp.raiz.setAttribute('aria-label', texto);
+    this.xp.raiz.dataset.pct = `${t('hud.xpCurto', { nivel: jogador.nivel, pct })}`;
   }
 
   /** O painel de estatísticas: a conta (a ficha derivada) roda umas 5 vezes por segundo, não a cada quadro. */

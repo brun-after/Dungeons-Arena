@@ -166,6 +166,8 @@ export function lerComando(v: unknown): Comando | null {
       if (!id(v.invId)) return null;
       if (v.qtd === undefined) return { t: 'vender', invId: v.invId };
       return inteiro(v.qtd) && v.qtd > 0 && v.qtd <= 1000 ? { t: 'vender', invId: v.invId, qtd: v.qtd } : null;
+    case 'desfazerVenda':
+      return inteiro(v.indice) && v.indice >= 0 && v.indice < 1000 ? { t: 'desfazerVenda', indice: v.indice } : null;
     case 'fecharLoja':
       return { t: 'fecharLoja' };
     case 'dispensar':

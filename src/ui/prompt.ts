@@ -72,8 +72,19 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
       if (agoraMs - ultimo < INTERVALO_MS) return;
       ultimo = agoraMs;
       const novo = texto(estado);
-      if (el.textContent !== novo) el.textContent = novo;
       el.hidden = novo === '';
+      if (el.dataset.texto === novo) return;
+      el.dataset.texto = novo;
+      // Marco 53 (22/11/2026, D-203): a tecla vira um selo destacado à esquerda do pergaminho (antes, só texto).
+      const k = tecla();
+      if (novo.startsWith(`${k}: `)) {
+        const selo = document.createElement('kbd');
+        selo.className = 'tecla-prompt';
+        selo.textContent = k;
+        const resto = document.createElement('span');
+        resto.textContent = novo.slice(k.length + 2);
+        el.replaceChildren(selo, resto);
+      } else el.textContent = novo;
     },
   };
 }

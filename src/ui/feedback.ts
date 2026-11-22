@@ -316,6 +316,9 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('vendeu', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.vendeu', { item: nomeItem(ev.itemId), preco: ev.preco }));
   });
+  bus.on('vendaDesfeita', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.vendaDesfeita', { item: nomeItem(ev.itemId), preco: ev.preco }));
+  });
   bus.on('lojaFechada', (ev) => {
     if (ev.id !== idLocal) return;
     hud.registrar(t(ev.perigo ? 'log.lojaFechadaPerigo' : 'log.lojaFechada'));

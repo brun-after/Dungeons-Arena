@@ -37,6 +37,8 @@ export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
   escolhendo: string | null;
   essenciaInvId?: string | null;
+  /** Marco 53 (22/11/2026, D-203): as cartas abertas (as outras ficam compactas, e cabem mais na tela). */
+  expandidas?: Set<string>;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -139,7 +141,9 @@ export function desenharHabilidades(
   const cartao = (id: string, conhecida: { rank: number; caminhos: string[] } | null): HTMLLIElement | null => {
     const h = conhecida ? compilada(id) : resolverHabilidade(ctx, id);
     if (!h) return null;
-    const li = el('li', 'linha-item cartao-habilidade');
+    // Marco 53 (D-203): a carta compacta mostra o nome, o grau, a 1ª linha e as teclas; o clique no nome a abre.
+    const aberta = ui.expandidas?.has(id) ?? false;
+    const li = el('li', `linha-item cartao-habilidade${aberta ? ' aberta' : ' compacta'}`);
     li.dataset.habilidade = id;
     const textos = el('div', 'textos-item');
     const cor = h.elemento ? ctx.conteudo.elementos.get(h.elemento)?.cor : undefined;
@@ -152,6 +156,20 @@ export function desenharHabilidades(
     const grau = el('span', `grau-habilidade grau-${h.grau}`, t('habilidades.grau', { grau: h.grau }));
     grau.title = t('habilidades.grauDica', { grau: h.grau, min: Math.round((ticksDeEstudo(ctx, j, id) * DT_MS) / 60000) });
     titulo.append(' ', grau);
+    const abrir = el('button', 'abrir-carta', aberta ? '−' : '+');
+    abrir.type = 'button';
+    abrir.dataset.chave = `abrir-${id}`;
+    abrir.setAttribute('aria-expanded', String(aberta));
+    abrir.setAttribute('aria-label', t(aberta ? 'habilidades.fecharCarta' : 'habilidades.abrirCarta', { nome: h.nome }));
+    const alternar = () => {
+      const abertas = (ui.expandidas ??= new Set());
+      if (abertas.has(id)) abertas.delete(id);
+      else abertas.add(id);
+      redesenhar();
+    };
+    abrir.addEventListener('click', alternar);
+    titulo.addEventListener('click', (ev) => { if (ev.target === titulo) alternar(); });
+    titulo.append(abrir);
     textos.append(titulo);
     // D-175 (15/11/2026): a história, o que se vê e a receita (o botão +) de toda skill.
     const historia = blocoDaHistoria(ctx, j, id, tick);

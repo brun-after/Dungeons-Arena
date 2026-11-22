@@ -40,7 +40,7 @@ import { aplicarAtualizacao } from '../progression/atualizacao-39';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { definirPassiva } from '../progression/passivas-gerais';
-import { comprar, vender } from '../progression/loja';
+import { comprar, desfazerVenda, vender } from '../progression/loja';
 import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
@@ -266,6 +266,9 @@ function aplicarComandos(
         break;
       case 'vender':
         vender(estado, ctx, ator, cmd.invId, saida, cmd.qtd);
+        break;
+      case 'desfazerVenda':
+        desfazerVenda(estado, ctx, ator, cmd.indice, saida);
         break;
       case 'fecharLoja':
         fecharLoja(estado, ctx, ator, saida);

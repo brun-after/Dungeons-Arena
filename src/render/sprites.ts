@@ -1,7 +1,7 @@
 import { tintaDaInvocacao } from './cores-necromancia';
 import { pintarInvocacao } from './tom-dos-mortos';
 import { alfaDoCorpo, sumidoPara } from './movimento-visual';
-import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
+import { desenharDestaqueProprio } from './destaque-proprio'; import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
 // Marcadores das entidades: modelo de criatura (ou a imagem do jogador), anel de equipe sob os pés, barra
@@ -693,7 +693,7 @@ export class CamadaEntidades {
   private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecao: 'auto' | 'travado' | null): void {
     const g = m.aneis.clear();
     const k = m.achatamento;
-    desenharPorteDoNivel(g, e, m.escala, k, m.topo, this.o.reduzido() ? 0 : performance.now()); // D-135: o grau do nível.
+    desenharPorteDoNivel(g, e, m.escala, k, m.topo, this.o.reduzido() ? 0 : performance.now()); if (e.id === this.o.idLocal && !e.morto) desenharDestaqueProprio(g, RAIO * 1.15 * m.escala, k, this.o.reduzido() ? 0 : performance.now()); // D-135 o grau do nível; D-203 a aura do jogador.
     const anel = (r: number) => g.ellipse(0, 0, r, r * k);
     // Ajuste de 15/10/2026 (D-065): automático, o anel amarelo fino; travado, laranja-avermelhado e grosso, com as
     // quatro marcas da mira.
@@ -748,7 +748,7 @@ export class CamadaEntidades {
 
     // Marco 31 (D-130): a moldura escura com borda de metal gasto e um brilho no alto da barra (volume).
     const fracaoHp = e.hp / Math.max(1, e.hpMax);
-    g.rect(x - 1, y - 1, largura + 2, proprio ? 9 : 6).fill({ color: 0x0b0a0d, alpha: 0.85 }).stroke({ width: 1, color: 0x5a5046, alpha: 0.7 });
+    g.rect(x - 1, y - 1, largura + 2, proprio ? 9 : 6).fill({ color: 0x0b0a0d, alpha: 0.85 }).stroke(proprio ? { width: 1.5, color: 0xf5c542, alpha: 0.95 } : { width: 1, color: 0x5a5046, alpha: 0.7 }); // D-203: a sua, dourada
     g.rect(x, y, largura * fracaoHp, 4).fill(corDoHp(fracaoHp));
     g.rect(x, y, largura * fracaoHp, 1).fill({ color: 0xffffff, alpha: 0.25 });
     if (proprio) {

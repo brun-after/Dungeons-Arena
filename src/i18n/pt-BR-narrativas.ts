@@ -195,6 +195,8 @@ export const textosNarrativas = {
   'receita.ultimateElementos': 'Elementos do par: {a} (faixa {fa}) e {b} (faixa {fb}). Cada um entra com o estado dele; dois diferentes reagem e somam dano.',
   'receita.ultimateFusao': 'Fusão dos dois estilos mais fortes ({a} e {b}), na faixa {faixa}: {texto}',
   'receita.ultimateVeiculoInvoca': 'Veículo da classe: as invocações são as criaturas do {classe}.',
+  // D-204 (22/11/2026): no Aventureiro, cópias da fera ativa.
+  'receita.ultimateVeiculoCopias': 'Veículo da classe: cada invocação é uma cópia da sua fera da vez, pelo mesmo tempo. Enquanto houver cópia viva, o dano na fera chega a você a 1/3.',
   'receita.ultimateVeiculoEtapa': 'Veículo da classe: no lugar das invocações, o {classe} dispara uma etapa própria.',
   'receita.ultimateLanca': 'Veículo da classe: os mortos lançam as lanças junto de toda ultimate que fere.',
   'receita.ressonancia': 'Ressonância ao alcance: uma, ainda não descoberta, liga este estilo a este elemento.',

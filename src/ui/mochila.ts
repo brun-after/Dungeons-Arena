@@ -22,6 +22,7 @@ import { criarPainelEstatisticas, danoDoBasico, estatisticasDoJogador } from './
 import { criarTelaAtualizacao } from './tela-atualizacao';
 import { painelDoVinculo } from './radar-vinculo';
 import { nomeDaEntrada } from './nome-do-item';
+import { linhasDaReceita, moldeDaReceita } from './forja/texto-receita';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
@@ -85,7 +86,8 @@ function botao(texto: string, chave: string, aoClicar: () => void, classe = 'bot
  */
 export function molduraDoItem(item: Item | undefined): string {
   if (!item) return 'icone-item';
-  const classes = ['icone-item'];
+  // Marco 53 (D-203): a aura do ícone na cor da raridade.
+  const classes = ['icone-item', `aura-${item.raridade}`];
   if (item.forma) classes.push(`forma-${item.forma}`);
   if (item.elemento) classes.push(`elemento-${item.elemento}`);
   return classes.join(' ');
@@ -194,7 +196,9 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // Marco 26 (28/10/2026, D-116): o livro que ensina skill de classe leva a runa da classe.
     if (opcoes.item) comRuna(nome, classeDoItem(ctx.conteudo, opcoes.item.id));
     textos.append(nome);
-    const resumo = opcoes.item ? resumoDoItem(opcoes.item, armaDoItem(ctx, opcoes.item), o.jogador()?.bolsa?.classeId, ctx.balance) : '';
+    // Marco 53 (22/11/2026, D-203): a receita da forja diz para quem serve, a raridade e onde cai.
+    const molde = opcoes.item ? moldeDaReceita(ctx, opcoes.item.id) : null;
+    const resumo = molde ? linhasDaReceita(ctx, molde, o.jogador()?.bolsa?.classeId).join(' · ') : opcoes.item ? resumoDoItem(opcoes.item, armaDoItem(ctx, opcoes.item), o.jogador()?.bolsa?.classeId, ctx.balance) : '';
     const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);
@@ -362,7 +366,9 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const dicaAtual = dica;
     const tabela = el('table', 'tabela-ficha');
     const cab = el('tr');
-    for (const chave of ['ficha.atributo', 'ficha.base', 'ficha.bonus', 'ficha.efetivo'] as const) cab.append(el('th', undefined, t(chave)));
+    // Marco 53 (22/11/2026, D-203): o inicial da classe e os pontos que o jogador pôs, em colunas separadas.
+    for (const chave of ['ficha.atributo', 'ficha.inicial', 'ficha.seusPontos', 'ficha.bonus', 'ficha.efetivo'] as const) cab.append(el('th', undefined, t(chave)));
+    const inicialDaClasse = ctx.conteudo.classes.get(bolsa.classeId)?.atributos;
     cab.append(el('th'));
     tabela.append(cab);
     for (const nome of NOMES_ATRIBUTOS) {
@@ -374,9 +380,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const rotulo = nomeDoAtributo(nome, bolsa.classeId);
       const nomeAtributo = el('td', 'nome-atributo', rotulo);
       nomeAtributo.append(' ', dicaAtual.botao(nome, () => linhasDaDica(nome, efetiva.atributos, ctx, j, efetiva.hpMax, efetiva.manaMax), rotulo));
+      const inicial = Math.min(base, inicialDaClasse?.[nome] ?? base);
+      const meus = base - inicial;
       tr.append(
         nomeAtributo,
-        el('td', undefined, String(base)),
+        el('td', 'ponto-inicial', String(inicial)),
+        el('td', meus > 0 ? 'ponto-meu' : undefined, meus > 0 ? `+${meus}` : '—'),
         el('td', diff > 0 ? 'bonus-positivo' : diff < 0 ? 'bonus-negativo' : undefined, diff === 0 ? '—' : `${diff > 0 ? '+' : ''}${diff}`),
         el('td', 'efetivo', String(valor)),
       );

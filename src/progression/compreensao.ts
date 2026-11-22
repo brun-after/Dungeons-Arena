@@ -1,5 +1,5 @@
 // Marco 50 (21/11/2026, D-196): a compreensão de uma skill, o uso que ela pede antes de entrar numa fórmula. Cada
-// lançamento que acerta um inimigo de nível igual ou maior que o do personagem menos a faixa (10) soma 2% numa skill
+// lançamento que acerta um inimigo (marco 53, D-203: de qualquer nível; antes, até 10 abaixo) soma 2% numa skill
 // comum e 1% numa fusão (cerca de 50 e 100 acertos). Só o primeiro alvo de cada golpe conta, e só a skill conhecida
 // que pode entrar numa fórmula. Em ticks de combate, sem relógio de parede.
 
@@ -14,7 +14,8 @@ export function compreender(ctx: ContextoSimulacao, atacante: Entidade | undefin
   const bolsa = atacante?.bolsa;
   if (!atacante || !bolsa || indice !== 0 || atacante === alvo) return;
   const r = ctx.balance.alquimia.compreensao;
-  if (alvo.nivel < atacante.nivel - r.faixaNivel || !podeFerir(atacante, alvo, ctx.modo)) return;
+  // Marco 53 (22/11/2026, D-203): qualquer inimigo conta, de qualquer nível (antes, só até 10 níveis abaixo).
+  if (!podeFerir(atacante, alvo, ctx.modo)) return;
   const atual = bolsa.compreensao?.[hab.id] ?? 0;
   if (atual >= 100 || !bolsa.conhecidas.some((c) => c.id === hab.id) || !fundivel(ctx, hab.id)) return;
   (bolsa.compreensao ??= {})[hab.id] = Math.min(100, atual + (ehFusao(hab.id) ? r.fusaoPct : r.comumPct));

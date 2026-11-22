@@ -19,7 +19,7 @@ import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade, type EstadoFera } from '../entities/entidade';
 import { emCombate } from '../progression/buffs';
 import { leituraDoPet } from './pets-estilos';
-import { classeDoAventureiro, feraDisponivel, PETS, petDe, type Pet } from './pets';
+import { classeDoAventureiro, feraDisponivel, PETS, petDe, soltarACaca, type Pet } from './pets';
 
 const feras = (ctx: ContextoSimulacao) => ctx.balance.ajustesClasses.aventureiro.feras;
 
@@ -147,6 +147,8 @@ export function proximaDisponivel(e: Entidade, de: Pet): Pet | null {
 export function trocarPara(estado: EstadoJogo, e: Entidade, pet: Pet, saida: EventoSimulacao[]): void {
   if (e.bolsa) e.bolsa.pet = pet;
   e.petAtivo = pet;
+  // D-204 (22/11/2026): a fera que chega não herda a caça (seguia mordendo depois que o dono saía da luta).
+  soltarACaca(e);
   for (const c of estado.entidades) {
     if (!vivo(c) || c.invocacao?.donoId !== e.id || !c.invocacao.companheiro) continue;
     c.invocacao.companheiro = false;

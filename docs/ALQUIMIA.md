@@ -1,8 +1,9 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.3 · **Data:** 21/11/2026
+**Versão:** 1.4 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.4 (22/11/2026)**: marco 53 (D-203). A compreensão conta o acerto em inimigo de qualquer nível.
 > - **1.3 (21/11/2026)**: D-198, adendo. Reaprender de graça e na hora, e a chance que sobe a cada tentativa.
 > - **1.2 (21/11/2026)**: marco 52 (D-198). Os níveis de raridade da fusão e a fórmula refeita.
 > - **1.1 (21/11/2026)**: marco 51 (D-197). A forja: engastes, receitas como loot e a mesa da forja.
@@ -14,7 +15,7 @@ Alquimia (artefato). As decisões ficam em [DECISOES.md](DECISOES.md) (D-192 a D
 
 ## Como o jogador funde
 
-1. **Usar a skill.** Cada acerto num inimigo de nível igual ou maior que o seu − 10 dá compreensão: +2% numa skill
+1. **Usar a skill.** Cada acerto num inimigo, de qualquer nível, dá compreensão: +2% numa skill
    comum e +1% numa fusão, contando só o primeiro alvo do golpe. A essência da família acelera em 25%, uma vez por
    skill. A carta da skill mostra o sigilo da compreensão.
 2. **Montar a mistura.** Na aba Alquimia da mochila, arraste ou toque os orbes até os vértices do círculo, na ordem

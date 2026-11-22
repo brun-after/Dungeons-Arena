@@ -24,7 +24,7 @@ import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { tocarEmVolta, tocarPonta, pontaDaAfinidade } from './movimento-extras';
 import { leituraDoPet } from './pets-estilos';
-import { petDoCompanheiro, type Pet } from './pets';
+import { petDoCompanheiro, soltarACaca, type Pet } from './pets';
 import { construirEfeito } from './registro-efeitos';
 
 const feras = (ctx: ContextoSimulacao) => ctx.balance.ajustesClasses.aventureiro.feras;
@@ -37,6 +37,8 @@ export function feraEmCampo(estado: EstadoJogo, dono: Entidade): Entidade | unde
 
 /** O Chamado: a fera vem para a célula livre ao lado do dono mais perto dela. False: não há fera ou lugar. */
 export function chamarFera(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, saida: EventoSimulacao[]): boolean {
+  // D-204 (22/11/2026): o Chamado também solta a caça (a fera e as cópias param de perseguir).
+  soltarACaca(dono);
   const fera = feraEmCampo(estado, dono);
   if (!fera) return false;
   const de = celulaOcupada(fera);

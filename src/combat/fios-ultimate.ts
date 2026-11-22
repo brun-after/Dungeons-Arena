@@ -98,7 +98,8 @@ function vestir(h: Habilidade, classe: string | undefined, fontes: FontesDosFios
   const runa = h.runa ?? 'fisico';
   const estado = runa === 'fisico' ? construirEfeito('atolado', { pct: 40, duracaoMs: 2000 }) : fontes.elementos.get(runa)?.estado;
   const efeitos = h.efeitos.flatMap((e): EfeitoCanonico[] => {
-    if (e.tipo === 'invocar_temporario' && criatura) return [{ ...e, ref: criatura }];
+    // D-204 (22/11/2026): no Aventureiro, cópias da fera ativa (a criatura fica de reserva, com a fera cansada).
+    if (e.tipo === 'invocar_temporario' && criatura) return [{ ...e, ref: criatura, ...(veiculo.copiasDoPet && { copiaDoPet: true }) }];
     if (e.tipo === 'invocar_temporario' && etapa) return etapasNoLugar(e, etapa, veiculo.etapasVezes ?? 1);
     if (e.tipo === 'campo_veneno' && !e.interno && estado) return [{ ...e, interno: { ...estado, interno: null } }];
     return [e];

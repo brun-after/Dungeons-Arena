@@ -209,6 +209,25 @@ function rumoDe(e: Entidade, dx?: number, dy?: number, alvo?: Celula): { dx: num
 }
 const RUMOS: Record<NonNullable<Entidade['olhando']>, [number, number]> = { N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SO: [-1, 1], O: [-1, 0], NO: [-1, -1] };
 
+/**
+ * Marco 53 (D-203): o rumo para longe do inimigo mais perto que persegue `e` (ou que `e` tem como alvo), a até
+ * `movimentoClasse.fugaRaio` células; null sem ninguém (o recuo usa o "para trás" de sempre).
+ */
+function rumoDeFuga(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): { dx: number; dy: number } | null {
+  let perto: Entidade | null = null;
+  let menor = ctx.balance.movimentoClasse.fugaRaio + 1;
+  for (const o of estado.entidades) {
+    if (o === e || !vivo(o) || !podeFerir(e, o, ctx.modo)) continue;
+    if (o.ia?.alvoId !== e.id && e.alvoSelecionado !== o.id) continue;
+    const d = Math.hypot(o.x - e.x, o.y - e.y);
+    if (d < menor && d > 0) {
+      menor = d;
+      perto = o;
+    }
+  }
+  return perto ? { dx: (e.x - perto.x) / menor, dy: (e.y - perto.y) / menor } : null;
+}
+
 /** A célula a `n` células no rumo. */
 const aFrente = (e: Entidade, r: { dx: number; dy: number }, n: number) => ({ x: Math.round(e.x + r.dx * n), y: Math.round(e.y + r.dy * n) });
 const cabeAli = (ctx: ContextoSimulacao, x: number, y: number) => passavel(ctx.fase, x, y) && corpoCabe(ctx.fase, x, y, ctx.balance.movimento.raioCorpo);
@@ -363,7 +382,9 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     case 'avanco':
     case 'recuo':
     case 'teleporte': {
-      const rumo = m.tipo === 'recuo' ? { dx: -r.dx, dy: -r.dy } : r;
+      // Marco 53 (22/11/2026, D-203): perseguido, o recuo foge de quem persegue (fugindo de costas para o inimigo, o
+      // "para trás" do rumo levava para cima dele).
+      const rumo = m.tipo === 'recuo' ? (rumoDeFuga(estado, ctx, e) ?? { dx: -r.dx, dy: -r.dy }) : r;
       // D-168: a Arremetida vai no rumo do ponto mirado.
       const destino = m.tipo === 'teleporte' && alvo ? noAlcance(e, alvo, alcance) : aFrente(e, rumo, alcance);
       if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }

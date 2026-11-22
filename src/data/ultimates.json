@@ -258,7 +258,8 @@
         "ataque": "lobo_espiritual",
         "cura": "coruja_ancia",
         "guarda": "javali_espiritual"
-      }
+      },
+      "copiasDoPet": true
     }
   },
   "fusoes": [

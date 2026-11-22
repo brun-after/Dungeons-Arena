@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.62 · **Data:** 21/11/2026
+**Versão do documento:** 3.63 · **Data:** 22/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.63 (22/11/2026)**: marco 53: o conforto (clique e mapa para andar, câmera no mouse, zoom do touchpad, seguir o companheiro, avisos, cartas de skill, receitas da forja, renascer com escolha e consertos) (D-203).
 > - **3.62 (21/11/2026)**: marco 52: reaprender a skill consumida de graça e na hora, e a chance que sobe a cada tentativa (D-198).
 > - **3.61 (21/11/2026)**: marco 52: os níveis de raridade da fusão (3º, 2º e 1º), com a chance pela Inteligência e a fórmula refeita (D-198).
 > - **3.60 (21/11/2026)**: marco 51: a forja por receita, com engastes de 1 a 3 materiais em armas e equipamento e a mesa da forja (D-197).
@@ -382,6 +383,27 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 53 — o conforto (22/11/2026)
+
+Ajustes pedidos por quem jogou o Mundo.
+- **Andar.** Um clique só leva até o ponto. Clicar no mapa do lugar leva andando até lá, e o botão Seguir no painel do
+  grupo anda atrás do companheiro. Clicar numa loja, num NPC ou num baú abre.
+- **Câmera e zoom.** A câmera olha para onde o mouse aponta e, no modo janela, desliza com o cursor na borda da tela. O zoom da pinça do touchpad ficou suave, e a
+  sensibilidade está nas Configurações.
+- **Mapa.** O minimapa ampliado se arrasta. Portões, casas, os serviços da vila, as pedras e as fogueiras aparecem
+  nos dois mapas.
+- **Ver o que acontece.** Uma aura dourada marca o seu personagem. O aviso de interação virou um pergaminho, e o
+  controle de grupo aparece grande no alto da tela. A barra de XP fica no HUD.
+- **Menus.** As cartas de skill ficam compactas. A ficha separa o inicial da classe dos seus pontos. Vender e guardar
+  escolhem a quantidade, a venda pode ser desfeita até você sair da loja, e a receita da forja diz para quem serve, a raridade e onde cai.
+- **Regras.** A compreensão sobe com inimigos de qualquer nível. À noite, o vendedor da noite e o andarilho cobram
+  50% a mais. Quem morre escolhe onde renascer. Nada cai embaixo de árvore, e o recuo do Arqueiro foge de quem o
+  persegue.
+- **Consertos.** A seta da lápide some. Quem compra do vendedor da noite não trava ao amanhecer. Ficar parado não
+  derruba mais o personagem.
+
+Detalhes em D-203.
 
 ### Marco 52 — a raridade das fusões (21/11/2026)
 

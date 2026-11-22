@@ -6,11 +6,20 @@ import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { criarJogador } from '../../src/entities/fabrica';
 import { lerLugar, montarLugar } from '../../src/mundo/lugares';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
-import { conferirVilaANoite, REF_NOTURNO } from '../../src/mundo/vila-noite';
-import { vender } from '../../src/progression/loja';
+import { conferirVilaANoite, fatorDaNoite, REF_NOTURNO } from '../../src/mundo/vila-noite';
+import { desfazerVenda, vender } from '../../src/progression/loja';
 import { conferirLapide, criarOrientacaoMundo, esquecerLapide, marcarLapide } from '../../src/ui/orientacao-mundo';
-import { processarInteracoes } from '../../src/world/interacao';
-import { CONTEUDO } from '../apoio/fases';
+import { fecharLoja, processarInteracoes } from '../../src/world/interacao';
+import { CONTEUDO, faseDeTexto } from '../apoio/fases';
+import type { Comando } from '../../src/core/comandos';
+import { BALANCE_PADRAO } from '../../src/core/contexto';
+import { criarEstado } from '../../src/core/estado';
+import type { FichaDoMundo } from '../../src/mundo/ficha-mundo';
+import { ondeRenascer } from '../../src/mundo/renascer';
+import { velocidadeDaBorda, zoomDaRoda } from '../../src/input/ponteiro';
+import { celulaLivrePerto, criarCondutor } from '../../src/ui/condutor';
+import { objetoClicado } from '../../src/ui/clique-objeto';
+import { novoObjeto } from '../../src/world/objeto-novo';
 
 function vila(noite: number) {
   const reino = CONTEUDO.reinos.get('reino_central');
@@ -79,5 +88,108 @@ describe('marco 53: conforto (D-203)', () => {
     guia.definir({ lugar: 'regiao:y', nome: 'outro' });
     esquecerLapide(guia);
     expect(guia.destino?.nome).toBe('outro');
+  });
+});
+
+describe('marco 53: o condutor, o clique, o renascer, a noite e a roda (D-203)', () => {
+  it('o condutor manda trechos de irPara até o ponto e desliga quando o jogador anda', () => {
+    const fase = faseDeTexto(Array.from({ length: 120 }, () => '.'.repeat(120)));
+    const cmds: Comando[] = [];
+    const c = criarCondutor(() => fase, (cmd) => cmds.push(cmd));
+    const classe = CONTEUDO.classes.get('guerreiro');
+    if (!classe) throw new Error('classe');
+    const estado = criarEstado({ semente: 1, faseId: fase.id });
+    const eu = criarJogador(classe, 'p1', 5, 5, BALANCE_PADRAO);
+    estado.entidades.push(eu);
+    c.conduzir({ tipo: 'ponto', x: 100, y: 5 });
+    c.atualizar(estado, eu, 0);
+    const primeiro = cmds.at(-1);
+    expect(primeiro).toMatchObject({ t: 'irPara', y: 5 });
+    expect(primeiro && 'x' in primeiro ? primeiro.x : 0).toBeLessThanOrEqual(5 + 40);
+    c.comandoDoJogador({ t: 'mover', dir: 'N' });
+    expect(c.atual()).toBeNull();
+  });
+
+  it('o ponto marcado na árvore vai para a célula livre mais perto', () => {
+    const fase = faseDeTexto(['....', '.#..', '....']);
+    expect(celulaLivrePerto(fase, 1, 1)).not.toEqual({ x: 1, y: 1 });
+    expect(celulaLivrePerto(fase, 0, 0)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('o clique acha a loja na célula dela ou na da frente, não ao lado', () => {
+    const estado = criarEstado({ semente: 1, faseId: 'x' });
+    estado.objetos.push(novoObjeto('l1', 'loja', 10, 10, { ref: 'ferreiro' }));
+    expect(objetoClicado(estado, { x: 10, y: 10 })?.objetoId).toBe('l1');
+    expect(objetoClicado(estado, { x: 9, y: 9 })?.objetoId).toBe('l1');
+    expect(objetoClicado(estado, { x: 11, y: 10 })).toBeNull();
+  });
+
+  it('renasce onde o jogador escolheu (sem escolha, a vila salva)', () => {
+    const ficha = { vilaSalva: 'vila_b' } as FichaDoMundo;
+    const reino = { inicio: 'vila_do_centro' };
+    expect(ondeRenascer(ficha, undefined, reino, 0).regiao).toBe('vila_b');
+    expect(ondeRenascer(ficha, 'central', reino, 0).regiao).toBe('vila_do_centro');
+    expect(ondeRenascer(ficha, 'save', reino, 0).regiao).toBe('vila_b');
+    expect(ondeRenascer(ficha, 'acampamento', reino, 0).regiao).toBe('vila_b');
+  });
+
+  it('à noite, o vendedor da noite e o andarilho cobram mais; de dia e nas outras lojas, não', () => {
+    const { ctx } = vila(1);
+    const pct = ctx.balance.mundo.vilaNoite.sobretaxa.pct;
+    expect(fatorDaNoite(ctx, { tipo: 'loja', ref: REF_NOTURNO })).toBe(1 + pct / 100);
+    expect(fatorDaNoite(ctx, { tipo: 'loja', ref: 'errante' })).toBe(1 + pct / 100);
+    expect(fatorDaNoite(ctx, { tipo: 'loja', ref: 'ferreiro' })).toBe(1);
+    expect(fatorDaNoite(ctx, { tipo: 'loja', ref: REF_NOTURNO }, 0)).toBe(1);
+  });
+
+  it('a roda comum dá os mesmos 0,1 de antes; a pinça do touchpad (Ctrl, passos pequenos) vai devagar', () => {
+    expect(zoomDaRoda(1, { deltaY: -100, deltaMode: 0, ctrlKey: false })).toBeCloseTo(Math.exp(0.1));
+    // Vinte eventos de 2 px de pinça: antes, +2 de zoom (0,1 cada); agora, uns 27%.
+    let z = 1;
+    for (let i = 0; i < 20; i++) z = zoomDaRoda(z, { deltaY: -2, deltaMode: 0, ctrlKey: true });
+    expect(z).toBeGreaterThan(1.1);
+    expect(z).toBeLessThan(1.4);
+    expect(zoomDaRoda(1, { deltaY: -100, deltaMode: 0, ctrlKey: false }, 0.5)).toBeLessThan(zoomDaRoda(1, { deltaY: -100, deltaMode: 0, ctrlKey: false }));
+  });
+});
+
+describe('marco 53: a venda desfazível e a câmera na borda (D-203)', () => {
+  it('a venda se desfaz enquanto a loja está aberta; fechada, está feita', () => {
+    const { ctx, estado, regiao } = vila(1);
+    conferirVilaANoite(estado, ctx, regiao);
+    const vendedor = estado.objetos.find((o) => o.ref === REF_NOTURNO);
+    const classe = CONTEUDO.classes.get('guerreiro');
+    if (!vendedor || !classe) throw new Error('vendedor');
+    const eu = criarJogador(classe, 'p1', vendedor.x, vendedor.y + 1, ctx.balance);
+    estado.entidades.push(eu);
+    const saida: EventoSimulacao[] = [];
+    eu.interacao = { tipo: 'loja', objetoId: vendedor.objetoId, ateTick: Number.MAX_SAFE_INTEGER };
+    const bolsa = eu.bolsa;
+    if (!bolsa) throw new Error('bolsa');
+    bolsa.mochila = [{ invId: 'x1', itemId: 'lenha', qtd: 5, ref: null }];
+    const antes = bolsa.ouro;
+    vender(estado, ctx, eu, 'x1', saida, 2);
+    vender(estado, ctx, eu, 'x1', saida, 1);
+    expect(eu.interacao.vendas).toHaveLength(1);
+    expect(eu.interacao.vendas?.[0]?.qtd).toBe(3);
+    desfazerVenda(estado, ctx, eu, 0, saida);
+    expect(bolsa.ouro).toBe(antes);
+    expect(bolsa.mochila.reduce((s, i) => s + (i.itemId === 'lenha' ? i.qtd : 0), 0)).toBe(5);
+    expect(saida.some((e) => e.t === 'vendaDesfeita')).toBe(true);
+    // Sem o ouro da venda, não desfaz.
+    vender(estado, ctx, eu, bolsa.mochila[0]?.invId ?? '', saida, 1);
+    bolsa.ouro = 0;
+    desfazerVenda(estado, ctx, eu, 0, saida);
+    expect(eu.interacao.vendas).toHaveLength(1);
+    // A loja fechada leva a lista junto: o negócio está feito.
+    fecharLoja(estado, ctx, eu, saida);
+    expect(eu.interacao).toBeNull();
+  });
+
+  it('a câmera desliza só com o cursor na faixa da borda, mais rápido perto da beirada', () => {
+    expect(velocidadeDaBorda(500, 1000)).toBe(0);
+    expect(velocidadeDaBorda(0, 1000)).toBeLessThan(velocidadeDaBorda(20, 1000));
+    expect(velocidadeDaBorda(20, 1000)).toBeLessThan(0);
+    expect(velocidadeDaBorda(995, 1000)).toBeGreaterThan(0);
   });
 });
