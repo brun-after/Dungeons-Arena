@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.53 · **Data:** 22/11/2026
+**Versão:** 1.54 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.54 (22/11/2026)**: D-201: as regiões do Mundo ficam com a sala aberta no servidor o tempo todo (o canal 1, que dorme vazia em vez de fechar), e as masmorras e os covis também são montados na subida.
 > - **1.53 (22/11/2026)**: D-134: a skin do arqueiro vira Muse Elf (voa em vez de andar, as asas batem, mais baixa e de formas femininas). D-200: as armadilhas do núcleo Armadilha (a skill comum inicial do Arqueiro) ocupam um quadrado de 4 células.
 > - **1.52 (21/11/2026)**: D-134: a quarta skin, a Muse Elf do arqueiro (então Valquíria Glacial) (armadura de prata e ouro, elmo de asas, asas de gelo, capa de pelo e o arco glacial).
 > - **1.51 (21/11/2026)**: D-199: no celular, a qualidade automática não cai mais para o mínimo (sem efeitos de skill); abaixo do baixo, aperta a economia (meia resolução e metade das partículas, depois 30 fps). O palco 3D dos personagens no toque desenha até 1,5× e a ~30 quadros por segundo. O computador não muda.
@@ -6498,3 +6499,31 @@ células, para ficar mais fácil acertar o lugar onde o inimigo está ou estará
 - **Tela:** o círculo de conjuração fica no meio do quadrado, do tamanho dele, com a borda das células à mostra.
 
 **Consequências.** O save e a rede não mudam de formato (`lado` é opcional). O dano e a duração não mudam.
+
+## D-201 — As regiões do Mundo sempre abertas no servidor (22/11/2026)
+
+**Pedido.** Deixar todos os mapas prontos no servidor o tempo todo, para diminuir as travadas.
+
+**Antes.** Desde o D-144, o servidor monta o molde das 24 regiões ao subir. A sala de cada uma só abria na primeira
+entrada (ou no aquecimento da passagem, D-169) e fechava depois de 120 s vazia. Na volta, a sala era aberta de novo.
+As masmorras e os covis montavam o molde na primeira entrada.
+
+**Decisão.**
+- **A sala permanente.** Ao subir, depois de o servidor escutar, cada região abre o canal 1, um lugar por vez a cada
+  250 ms. Essa sala nunca expira. As outras regras não mudam: o canal 2 em diante (a região cheia), as masmorras e os
+  covis fecham vazios como antes. A regra fica no coordenador (`salaPermanente`): região compartilhada, canal 1, com o
+  servidor mantendo as regiões. Não vem das opções de quem entra.
+- **A sala vazia dorme.** Medido no computador de desenvolvimento, as 24 regiões acordadas e vazias custam ~7,7 ms por
+  tick, quase um núcleo inteiro. Dormindo, o processo fica em ~4%. Por isso a sala permanente vazia há 120 s para de
+  simular (`dormindo` em `sala-base.ts`) e acorda quando alguém entra. Os 120 s acordada deixam o tick tirar quem saiu
+  e gravar a ficha. A sala recém-aberta, sem ninguém ainda, dorme no primeiro segundo. A hora do Mundo vem do relógio
+  (D-178), então a noite segue certa quando a sala acorda. Os monstros ficam onde estavam.
+- **Todos os moldes na subida.** As 78 masmorras e covis entram no aquecimento depois das regiões (~5 MB e 0,3 s no
+  total; as regiões são ~17 MB e ~10 s).
+
+**Custo.** Cerca de 27 MB a mais de estado, as 24 salas no `/salas` e no `/saude` e o tick de quem joga como antes.
+A cota de salas (`MAX_SALAS`) já não conta as do Mundo (D-128).
+
+**O que isto não resolve.** O desenho do mapa é feito no navegador: o chão assado, as texturas e os sprites (D-169).
+Assar o chão no servidor e mandar imagens pesaria na rede e no disco mais do que ganha, então fica de fora. A sala
+pronta tira a espera da criação da sala e o primeiro tick dela, não a montagem da cena no aparelho.
