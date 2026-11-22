@@ -41,7 +41,7 @@ import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { definirPassiva } from '../progression/passivas-gerais';
 import { comprar, desfazerVenda, vender } from '../progression/loja';
-import { soltarItem } from '../progression/soltar-item';
+import { mochilaFechada, soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarIrPara, rumoDe } from '../world/movimento';
@@ -257,6 +257,9 @@ function aplicarComandos(
       // Marco 9A (14/10/2026): baú, loja e ordenação da mochila.
       case 'abrirMenu':
         usarRefugio(estado, ctx, ator, saida);
+        break;
+      case 'fecharMochila':
+        mochilaFechada(estado, ctx, ator.id);
         break;
       case 'interagir':
         interagir(estado, ctx, ator, saida);

@@ -158,6 +158,8 @@ export function lerComando(v: unknown): Comando | null {
       return { t: 'interagir' };
     case 'abrirMenu':
       return { t: 'abrirMenu' };
+    case 'fecharMochila':
+      return { t: 'fecharMochila' };
     // Marco 9A: a arena não tem economia (sem bolsa), mas o protocolo aceita a forma e a simulação recusa.
     case 'comprar':
       return id(v.itemId) ? { t: 'comprar', itemId: v.itemId } : null;

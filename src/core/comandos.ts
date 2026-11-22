@@ -33,6 +33,8 @@ export type Comando =
   | { t: 'interagir' }
   /** Ajuste de 16/10/2026 (D-067): abriu a mochila (gasta a carga de refúgio, se houver). */
   | { t: 'abrirMenu' }
+  /** Marco 53 (D-203): a mochila fechou; o que o jogador soltou nela fica recolhível em 5 s. */
+  | { t: 'fecharMochila' }
   /** Marco 9A (14/10/2026): loja (com a janela aberta) e ordenação manual da mochila. */
   | { t: 'comprar'; itemId: string }
   | { t: 'vender'; invId: string; qtd?: number }
@@ -96,6 +98,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'distribuirPonto',
   'interagir',
   'abrirMenu',
+  'fecharMochila',
   'comprar',
   'vender',
   'desfazerVenda',

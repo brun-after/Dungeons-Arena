@@ -167,6 +167,11 @@ export interface ModoDeJogo {
    */
   xpNoChao?: boolean;
   /**
+   * Marco 53 (22/11/2026, D-203): false tira da tela o registro lateral de acontecimentos (o Mundo); só o importante
+   * aparece, em destaque, no mesmo canto. Ausente = o registro de sempre.
+   */
+  registroNaTela?: boolean;
+  /**
    * Marco 30 (D-129): o loot do lugar em % (o ouro e a chance de item); o Mundo põe o do perigo da região. Ausente =
    * 100.
    */
@@ -328,6 +333,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.dropsDeRenascido === undefined ? {} : { dropsDeRenascido: l.booleano(o, 'dropsDeRenascido') }),
     ...(o.fadigaDeXpPorFase === undefined ? {} : { fadigaDeXpPorFase: l.booleano(o, 'fadigaDeXpPorFase') }),
     ...(o.xpNoChao === undefined ? {} : { xpNoChao: l.booleano(o, 'xpNoChao') }),
+    ...(o.registroNaTela === undefined ? {} : { registroNaTela: l.booleano(o, 'registroNaTela') }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

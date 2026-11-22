@@ -149,6 +149,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       o.aoAbrir();
       desenhar();
     },
+    // Marco 53 (22/11/2026, D-203): o que se soltou aqui só fica recolhível 5 s depois de fechar.
+    aoFechar: () => { emitir({ t: 'fecharMochila' }); },
   });
   // A tecla da mochila (`I`, ou a das Configurações, D-187) fecha de dentro do modal (a entrada de jogo fica bloqueada
   // enquanto ele está aberto).

@@ -134,6 +134,12 @@ export interface ObjetoNoMundo {
   ref: string | null;
   /** Quem soltou precisa sair da célula antes de recolher; aliados podem pegar imediatamente. */
   aguardaSaidaDe?: EntidadeId;
+  /**
+   * Marco 53 (22/11/2026, D-203): quem soltou o item não o recolhe até este tick: 5 s depois de fechar a mochila (o
+   * comando `fecharMochila`), ou o teto se a mochila nunca fechar. Os outros pegam na hora.
+   */
+  soltoPor?: EntidadeId;
+  soltoAteTick?: number;
   /** Marco 26 (29/10/2026, D-122): tick em que o drop caiu (só os largados em jogo; o prazo no chão conta daqui). */
   largadoTick?: number;
   /** Marco 30 (30/10/2026, D-129): o render não desenha (a porta da estrutura escondida do Mundo; o prompt mostra). */

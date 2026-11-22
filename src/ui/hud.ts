@@ -15,6 +15,9 @@ import { criarPainelEstatisticas, estatisticasDoJogador } from './estatisticas';
 import { xpParaProximo } from '../progression/nivel';
 import { AlertaDeControle } from './alerta-controle';
 
+/** Marco 53 (D-203): os destaques no canto do registro (quantos e por quanto tempo). */
+const MAX_DESTAQUES = 4;
+const DESTAQUE_MS = 5000;
 const MAX_LINHAS_LOG = 6;
 
 export function classeDoHp(fracao: number): 'alto' | 'medio' | 'baixo' {
@@ -63,6 +66,9 @@ export class Hud {
   /** Marco 53 (22/11/2026, D-203): o selo grande do controle de grupo. */
   private readonly controle: AlertaDeControle;
   private proximaEstatistica = 0;
+  /** Marco 53 (D-203): o modo não põe o registro na tela; os destaques (o importante, por alguns segundos) ficam. */
+  private readonly semRegistro: boolean;
+  private readonly destaques = document.createElement('ol');
 
   constructor(
     raiz: HTMLElement,
@@ -100,6 +106,11 @@ export class Hud {
 
     this.log = document.createElement('ol');
     this.log.className = 'log-combate';
+    // Marco 53 (22/11/2026, D-203): sem o registro na tela (o Mundo), o importante vai para os destaques.
+    this.semRegistro = mundo?.ctx.modo.registroNaTela === false;
+    this.log.hidden = this.semRegistro;
+    this.destaques.className = 'destaques-hud';
+    this.destaques.setAttribute('aria-live', 'polite');
     this.log.setAttribute('aria-live', 'polite');
     this.log.setAttribute('aria-label', t('hud.log'));
 
@@ -125,7 +136,8 @@ export class Hud {
     this.morte.append(titulo, detalhe);
 
     this.estatisticas.elemento.hidden = true;
-    raiz.append(this.log, this.morte, this.estatisticas.elemento);
+    if (this.semRegistro) this.botaoLog.hidden = true;
+    raiz.append(this.log, this.destaques, this.morte, this.estatisticas.elemento);
     this.controle = new AlertaDeControle(raiz);
   }
   /** Marco 16: desmonta o que prende a página (o ouvinte de teclado dos chips de efeito). */
@@ -191,7 +203,7 @@ export class Hud {
     const regras = this.mundo?.ctx.balance.xp;
     const temXp = !!regras && !!jogador.bolsa && jogador.nivel < regras.nivelMax;
     this.xp.raiz.hidden = !temXp;
-    if (!temXp || !regras) return;
+    if (!temXp) return;
     const proximo = xpParaProximo(jogador.nivel, regras);
     const pct = Math.min(100, Math.floor((jogador.xp / Math.max(1, proximo)) * 100));
     this.xp.preenchimento.style.width = `${pct}%`;
@@ -200,7 +212,7 @@ export class Hud {
     this.xp.raiz.setAttribute('aria-valuemax', String(proximo));
     this.xp.raiz.setAttribute('aria-valuenow', String(jogador.xp));
     this.xp.raiz.setAttribute('aria-label', texto);
-    this.xp.raiz.dataset.pct = `${t('hud.xpCurto', { nivel: jogador.nivel, pct })}`;
+    this.xp.raiz.dataset.pct = t('hud.xpCurto', { nivel: jogador.nivel, pct });
   }
 
   /** O painel de estatísticas: a conta (a ficha derivada) roda umas 5 vezes por segundo, não a cada quadro. */
@@ -229,10 +241,37 @@ export class Hud {
     this.rede.dataset.qualidade = !r.conectado ? 'ruim' : r.rttMs <= 150 ? 'boa' : r.rttMs <= 250 ? 'media' : 'ruim';
   }
 
-  registrar(texto: string): void {
+  /**
+   * Uma linha no registro. Marco 53 (D-203): `destaque` é o que importa ao jogador (uma recusa, um estudo, um buff); no
+   * modo sem registro na tela, só esses aparecem, maiores e por alguns segundos, no mesmo canto.
+   */
+  registrar(texto: string, destaque = false): void {
+    if (this.semRegistro) {
+      if (destaque) this.destacar(texto);
+      return;
+    }
     const linha = document.createElement('li');
     linha.textContent = texto;
     this.log.append(linha);
     while (this.log.children.length > MAX_LINHAS_LOG) this.log.firstElementChild?.remove();
+  }
+
+  private destacar(texto: string): void {
+    const ultima = this.destaques.lastElementChild;
+    if (ultima instanceof HTMLElement && ultima.dataset.texto === texto) {
+      // O mesmo aviso de novo (a recarga apertada várias vezes): conta em vez de repetir a linha.
+      const n = Number(ultima.dataset.n ?? '1') + 1;
+      ultima.dataset.n = String(n);
+      ultima.textContent = `${texto} ×${String(n)}`;
+      ultima.getAnimations().forEach((a) => { a.currentTime = 0; });
+      return;
+    }
+    const linha = document.createElement('li');
+    linha.textContent = texto;
+    linha.dataset.texto = texto;
+    this.destaques.append(linha);
+    while (this.destaques.children.length > MAX_DESTAQUES) this.destaques.firstElementChild?.remove();
+    const animacao = linha.animate([{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none', offset: 0.06 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], { duration: DESTAQUE_MS, fill: 'forwards' });
+    animacao.onfinish = () => { linha.remove(); };
   }
 }

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.63 · **Data:** 22/11/2026
+**Versão do documento:** 3.64 · **Data:** 22/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.64 (22/11/2026)**: marco 53: o item solto espera 5 s, o Mundo sem o registro lateral, o XP subindo do personagem e a faixa do chefe (D-203).
 > - **3.63 (22/11/2026)**: marco 53: o conforto (clique e mapa para andar, câmera no mouse, zoom do touchpad, seguir o companheiro, avisos, cartas de skill, receitas da forja, renascer com escolha e consertos) (D-203).
 > - **3.62 (21/11/2026)**: marco 52: reaprender a skill consumida de graça e na hora, e a chance que sobe a cada tentativa (D-198).
 > - **3.61 (21/11/2026)**: marco 52: os níveis de raridade da fusão (3º, 2º e 1º), com a chance pela Inteligência e a fórmula refeita (D-198).
@@ -402,6 +403,9 @@ Ajustes pedidos por quem jogou o Mundo.
   persegue.
 - **Consertos.** A seta da lápide some. Quem compra do vendedor da noite não trava ao amanhecer. Ficar parado não
   derruba mais o personagem.
+- **Soltar e ver.** O item solto só volta a quem soltou 5 s depois de fechar a mochila ("Acabou de soltar"). No
+  Mundo, o registro lateral saiu: o importante aparece em destaque no canto, o XP sobe do personagem como o ouro, e o
+  chefe que surge ganha uma faixa vermelha no alto.
 
 Detalhes em D-203.
 

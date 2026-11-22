@@ -121,29 +121,29 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('acaoRecusada', (ev) => {
     if (ev.atorId !== idLocal) return;
     vibrar([50, 30, 50]);
-    hud.registrar(t(`recusa.${ev.motivo}` as const));
+    hud.registrar(t(`recusa.${ev.motivo}` as const), true);
   });
   // Marco 40 (13/11/2026, D-164): o movimento da classe (a troca no G e as recusas).
   bus.on('movimentoClasse', (ev) => {
     if (ev.id !== idLocal) return;
     const nomeMov = t(`movimento.${ev.mov}` as ChaveTexto);
     if (ev.fase === 'ativo') hud.registrar(t('movimento.log.ativo', { nome: nomeMov }));
-    else if (ev.fase === 'perdeu') hud.registrar(t('movimento.log.perdeu', { nome: nomeMov }));
-    else if (ev.fase === 'recusado') hud.registrar(t(`movimento.recusa.${ev.motivo ?? 'recarga'}` as ChaveTexto));
+    else if (ev.fase === 'perdeu') hud.registrar(t('movimento.log.perdeu', { nome: nomeMov }), true);
+    else if (ev.fase === 'recusado') hud.registrar(t(`movimento.recusa.${ev.motivo ?? 'recarga'}` as ChaveTexto), true);
   });
   // Marco 40 (D-165): a troca de companheiro do Aventureiro.
   bus.on('companheiroTrocado', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('pet.log.trocou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('pet.log.trocou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }), true);
   });
   // D-188 (19/11/2026): o cansaço das feras.
   bus.on('feraCansou', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('pet.log.cansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('pet.log.cansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }), true);
   });
   bus.on('feraDescansou', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('pet.log.descansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('pet.log.descansou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }), true);
   });
   bus.on('acaoCancelada', (ev) => {
-    if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));
+    if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }), ev.atorId === idLocal);
   });
   // Marco 8A: todo status aplicado em você ou por você entra no registro; números vêm do resultado.
   const ultimoAviso = new Map<string, number>();
@@ -176,7 +176,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   });
   bus.on('habilidadeRecusada', (ev) => {
     if (ev.id !== idLocal) return;
-    hud.registrar(t(`habilidades.motivo.${ev.motivo}` as ChaveTexto, { nivel: '?' }));
+    hud.registrar(t(`habilidades.motivo.${ev.motivo}` as ChaveTexto, { nivel: '?' }), true);
   });
   // Marco 8A-2: invocação, dominação e armadilha.
   bus.on('invocou', (ev) => {
@@ -189,10 +189,10 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     o.aviso(texto);
   });
   bus.on('dominou', (ev) => {
-    hud.registrar(t('log.dominou', { alvo: nome(ev.id), dono: nome(ev.donoId) }));
+    hud.registrar(t('log.dominou', { alvo: nome(ev.id), dono: nome(ev.donoId) }), ev.donoId === idLocal || ev.id === idLocal);
   });
   bus.on('armadilhaDisparou', (ev) => {
-    if (ev.alvoId === idLocal || ev.donoId === idLocal) hud.registrar(t(ev.protegido ? 'log.armadilhaProtegida' : 'log.armadilha', { alvo: nome(ev.alvoId) }));
+    if (ev.alvoId === idLocal || ev.donoId === idLocal) hud.registrar(t(ev.protegido ? 'log.armadilhaProtegida' : 'log.armadilha', { alvo: nome(ev.alvoId) }), true);
   });
   bus.on('efeitoResultado', (ev) => {
     const alvo = posicao(ev.alvoId);
@@ -208,7 +208,11 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     if (ev.id === idLocal) vibrar([100, 50, 100, 50, 100]);
   });
   bus.on('xpGanho', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.xp', { xp: ev.xp }));
+    if (ev.id !== idLocal) return;
+    hud.registrar(t('log.xp', { xp: ev.xp }));
+    // Marco 53 (22/11/2026, D-203): o XP sobe do personagem ao pegar, como o ouro (antes, só no registro).
+    const eu = posicao(ev.id);
+    if (eu && ev.xp > 0) numeros.mostrar(t('numeros.xp', { xp: ev.xp }), 'xp', eu.x, eu.y - 0.3, o.agora(), ESCALONAMENTO_MS);
   });
   bus.on('surgiu', (ev) => {
     hud.registrar(t('log.surgiu', { alvo: nome(ev.id) }));
@@ -218,7 +222,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     // 16/11/2026 (D-184): a luz de XP já aparece no registro pelo `xpGanho`.
     if (ev.tipo === 'orbe_xp') return;
     if (ev.tipo === 'orbe_efeito') {
-      if (ev.id === idLocal) hud.registrar(t('log.orbeEfeito'));
+      if (ev.id === idLocal) hud.registrar(t('log.orbeEfeito'), true);
       return;
     }
     if (ev.tipo === 'item') {
@@ -264,25 +268,25 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     o.aviso(texto);
   });
   bus.on('interacaoIniciada', (ev) => {
-    if (ev.id === idLocal && ev.tipo === 'bau') hud.registrar(t('log.bauAbrindo'));
-    if (ev.id === idLocal && ev.tipo === 'desarme') hud.registrar(t('log.desarmando'));
+    if (ev.id === idLocal && ev.tipo === 'bau') hud.registrar(t('log.bauAbrindo'), true);
+    if (ev.id === idLocal && ev.tipo === 'desarme') hud.registrar(t('log.desarmando'), true);
   });
   // Marco 18 (D-068): o estudo de habilidades.
   const nomeHab = (id: string) => o.nomeHabilidade?.(id) ?? id;
   // Marco 52 (21/11/2026, D-198): o nível de raridade que a transmutação deu.
   bus.on('fusaoCriada', (ev) => {
     if (ev.id !== idLocal) return;
-    hud.registrar(ev.melhorou ? t('log.fusaoRaridade', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }) : t('log.fusaoSemMelhora', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }));
+    hud.registrar(ev.melhorou ? t('log.fusaoRaridade', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }) : t('log.fusaoSemMelhora', { nome: nomeHab(ev.habilidadeId), n: ev.raridade }), true);
   });
   bus.on('estudoIniciado', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.estudoIniciado', { nome: nomeHab(ev.habilidadeId), tempo: duracaoLegivel(ev.totalTicks * DT_MS) }));
+    if (ev.id === idLocal) hud.registrar(t('log.estudoIniciado', { nome: nomeHab(ev.habilidadeId), tempo: duracaoLegivel(ev.totalTicks * DT_MS) }), true);
   });
   // Marco 24 (D-094): o livro de uma geral só libera; aprender custa um ponto.
   bus.on('habilidadeLiberada', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('feedback.habilidadeLiberada', { nome: nomeHab(ev.habilidadeId) }));
+    if (ev.id === idLocal) hud.registrar(t('feedback.habilidadeLiberada', { nome: nomeHab(ev.habilidadeId) }), true);
   });
   bus.on('estudoAcelerado', (ev) => {
-    if (ev.id === idLocal && ev.restanteTicks > 0) hud.registrar(t('log.estudoAcelerado', { tempo: duracaoLegivel(ev.restanteTicks * DT_MS) }));
+    if (ev.id === idLocal && ev.restanteTicks > 0) hud.registrar(t('log.estudoAcelerado', { tempo: duracaoLegivel(ev.restanteTicks * DT_MS) }), true);
   });
   bus.on('estudoConcluido', (ev) => {
     if (ev.id !== idLocal) return;
@@ -326,13 +330,13 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   });
   // Ajuste de 16/10/2026 (D-067): buffs ofensivos armados e a carga de refúgio.
   bus.on('buffArmado', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.buffArmado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('log.buffArmado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }), true);
   });
   bus.on('buffAtivado', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.buffAtivado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('log.buffAtivado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }), true);
   });
   bus.on('buffExpirou', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.buffExpirou', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+    if (ev.id === idLocal) hud.registrar(t('log.buffExpirou', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }), true);
   });
   bus.on('refugioUsado', (ev) => {
     if (ev.id !== idLocal) return;
@@ -370,7 +374,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     o.aviso(texto);
   });
   bus.on('teleportou', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.teleportou', { numero: ev.numero }));
+    if (ev.id === idLocal) hud.registrar(t('log.teleportou', { numero: ev.numero }), true);
   });
   bus.on('subiuNivel', (ev) => {
     if (ev.id !== idLocal) return;

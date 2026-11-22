@@ -375,7 +375,9 @@
   },
   "inventario": {
     "capacidade": 20,
-    "pilhaMax": 10
+    "pilhaMax": 10,
+    "soltarEsperaMs": 5000,
+    "soltarEsperaMaxMs": 120000
   },
   "habilidades": {
     "pontosPorNivel": 1,

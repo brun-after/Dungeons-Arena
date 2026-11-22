@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.58 · **Data:** 22/11/2026
+**Versão:** 1.59 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.59 (22/11/2026)**: D-203: o item solto espera 5 s depois de fechar a mochila para voltar a quem soltou; o Mundo sem o registro lateral (o importante em destaque, o XP subindo do personagem e a faixa do chefe que surge).
 > - **1.58 (22/11/2026)**: D-204: a caça do pet do Aventureiro solta na troca de fera e no Chamado (o X); as ultimates dele trazem cópias da fera da vez no lugar das criaturas, e com uma cópia viva o dano na fera chega ao dono a 1/3.
 > - **1.57 (22/11/2026)**: D-203: o marco 53, o conforto (controles, mapa, avisos, consertos e regras pequenas pedidos depois de jogar).
 > - **1.56 (22/11/2026)**: D-202, adendo: as Ruínas do Norte (quem está longe da vista não é desenhado, então o atlas da criatura só sobe à placa quando ela chega perto; os shaders do modelo 3D novo compilam em paralelo).
@@ -6672,6 +6673,21 @@ estado.
   perto, a até duas células. A armadilha não é posta nessas células.
 - **O recuo do Arqueiro** foge do inimigo mais perto que o persegue (ou que ele tem como alvo), a até
   `movimentoClasse.fugaRaio` células. Quem fugia de costas para o inimigo era levado pelo "para trás" para cima dele.
+
+**O que se solta e o que se vê (1.59).**
+- **O item solto não volta na hora.** Quem soltou só o recolhe 5 s depois de fechar a mochila
+  (`inventario.soltarEsperaMs`); com a mochila aberta, nem saindo e voltando à célula. O comando novo `fecharMochila`
+  avisa a simulação, e o objeto guarda quem soltou e até quando (`soltoPor`, `soltoAteTick`). Se a mochila nunca
+  fechar (a conexão caiu), vale o teto `soltarEsperaMaxMs` (2 min). Parado sobre o item, o pergaminho diz "Acabou de
+  soltar". Os outros, e o falcão do Aventureiro por eles, pegam na hora; o falcão não traz ao dono o que o dono soltou.
+- **No Mundo, sem o registro lateral** (`modo.registroNaTela: false`, só em dados). Os acontecimentos de sempre (quem
+  surgiu, quem renasceu, o dano, os pets e os inimigos comuns) não vão mais à tela. O que importa ao jogador vai para
+  os destaques no mesmo canto, maiores e por 5 s: as recusas, o estudo, os buffs, os pets do Aventureiro, a armadilha
+  que disparou e o baú que abre. O que já tinha aviso (o nível, o item pego, a regra do chefe) continua no aviso.
+- **O XP sobe do personagem** ao pegar a luz, como o ouro (`+N XP`, em roxo), em todos os modos.
+- **O chefe que surge** vira uma faixa vermelha abaixo da do lugar, com o nome e o nível (`ui/anuncio-chefe.ts`). O
+  cliente percebe o chefe que aparece no estado (o da noite nasce fora da simulação, sem evento); o que já estava lá na
+  chegada não é anunciado, e o mesmo chefe só volta a ser depois de 2 min longe da vista.
 
 **Fora.** De dia, o andarilho tem o preço de sempre. O condutor não atravessa regiões: seguindo alguém que trocou de
 região, o personagem espera parado até ele voltar.

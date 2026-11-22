@@ -28,6 +28,7 @@ import { ticksDe } from '../core/tempo';
 import { emCombate } from '../progression/buffs';
 import { passavel } from '../world/fase';
 import { planejarCaminho } from '../world/movimento';
+import { acabouDeSoltar } from '../world/objetos';
 import { emPasso, vivo, type Entidade, type EstadoIa } from './entidade';
 
 /** O que o falcão recolhe para o dono (o resto, como itens e chaves, fica para o jogador). */
@@ -44,7 +45,7 @@ function coletavelMaisPerto(estado: EstadoJogo, ctx: ContextoSimulacao, falcao: 
   const daqui = celulaOcupada(falcao);
   let melhor: ObjetoNoMundo | null = null;
   for (const o of estado.objetos) {
-    if (o.aguardaSaidaDe || !serveAoDono(o, dono) || chebyshev(dono, o) > raio) continue;
+    if (o.aguardaSaidaDe || acabouDeSoltar(o, dono.id, estado.tick) || !serveAoDono(o, dono) || chebyshev(dono, o) > raio) continue;
     if (!melhor || chebyshev(daqui, o) < chebyshev(daqui, melhor) || (chebyshev(daqui, o) === chebyshev(daqui, melhor) && o.objetoId < melhor.objetoId)) melhor = o;
   }
   return melhor ? { x: melhor.x, y: melhor.y } : null;

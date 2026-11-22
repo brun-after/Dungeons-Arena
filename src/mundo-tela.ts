@@ -31,6 +31,7 @@ import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPaineisDaEconomia } from './ui/mundo-economia';
 import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
+import { criarAnuncioDeChefe } from './ui/anuncio-chefe';
 import { criarRelogioDoMundo } from './ui/relogio-mundo';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
@@ -372,6 +373,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   const vazio = criarEstado({ semente: 0, faseId: ctx.fase.id });
   const monitor = new MonitorDeConexao();
   const faixa = criarFaixaDoLugar();
+  const anuncioChefe = criarAnuncioDeChefe(); // Marco 53 (22/11/2026, D-203): o chefe que surge, em destaque.
   let pararLaco: (() => void) | null = null;
   let cena: Cena | null = null;
   let saindo = false;
@@ -424,6 +426,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
       ultimoLugar = a;
       enviarAcao({a:'grupo',op:'consultar'});
       faixa.mostrar(a);
+      anuncioChefe.chegou();
       if (a.pvp) avisar(t('mundo.perigo.perigoso'), 6000);
     } else if (a.tipo === 'portais') {
       abrirPortal(a, Date.now(), (destino, pagamento) => {
@@ -553,7 +556,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   }
   const c = cena;
   const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
-  camada.querySelector('.camada-ui')?.append(faixa.elemento, relogio.elemento, social.elemento, guia.elemento);
+  camada.querySelector('.camada-ui')?.append(faixa.elemento, anuncioChefe.elemento, relogio.elemento, social.elemento, guia.elemento);
   // Marco 53 (22/11/2026, D-203): morto fora de dungeon, a escolha de onde renascer.
   const nomeDaRegiao = (id: string | undefined) => reino.regioes.find((r) => r.id === id)?.nome ?? id ?? '';
   const renascer = criarEscolhaDeRenascer(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, enviarAcao, () => ({
@@ -642,6 +645,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     },
     renderizar: (alpha) => {
       guia.atualizar(eu.previsto, agoraMs());
+      if (eu.previsto) anuncioChefe.atualizar(eu.previsto, agoraMs());
       const id = eu.entidadeId ?? idLocal;
       const euAgora = eu.previsto ? buscarEntidade(eu.previsto, id) : undefined;
       condutor.atualizar(eu.previsto, euAgora, agoraMs());

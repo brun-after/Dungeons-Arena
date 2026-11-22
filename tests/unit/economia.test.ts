@@ -89,12 +89,49 @@ describe('itens compartilhados no chão', () => {
     c.tick({ t: 'soltarItem', invId: entrada.invId, qtd });
     expect(c.bolsa().mochila.some((i) => i.invId === entrada.invId)).toBe(false);
     expect(c.estado.objetos[0]).toMatchObject({ valor: qtd, ref: entrada.ref, aguardaSaidaDe: 'j' });
+    // Marco 53 (D-203): só 5 s depois de fechar a mochila.
+    c.tick({ t: 'fecharMochila' });
+    c.avancar(ticksDe(c.ctx.balance.inventario.soltarEsperaMs));
     c.e().x = 4;
     c.tick();
     c.e().x = 3;
     c.tick();
     expect(c.estado.objetos).toHaveLength(0);
     expect(c.bolsa().mochila.find((i) => i.ref === entrada.ref)?.qtd).toBe(qtd);
+  });
+
+  it('marco 53 (D-203): quem soltou só recolhe 5 s depois de fechar a mochila; o aliado pega na hora', () => {
+    const c = cenario([['j', 3, 5], ['aliado', 8, 5]]);
+    const invId = c.dar('adaga');
+    c.tick({ t: 'soltarItem', invId, qtd: 1 });
+    const solto = c.estado.objetos[0];
+    expect(solto?.soltoPor).toBe('j');
+    // Com a mochila aberta (sem o `fecharMochila`), sair e voltar não recolhe.
+    if (!solto) throw new Error('solto');
+    c.e().x = solto.x + 1;
+    c.tick();
+    c.e().x = solto.x;
+    c.e().y = solto.y;
+    c.avancar(ticksDe(10_000));
+    expect(c.estado.objetos).toHaveLength(1);
+    c.tick({ t: 'fecharMochila' });
+    c.avancar(ticksDe(c.ctx.balance.inventario.soltarEsperaMs) - 2);
+    expect(c.estado.objetos).toHaveLength(1);
+    c.avancar(3);
+    expect(c.estado.objetos).toHaveLength(0);
+    // O aliado não espera.
+    const outro = c.dar('adaga');
+    c.e().x = 3;
+    c.e().y = 5;
+    c.tick({ t: 'soltarItem', invId: outro, qtd: 1 });
+    const segundo = c.estado.objetos[0];
+    if (!segundo) throw new Error('segundo');
+    c.e('aliado').x = segundo.x;
+    c.e('aliado').y = segundo.y;
+    c.tick();
+    expect(c.estado.objetos).toHaveLength(0);
+    expect(lerComando({ t: 'fecharMochila' })).toEqual({ t: 'fecharMochila' });
+    for (const modo of ['campanha', 'cooperativo', 'livre', 'mundo']) expect(CONTEUDO.modos.get(modo)?.comandosDeRede).toContain('fecharMochila');
   });
 
   it('recusa quantidade inválida, entrada de outro jogador e replay sem duplicar', () => {
@@ -112,7 +149,8 @@ describe('itens compartilhados no chão', () => {
   it('sem espaço no chão não retira nada; mochila cheia do aliado mantém o drop', () => {
     const c = cenario([['j', 3, 5], ['aliado', 4, 5]]);
     const invId = c.dar('adaga');
-    for (let x = 2; x <= 4; x++) for (let y = 4; y <= 6; y++) c.objeto(novoObjeto(`ocupado-${x}-${y}`, 'loja', x, y));
+    // Marco 53 (D-203): o drop procura chão até duas células em volta.
+    for (let x = 1; x <= 5; x++) for (let y = 3; y <= 7; y++) c.objeto(novoObjeto(`ocupado-${x}-${y}`, 'loja', x, y));
     const antes = JSON.stringify(c.bolsa());
     c.tick({ t: 'soltarItem', invId, qtd: 1 });
     expect(JSON.stringify(c.bolsa())).toBe(antes);
@@ -134,13 +172,13 @@ describe('itens compartilhados no chão', () => {
   it('sair andando não recolhe o próprio drop na metade do passo', () => {
     const c = cenario();
     const invId = c.dar('adaga');
-    c.tick({ t: 'soltarItem', invId, qtd: 1 }, { t: 'irPara', x: 3, y: 3 });
+    c.tick({ t: 'soltarItem', invId, qtd: 1 }, { t: 'irPara', x: 3, y: 3 }, { t: 'fecharMochila' });
     c.avancar(90);
     expect(c.e().y).toBe(3);
     expect(c.estado.objetos).toHaveLength(1);
     expect(c.bolsa().mochila.some((i) => i.itemId === 'adaga')).toBe(false);
     c.tick({ t: 'irPara', x: 3, y: 5 });
-    c.avancar(90);
+    c.avancar(ticksDe(c.ctx.balance.inventario.soltarEsperaMs));
     expect(c.estado.objetos).toHaveLength(0);
     expect(c.bolsa().mochila.some((i) => i.itemId === 'adaga')).toBe(true);
   });

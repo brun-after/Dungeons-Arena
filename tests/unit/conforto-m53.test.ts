@@ -20,6 +20,8 @@ import { velocidadeDaBorda, zoomDaRoda } from '../../src/input/ponteiro';
 import { celulaLivrePerto, criarCondutor } from '../../src/ui/condutor';
 import { objetoClicado } from '../../src/ui/clique-objeto';
 import { novoObjeto } from '../../src/world/objeto-novo';
+import { chefesNovos } from '../../src/ui/anuncio-chefe';
+import { criarInimigo } from '../../src/entities/fabrica';
 
 function vila(noite: number) {
   const reino = CONTEUDO.reinos.get('reino_central');
@@ -191,5 +193,34 @@ describe('marco 53: a venda desfazível e a câmera na borda (D-203)', () => {
     expect(velocidadeDaBorda(0, 1000)).toBeLessThan(velocidadeDaBorda(20, 1000));
     expect(velocidadeDaBorda(20, 1000)).toBeLessThan(0);
     expect(velocidadeDaBorda(995, 1000)).toBeGreaterThan(0);
+  });
+});
+
+describe('marco 53: o registro do Mundo e o chefe que surge (D-203)', () => {
+  it('o Mundo tira o registro lateral da tela; os outros modos o mantêm', () => {
+    expect(CONTEUDO.modos.get('mundo')?.registroNaTela).toBe(false);
+    for (const m of ['campanha', 'cooperativo', 'livre']) expect(CONTEUDO.modos.get(m)?.registroNaTela).toBeUndefined();
+  });
+
+  it('o chefe é anunciado uma vez; volta a ser depois de muito tempo longe da vista; o inimigo comum, nunca', () => {
+    const estado = criarEstado({ semente: 1, faseId: 'x' });
+    const pChefe = CONTEUDO.presets.get('necromante_ancestral');
+    const pComum = CONTEUDO.presets.get('lobo');
+    if (!pChefe || !pComum) throw new Error('presets');
+    const chefe = criarInimigo(pChefe, 'b1', 5, 5, BALANCE_PADRAO, { nivel: 30 });
+    const comum = criarInimigo(pComum, 'l1', 6, 6, BALANCE_PADRAO, { nivel: 30 });
+    expect(chefe.arquetipo).toBe('boss');
+    estado.entidades.push(chefe, comum);
+    const vistos = new Map<string, number>();
+    expect(chefesNovos(estado, vistos, 0).map((c) => c.id)).toEqual(['b1']);
+    expect(chefesNovos(estado, vistos, 1000)).toEqual([]);
+    estado.entidades = [comum];
+    chefesNovos(estado, vistos, 2000);
+    estado.entidades = [comum, chefe];
+    expect(chefesNovos(estado, vistos, 60_000)).toEqual([]);
+    estado.entidades = [comum];
+    chefesNovos(estado, vistos, 61_000);
+    estado.entidades = [comum, chefe];
+    expect(chefesNovos(estado, vistos, 300_000).map((c) => c.id)).toEqual(['b1']);
   });
 });

@@ -830,6 +830,65 @@ body.toque .log-combate.aberto {
   display: block;
 }
 
+/* Marco 53 (22/11/2026, D-203): sem o registro na tela (o Mundo), o importante aparece aqui, maior e por uns segundos. */
+.destaques-hud {
+  position: absolute;
+  left: calc(12px + var(--seguro-esq));
+  bottom: calc(110px + var(--seguro-base));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: min(380px, calc(100% - 24px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.destaques-hud li {
+  padding: 5px 12px;
+  border-left: 3px solid var(--destaque);
+  border-radius: 6px;
+  background: rgba(16, 21, 28, 0.82);
+  color: var(--texto);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px #000;
+}
+
+body.toque .destaques-hud {
+  top: calc(64px + var(--seguro-topo));
+  bottom: auto;
+}
+
+/* Marco 53 (D-203): o chefe que surge, abaixo da faixa do lugar. */
+.faixa-chefe {
+  position: absolute;
+  top: calc(104px + var(--seguro-topo));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 20px;
+  border: 1px solid #e74c3c;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(60, 12, 12, 0.92), rgba(24, 8, 8, 0.88));
+  box-shadow: 0 0 18px rgba(231, 76, 60, 0.55), 0 0 0 1px rgba(231, 76, 60, 0.6) inset;
+  color: var(--texto);
+  font-size: 0.85rem;
+  pointer-events: none;
+  text-align: center;
+}
+
+.faixa-chefe strong {
+  color: #ffb199;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* Aviso de morte */
 .aviso-morte {
   position: absolute;
