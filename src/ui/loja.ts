@@ -17,6 +17,8 @@ import { fundivel } from '../progression/fusao-elemental';
 import { ferreiroAberto } from '../progression/moldes';
 import { desenharMesaDaForja, mesaVazia } from './forja/mesa';
 import { criarModal } from './modal';
+import { nomeDaEntrada } from './nome-do-item';
+import { seletorDeQuantidade } from './mundo-dialogos';
 import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
 import { vitrineDaLoja } from '../progression/vitrine';
@@ -91,7 +93,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
   modal.dialogo.addEventListener('animationend', () => { modal.dialogo.classList.remove('tremor-loja'); });
   modal.corpo.append(saldo, listas);
 
-  const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
+  const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: (qtd: number) => void; qtdMax?: number } | null, nota?: string) => {
     const li = el('li', 'linha-item');
     const conteudo = el('span', 'conteudo-item');
     const iconeItem = el('span', molduraDoItem(item));
@@ -106,12 +108,15 @@ export function criarLoja(o: OpcoesLoja): Loja {
     if (qtd > 1) conteudo.append(el('span', 'qtd-item', `×${qtd}`));
     li.append(conteudo);
     if (acao) {
+      // Marco 53 (22/11/2026, D-203): a pilha escolhe quantas unidades (antes, uma por clique).
+      const quantas = acao.qtdMax && acao.qtdMax > 1 ? seletorDeQuantidade(acao.qtdMax, `${acao.chave}-qtd`, rotulo) : null;
+      if (quantas) li.append(quantas.el);
       const b = el('button', 'botao-cabecalho', acao.texto);
       b.type = 'button';
       b.dataset.chave = acao.chave;
       b.disabled = acao.desligado;
       b.setAttribute('aria-label', `${acao.texto}: ${rotulo}`);
-      b.addEventListener('click', acao.fazer);
+      b.addEventListener('click', () => { acao.fazer(quantas?.valor() ?? 1); });
       li.append(b);
     }
     return li;
@@ -168,9 +173,9 @@ export function criarLoja(o: OpcoesLoja): Loja {
       mochila.append(
         linha(
           item,
-          item?.nome ?? entrada.itemId,
+          nomeDaEntrada(ctx, entrada),
           entrada.qtd,
-          pode ? { texto: t('loja.vender', { preco }), chave: `vender-${entrada.invId}`, desligado: false, fazer: () => { emitir({ t: 'vender', invId: entrada.invId }); } } : null,
+          pode ? { texto: t('loja.vender', { preco }), chave: `vender-${entrada.invId}`, desligado: false, qtdMax: entrada.qtd, fazer: (qtd) => { emitir({ t: 'vender', invId: entrada.invId, qtd }); } } : null,
           pode ? undefined : t('loja.naoCompra'),
         ),
       );

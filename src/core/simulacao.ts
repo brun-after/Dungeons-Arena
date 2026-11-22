@@ -265,7 +265,7 @@ function aplicarComandos(
         comprar(estado, ctx, ator, cmd.itemId, saida);
         break;
       case 'vender':
-        vender(estado, ctx, ator, cmd.invId, saida);
+        vender(estado, ctx, ator, cmd.invId, saida, cmd.qtd);
         break;
       case 'fecharLoja':
         fecharLoja(estado, ctx, ator, saida);

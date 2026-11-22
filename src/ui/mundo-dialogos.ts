@@ -87,6 +87,23 @@ export function campoNumero(rotulo: string, inicial: number, min: number, max: n
   return { el, valor: () => Math.min(max, Math.max(min, Math.floor(Number(input.value) || 0))) };
 }
 
+/**
+ * Marco 53 (22/11/2026, D-203): quantas unidades da pilha (vender, guardar, tirar), compacto, ao lado do botão. Começa
+ * na pilha inteira (o mais comum); o jogador baixa se quiser menos.
+ */
+export function seletorDeQuantidade(max: number, chave: string, rotulo: string): { el: HTMLInputElement; valor: () => number } {
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.className = 'seletor-qtd';
+  input.min = '1';
+  input.max = String(max);
+  input.step = '1';
+  input.value = String(max);
+  input.dataset.chave = chave;
+  input.setAttribute('aria-label', t('mochila.quantidade', { item: rotulo, max }));
+  return { el: input, valor: () => Math.min(max, Math.max(1, Math.floor(Number(input.value) || 1))) };
+}
+
 /** Um item da lista do diálogo: o texto e as ações à direita. */
 export function linhaDeItem(texto: string, ...acoes: HTMLElement[]): HTMLLIElement {
   const li = document.createElement('li');

@@ -64,13 +64,16 @@ function tentarComprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
   return null;
 }
 
-/** Vende uma unidade de uma entrada da mochila (o equipado não está na mochila: não é vendável). */
-export function vender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[]): void {
-  const motivo = tentarVender(estado, ctx, e, invId, saida);
+/**
+ * Vende unidades de uma entrada da mochila (o equipado não está na mochila: não é vendável). Marco 53 (22/11/2026,
+ * D-203): `qtd` unidades de uma vez (no máximo a pilha); sem ela, uma.
+ */
+export function vender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[], qtd = 1): void {
+  const motivo = tentarVender(estado, ctx, e, invId, saida, qtd);
   if (motivo) recusarItem(e, motivo, estado.tick, saida);
 }
 
-function tentarVender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[]): MotivoItem | null {
+function tentarVender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[], qtd: number): MotivoItem | null {
   const bolsa = e.bolsa;
   if (!bolsa) return 'sem_mochila';
   if (!lojaAberta(estado, e)) return 'loja_fechada';
@@ -79,8 +82,9 @@ function tentarVender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, i
   const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
   if (!entrada || !item) return 'nao_encontrado';
   if (!vendavel(item) || entrada.ref === 'resgate_dungeon') return 'nao_vendavel';
-  const preco = precoDeVenda(item, ctx.balance.economia.vendaPct);
-  entrada.qtd--;
+  const unidades = Math.max(1, Math.min(entrada.qtd, Math.floor(qtd)));
+  const preco = precoDeVenda(item, ctx.balance.economia.vendaPct) * unidades;
+  entrada.qtd -= unidades;
   if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
   bolsa.ouro += preco;
   saida.push({ t: 'vendeu', tick: estado.tick, id: e.id, itemId: item.id, preco });

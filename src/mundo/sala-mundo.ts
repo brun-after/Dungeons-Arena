@@ -124,7 +124,7 @@ export class SalaMundo extends SalaArena {
   ) {
     const molde = opcoesMundo.molde;
     const montado = molde ? { ...molde, estado: clonarEstado(molde.estado) } : montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
-    const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo() };
+    const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo(), reservaReconexaoMs: montado.ctx.balance.mundo.reconexaoS * 1000 };
     super(montado.ctx, opcoes, montado.estado);
     this.lugar = lugar;
     this.canal = opcoesMundo.canal ?? 1;

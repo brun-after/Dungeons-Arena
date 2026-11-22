@@ -44,6 +44,9 @@ export interface OpcoesDoSocial {
   idLocal: () => string;
   enviar: (acao: AcaoDoMundo) => void;
   avisar: (texto: string) => void;
+  /** Marco 53 (22/11/2026, D-203): seguir um companheiro do grupo (null para de seguir) e quem está sendo seguido. */
+  seguir?: (nome: string | null) => void;
+  seguindo?: () => string | null;
 }
 
 export interface PainelSocial {
@@ -103,6 +106,12 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
       const classe = o.ctx.conteudo.classes.get(m.classeId)?.nome ?? m.classeId;
       const texto = t(m.lider ? 'mundo.grupo.lider' : 'mundo.grupo.membro', { nome: m.nome, classe, nivel: m.nivel, lugar: nomeDoLugar(m.lugar) });
       const acoes = souLider && m.nome !== minhaVez ? [botao(t('mundo.grupo.expulsar'), () => { o.enviar({ a: 'grupo', op: 'expulsar', nome: m.nome }); }, false, 'botao-cabecalho')] : [];
+      // Marco 53 (D-203): seguir o companheiro que está no mesmo lugar (o personagem anda sozinho atrás dele).
+      const aqui = o.estado()?.entidades.some((e) => e.nome === m.nome && e.controlador !== 'ia');
+      if (o.seguir && m.nome !== minhaVez && aqui) {
+        const seguindo = o.seguindo?.() === m.nome;
+        acoes.unshift(botao(t(seguindo ? 'mundo.grupo.pararDeSeguir' : 'mundo.grupo.seguir'), () => { o.seguir?.(seguindo ? null : m.nome); desenharGrupo(); }, false, `botao-cabecalho${seguindo ? ' ativo' : ''}`));
+      }
       ul.append(linhaDeItem(texto, ...acoes));
     }
     secaoGrupo.append(ul);

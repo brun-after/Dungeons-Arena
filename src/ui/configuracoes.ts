@@ -128,6 +128,9 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('mundo.party.visao'), marcador('visaoParty', p.visaoParty, v => { mudar({ visaoParty: v }); })),
       campo(t('config.modoCamera'), escolha('camera', p.camera, ['janela', 'centralizada'] as const, 'modoCamera', (v) => { mudar({ camera: v }); })),
       campo(t('config.enquadrarDois'), marcador('enquadrarDois', p.enquadrarDois, (v) => { mudar({ enquadrarDois: v }); })),
+      // Marco 53 (22/11/2026, D-203): a sensibilidade do zoom (a pinça do touchpad era rápida demais) e o olhar do mouse.
+      campo(t('config.sensibilidadeZoom'), faixa('sensibilidadeZoom', Math.round(p.sensibilidadeZoom * 100), 25, 200, 25, (v) => { mudar({ sensibilidadeZoom: v / 100 }); })),
+      ...(o.toque ? [] : [campo(t('config.cameraNoMouse'), marcador('cameraNoMouse', p.cameraNoMouse, (v) => { mudar({ cameraNoMouse: v }); }))]),
     );
     // Marco 26 (D-107): as teclas valem em qualquer aparelho; o tipo do direcional, só onde ele aparece.
     const teclas = campo(t('config.teclas'), escolha('teclasMovimento', p.teclasMovimento, ['wasd', 'ewas'] as const, 'teclasMovimento', (v) => { mudar({ teclasMovimento: v }); }));

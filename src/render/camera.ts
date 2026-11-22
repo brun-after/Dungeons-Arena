@@ -24,6 +24,11 @@ import {
 } from './camera-calculo';
 import { celulaSobProjetado, centroDaCelula, pontoSobProjetado, type Projecao } from './projecao';
 
+/** Marco 53 (D-203): o olhar do mouse: a zona central sem efeito, o desvio máximo e a rapidez (por segundo). */
+const OLHAR_ZONA_MORTA = 0.2;
+const OLHAR_FRACAO = 0.22;
+const OLHAR_SUAVIDADE = 3;
+
 /** Depois de mexer na câmera à mão, o "enquadrar dois" espera 4 s (§2.4). */
 export const JANELA_MANUAL_MS = 4000;
 
@@ -46,6 +51,13 @@ export class Camera {
   /** D-117: a borda que acompanha o boneco depois de reenquadrá-lo, por eixo (−1 início, 1 fim, 0 nenhuma). */
   private presaX: -1 | 0 | 1 = 0;
   private presaY: -1 | 0 | 1 = 0;
+  /**
+   * Marco 53 (22/11/2026, D-203): a câmera olha para onde o mouse aponta (também segurando o clique para andar). O
+   * desvio (px do mundo) soma-se à origem só no desenho e nas conversões de tela; a janela morta não o vê.
+   */
+  private olharX = 0;
+  private olharY = 0;
+  private mira: { x: number; y: number } | null = null;
 
   constructor(
     private projecao: Projecao,
@@ -188,8 +200,40 @@ export class Camera {
     this.foco = ponto && !this.solta && agoraMs - this.ultimaManualMs >= JANELA_MANUAL_MS ? ponto : null;
   }
 
+  /**
+   * Marco 53 (D-203): onde o mouse aponta, em fração da vista a partir do centro (−1 a 1 nos dois eixos); null para de
+   * olhar (o desvio volta a zero, suave).
+   */
+  mirar(fracao: { x: number; y: number } | null): void {
+    this.mira = fracao;
+  }
+
+  /** Marco 53 (D-203): o desvio para onde o mouse aponta, suavizado; fora da zona central, até 22% da vista. */
+  private avancarOlhar(dtS: number): void {
+    const eixo = (f: number) => {
+      const a = Math.abs(f);
+      return a <= OLHAR_ZONA_MORTA ? 0 : (Math.sign(f) * Math.min(1, (a - OLHAR_ZONA_MORTA) / (1 - OLHAR_ZONA_MORTA))) * OLHAR_FRACAO;
+    };
+    const m = this.mira && !this.solta && !this.foco ? this.mira : { x: 0, y: 0 };
+    const alvoX = eixo(m.x) * this.larguraVistaMundo;
+    const alvoY = eixo(m.y) * this.alturaVistaMundo;
+    const k = Math.min(1, dtS * OLHAR_SUAVIDADE);
+    this.olharX += (alvoX - this.olharX) * k;
+    this.olharY += (alvoY - this.olharY) * k;
+  }
+
+  /** A origem vista (com o desvio do mouse), dentro do mapa. */
+  private get vx(): number {
+    return this.limitarX(this.x + this.olharX);
+  }
+
+  private get vy(): number {
+    return this.limitarY(this.y + this.olharY);
+  }
+
   /** Avança a suavização. `posicaoJogador` em células (posição de render). */
   atualizar(dtS: number, posicaoJogador: { x: number; y: number }, velocidadeJogador: number): void {
+    this.avancarOlhar(dtS);
     if (this.foco) {
       const o = this.origemPara(this.foco.x, this.foco.y);
       this.alvoX = o.x;
@@ -236,18 +280,18 @@ export class Camera {
   }
 
   celulaSob(sx: number, sy: number): Celula {
-    return celulaSobProjetado(this.projecao, this.x + sx / this.zoom, this.y + sy / this.zoom);
+    return celulaSobProjetado(this.projecao, this.vx + sx / this.zoom, this.vy + sy / this.zoom);
   }
 
   /** Marco 26 (D-104): o ponto contínuo da fase sob o ponto da tela (o irPara vai ao ponto tocado). */
   pontoSob(sx: number, sy: number): Celula {
-    return pontoSobProjetado(this.projecao, this.x + sx / this.zoom, this.y + sy / this.zoom);
+    return pontoSobProjetado(this.projecao, this.vx + sx / this.zoom, this.vy + sy / this.zoom);
   }
 
   /** Centro de uma posição (em células) em px de tela. */
   paraTela(cx: number, cy: number): { x: number; y: number } {
     const c = this.centro(cx, cy);
-    return { x: (c.x - this.x) * this.zoom, y: (c.y - this.y) * this.zoom };
+    return { x: (c.x - this.vx) * this.zoom, y: (c.y - this.vy) * this.zoom };
   }
 
   /**
@@ -255,12 +299,14 @@ export class Camera {
    * que envolve os quatro cantos da vista desprojetados.
    */
   retanguloVisivel(alturaTotalTela: number): [number, number, number, number] {
-    const x1 = this.x + this.larguraVistaMundo;
-    const y1 = this.y + alturaTotalTela / this.zoom;
+    const x0 = this.vx;
+    const y0 = this.vy;
+    const x1 = x0 + this.larguraVistaMundo;
+    const y1 = y0 + alturaTotalTela / this.zoom;
     const cantos = [
-      this.projecao.desprojetar(this.x, this.y),
-      this.projecao.desprojetar(x1, this.y),
-      this.projecao.desprojetar(this.x, y1),
+      this.projecao.desprojetar(x0, y0),
+      this.projecao.desprojetar(x1, y0),
+      this.projecao.desprojetar(x0, y1),
       this.projecao.desprojetar(x1, y1),
     ];
     const xs = cantos.map((c) => c.x);
@@ -272,8 +318,8 @@ export class Camera {
   aplicar(mundo: Container, impacto: { dx: number; dy: number; zoomExtra: number } = { dx: 0, dy: 0, zoomExtra: 0 }): void {
     const zoom = this.zoom * (1 + impacto.zoomExtra);
     // O soco de zoom é ancorado no centro da vista.
-    const cx = this.x + this.larguraVistaMundo / 2;
-    const cy = this.y + this.alturaVistaMundo / 2;
+    const cx = this.vx + this.larguraVistaMundo / 2;
+    const cy = this.vy + this.alturaVistaMundo / 2;
     const x = cx - this.vista.largura / 2 / zoom;
     const y = cy - this.vista.altura / 2 / zoom;
     mundo.scale.set(zoom);

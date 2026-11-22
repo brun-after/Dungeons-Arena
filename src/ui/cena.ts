@@ -595,6 +595,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   let posicaoVisual: { x: number; y: number } | null = null; let vistaAtual: readonly number[] = [];
   const ponteiro = ligarPonteiro(palco.canvas, {
     camera,
+    sensibilidade: () => lerPreferencias().sensibilidadeZoom, cameraNoMouse: () => lerPreferencias().cameraNoMouse,
     aoIrPara: aoTocarCelula,
     guiar: {
       posicaoNaTela: () => (posicaoVisual ? camera.paraTela(posicaoVisual.x, posicaoVisual.y) : null),
@@ -604,9 +605,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       isometrico,
     },
   });
-  palco.canvas.addEventListener('contextmenu', (ev) => {
-    ev.preventDefault();
-  });
+  palco.canvas.addEventListener('contextmenu', (ev) => { ev.preventDefault(); });
 
   const feedback = ligarFeedback({
     bus,

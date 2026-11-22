@@ -21,6 +21,7 @@ import { painelDeEstilos, previaDoPonto } from './radar-estilos';
 import { criarPainelEstatisticas, danoDoBasico, estatisticasDoJogador } from './estatisticas';
 import { criarTelaAtualizacao } from './tela-atualizacao';
 import { painelDoVinculo } from './radar-vinculo';
+import { nomeDaEntrada } from './nome-do-item';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
@@ -323,13 +324,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         ? () => { agir({ t: 'equipar', invId: entrada.invId, slot }); }
         : null;
     const bloqueio = item && j.nivel < item.nivelMinimo ? t('mochila.requerNivel', { nivel: item.nivelMinimo }) : null;
-    // O livro raro mostra a habilidade gerada que ensina.
-    const ensinada = entrada.ref ? resolverHabilidade(ctx, entrada.ref) : undefined;
+    // O livro raro mostra a habilidade gerada que ensina (marco 53: também a de catálogo, em nome-do-item.ts).
     return linhaItem({
       chave: `inv-${entrada.invId}`,
       item,
       qtd: entrada.qtd,
-      rotulo: ensinada ? `${item?.nome ?? entrada.itemId}: ${ensinada.nome}` : (item?.nome ?? entrada.itemId),
+      rotulo: nomeDaEntrada(ctx, entrada),
       acao,
       textoAcao: consumivel ? t('mochila.usar') : t('mochila.equipar'),
       bloqueio,

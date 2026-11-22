@@ -108,6 +108,8 @@ export interface OpcoesSala {
   /** Marco 17: faixa de nível da sala (null: aberta). */
   faixa?: FaixaDeNivel | null;
   certificacao?: CertificacaoDaSala | undefined;
+  /** Marco 53 (22/11/2026, D-203): a reserva de quem caiu (o Mundo: `mundo.reconexaoS`); sem ela, 30 s. */
+  reservaReconexaoMs?: number;
 }
 
 /** O que o gancho de entrada devolve: a prévia da ficha, ou o motivo da recusa. */
@@ -618,9 +620,17 @@ export class SalaArena {
     }
   }
 
-  /** A reserva de reconexão dura 30 s (§2.13); depois a entidade sai do mundo. */
+  /**
+   * Quanto a sessão caída fica reservada (§2.13: 30 s). Marco 53 (22/11/2026, D-203): o Mundo reserva mais (o jogador
+   * parado com o notebook dormindo voltava sem personagem).
+   */
+  get reservaReconexaoMs(): number {
+    return this.opcoes.reservaReconexaoMs ?? RESERVA_RECONEXAO_MS;
+  }
+
+  /** Passada a reserva de reconexão, a entidade sai do mundo. */
   private removerDesconectados(): void {
-    const limite = ticksDe(RESERVA_RECONEXAO_MS);
+    const limite = ticksDe(this.reservaReconexaoMs);
     for (const s of [...this.sessoes.values()]) {
       if (s.conectada || this.estado.tick - s.desconectadaEmTick < limite) continue;
       this.removerSessao(s);

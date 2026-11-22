@@ -83,7 +83,7 @@ export function criarFaixaDoLugar(): { elemento: HTMLElement; mostrar: (aviso: E
 }
 
 /** O mapa do reino: a grade das regiões, com névoa nas que o personagem ainda não viu. */
-export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string, terreno?: { ctx: ContextoSimulacao; estado: () => EstadoJogo | null; idLocal: string; membros?: readonly import('../mundo/avisos').MembroVisto[]; orientacao?: OrientacaoMundo }): void {
+export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string, terreno?: { ctx: ContextoSimulacao; estado: () => EstadoJogo | null; idLocal: string; membros?: readonly import('../mundo/avisos').MembroVisto[]; orientacao?: OrientacaoMundo; andar?: (ponto: { x: number; y: number }) => void }): void {
   if (document.querySelector('.mapa-expandido')) return;
   const d = dialogo(t('mundo.mapa.titulo'));
   d.el.classList.add('mapa-expandido');
@@ -205,7 +205,7 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
     escolhas.hidden = painel === local;
   };
   if (terreno) {
-    const canvas = mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas, terreno.orientacao);
+    const canvas = mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas, terreno.orientacao, undefined, terreno.andar);
     // 09/11/2026 (D-143): a janela com zoom é a mesma do Portal temporário (ampliada no celular, o mapa ocupa a tela).
     const { janela, zoom } = janelaComZoom(canvas, d.el, { reduzir: t('mundo.mapa.reduzir'), ampliar: t('mundo.mapa.ampliar') });
     local.append(zoom, janela, paragrafo(t('mundo.mapa.legenda'), 'legenda-cartografia'));

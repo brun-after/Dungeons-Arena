@@ -729,6 +729,7 @@
     "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },
     "covil": { "contribuicaoMinPct": 10 },
     "checkpointS": 60,
+    "reconexaoS": 300,
     "passagemProtecaoS": 3,
     "errantes": { "passoMs": 650, "pausaPertoCelulas": 2 },
     "escolta": { "raioChegada": 3, "duracaoMin": 30 },

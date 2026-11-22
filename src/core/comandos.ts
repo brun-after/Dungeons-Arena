@@ -35,7 +35,7 @@ export type Comando =
   | { t: 'abrirMenu' }
   /** Marco 9A (14/10/2026): loja (com a janela aberta) e ordenação manual da mochila. */
   | { t: 'comprar'; itemId: string }
-  | { t: 'vender'; invId: string }
+  | { t: 'vender'; invId: string; qtd?: number }
   | { t: 'fecharLoja' }
   | { t: 'moverItem'; invId: string; posicao: number }
   /** Marco 10A-3: dispensa as próprias invocações (§2.9). */

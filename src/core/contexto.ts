@@ -527,6 +527,8 @@ export interface Balance {
     /** No covil, quem causou ao menos esta % do dano no boss leva o próprio sorteio. */
     covil: { contribuicaoMinPct: number };
     checkpointS: number;
+    /** Marco 53 (D-203): a reserva de quem caiu no Mundo, em segundos (a entidade fica parada até lá). */
+    reconexaoS: number;
     /** Invisível para inimigos por alguns segundos depois de passar de região. */
     passagemProtecaoS: number;
     /** Marco 38 (08/11/2026, D-142): o passo do mercador errante e a distância em que ele para perto de alguém. */
