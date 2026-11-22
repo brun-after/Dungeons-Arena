@@ -105,3 +105,17 @@ export function profundidade(p: Projecao, cx: number, cy: number): number {
   const c = centroDaCelula(cx, cy);
   return p.projetar(c.x, c.y).z;
 }
+
+/**
+ * 22/11/2026 (D-202): a célula (x, y) está a mais de `folga` células da vista (o retângulo do plano, em px de mundo)?
+ * Quem está longe não é desenhado: o atlas da criatura só sobe para a placa quando ela chega perto (a troca de região
+ * mandava os de todas as criaturas da região no primeiro quadro, mais de 100 megapixels nas Ruínas do Norte).
+ */
+export function longeDaVista(vista: readonly number[], x: number, y: number, folga = 10): boolean {
+  const [x0, y0, x1, y1] = vista;
+  if (x0 === undefined || y0 === undefined || x1 === undefined || y1 === undefined) return false;
+  const m = folga * CELULA_PX;
+  const px = (x + 0.5) * CELULA_PX;
+  const py = (y + 0.5) * CELULA_PX;
+  return px < x0 - m || px > x1 + m || py < y0 - m || py > y1 + m;
+}

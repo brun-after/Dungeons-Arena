@@ -201,7 +201,7 @@ function palco(): Promise<import('../render/vivos/palco-vivo').PalcoVivo | null>
 async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement | null> {
   const p = await palco();
   if (!p?.suporta(modelo)) return null;
-  const { pedidoVivo, chaveDaSkin } = await import('../render/vivos/palco-vivo');
+  const [{ chaveDaSkin }, { pedidoVivo }] = await Promise.all([import('../render/vivos/palco-vivo'), import('../render/vivos/pedido-vivo')]);
   // 06/11/2026: com skin vestida, o retrato é a skin (sem o equipamento).
   const chave = chaveDaSkin(eq?.skin, modelo) ?? modelo;
   if (chave !== modelo && !p.suporta(chave)) return null;

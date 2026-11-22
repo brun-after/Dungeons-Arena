@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.55 · **Data:** 22/11/2026
+**Versão:** 1.56 · **Data:** 22/11/2026
 
 > **Histórico**
+> - **1.56 (22/11/2026)**: D-202, adendo: as Ruínas do Norte (quem está longe da vista não é desenhado, então o atlas da criatura só sobe à placa quando ela chega perto; os shaders do modelo 3D novo compilam em paralelo).
 > - **1.55 (22/11/2026)**: D-202: a troca de região sem a travada do cliente (o palco 3D e o do Pixi passam de cena em cena, o chão é pintado num trabalhador, o three.js sem ler o log dos shaders fora do desenvolvimento) e a medida `&troca=` no `?bench=mundo`.
 > - **1.54 (22/11/2026)**: D-201: as regiões sempre abertas no servidor foram tentadas e revertidas (o jogo piorou).
 > - **1.53 (22/11/2026)**: D-134: a skin do arqueiro vira Muse Elf (voa em vez de andar, as asas batem, mais baixa e de formas femininas). D-200: as armadilhas do núcleo Armadilha (a skill comum inicial do Arqueiro) ocupam um quadrado de 4 células.
@@ -6565,7 +6566,31 @@ maiores que no jogo):
 O chão pintado no trabalhador é idêntico ao de antes (a mesma cena fotografada nos dois builds).
 
 **O que falta.**
-- As Ruínas do Norte quase não melhoraram: o primeiro quadro delas ainda leva ~4 s de JavaScript. O próximo passo é
-  medir o que essa região tem de diferente.
+- As Ruínas do Norte quase não melhoraram com isto (o primeiro quadro ainda levava ~4 s); resolvido no adendo abaixo.
 - A primeira troca depois de entrar no Mundo ainda cria um `Application`, porque a guarda está vazia.
 - Não foi medido num celular.
+
+**Adendo: as Ruínas do Norte (22/11/2026).** Isolei no perfil só a troca para as Ruínas. O primeiro quadro delas
+mandava 104 megapixels de textura para a placa, contra 30 nos Campos do Oeste. Eram os atlas pré-renderizados de todas
+as criaturas da região, até as que estavam a dezenas de células: só os dois dragões têm 4032×2848 cada. O Pixi manda a
+textura de tudo o que está no palco, visível na tela ou não. Além disso, o modelo 3D de uma criatura nunca vista
+compilava os shaders no meio do quadro.
+- **Quem está longe não é desenhado** (`longeDaVista` em `render/projecao.ts`, a 10 células da vista do quadro). Fica
+  escondido pelo mesmo `oculto` de quem está dentro de casa, e o corpo dele não é desenhado (`sprites.ts`). Assim o
+  atlas só sobe quando a criatura chega perto, e o palco 3D não desenha quem está longe.
+- **Os shaders do modelo 3D novo compilam em paralelo** (`compileAsync`, que usa `KHR_parallel_shader_compile`). Até
+  terminar, a criatura aparece pelo atlas, como enquanto o GLB carrega.
+- `pedidoVivo` saiu para `render/vivos/pedido-vivo.ts` (o `palco-vivo.ts` chegou ao teto de linhas).
+
+Resultado no build de produção (a mesma rota, duas rodadas, contra o build de antes do D-202):
+
+| Troca | Antes do D-202 | Agora | Pior quadro antes | Pior quadro agora |
+|---|---|---|---|---|
+| Campos do Oeste | 8,5 a 14,4 s | 3,3 a 3,7 s | 1,8 a 4 s | ~0,6 s |
+| Floresta Antiga | 6,1 a 16 s | 3,3 a 4,1 s | 1,8 a 4,6 s | 0,58 a 0,7 s |
+| Ruínas do Norte | 7,6 a 13,9 s | 4,0 a 4,8 s | 2,7 a 4,8 s | 0,78 s |
+| Vila do Centro | 2,2 a 2,8 s | 0,83 a 0,89 s | 0,9 a 1,4 s | 0,4 a 0,5 s |
+| Encosta do Leste | 6,5 a 7 s | 2,1 a 2,7 s | 1,8 a 2,2 s | 0,36 a 0,42 s |
+
+As criaturas perto da tela continuam aparecendo (conferido por foto). O atlas grande agora sobe quando a criatura
+chega perto: o primeiro dragão que aparece ainda pode dar um quadro mais lento, uma vez.

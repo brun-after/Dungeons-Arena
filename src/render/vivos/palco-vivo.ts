@@ -18,10 +18,8 @@ import { fundirPecas, malhasDe } from './fundir-pecas';
 import { BATIDA_DO_VOO_MS, FRACAO_PLANAR, PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
 import { PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
-import type { Equipamento3d } from '../adornos';
-import type { AparenciaEquipada } from '../../entities/entidade';
 import { definirDetalhe, type PecaSombria } from './armaduras-sombrias';
-import { grauDaChave, montarVesteViva, pecasDoPedido, realcar, realceDe, type Realce } from './vestes-vivas';
+import { grauDaChave, montarVesteViva, realcar, type Realce } from './vestes-vivas';
 import { CHEFES, CHEFES_DE_GEOMETRIA } from './chefes-vivos';
 import { PROCS_FILO } from './filo';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
@@ -239,6 +237,8 @@ function recortar(c: THREE.AnimationClip, pernas: boolean): THREE.AnimationClip 
 
 export class PalcoVivo {
   private readonly bases = new Map<string, Base | 'carregando' | 'falhou'>();
+  /** D-202: os modelos prontos com os shaders ainda compilando em paralelo (até lá, o atlas desenha). */
+  private readonly aquecendo = new Set<string>();
   private readonly atores = new Map<string, Ator>();
   private readonly renderer: THREE.WebGLRenderer;
   private readonly cena = new THREE.Scene();
@@ -332,14 +332,13 @@ export class PalcoVivo {
 
   private base(modelo: string): Base | null {
     const b = this.bases.get(modelo);
-    if (b && b !== 'carregando' && b !== 'falhou') return b;
+    if (b && b !== 'carregando' && b !== 'falhou') return this.aquecendo.has(modelo) ? null : b;
     if (b) return null;
     const classe = Object.hasOwn(CLASSES, modelo) ? CLASSES[modelo] : undefined;
     if (classe?.proc) {
       const { grupo, animacoes } = classe.proc();
-      const pronta = this.montarBase(modelo, classe, grupo, animacoes);
-      this.bases.set(modelo, pronta);
-      return pronta;
+      this.bases.set(modelo, this.aquecer(this.montarBase(modelo, classe, grupo, animacoes)));
+      return null;
     }
     const url = classe && Object.entries(URLS).find(([c]) => c.endsWith(`/${classe.glb}.glb`))?.[1];
     if (!url) {
@@ -350,12 +349,23 @@ export class PalcoVivo {
     void url()
       .then((u) => new GLTFLoader().loadAsync(u))
       .then((g) => {
-        if (!this.destruido) this.bases.set(modelo, this.montarBase(modelo, classe, g.scene, g.animations));
+        if (!this.destruido) this.bases.set(modelo, this.aquecer(this.montarBase(modelo, classe, g.scene, g.animations)));
       })
       .catch(() => {
         this.bases.set(modelo, 'falhou');
       });
     return null;
+  }
+
+  /**
+   * 22/11/2026 (D-202): compila os shaders do modelo em paralelo (KHR_parallel_shader_compile) antes do primeiro quadro
+   * dele. Compilados no meio do quadro, a criatura nunca vista (as das Ruínas do Norte) parava a troca de região.
+   */
+  private aquecer(base: Base): Base {
+    this.aquecendo.add(base.nome);
+    const fim = () => { this.aquecendo.delete(base.nome); };
+    this.renderer.compileAsync(base.modelo, this.camera, this.cena).then(fim, fim);
+    return base;
   }
 
   private montarBase(nome: string, classe: Classe, modelo: THREE.Object3D, animacoes: THREE.AnimationClip[]): Base {
@@ -723,7 +733,7 @@ export class PalcoVivo {
    */
   async retrato(p: PedidoVivo, largura: number, altura: number): Promise<HTMLCanvasElement | null> {
     let base = this.base(p.modelo);
-    for (let i = 0; !base && i < 600 && this.bases.get(p.modelo) === 'carregando' && !this.destruido; i++) {
+    for (let i = 0; !base && i < 600 && (this.bases.get(p.modelo) === 'carregando' || this.aquecendo.has(p.modelo)) && !this.destruido; i++) {
       await new Promise((r) => setTimeout(r, 50));
       base = this.base(p.modelo);
     }
@@ -771,30 +781,4 @@ export class PalcoVivo {
     this.fonte.destroy(true);
     this.renderer.dispose();
   }
-}
-
-/** O pedido do quadro a partir do que o desenho das entidades já calcula (sprites.ts). */
-export function pedidoVivo(
-  id: string,
-  modelo: string,
-  aparencia: AparenciaEquipada | null | undefined,
-  equipamento: Equipamento3d | null,
-  estado: EstadoPersonagem,
-  tempoMs: number,
-  fracao: number,
-  angulo: number,
-  golpe?: PedidoVivo['golpe'],
-): PedidoVivo {
-  // 06/11/2026: com skin (a chave `skin:<id>`), prevalece a skin: sem peças e sem armas do equipamento (a skin tem a dela).
-  if (modelo.startsWith('skin:')) return { id, modelo, pecas: {}, estado, tempoMs, fracao, angulo, golpe, arma: null, secundaria: null };
-  // Marco 46 (D-189): cada peça pelo propósito, estilo, marca e grau dela; o realce pelo grau, conjunto e elemento.
-  const realce = realceDe(aparencia, modelo);
-  const arma = equipamento?.arma.modelo ? equipamento.arma : null;
-  const secundaria = equipamento?.secundaria ?? null;
-  // Só no servidor de desenvolvimento: `&vestir=N` veste todas as peças (e as armas) no grau N, para revisar o visual.
-  const vestir = import.meta.env.DEV ? Number(new URLSearchParams(location.search).get('vestir') ?? Number.NaN) : Number.NaN;
-  if (vestir >= 0 && vestir <= 5) {
-    return { id, modelo, pecas: pecasDoPedido(aparencia, modelo, vestir), realce, estado, tempoMs, fracao, angulo, golpe, arma: arma && { ...arma, grau: vestir }, secundaria: secundaria && { ...secundaria, grau: vestir } };
-  }
-  return { id, modelo, pecas: pecasDoPedido(aparencia, modelo), realce, estado, tempoMs, fracao, angulo, golpe, arma, secundaria };
 }
