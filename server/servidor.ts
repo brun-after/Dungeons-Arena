@@ -32,7 +32,7 @@ import { PersistenciaEmMemoria, PersistenciaSupabase, slotValido, type Persisten
 export interface OpcoesServidor {
   porta: number;
   regiao: string;
-  /** 09/11/2026 (D-144): montar os lugares do Mundo e abrir as salas das regiões logo ao subir (o main liga; os testes não). */
+  /** 09/11/2026 (D-144): montar as regiões do Mundo logo ao subir (o main liga; os testes não). */
   aquecerMundo?: boolean;
   /** Margem sobre o teto de 16 KiB por mensagem (envelope do Colyseus). */
   maxPayload?: number;
@@ -87,6 +87,8 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   const mercado: LojaDoMercado = o.supabaseUrl && o.supabaseChaveServico ? new MercadoSupabase(o.supabaseUrl, o.supabaseChaveServico) : new MercadoEmMemoria();
   const coordenador = new CoordenadorDoMundo(persistencia, conteudoMundo, mercado);
   SalaMundoColyseus.coordenador = coordenador;
+  // 09/11/2026 (D-144): as regiões montadas de antemão (a primeira sala de cada uma não trava o servidor).
+  if (o.aquecerMundo) coordenador.aquecer();
   const limiteMundo = new LimiteDeTentativas(30, 60_000);
   const httpServer = http.createServer();
   const inicio = Date.now();
@@ -233,9 +235,6 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     gracefullyShutdown: false,
   });
   await servidor.listen(o.porta);
-  // 09/11/2026 (D-144): os lugares montados de antemão (a primeira sala de cada um não trava o servidor).
-  // 22/11/2026 (D-201): depois de o servidor subir, para cada região abrir a sala permanente.
-  if (o.aquecerMundo) coordenador.aquecer(250, true);
   const endereco = httpServer.address();
   const porta = typeof endereco === 'object' && endereco ? endereco.port : o.porta;
   registrarLog('servidor_iniciado', { porta, regiao: o.regiao, versao: versaoDoConteudo() });

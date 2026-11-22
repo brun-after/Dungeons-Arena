@@ -156,39 +156,19 @@ export class CoordenadorDoMundo {
   }
 
   /**
-   * 09/11/2026 (D-144): monta os lugares logo que o servidor sobe, um por vez com folga entre eles, para a primeira
-   * entrada em cada um não travar quem já está jogando.
-   * 22/11/2026 (D-201): também as masmorras e os covis; com `abrirSalas`, cada região ganha a sala permanente (o
-   * canal 1, que dorme vazia e nunca expira), e quem chega encontra a região viva, sem esperar a sala abrir.
+   * 09/11/2026 (D-144): monta as regiões logo que o servidor sobe, uma por vez com folga entre elas, para a primeira
+   * entrada em cada região não travar quem já está jogando.
    */
-  aquecer(intervaloMs = 250, abrirSalas = false, lugares?: readonly string[]): void {
-    this.manterRegioes = abrirSalas;
-    const r = this.reino;
-    const ids = lugares ? [...lugares] : [...r.regioes.map((x) => `regiao:${x.id}`), ...r.masmorras.map((x) => `masmorra:${x.id}`), ...r.covis.map((x) => `covil:${x.id}`)];
+  aquecer(intervaloMs = 250): void {
+    const ids = this.reino.regioes.map((r) => `regiao:${r.id}`);
     const proxima = () => {
       const id = ids.shift();
       if (id === undefined) return;
       const lugar = lerLugar(this.reino, id);
       if (lugar && !this.moldes.has(id)) this.moldeDe(lugar);
-      if (lugar?.tipo === 'regiao' && abrirSalas) void this.abrirRegiao(id);
       setTimeout(proxima, intervaloMs).unref();
     };
     setTimeout(proxima, intervaloMs).unref();
-  }
-
-  /** 22/11/2026 (D-201): as regiões têm sala permanente (liga no aquecer do servidor; os testes não). */
-  private manterRegioes = false;
-
-  /** A sala do lugar é a permanente: a região compartilhada, no canal 1, com o servidor mantendo as regiões. */
-  salaPermanente(lugar: string, instancia: string, canal: number): boolean {
-    return this.manterRegioes && lugar.startsWith('regiao:') && instancia === '' && canal === 1;
-  }
-
-  /** Abre o canal 1 da região, se ainda não há sala dela (alguém pode ter entrado antes do aquecimento). */
-  private async abrirRegiao(lugar: string): Promise<void> {
-    const abertas = await matchMaker.query({ name: 'mundo' });
-    if (abertas.some((s) => ((s.metadata ?? {}) as { lugar?: unknown }).lugar === lugar)) return;
-    await matchMaker.createRoom('mundo', { lugar, instancia: '' }).catch(() => undefined);
   }
 
   /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
@@ -500,10 +480,6 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       return { ficha };
     }
     return null;
-  }
-
-  protected override permanente(): boolean {
-    return this.coordenador.salaPermanente(this.mundo.idLugar, this.instancia, this.canal);
   }
 
   protected metadataPropria(): MetadataDaSala {

@@ -3,8 +3,7 @@
 // do jogo. Mensagens vão e vêm como texto JSON no tipo "m" — o mesmo protocolo do loopback (D-035).
 //
 // - O roomId é o código curto da sala (D-036).
-// - Criador é cliente comum: sair não encerra a sala (§2.13). Sala vazia expira em 120 s; a permanente (a região do
-//   Mundo, 22/11/2026, D-201) dorme no lugar de expirar: para de simular até alguém entrar.
+// - Criador é cliente comum: sair não encerra a sala (§2.13). Sala vazia expira em 120 s.
 // - Queda: a sessão fica reservada por 30 s (allowReconnection); a entidade fica parada e vulnerável.
 // - Passo fixo de 60 Hz com acumulador do Colyseus (sem espiral, D-037).
 // - Métricas vão também para a metadata da sala, que o `/saude` agrega (sem estado global).
@@ -62,10 +61,6 @@ export abstract class SalaColyseusBase extends Room {
   protected sala!: SalaArena;
   private readonly conexoes = new Map<string, Conexao>();
   private vaziaDesde: number | null = Date.now();
-  /** 22/11/2026 (D-201): a sala permanente vazia há 120 s não simula (o tick custa CPU sem ninguém para ver). */
-  private dormindo = false;
-  /** Ninguém entrou ainda: a sala permanente recém-aberta dorme logo (não há ficha a gravar nem quem tirar). */
-  private teveConexao = false;
   /** Marco 29 (30/10/2026, D-128): as sessões caídas, na reserva de reconexão. */
   protected readonly caidas = new Set<string>();
   private readonly duracaoTick = new Janela(600);
@@ -78,10 +73,6 @@ export abstract class SalaColyseusBase extends Room {
   protected abstract criarSala(opcoes: unknown): SalaArena;
   /** A parte da metadata própria do tipo de sala (a fase pode mudar com o tempo). */
   protected abstract metadataPropria(): MetadataDaSala;
-  /** 22/11/2026 (D-201): a sala que nunca expira (vazia, dorme). Só a região do Mundo. */
-  protected permanente(): boolean {
-    return false;
-  }
 
   override async onCreate(opcoes: unknown): Promise<void> {
     // Código único: tenta de novo nas raríssimas colisões.
@@ -102,7 +93,6 @@ export abstract class SalaColyseusBase extends Room {
     });
 
     this.setFixedTimestep((passo) => {
-      if (this.dormindo) return;
       const inicio = performance.now();
       this.sala.tick(passo.dtMs);
       this.duracaoTick.registrar(performance.now() - inicio);
@@ -127,9 +117,6 @@ export abstract class SalaColyseusBase extends Room {
     }, this.identidadeDe?.(client) ?? null);
     this.conexoes.set(id, conexao);
     this.vaziaDesde = null;
-    this.teveConexao = true;
-    if (this.dormindo) registrarLog('sala_acordou', { sala: this.roomId });
-    this.dormindo = false;
   }
 
   override async onDrop(client: Client): Promise<void> {
@@ -164,16 +151,9 @@ export abstract class SalaColyseusBase extends Room {
   }
 
   private expirarSeVazia(): void {
-    if (this.dormindo || this.vaziaDesde === null) return;
-    const venceu = Date.now() - this.vaziaDesde >= EXPIRACAO_SALA_VAZIA_MS;
-    if (!venceu && (this.teveConexao || !this.permanente())) return;
-    if (!this.permanente()) {
+    if (this.vaziaDesde !== null && Date.now() - this.vaziaDesde >= EXPIRACAO_SALA_VAZIA_MS) {
       void this.disconnect();
-      return;
     }
-    // Os 120 s acordada deixam o tick tirar quem saiu e gravar a ficha antes de a simulação parar.
-    this.dormindo = true;
-    registrarLog('sala_dormindo', { sala: this.roomId });
   }
 
   private bytesPorClientePorS = 0;
