@@ -23,10 +23,10 @@ export interface CliqueEmObjeto {
 }
 
 /**
- * O objeto usável clicado: o da célula, ou o de uma célula à frente (o desenho fica de pé e cobre as células de trás
- * dele na tela, nas duas visões). Clicar ao lado da loja continua sendo andar.
+ * O objeto usável clicado: o da célula, ou o da célula logo acima dela na tela (o desenho fica de pé e a cobre): vista
+ * de cima, a de cima (y - 1); no isométrico, a de trás na diagonal (x - 1, y - 1). Clicar ao lado continua sendo andar.
  */
-export function objetoClicado(estado: EstadoJogo, c: Celula): ObjetoNoMundo | null {
+export function objetoClicado(estado: EstadoJogo, c: Celula, iso = true): ObjetoNoMundo | null {
   let melhor: ObjetoNoMundo | null = null;
   let melhorD = Infinity;
   for (const o of estado.objetos) {
@@ -35,7 +35,8 @@ export function objetoClicado(estado: EstadoJogo, c: Celula): ObjetoNoMundo | nu
     const dx = o.x - c.x;
     const dy = o.y - c.y;
     const d = dx + dy;
-    if (dx >= 0 && dy >= 0 && dx <= 1 && dy <= 1 && d < melhorD) {
+    const cobre = (dx === 0 && dy === 0) || (dy === 1 && dx === (iso ? 1 : 0));
+    if (cobre && d < melhorD) {
       melhor = o;
       melhorD = d;
     }
@@ -43,7 +44,7 @@ export function objetoClicado(estado: EstadoJogo, c: Celula): ObjetoNoMundo | nu
   return melhor;
 }
 
-export function criarCliqueEmObjeto(ctx: ContextoSimulacao, estado: () => EstadoJogo, jogador: () => Entidade | undefined, emitir: (cmd: Comando) => void): CliqueEmObjeto {
+export function criarCliqueEmObjeto(ctx: ContextoSimulacao, estado: () => EstadoJogo, jogador: () => Entidade | undefined, emitir: (cmd: Comando) => void, iso: () => boolean = () => true): CliqueEmObjeto {
   let pedido: { objetoId: string; ateMs: number } | null = null;
   const alcance = ctx.balance.economia.alcanceInteracao;
 
@@ -52,7 +53,7 @@ export function criarCliqueEmObjeto(ctx: ContextoSimulacao, estado: () => Estado
   return {
     tocar: (c, agoraMs) => {
       const eu = jogador();
-      const o = eu && !eu.morto && !eu.interacao ? objetoClicado(estado(), c) : null;
+      const o = eu && !eu.morto && !eu.interacao ? objetoClicado(estado(), c, iso()) : null;
       if (!eu || !o) {
         pedido = null;
         return false;

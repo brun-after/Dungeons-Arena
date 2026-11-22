@@ -339,7 +339,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
   const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
-  const cliqueObjeto = criarCliqueEmObjeto(ctx, o.estado, jogador, emitir); // Marco 53 (22/11/2026, D-203)
+  const cliqueObjeto = criarCliqueEmObjeto(ctx, o.estado, jogador, emitir, isometrico); // Marco 53 (22/11/2026, D-203)
   const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
     // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick. D-168: a mira do movimento antes.

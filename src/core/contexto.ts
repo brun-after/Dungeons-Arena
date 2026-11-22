@@ -609,9 +609,7 @@ export interface Balance {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
     capacidade: number;
     pilhaMax: number;
-    /** Marco 53 (D-203): quem soltou espera isto (ms) depois de fechar a mochila para recolher; o teto, sem fechar. */
-    soltarEsperaMs: number;
-    soltarEsperaMaxMs: number;
+    soltarEsperaMs: number; soltarEsperaMaxMs: number; // Marco 53 (D-203): a espera de quem soltou (ms) e o teto.
   };
   /** Marco 14 (D-059): ranks, barra e pontos de habilidade; orçamento de poder; habilidades geradas. */
   habilidades: RegrasHabilidades;

@@ -124,6 +124,12 @@ describe('marco 53: o condutor, o clique, o renascer, a noite e a roda (D-203)',
     expect(objetoClicado(estado, { x: 10, y: 10 })?.objetoId).toBe('l1');
     expect(objetoClicado(estado, { x: 9, y: 9 })?.objetoId).toBe('l1');
     expect(objetoClicado(estado, { x: 11, y: 10 })).toBeNull();
+    // Isométrico: as vizinhas de trás pelos lados ficam para andar (a célula ao lado do baú, no e2e).
+    expect(objetoClicado(estado, { x: 9, y: 10 })).toBeNull();
+    expect(objetoClicado(estado, { x: 10, y: 9 })).toBeNull();
+    // Vista de cima, a célula ao lado (à esquerda) é andar; só a de cima é coberta pelo desenho.
+    expect(objetoClicado(estado, { x: 9, y: 10 }, false)).toBeNull();
+    expect(objetoClicado(estado, { x: 10, y: 9 }, false)?.objetoId).toBe('l1');
   });
 
   it('renasce onde o jogador escolheu (sem escolha, a vila salva)', () => {
