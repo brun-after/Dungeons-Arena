@@ -1,4 +1,5 @@
-// A vista local do Mundo (marco 43, 15/11/2026, D-177): `?bench=mundo&regiao=<id>[&x=..&y=..][&segundos=..][&hora=..]`.
+// A vista local do Mundo (marco 43, 15/11/2026, D-177): `?bench=mundo&regiao=<id>[&x=..&y=..][&segundos=..][&hora=..]`
+// e, desde o D-202 (22/11/2026), `&troca=<id>` para medir a troca de região.
 // Monta a região do Mundo na própria página, sem servidor (a mesma geração e a mesma cena do jogo), com o jogador
 // local controlável no ponto pedido (ou na chegada). Serve para ver o relevo, os objetos e a luz de cada região e
 // para medir os quadros no exterior (a medida sai no painel depois de `segundos`, como os outros benchmarks).
@@ -12,7 +13,7 @@ import { montarLugar } from '../mundo/lugares';
 import { reinoDoConteudo } from '../mundo/reino';
 import { iniciarLaco } from '../plataforma/laco-navegador';
 import { Interpolador } from '../render/interpolacao';
-import { montarCena } from '../ui/cena';
+import { montarCena, type Cena } from '../ui/cena';
 import { passavel } from '../world/fase';
 
 export interface MedidaMundo {
@@ -82,4 +83,91 @@ export async function iniciarMundoLocal(raiz: HTMLElement, params: URLSearchPara
       }
     },
   });
+  // 22/11/2026 (D-202): `&troca=<id>[,<id>...]` mede as trocas de região, uma depois da outra (a cena de lá montada
+  // por cima e a de antes tirada, como no Mundo). As medidas ficam em `window.__trocas` quando todas terminam.
+  const trocas = (params.get('troca') ?? '').split(',').filter(Boolean);
+  if (trocas.length > 0) setTimeout(() => { void medirTrocas(raiz, trocas, classe.id); }, 3000);
+}
+
+async function medirTrocas(raiz: HTMLElement, ids: readonly string[], classeId: string): Promise<void> {
+  const medidas: MedidaDaTroca[] = [];
+  let anterior: Cena | null = null;
+  for (const id of ids) {
+    const r = await medirTroca(raiz, id, classeId);
+    if (!r) break;
+    anterior?.desmontar();
+    anterior = r.cena;
+    medidas.push(r.medida);
+  }
+  (globalThis as { __trocas?: MedidaDaTroca[] }).__trocas = medidas;
+}
+
+/** O que a medida da troca anota (em `window.__troca` e no console). */
+export interface MedidaDaTroca {
+  /** Gerar o mapa de lá, montar a cena e esperar o chão à vista (ms). */
+  lugarMs: number;
+  cenaMs: number;
+  chaoMs: number;
+  totalMs: number;
+  /** O tempo de JavaScript de cada quadro da cena nova até o chão ficar pronto. */
+  quadrosMs: number[];
+  /** O maior intervalo entre dois quadros da página, da montagem até 1,5 s depois do chão pronto. */
+  maiorQuadroMs: number;
+  regiao: string;
+}
+
+/**
+ * 22/11/2026 (D-202): monta a região `id` por cima da de agora, escondida até o chão à vista ficar pronto, como a
+ * troca de sala do Mundo (mundo-tela.ts), e mede cada etapa. Sem servidor: a conexão fica de fora.
+ */
+async function medirTroca(raiz: HTMLElement, id: string, classeId: string): Promise<{ cena: Cena; medida: MedidaDaTroca } | null> {
+  const conteudo = conteudoOficial();
+  const reino = reinoDoConteudo(conteudo);
+  const regiao = reino.regioes.find((r) => r.id === id);
+  const classe = conteudo.classes.get(classeId);
+  if (!regiao || !classe) return null;
+  const t0 = performance.now();
+  let maior = 0;
+  let ultimo = t0;
+  let vigiando = true;
+  const vigiar = () => {
+    const agora = performance.now();
+    maior = Math.max(maior, agora - ultimo);
+    ultimo = agora;
+    if (vigiando) requestAnimationFrame(vigiar);
+  };
+  requestAnimationFrame(vigiar);
+  const { ctx, estado } = montarLugar(conteudo, reino, { tipo: 'regiao', regiao }, modoPorId(conteudo, 'mundo'));
+  const lugarMs = performance.now() - t0;
+  const chegada = ctx.fase.spawns[0] ?? { x: 2, y: 2 };
+  estado.entidades.push(criarJogador(classe, 'local', chegada.x, chegada.y, ctx.balance));
+  const camada = document.createElement('div');
+  camada.className = 'camada-mundo';
+  camada.style.visibility = 'hidden';
+  raiz.append(camada);
+  const t1 = performance.now();
+  const cena = await montarCena({ raiz: camada, ctx, idLocal: 'local', estado: () => estado, emitir: () => {}, pausaOJogo: false });
+  const cenaMs = performance.now() - t1;
+  if (!cena) return null;
+  const t2 = performance.now();
+  const quadrosMs: number[] = [];
+  const interp = new Interpolador();
+  await new Promise<void>((pronto) => {
+    const passo = () => {
+      const q0 = performance.now();
+      cena.quadro({ alpha: 1, agoraMs: q0, posicao: (e) => interp.posicao(e, 1) });
+      quadrosMs.push(Math.round(performance.now() - q0));
+      if (cena.mundo.chaoPronto() || performance.now() - t2 > 8000) pronto();
+      else requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  });
+  const chaoMs = performance.now() - t2;
+  camada.style.visibility = '';
+  const totalMs = performance.now() - t0;
+  await new Promise((r) => setTimeout(r, 1500));
+  vigiando = false;
+  const medida: MedidaDaTroca = { regiao: id, lugarMs: Math.round(lugarMs), cenaMs: Math.round(cenaMs), chaoMs: Math.round(chaoMs), totalMs: Math.round(totalMs), quadrosMs, maiorQuadroMs: Math.round(maior) };
+  console.info('troca de região', JSON.stringify(medida));
+  return { cena, medida };
 }

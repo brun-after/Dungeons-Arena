@@ -1,6 +1,6 @@
-// Pinta o chão texturizado de um bloco num canvas (marco 31, 31/10/2026, D-130). Com as máscaras de
-// render/solo/mascaras.ts: a textura de base, cada camada por cima recortada pelo seu peso (bordas macias), as
-// manchas de variação, a mesma base em outra escala e girada (esconde a repetição), a sombra de escala grande, a
+// Pinta o chão texturizado de um bloco num canvas (marco 31, 31/10/2026, D-130; no trabalhador desde o D-202).
+// Com as máscaras de render/solo/mascaras.ts: a textura de base, cada camada por cima recortada pelo seu peso (bordas
+// macias), as manchas de variação, a mesma base em outra escala e girada (esconde a repetição), a sombra de escala grande, a
 // oclusão junto às paredes e, por fim, a tinta do tema em `multiply`. O padrão da textura é alinhado ao mundo, então
 // o desenho continua de um bloco para o outro.
 
@@ -20,16 +20,32 @@ const MACRO_ESCALA = 2.7;
 const MACRO_GIRO = 0.3;
 const MACRO_ALFA = 0.28;
 
-type Contexto2D = CanvasRenderingContext2D;
+/**
+ * 22/11/2026 (D-202): a tela de trabalho é o OffscreenCanvas (o mesmo código roda no trabalhador,
+ * render/solo/assar-trabalhador.ts) ou, onde ele não existe, o canvas da página. Os dois contextos têm os mesmos
+ * métodos de desenho usados aqui.
+ */
+export type TelaDoSolo = HTMLCanvasElement | OffscreenCanvas;
+type Contexto2D = OffscreenCanvasRenderingContext2D;
+
+export function novaTela(largura = 1, altura = 1): TelaDoSolo {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(largura, altura);
+  const c = document.createElement('canvas');
+  c.width = largura;
+  c.height = altura;
+  return c;
+}
+
+const contexto = (t: TelaDoSolo): Contexto2D | null => (t as OffscreenCanvas).getContext('2d');
 
 const hexCss = (cor: number) => `#${cor.toString(16).padStart(6, '0')}`;
 
 /** Os canvases de trabalho (reaproveitados de bloco em bloco). */
 export class AssadorDeSolo {
-  private readonly rascunho = document.createElement('canvas');
-  private readonly mascara = document.createElement('canvas');
+  private readonly rascunho = novaTela();
+  private readonly mascara = novaTela();
   /** Marco 31 (D-130): o contorno desfocado de uma área elemental (o recorte em `destination-in`). */
-  private readonly recorte = document.createElement('canvas');
+  private readonly recorte = novaTela();
 
   constructor(
     private readonly texturas: TexturasDoSolo,
@@ -47,8 +63,8 @@ export class AssadorDeSolo {
   }
 
   /** Pinta o bloco cujo canto (em px de mundo) é `origemX`, `origemY`. */
-  assar(destino: HTMLCanvasElement, pesos: PesosDoBloco, origemX: number, origemY: number): void {
-    const g = destino.getContext('2d');
+  assar(destino: TelaDoSolo, pesos: PesosDoBloco, origemX: number, origemY: number): void {
+    const g = contexto(destino);
     if (!g) return;
     const l = destino.width;
     const a = destino.height;
@@ -116,7 +132,7 @@ export class AssadorDeSolo {
   /** Uma camada por cima, recortada pela máscara dos seus pesos. */
   private recortada(g: Contexto2D, camada: CamadaSolo, pesos: Float32Array, origemX: number, origemY: number, dim: PesosDoBloco, escalaExtra: number): void {
     if (!pesos.some((p) => p > 0.002)) return;
-    const r = this.rascunho.getContext('2d');
+    const r = contexto(this.rascunho);
     if (!r) return;
     r.globalCompositeOperation = 'source-over';
     r.clearRect(0, 0, this.rascunho.width, this.rascunho.height);
@@ -141,7 +157,7 @@ export class AssadorDeSolo {
    * núcleo ganha o brilho do elemento, como na pintura por manchas de antes.
    */
   private ambientes(g: Contexto2D, origemX: number, origemY: number, l: number, a: number): void {
-    const r = this.rascunho.getContext('2d');
+    const r = contexto(this.rascunho);
     if (!r) return;
     const k = this.escala;
     const x0 = origemX / CELULA_PX;
@@ -187,7 +203,7 @@ export class AssadorDeSolo {
       this.recorte.width = l;
       this.recorte.height = a;
     }
-    const m = this.recorte.getContext('2d');
+    const m = contexto(this.recorte);
     if (!m) return false;
     const k = this.escala;
     m.save();
@@ -249,7 +265,7 @@ export class AssadorDeSolo {
   /** Escurece pelo peso (a oclusão e a sombra grande). */
   private sombra(g: Contexto2D, pesos: Float32Array, dim: PesosDoBloco, cor = '#000', modo: GlobalCompositeOperation = 'source-over'): void {
     if (!pesos.some((p) => p > 0.002)) return;
-    const r = this.rascunho.getContext('2d');
+    const r = contexto(this.rascunho);
     if (!r) return;
     r.globalCompositeOperation = 'source-over';
     r.clearRect(0, 0, this.rascunho.width, this.rascunho.height);
@@ -267,7 +283,7 @@ export class AssadorDeSolo {
 
   /** A máscara pequena (uma amostra por pixel), esticada com suavização na hora de recortar. */
   private pintarMascara(pesos: Float32Array, dim: PesosDoBloco): void {
-    const m = this.mascara.getContext('2d');
+    const m = contexto(this.mascara);
     if (!m) return;
     const img = m.createImageData(dim.largura, dim.altura);
     for (let i = 0; i < pesos.length; i++) {

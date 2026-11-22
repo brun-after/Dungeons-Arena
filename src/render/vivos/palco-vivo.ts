@@ -259,6 +259,7 @@ export class PalcoVivo {
   constructor(private readonly resolucao: number, private readonly detalhe = DETALHE, private readonly intervaloMs = 0) {
     this.renderer = new THREE.WebGLRenderer({ canvas: this.tela, antialias: true, alpha: true, premultipliedAlpha: true });
     this.renderer.setPixelRatio(1);
+    this.renderer.debug.checkShaderErrors = import.meta.env.DEV; // D-202: o log de cada programa custa segundos no Windows
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.2;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -664,6 +665,8 @@ export class PalcoVivo {
     const base = this.base(p.modelo);
     if (!base) return null;
     let a = this.atores.get(p.id);
+    // 22/11/2026 (D-202): o palco passa de cena em cena, e os ids se repetem entre as salas: outro modelo, outro ator.
+    if (a && a.base !== base) { this.soltarAtor(p.id, a); a = undefined; }
     if (!a) {
       a = this.novoAtor(base);
       this.atores.set(p.id, a);
@@ -687,12 +690,7 @@ export class PalcoVivo {
     if (this.intervaloMs > 0 && performance.now() - this.ultimoDesenhoMs < this.intervaloMs - 4) return;
     this.ultimoDesenhoMs = performance.now();
     for (const [id, a] of this.atores) {
-      if (a.semPedido++ > ESQUECER_APOS) {
-        a.raiz.removeFromParent();
-        a.textura.destroy(false);
-        this.livres.push(a.vaga);
-        this.atores.delete(id);
-      }
+      if (a.semPedido++ > ESQUECER_APOS) this.soltarAtor(id, a);
     }
     if (this.pedidos === 0) return;
     this.pedidos = 0;
@@ -757,6 +755,14 @@ export class PalcoVivo {
     this.renderer.setSize(COLUNAS * this.quadroL, this.linhas * this.quadroA, false);
     return saida;
   }
+
+  /** Tira o ator do palco e libera a vaga dele no atlas. */
+  private soltarAtor(id: string, a: Ator): void {
+    a.raiz.removeFromParent(); a.textura.destroy(false); this.livres.push(a.vaga); this.atores.delete(id);
+  }
+
+  /** D-202: o palco compartilhado (palco-compartilhado.ts) só volta a ser usado se não foi destruído. */
+  get ativo(): boolean { return !this.destruido; }
 
   destruir(): void {
     this.destruido = true;

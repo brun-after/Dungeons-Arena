@@ -13,6 +13,45 @@ import type { Matriz } from './projecao';
 
 export const TETO_DPR = 2;
 const DEBOUNCE_RESIZE_MS = 150;
+/**
+ * 22/11/2026 (D-202): os Application guardados quando a cena sai, para a próxima. Cada um novo é outro contexto WebGL,
+ * e a primeira imagem dele compila de novo todos os shaders (no Windows, pelo compilador do Direct3D): na troca de
+ * região, segundos com a tela parada. Até dois, porque na troca a cena de antes e a nova ficam na página juntas. O que
+ * uma cena criou e não soltou sai da placa pelo coletor do Pixi (um minuto sem uso).
+ */
+const GUARDADOS_MAX = 2;
+const guardados: Application[] = [];
+
+async function obterApp(host: HTMLElement, resolucao: number): Promise<Application> {
+  const largura = Math.max(1, host.clientWidth);
+  const altura = Math.max(1, host.clientHeight);
+  const guardado = guardados.pop();
+  if (guardado) {
+    guardado.renderer.resize(largura, altura, resolucao);
+    return guardado;
+  }
+  const app = new Application();
+  await app.init({
+    width: largura,
+    height: altura,
+    background: '#14121a',
+    resolution: resolucao,
+    autoDensity: true,
+    antialias: false,
+    preference: 'webgl',
+    autoStart: false,
+    sharedTicker: false,
+  });
+  return app;
+}
+
+/** Devolve o Application à guarda (sem nada no palco e fora da página), ou o destrói se a guarda está cheia. */
+function devolverApp(app: Application): void {
+  for (const filho of app.stage.removeChildren()) filho.destroy({ children: true });
+  app.canvas.remove();
+  if (guardados.length < GUARDADOS_MAX) guardados.push(app);
+  else app.destroy({ removeView: true }, { children: true });
+}
 
 export interface Palco {
   app: Application;
@@ -52,18 +91,7 @@ export interface Palco {
 }
 
 export async function criarPalco(host: HTMLElement): Promise<Palco> {
-  const app = new Application();
-  await app.init({
-    width: Math.max(1, host.clientWidth),
-    height: Math.max(1, host.clientHeight),
-    background: '#14121a',
-    resolution: Math.min(window.devicePixelRatio || 1, TETO_DPR),
-    autoDensity: true,
-    antialias: false,
-    preference: 'webgl',
-    autoStart: false,
-    sharedTicker: false,
-  });
+  const app = await obterApp(host, Math.min(window.devicePixelRatio || 1, TETO_DPR));
   app.ticker.stop();
   host.append(app.canvas);
 
@@ -140,7 +168,7 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
       observador.disconnect();
       window.removeEventListener('resize', redimensionar);
       window.removeEventListener('orientationchange', redimensionar);
-      app.destroy({ removeView: true }, { children: true });
+      devolverApp(app);
     },
   };
 }

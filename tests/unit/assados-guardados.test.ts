@@ -1,6 +1,6 @@
 // Marco 41 (14/11/2026, D-169): os blocos de chão assados guardados entre as cenas. O mesmo bloco é compartilhado
 // (a cena daqui, a vizinha além da borda e a cena de lá), o que está em uso nunca é apagado e a chave muda com o
-// conteúdo do bloco.
+// conteúdo do bloco. 22/11/2026 (D-202): a imagem pode ser o ImageBitmap do trabalhador.
 
 import { describe, expect, it } from 'vitest';
 import { chaveDoAssado, guardarAssado, pegarAssado, soltarAssado, temAssado } from '../../src/render/solo/assados-guardados';
@@ -26,6 +26,19 @@ describe('chão assado guardado (D-169)', () => {
     expect(temAssado('velho')).toBe(false);
     expect(velho.width).toBe(0);
     soltarAssado('em-uso');
+  });
+
+  it('a imagem do trabalhador (ImageBitmap) é fechada ao sair da guarda (D-202)', () => {
+    let fechada = false;
+    const bitmap = { width: 8, height: 8, close: () => { fechada = true; } } as unknown as ImageBitmap;
+    guardarAssado('bitmap', bitmap);
+    soltarAssado('bitmap');
+    for (let i = 0; i < 30; i++) {
+      guardarAssado(`mais${i}`, tela());
+      soltarAssado(`mais${i}`);
+    }
+    expect(temAssado('bitmap')).toBe(false);
+    expect(fechada).toBe(true);
   });
 
   it('a chave muda com as células do bloco e não com a resolução', () => {

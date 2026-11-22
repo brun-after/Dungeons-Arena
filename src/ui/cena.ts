@@ -80,7 +80,7 @@ import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { ObjetosPreRenderizados } from '../render/objetos-3d';
 import { AtlasDePersonagens } from '../render/personagens-3d';
-import { PalcoVivo } from '../render/vivos/palco-vivo';
+import { reservarPalcoVivo } from '../render/vivos/palco-compartilhado';
 import { webglAcelerado } from '../render/vivos/acelerado';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
@@ -240,7 +240,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // D-199 (21/11/2026): no toque, até 1,5× (a densidade do palco na resolução automática; os 2× gastavam o quádruplo
   // de pixels no desenho e no envio da textura a cada quadro) e no máximo ~30 redesenhos por segundo.
   const dprVivo = Math.min(toque ? 1.5 : 2, Math.max(1, globalThis.devicePixelRatio || 1));
-  const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(dprVivo, undefined, toque ? 1000 / 30 : 0);
+  const reservaVivos = o.tileset || !webglAcelerado() ? null : reservarPalcoVivo(dprVivo, toque ? 1000 / 30 : 0); // D-202: o mesmo de cena em cena
   const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual, ap.qualidade().soloEscala, pintor);
   if (solo) await solo.texturas;
   if (personagens) {
@@ -268,7 +268,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     idLocal,
     rotulos: palco.rotulos,
     personagens,
-    vivos,
+    vivos: reservaVivos?.palco ?? null,
     projecao,
     biblioteca: () => visao?.biblioteca() ?? null,
     tokenProprio: () => visao?.tokenProprio() ?? null,
@@ -790,7 +790,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       pintor.destruir();
       modelos3d.destruir();
       personagens?.destruir();
-      vivos?.destruir();
+      reservaVivos?.soltar();
       ap.encerrar();
       for (const d of document.querySelectorAll(`dialog.modal[data-cena="${marcaCena}"]`)) d.remove();
       palco.destruir();
