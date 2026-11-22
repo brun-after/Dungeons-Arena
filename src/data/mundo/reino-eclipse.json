@@ -89,7 +89,7 @@
   ],
   "regioes": [
     {
-      "id": "eclipse_baluarte",
+      "id": "eclipse_baluarte", "ninhos": [{ "preset": "guardiao_de_marmore", "nome": "Pedreira do baluarte" }],
       "andarilhos": [],
       "mercadoresErrantes": 1,
       "nome": "Baluarte da Aurora",
@@ -363,7 +363,7 @@
       ]
     },
     {
-      "id": "eclipse_exilados",
+      "id": "eclipse_exilados", "ninhos": [{ "preset": "marionetista", "nome": "Teatro dos exilados" }],
       "escuroBase": 1,
       "andarilhos": [
         {
@@ -1089,7 +1089,7 @@
       ]
     },
     {
-      "id": "eclipse_geleiras",
+      "id": "eclipse_geleiras", "ninhos": [{ "preset": "escultor_de_geada", "nome": "Ateliê da geada" }],
       "nome": "Geleiras Eternas",
       "tamanho": 296,
       "gx": 3,
@@ -1520,7 +1520,7 @@
       ]
     },
     {
-      "id": "eclipse_tempestade",
+      "id": "eclipse_tempestade", "ninhos": [{ "preset": "velejador", "nome": "Destroços do cais" }],
       "nome": "Coroa da Tempestade",
       "tamanho": 272,
       "gx": 2,

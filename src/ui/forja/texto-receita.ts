@@ -3,7 +3,8 @@
 // - para quê: o slot e, na arma, a família e a classe que a usa naturalmente (a de outra classe também serve, com uma
 //   parte da passiva dela, como qualquer arma emprestada, progression/armas.ts);
 // - a raridade mínima da peça base (o resultado guarda a raridade da peça) e o que a forja faz nela;
-// - onde a receita cai: as criaturas que a guardam, as regiões e dungeons onde elas vivem, a dimensão e os chefes.
+// - onde a receita cai: as criaturas que a guardam, as regiões e dungeons onde elas vivem, a dimensão e os chefes,
+//   e o ninho delas, onde ela cai mais (world/ninhos.ts).
 // Tudo vem do molde (forja.json) e do reino; nada fixo por receita.
 
 import type { ContextoSimulacao } from '../../core/contexto';
@@ -53,7 +54,15 @@ function ondeCai(ctx: Pick<ContextoSimulacao, 'conteudo'>, molde: Molde): string
   }
   for (const d of molde.cai.dimensoes) partes.push(t('forja.receita.dimensao', { nome: ctx.conteudo.dimensoes.get(d)?.nome ?? d }));
   if (molde.cai.chefes) partes.push(t('forja.receita.chefes'));
+  const ninhos = ninhosDasCriaturas(ctx, molde.cai.presets);
+  if (ninhos.length > 0) partes.push(t('forja.receita.ninhos', { lista: ninhos.join(', ') }));
   return partes.length > 0 ? t('forja.receita.cai', { lista: partes.join(' · ') }) : null;
+}
+
+/** Marco 53 (22/11/2026, D-203): os ninhos das criaturas (onde a receita cai mais), com a região de cada um. */
+function ninhosDasCriaturas(ctx: Pick<ContextoSimulacao, 'conteudo'>, presets: readonly string[]): string[] {
+  if (ctx.conteudo.reinos.size === 0 || presets.length === 0) return [];
+  return reinoDoConteudo(ctx.conteudo).regioes.flatMap((r) => (r.ninhos ?? []).filter((n) => presets.includes(n.preset)).map((n) => t('forja.receita.ninho', { nome: n.nome, regiao: r.nome })));
 }
 
 /** As regiões, dungeons e covis do reino onde alguma das criaturas aparece (sem repetir). */
