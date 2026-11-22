@@ -17,6 +17,12 @@ import { fundivel } from '../progression/fusao-elemental';
 import { ferreiroAberto } from '../progression/moldes';
 import { desenharMesaDaForja, mesaVazia } from './forja/mesa';
 import { criarModal } from './modal';
+import { nomeDaEntrada } from './nome-do-item';
+import { linhasDaReceita, moldeDaReceita } from './forja/texto-receita';
+import { fatorDaNoite } from '../mundo/vila-noite';
+import { horaDoMundo } from '../mundo/ciclo';
+import { agoraDoMundo } from './hora-do-mundo';
+import { seletorDeQuantidade } from './mundo-dialogos';
 import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
 import { vitrineDaLoja } from '../progression/vitrine';
@@ -64,7 +70,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
   /** Marco 51 (21/11/2026, D-197): a mesa da forja (o que está posto nela e a cena), só da tela. */
   const mesa = mesaVazia();
   const assinaturaDe = (bolsa: NonNullable<Entidade['bolsa']>, loja: ObjetoNoMundo) =>
-    JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(), o.ctx, loja), estoqueDaLoja(o.estado(), o.ctx, loja), filtros]);
+    JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(), o.ctx, loja), estoqueDaLoja(o.estado(), o.ctx, loja), filtros, o.jogador()?.interacao?.vendas]);
 
   const modal = criarModal({
     titulo: t('loja.titulo'),
@@ -91,7 +97,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
   modal.dialogo.addEventListener('animationend', () => { modal.dialogo.classList.remove('tremor-loja'); });
   modal.corpo.append(saldo, listas);
 
-  const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
+  const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: (qtd: number) => void; qtdMax?: number } | null, nota?: string) => {
     const li = el('li', 'linha-item');
     const conteudo = el('span', 'conteudo-item');
     const iconeItem = el('span', molduraDoItem(item));
@@ -100,18 +106,22 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const textos = el('span', 'textos-item');
     // Marco 26 (28/10/2026, D-116): o livro de skill de classe leva a runa da classe.
     textos.append(comRuna(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo), item ? classeDoItem(ctx.conteudo, item.id) : null));
-    const detalhe = nota ?? (item ? resumoDoItem(item, armaDoItem(ctx, item), o.jogador()?.bolsa?.classeId, ctx.balance) : '');
+    const molde = item ? moldeDaReceita(ctx, item.id) : null;
+    const detalhe = nota ?? (molde ? linhasDaReceita(ctx, molde, o.jogador()?.bolsa?.classeId).join(' · ') : item ? resumoDoItem(item, armaDoItem(ctx, item), o.jogador()?.bolsa?.classeId, ctx.balance) : '');
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);
     if (qtd > 1) conteudo.append(el('span', 'qtd-item', `×${qtd}`));
     li.append(conteudo);
     if (acao) {
+      // Marco 53 (22/11/2026, D-203): a pilha escolhe quantas unidades (antes, uma por clique).
+      const quantas = acao.qtdMax && acao.qtdMax > 1 ? seletorDeQuantidade(acao.qtdMax, `${acao.chave}-qtd`, rotulo) : null;
+      if (quantas) li.append(quantas.el);
       const b = el('button', 'botao-cabecalho', acao.texto);
       b.type = 'button';
       b.dataset.chave = acao.chave;
       b.disabled = acao.desligado;
       b.setAttribute('aria-label', `${acao.texto}: ${rotulo}`);
-      b.addEventListener('click', acao.fazer);
+      b.addEventListener('click', () => { acao.fazer(quantas?.valor() ?? 1); });
       li.append(b);
     }
     return li;
@@ -147,7 +157,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const ofertas = ofertasDoMundo(o.estado(), o.ctx, loja);
     // Marco 17: o preço já com o desconto do Carisma.
     const linhaDeCompra = (item: Item, rotulo: string) => {
-      const preco = precoDoItem(item, j, o.ctx);
+      // Marco 53 (D-203): à noite, o vendedor da noite e o andarilho cobram mais (o relógio do cliente, como no aviso).
+      const preco = precoDoItem(item, j, o.ctx, fatorDaNoite(o.ctx, loja, o.ctx.fase.exterior ? horaDoMundo(agoraDoMundo(), o.ctx.balance.mundo.ciclo).noite : 0));
       return linha(item, rotulo, 1, { texto: t('loja.comprar', { preco }), chave: `comprar-${item.id}`, desligado: bolsa.ouro < preco, fazer: () => { emitir({ t: 'comprar', itemId: item.id }); } });
     };
     for (const id of estoqueDaLoja(o.estado(), o.ctx, loja)) {
@@ -168,14 +179,26 @@ export function criarLoja(o: OpcoesLoja): Loja {
       mochila.append(
         linha(
           item,
-          item?.nome ?? entrada.itemId,
+          nomeDaEntrada(ctx, entrada),
           entrada.qtd,
-          pode ? { texto: t('loja.vender', { preco }), chave: `vender-${entrada.invId}`, desligado: false, fazer: () => { emitir({ t: 'vender', invId: entrada.invId }); } } : null,
+          pode ? { texto: t('loja.vender', { preco }), chave: `vender-${entrada.invId}`, desligado: false, qtdMax: entrada.qtd, fazer: (qtd) => { emitir({ t: 'vender', invId: entrada.invId, qtd }); } } : null,
           pode ? undefined : t('loja.naoCompra'),
         ),
       );
     }
     listas.append(mochila);
+    // Marco 53 (22/11/2026, D-203): as vendas desta visita, desfazíveis até sair da loja.
+    const vendas = j.interacao?.tipo === 'loja' ? j.interacao.vendas ?? [] : [];
+    if (vendas.length > 0) {
+      listas.append(el('h3', 'subtitulo-modal', t('loja.vendasDaVisita')), el('p', 'detalhe-item', t('loja.vendasDica')));
+      const ul = el('ul', 'lista-itens');
+      vendas.forEach((v, indice) => {
+        const item = itens.get(v.itemId);
+        const acao = { texto: t('loja.desfazer', { preco: v.preco }), chave: `desfazer-${String(indice)}`, desligado: bolsa.ouro < v.preco, fazer: () => { emitir({ t: 'desfazerVenda', indice }); } };
+        ul.append(linha(item, nomeDaEntrada(ctx, { itemId: v.itemId, ref: v.ref }), v.qtd, acao, bolsa.ouro < v.preco ? t('loja.desfazerSemOuro') : undefined));
+      });
+      listas.append(ul);
+    }
     desenharForja(j, loja);
     if (focoAntes) modal.corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
   };

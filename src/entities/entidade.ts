@@ -1,3 +1,4 @@
+import type { Interacao } from './interacao-tipos';
 import type { MemoriaTatica } from '../combat/estado-tatico';
 // Entidade (§2.5). Só dados, para clonar, comparar no digest e gravar em checkpoint.
 // Marco 3: atributos, recursos, efeitos, ação em curso e dados de morte e respawn.
@@ -94,6 +95,7 @@ export interface DadosInvocacao {
   modeloOriginal?: string;
   /** Marco 22 (D-089): o falcão do Aventureiro. Divide a vida do dono (o dano nele sai do dono) e tem vaga própria. */
   companheiro?: boolean;
+  copiaDoPet?: boolean; // D-204 (22/11/2026): a cópia da fera que a ultimate do Aventureiro trouxe (pets.ts).
   /** A vida do dono copiada no fim do último tick; a diferença é o dano que o falcão levou. */
   hpEspelhado?: number;
   /** Marco 24 (24/10/2026): invocação temporária fora do limite (Levante profano). */
@@ -332,16 +334,8 @@ export interface Estudo {
   rank?: number;
 }
 
-/**
- * Interação em curso com baú ou loja (§2.10, marco 9A): enquanto existir, a entidade está
- * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
- */
-export interface Interacao {
-  /** Marco 18: `desarme` de armadilha revelada (o `objetoId` é o id da armadilha em texto). */
-  tipo: 'bau' | 'loja' | 'desarme' | 'coleta';
-  objetoId: string;
-  ateTick: number;
-}
+// 22/11/2026 (marco 53): a interação em curso mora em interacao-tipos.ts (só tipos).
+export type { Interacao, VendaDesfazivel } from './interacao-tipos';
 
 export interface Entidade {
   id: EntidadeId;
@@ -789,7 +783,7 @@ export function clonarEntidade(e: Entidade): Entidade {
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
     invocacao: e.invocacao ? { ...e.invocacao, ...(e.invocacao.posto && { posto: { ...e.invocacao.posto } }), ...(e.invocacao.descarga && { descarga: { ...e.invocacao.descarga } }) } : null,
-    interacao: e.interacao ? { ...e.interacao } : null,
+    interacao: e.interacao ? { ...e.interacao, ...(e.interacao.vendas && { vendas: e.interacao.vendas.map((v) => ({ ...v })) }) } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
     aparencia: e.aparencia ? { ...e.aparencia, ...(e.aparencia.vestes && { vestes: { ...e.aparencia.vestes } }) } : null,
     estilos: [...e.estilos],

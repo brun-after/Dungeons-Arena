@@ -3,6 +3,7 @@
 // (engastar, extrair) e a bandeja com o que a mochila tem. Arrastar ou tocar põe a peça no espaço; "Forjar" corre a
 // cena e só no fim emite o comando (a simulação confere tudo). Textos por textContent.
 
+import { linhasDaReceita } from './texto-receita';
 import type { Comando } from '../../core/comandos';
 import type { ContextoSimulacao } from '../../core/contexto';
 import type { EstadoJogo } from '../../core/estado';
@@ -106,6 +107,8 @@ export function desenharMesaDaForja(raiz: HTMLElement, estado: EstadoJogo, ctx: 
     const ul = el('ul', 'descricao-habilidade');
     ul.append(el('li', 'linha-assinatura', `${molde.nome} · ${t('loja.grau', { grau: GRAUS[molde.grau - 1] ?? molde.grau })}`));
     ul.append(el('li', undefined, molde.texto));
+    // Marco 53 (22/11/2026, D-203): para quem serve, a raridade, o resultado e onde cai.
+    for (const linha of linhasDaReceita(ctx, molde, bolsa.classeId)) ul.append(el('li', 'detalhe-item', linha));
     const tem = (itemId: string) => bolsa.mochila.filter((i) => i.itemId === itemId).reduce((s, i) => s + i.qtd, 0);
     for (const x of molde.materiais) ul.append(el('li', tem(x.item) >= x.qtd ? undefined : 'linha-instavel', t('forja.pede', { nome: itens.get(x.item)?.nome ?? x.item, tem: tem(x.item), qtd: x.qtd })));
     if (molde.runa) ul.append(el('li', tem(`runa_${molde.runa}`) > 0 ? undefined : 'linha-instavel', t('forja.pede', { nome: itens.get(`runa_${molde.runa}`)?.nome ?? molde.runa, tem: tem(`runa_${molde.runa}`), qtd: 1 })));

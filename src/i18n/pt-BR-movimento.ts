@@ -22,7 +22,7 @@ export const textosMovimento = {
   'movimento.troca_de_companheiro': 'Troca de companheiro',
   'movimento.troca_de_companheiro.texto': 'Troca a fera da vez pela próxima descansada: do falcão ao lobo, do lobo ao urso, do urso ao falcão. A cansada fica de fora até descansar.',
   'movimento.chamado': 'Chamado',
-  'movimento.chamado.texto': 'Desmontado: a fera da vez vem para junto de você. Montado, o mesmo botão faz o golpe dela (Arremesso, Disparada ou Círculo de Contenção).',
+  'movimento.chamado.texto': 'Desmontado: a fera da vez larga a caça e vem para junto de você. Montado, o mesmo botão faz o golpe dela (Arremesso, Disparada ou Círculo de Contenção).',
   'movimento.arremesso': 'Arremesso',
   'movimento.arremesso.texto': 'No voo do falcão: ele te arremessa para a frente, num salto de 1/4 do alcance do voo (1/3 a partir do nível 90). O falcão cansa e descansa o dobro.',
   'movimento.disparada': 'Disparada',

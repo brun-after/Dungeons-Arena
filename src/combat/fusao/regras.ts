@@ -23,8 +23,6 @@ export interface RegrasAlquimia {
     /** O ganho por acerto (%), na skill comum e na fusão. */
     comumPct: number;
     fusaoPct: number;
-    /** Só conta o inimigo de nível igual ou maior que o do personagem menos esta faixa. */
-    faixaNivel: number;
     /** A essência da família da skill acelera (uma vez por skill). */
     essenciaPct: number;
   };

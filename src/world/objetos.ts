@@ -5,6 +5,7 @@
 // Marco 9A (14/10/2026): ouro (vai para a bolsa), loot com quantidade e os interagíveis (baú e loja),
 // que não são coletados ao pisar: abrem pelo comando `interagir` (world/interacao.ts).
 
+import { chaoAVista } from './geografia';
 import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armarBuff, EFEITOS_OFENSIVOS } from '../progression/buffs';
 import { aplicarEfeito } from '../combat/efeitos';
@@ -15,7 +16,6 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { guardarItem } from '../progression/inventario';
 import { ordemRotativa } from './colisao';
-import { passavel } from './fase';
 import { coletarOrbesXp } from '../progression/orbe-xp';
 
 // 25/10/2026: `novoObjeto` mora em objeto-novo.ts (só tipos), para o e2e importar sem puxar o núcleo inteiro.
@@ -59,6 +59,11 @@ function coletor(e: Entidade): boolean {
   return e.controlador !== 'ia' && vivo(e);
 }
 
+/** Marco 53 (22/11/2026, D-203): quem soltou o item ainda espera para recolhê-lo (a mochila aberta ou os 5 s). */
+export function acabouDeSoltar(o: ObjetoNoMundo, id: string, tick: number): boolean {
+  return o.soltoPor === id && (o.soltoAteTick ?? 0) > tick;
+}
+
 export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.objetos.length === 0 || !ctx.modo.objetosDeFase) return;
   coletarOrbesXp(estado, ctx, saida);
@@ -73,7 +78,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     // Marco 22 (D-089): o falcão do Aventureiro recolhe para o dono o que encontra onde pousa.
     const dono = e.invocacao?.companheiro && vivo(e) ? estado.entidades.find((x) => x.id === e.invocacao?.donoId) : undefined;
     if (!coletor(e) && !dono) continue;
-    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && x.aguardaSaidaDe !== e.id && !consumidos.has(x.objetoId) && coletavel(x));
+    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && x.aguardaSaidaDe !== e.id && !acabouDeSoltar(x, (dono ?? e).id, estado.tick) && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
     // Ajuste de 24/10/2026 (D-091): também os orbes de vida, de mana e de buff, aplicados ao dono.
     if (dono && (!vivo(dono) || !TIPOS_DO_FALCAO.has(o.tipo))) continue;
@@ -134,12 +139,22 @@ const VIZINHANCA: readonly (readonly [number, number])[] = [
   [-1, -1],
 ];
 
-/** A célula pode já ter um objeto: tenta ela e as vizinhas passáveis, numa ordem fixa. */
+/**
+ * A célula pode já ter um objeto: tenta ela e as vizinhas passáveis, numa ordem fixa. Marco 53 (22/11/2026, D-203):
+ * nunca sob uma árvore, um rochedo, um arbusto ou uma peça do cenário (o item sumia embaixo dela); sem lugar nas
+ * vizinhas, tenta o anel seguinte.
+ */
 export function largarPerto(ctx: ContextoSimulacao, x0: number, y0: number, largar: (x: number, y: number) => boolean): boolean {
   for (const [dx, dy] of VIZINHANCA) {
     const x = x0 + dx;
     const y = y0 + dy;
-    if (passavel(ctx.fase, x, y) && largar(x, y)) return true;
+    if (chaoAVista(ctx.fase, x, y) && largar(x, y)) return true;
+  }
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== 2) continue;
+      if (chaoAVista(ctx.fase, x0 + dx, y0 + dy) && largar(x0 + dx, y0 + dy)) return true;
+    }
   }
   return false;
 }

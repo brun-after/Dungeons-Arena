@@ -71,7 +71,8 @@
         "sobrevivente": { "falcao": { "curaNoGolpePct": 3, "reflexoMenosPct": 30, "cansacoMenosPct": 40 }, "lobo": { "interceptarMenosPct": 40, "reflexoMenosPct": 30, "cansacoMenosPct": 40 }, "urso": { "reflexoMenosPct": 40, "cansacoMenosPct": 40, "contencaoMaisMs": 2000, "bloqueioMaisPct": 50 } },
         "pergaminhista": { "falcao": { "runaNoGolpe": 1, "runaRaio": 1.5, "quedaRuna": 1.5 }, "lobo": { "runaNoGolpe": 1, "disparadaRuna": 1 }, "urso": { "runaNoGolpe": 1, "contencaoRuna": 1 } }
       },
-      "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70, "duracaoMs": 5000 }
+      "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70, "duracaoMs": 5000 },
+      "copiasDoPet": { "repasseDivisor": 3 }
     },
     "arqueiro": {
       "secundariosMult": 1.15, "alcanceAndandoPct": 90, "alcanceSemMiraPct": 70, "conjuracaoMult": 0.9,
@@ -103,7 +104,7 @@
     "maxPassosToque": 60
   },
   "movimentoClasse": {
-    "viagemPct": 60, "viagemPesadaPct": 30, "recargaEmCombatePct": 200,
+    "viagemPct": 60, "viagemPesadaPct": 30, "recargaEmCombatePct": 200, "fugaRaio": 12,
     "salto": { "velocidadeParadoPct": 90, "velocidadeMaxPct": 125, "raio": 2, "atordoarMs": 1000, "danoPorNivel": 1.5, "extensao": 5, "corridaMetadePct": 50, "dashGracaMs": 500 },
     "nevoa": { "servosRaio": 5, "anel": 1.6, "velocidadeMin": 10 },
     "eco": { "hpPct": 30, "duracaoMs": 3000, "provocarRaio": 6, "invisivelMs": 1000 },
@@ -244,7 +245,7 @@
     "ressonanciaPct": 15,
     "instavel": { "custoParPct": 20, "custoTrioPct": 10, "recargaPct": 15 },
     "runa": { "amplificaPct": 25, "camadaPct": 50 },
-    "compreensao": { "comumPct": 2, "fusaoPct": 1, "faixaNivel": 10, "essenciaPct": 25 },
+    "compreensao": { "comumPct": 2, "fusaoPct": 1, "essenciaPct": 25 },
     "dropRuna": { "chancePct": 4, "chefePct": 60 },
     "raridade": {
       "_doc": "Marco 52 (21/11/2026, D-198): o 2º e o 1º nível de raridade da fusão. A chance base sobe com a Inteligência acima de 10 (porIntPct por ponto) até maxPct; o resto é o 3º nível, o comum, sem bônus.",
@@ -374,7 +375,9 @@
   },
   "inventario": {
     "capacidade": 20,
-    "pilhaMax": 10
+    "pilhaMax": 10,
+    "soltarEsperaMs": 5000,
+    "soltarEsperaMaxMs": 120000
   },
   "habilidades": {
     "pontosPorNivel": 1,
@@ -720,7 +723,7 @@
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
     "tocha": { "atraiMult": 1.6, "afastaRaio": 5, "iguaisAvancamPct": 50, "fracosAvancamPct": 50, "fracosAlcancePct": 50, "janelaIguaisMs": 20000, "raioDoFogo": 4, "visaoSemTocha": 3, "visaoComTocha": 10, "visaoDesdeEscuro": 0.45, "manaPct": 2, "manaMin": 1 },
     "elementosPelaHora": { "noite": ["trevas", "gelo"], "dia": ["sagrado", "fogo"], "pct": 15 },
-    "vilaNoite": { "fechaDesde": 0.5, "fecham": ["ferreiro", "alquimista", "mercado"], "estoque": ["tocha", "lenha", "po_revelador", "pocao_vida", "pocao_mana", "pergaminho_retorno"] },
+    "vilaNoite": { "fechaDesde": 0.5, "fecham": ["ferreiro", "alquimista", "mercado"], "_docSobretaxa": "Marco 53 (D-203): à noite, o vendedor da noite e o comerciante andarilho cobram mais que a loja da vila.", "sobretaxa": { "lojas": ["noturno", "errante"], "pct": 50 }, "estoque": ["tocha", "lenha", "po_revelador", "pocao_vida", "pocao_mana", "pergaminho_retorno"] },
     "acampamento": { "acesaMin": 20, "duraMin": 120, "raioFogo": 1.5, "raioDescanso": 2, "noiteDesde": 0.5, "curaPctPorS": 2, "descansoMinS": 60, "marcaMin": 10, "bonusDanoPct": 10, "bonusMin": 10, "atraiChancePorMinPct": 40, "atraiDistancia": [9, 14], "slots": 20 },
     "lojaDungeon": { "diaRenovacao": 3, "fusoHoras": -3, "basicos": 4, "incomuns": 3, "raros": 4, "raroExtraChancePct": 30, "epicoChancePct": 40, "lendarioChancePct": 6, "nivelFolga": 10 },
     "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
@@ -729,6 +732,7 @@
     "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },
     "covil": { "contribuicaoMinPct": 10 },
     "checkpointS": 60,
+    "reconexaoS": 300,
     "passagemProtecaoS": 3,
     "errantes": { "passoMs": 650, "pausaPertoCelulas": 2 },
     "escolta": { "raioChegada": 3, "duracaoMin": 30 },

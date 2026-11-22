@@ -4,12 +4,12 @@
 //
 // - O roomId é o código curto da sala (D-036).
 // - Criador é cliente comum: sair não encerra a sala (§2.13). Sala vazia expira em 120 s.
-// - Queda: a sessão fica reservada por 30 s (allowReconnection); a entidade fica parada e vulnerável.
+// - Queda: a sessão fica reservada por 30 s (no Mundo, `mundo.reconexaoS`, marco 53) (allowReconnection); a entidade fica parada e vulnerável.
 // - Passo fixo de 60 Hz com acumulador do Colyseus (sem espiral, D-037).
 // - Métricas vão também para a metadata da sala, que o `/saude` agrega (sem estado global).
 
 import { matchMaker, Room, ServerError, type AuthContext, type Client } from '@colyseus/core';
-import { RESERVA_RECONEXAO_MS, type Conexao, type SalaArena } from '../../src/arena/sala';
+import { type Conexao, type SalaArena } from '../../src/arena/sala';
 import { gerarCodigo, LimiteDeTentativas } from '../codigo-sala';
 import type { Certificador } from '../certificacao';
 import { Janela, registrarLog, type AtrasoDoAgendador } from '../metricas';
@@ -122,7 +122,7 @@ export abstract class SalaColyseusBase extends Room {
   override async onDrop(client: Client): Promise<void> {
     this.conexoes.get(client.sessionId)?.fechar();
     this.caidas.add(client.sessionId);
-    await this.allowReconnection(client, RESERVA_RECONEXAO_MS / 1000);
+    await this.allowReconnection(client, this.sala.reservaReconexaoMs / 1000);
   }
 
   override onReconnect(client: Client): void {

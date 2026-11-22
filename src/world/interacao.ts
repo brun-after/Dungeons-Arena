@@ -204,6 +204,12 @@ function entregarBau(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   o.abertoTick = estado.tick;
 }
 
+/** Marco 53 (D-203): a loja da janela aberta não está mais no mundo, ou fechou pela noite. */
+function lojaSumiu(estado: EstadoJogo, ctx: ContextoSimulacao, objetoId: string): boolean {
+  const o = estado.objetos.find((x) => x.objetoId === objetoId);
+  return !o || o.tipo !== 'loja' || lojaFechadaANoite(ctx, o);
+}
+
 /** Etapa 5 do tick: fim dos congelamentos, reservas órfãs e baús abertos que somem. */
 export function processarInteracoes(
   estado: EstadoJogo,
@@ -214,6 +220,12 @@ export function processarInteracoes(
   for (const e of estado.entidades) {
     const i = e.interacao;
     // 09/11/2026 (D-144): a perseguição não fecha mais a loja (quem é atacado nela vê a tela tremer, no cliente).
+    // Marco 53 (22/11/2026, D-203): a loja que sumiu (o vendedor da noite vai embora ao clarear) ou que fechou pela
+    // noite fecha a janela; antes, quem estava comprando ficava congelado sem loja para fechar.
+    if (i?.tipo === 'loja' && estado.tick < i.ateTick && lojaSumiu(estado, ctx, i.objetoId)) {
+      fecharLoja(estado, ctx, e, saida);
+      continue;
+    }
     if (!i || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
     else if (i.tipo === 'desarme') concluirDesarme(estado, ctx, e, Number(i.objetoId), disparar, saida);

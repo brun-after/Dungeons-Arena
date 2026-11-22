@@ -36,6 +36,23 @@ export function marcarLapide(guia: OrientacaoMundo, lugar: string, ponto: { x: n
   guia.definir({ lugar, nome: t('mundo.lapide.nome'), ponto: { ...ponto } });
 }
 
+/**
+ * Marco 53 (22/11/2026, D-203): a lápide recolhida ou vencida tira a marca e, se a rota era para ela, a rota também
+ * (a seta seguia apontando para o túmulo vazio).
+ */
+export function esquecerLapide(guia: OrientacaoMundo): void {
+  const lapide = guia.lapide;
+  if (!lapide) return;
+  guia.lapide = null;
+  const d = guia.destino;
+  if (d?.lugar === lapide.lugar && d.ponto?.x === lapide.ponto.x && d.ponto.y === lapide.ponto.y) guia.definir(null);
+}
+
+/** Marco 53 (D-203): confere o prazo da lápide (a seta some quando o túmulo vence). */
+export function conferirLapide(guia: OrientacaoMundo, agoraMs: number): void {
+  if (guia.lapide && guia.lapide.ateMs <= agoraMs) esquecerLapide(guia);
+}
+
 export function criarGuiaMundo(guia: OrientacaoMundo, reino: Reino, lugar: string, ctx: ContextoSimulacao, idLocal: string, descobertas: () => readonly string[]) {
   const el = document.createElement('aside');
   el.className = 'guia-mundo';
@@ -53,6 +70,7 @@ export function criarGuiaMundo(guia: OrientacaoMundo, reino: Reino, lugar: strin
     atualizar: (estado: EstadoJogo | null, agora: number) => {
       if (agora - ultimo < 150) return;
       ultimo = agora;
+      conferirLapide(guia, Date.now());
       const eu = estado?.entidades.find(e => e.id === idLocal);
       const destino = guia.destino;
       el.hidden = !destino || !eu;

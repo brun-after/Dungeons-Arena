@@ -17,7 +17,8 @@ export const ESCALONAMENTO_MS = 80;
 
 // Marco 48 (20/11/2026, D-193): 'estado' é o tique de um estado (na cor do elemento) e 'reacao' o dano que o
 // elemento faz além do golpe (descarga, estilhaço, eco, reação), maior e separado do número do golpe.
-export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'recurso' | 'esquiva' | 'ouro' | 'estado' | 'reacao';
+// Marco 53 (22/11/2026, D-203): 'xp' é o XP ganho, subindo do personagem como o ouro (antes, só no registro).
+export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'recurso' | 'esquiva' | 'ouro' | 'estado' | 'reacao' | 'xp';
 
 const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
   dano: { cor: 0xece8f4, tamanho: 18 },
@@ -29,6 +30,7 @@ const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
   ouro: { cor: 0xf1c40f, tamanho: 18 },
   estado: { cor: 0xece8f4, tamanho: 15 },
   reacao: { cor: 0xffd27a, tamanho: 21 },
+  xp: { cor: 0xb98cff, tamanho: 18 },
 };
 
 /** d20 nos extremos: cor da faixa (dourado no bom, vermelho na falha). */

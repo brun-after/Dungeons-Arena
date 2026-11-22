@@ -158,11 +158,18 @@ export function lerComando(v: unknown): Comando | null {
       return { t: 'interagir' };
     case 'abrirMenu':
       return { t: 'abrirMenu' };
+    case 'fecharMochila':
+      return { t: 'fecharMochila' };
     // Marco 9A: a arena não tem economia (sem bolsa), mas o protocolo aceita a forma e a simulação recusa.
     case 'comprar':
       return id(v.itemId) ? { t: 'comprar', itemId: v.itemId } : null;
     case 'vender':
-      return id(v.invId) ? { t: 'vender', invId: v.invId } : null;
+      // Marco 53 (D-203): a quantidade da pilha a vender (sem ela, uma).
+      if (!id(v.invId)) return null;
+      if (v.qtd === undefined) return { t: 'vender', invId: v.invId };
+      return inteiro(v.qtd) && v.qtd > 0 && v.qtd <= 1000 ? { t: 'vender', invId: v.invId, qtd: v.qtd } : null;
+    case 'desfazerVenda':
+      return inteiro(v.indice) && v.indice >= 0 && v.indice < 1000 ? { t: 'desfazerVenda', indice: v.indice } : null;
     case 'fecharLoja':
       return { t: 'fecharLoja' };
     case 'dispensar':

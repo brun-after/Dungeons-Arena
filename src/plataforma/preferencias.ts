@@ -67,6 +67,12 @@ export interface Preferencias {
   runaDaClasse: boolean;
   /** 06/11/2026: as skins liberadas por código neste aparelho (ids de entities/skins.ts). */
   skinsLiberadas: string[];
+  /** Marco 53 (22/11/2026, D-203): a sensibilidade do zoom (roda, pinça do touchpad e dos dedos), de 0,25 a 2. */
+  sensibilidadeZoom: number;
+  /** Marco 53 (D-203): a câmera olha para onde o mouse aponta. */
+  cameraNoMouse: boolean;
+  /** Marco 53 (D-203): no modo janela, o cursor na borda da tela desliza a câmera. */
+  cameraNaBorda: boolean;
   /** A skin vestida em cada classe (classe -> id); sem entrada = o visual do equipamento. */
   skinsEscolhidas: Record<string, string>;
 }
@@ -106,6 +112,9 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   runaDaClasse: true,
   skinsLiberadas: [],
   skinsEscolhidas: {},
+  sensibilidadeZoom: 1,
+  cameraNoMouse: true,
+  cameraNaBorda: true,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -138,6 +147,9 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     tamanhoToken: numeroEntre(d.tamanhoToken, 0.8, 1.3, PADRAO.tamanhoToken),
     areaExata: booleano(d.areaExata, PADRAO.areaExata),
     estiloNasGeradas: booleano(d.estiloNasGeradas, PADRAO.estiloNasGeradas),
+    sensibilidadeZoom: numeroEntre(d.sensibilidadeZoom, 0.25, 2, PADRAO.sensibilidadeZoom),
+    cameraNoMouse: booleano(d.cameraNoMouse, PADRAO.cameraNoMouse),
+    cameraNaBorda: booleano(d.cameraNaBorda, PADRAO.cameraNaBorda),
     fps: opcao(d.fps, ['auto', '60', '30'] as const, PADRAO.fps),
     resolucao: opcao(d.resolucao, ['auto', 'alta', 'media', 'baixa'] as const, PADRAO.resolucao),
     medidor: booleano(d.medidor, PADRAO.medidor),

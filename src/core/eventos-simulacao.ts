@@ -295,6 +295,8 @@ export type EventoSimulacao =
   | { t: 'refugioUsado'; tick: number; id: EntidadeId; ateTick: number }
   | { t: 'comprou'; tick: number; id: EntidadeId; itemId: string; preco: number }
   | { t: 'vendeu'; tick: number; id: EntidadeId; itemId: string; preco: number }
+  /** Marco 53 (D-203): a venda desfeita na loja ainda aberta (o ouro devolvido). */
+  | { t: 'vendaDesfeita'; tick: number; id: EntidadeId; itemId: string; preco: number }
   /** Marco 10A-1: portas internas e porta de saída. */
   | { t: 'teleportou'; tick: number; id: EntidadeId; numero: number; x: number; y: number }
   | { t: 'saidaAlcancada'; tick: number; id: EntidadeId; retorno?: boolean }

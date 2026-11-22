@@ -7,6 +7,8 @@ import { proximaEtapa } from '../mundo/orientacao';
 import { tipoEm } from '../world/fase';
 import { cartografia, rosaDosVentos } from './cartografia';
 import { lapideAtiva, type OrientacaoMundo } from './orientacao-mundo';
+import { corDoMarco, desenharMarco, marcosDaFase, marcosDoEstado } from './marcos-do-mapa';
+import { lerLugar } from '../mundo/lugares';
 
 /** 09/11/2026 (D-143): o modo de escolher um ponto (o destino do Portal temporário), no lugar de marcar. */
 export interface EscolhaNoMapa {
@@ -14,7 +16,11 @@ export interface EscolhaNoMapa {
   escolhido: () => { x: number; y: number } | null;
 }
 
-export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | null, idLocal: string, lugar: string, descobertas: readonly string[], orientacao?: OrientacaoMundo, escolha?: EscolhaNoMapa): HTMLCanvasElement {
+/**
+ * Marco 53 (22/11/2026, D-203): `andar` leva o personagem até o ponto marcado (o condutor, ui/condutor.ts); só no mapa
+ * do lugar onde ele está.
+ */
+export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | null, idLocal: string, lugar: string, descobertas: readonly string[], orientacao?: OrientacaoMundo, escolha?: EscolhaNoMapa, andar?: (ponto: { x: number; y: number }) => void): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.className = 'mapa-terreno'; c.width = 1000; c.height = 520; c.tabIndex = 0;
   c.setAttribute('aria-label', t('mundo.mapa.pontos'));
@@ -59,6 +65,13 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
     fg.font = '12px sans-serif'; fg.fillStyle = '#98afb4'; fg.textAlign = 'left';
     fg.fillText(t('mundo.mapa.bussola'), 25, 30);
   }
+  // Marco 53 (22/11/2026, D-203): os marcos do lugar (portões com o nome de onde levam, casas, serviços da vila).
+  const nomeDoDestino = (id: string) => {
+    if (!descobertas.includes(id)) return t('mundo.mapa.desconhecida');
+    const l = lerLugar(reino, id);
+    return l?.tipo === 'regiao' ? l.regiao.nome : null;
+  };
+  const marcosFixos = marcosDaFase(fase, nomeDoDestino);
   let cursor = { x: Math.floor(fase.largura / 2), y: Math.floor(fase.altura / 2) };
   let mostrarCursor = false;
   const rotulo = (nome: string, x: number, y: number, cor: string) => {
@@ -80,10 +93,15 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); g.setLineDash([]);
       g.strokeRect(b.x - 7, b.y - 7, 14, 14);
     }
+    for (const m of [...marcosFixos, ...(atual ? marcosDoEstado(atual).filter((x) => x.tipo !== 'masmorra') : [])]) {
+      const p = mapa.ponto(m.x, m.y);
+      desenharMarco(g, m.tipo, p.x, p.y, m.tipo === 'casa' ? 12 : 18);
+      if (m.rotulo) rotulo(m.rotulo, p.x, p.y - 6, corDoMarco(m.tipo));
+    }
     for (const estrutura of entradas) {
       const o = portaDa(estrutura).porta, p = mapa.ponto(o.x, o.y);
-      g.fillStyle = '#f6ce78'; g.beginPath(); g.moveTo(p.x, p.y - 6); g.lineTo(p.x + 6, p.y); g.lineTo(p.x, p.y + 6); g.lineTo(p.x - 6, p.y); g.closePath(); g.fill();
-      rotulo(estrutura.nome, p.x, p.y, '#f6ce78');
+      desenharMarco(g, 'masmorra', p.x, p.y, 18);
+      rotulo(estrutura.nome, p.x, p.y - 6, '#f6ce78');
     }
     for (const p of pontos) {
       const q = mapa.ponto(p.x, p.y);
@@ -142,11 +160,14 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       const marcado = pontos[perto];
       const ativo = orientacao?.destino;
       const selecionado = ativo?.lugar === lugar && ativo.ponto?.x === marcado?.x && ativo.ponto?.y === marcado?.y;
-      if (orientacao && marcado && !selecionado) orientacao.definir({ lugar, nome: t('mundo.mapa.ponto', marcado), ponto: marcado });
-      else { pontos.splice(perto, 1); if (selecionado) orientacao?.definir(null); }
+      if (orientacao && marcado && !selecionado) {
+        orientacao.definir({ lugar, nome: t('mundo.mapa.ponto', marcado), ponto: marcado });
+        andar?.(marcado);
+      } else { pontos.splice(perto, 1); if (selecionado) orientacao?.definir(null); }
     } else if (pontos.length < 50) {
       pontos.push({ x, y });
       orientacao?.definir({ lugar, nome: t('mundo.mapa.ponto', { x, y }), ponto: { x, y } });
+      andar?.({ x, y });
     }
     try { localStorage.setItem(chave, JSON.stringify(pontos)); } catch { /* Armazenamento opcional. */ }
     desenhar();

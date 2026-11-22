@@ -12,6 +12,7 @@ import { t } from '../i18n';
 import { tipoEm, type Fase } from '../world/fase';
 import { ligarZoomMapa } from './zoom-mapa';
 import { cartografia, rosaDosVentos } from './cartografia';
+import { desenharMarco, marcosDaFase, marcosDoEstado } from './marcos-do-mapa';
 
 // Marco 29 (D-128): o exterior do Mundo (mato, estrada, água e fachadas).
 const COR_TERRENO: Readonly<Record<string, string>> = { piso: '#3a3546', saida: '#c98a1a', parede: '#15131b', mato: '#3d5a2e', estrada: '#7a6448', agua: '#2b5f86', fachada: '#5a4a3c' };
@@ -55,6 +56,45 @@ export function marcadorDaEntidade(ctx: ContextoSimulacao, idLocal: string, e: E
     return { cor: '#e74c3c', r: ativo ? 2.5 : 1.5 };
 }
 
+/**
+ * Marco 53 (D-203): arrastar o minimapa ampliado (o mouse ou um dedo). Passados uns px de arrasto, o clique que vem
+ * ao soltar é engolido (não abre o mapa grande).
+ */
+function ligarArrastoDoMinimapa(canvas: HTMLCanvasElement, zoom: () => number, mover: (dx: number, dy: number) => void): void {
+  let ponto: { id: number; x: number; y: number; andou: number } | null = null;
+  let engolirClique = false;
+  canvas.addEventListener('pointerdown', (ev) => {
+    if (zoom() <= 1 || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+    ponto = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, andou: 0 };
+    engolirClique = false;
+  });
+  canvas.addEventListener('pointermove', (ev) => {
+    if (!ponto || ev.pointerId !== ponto.id) return;
+    const r = canvas.getBoundingClientRect();
+    const escala = canvas.width / Math.max(1, r.width);
+    const dx = (ev.clientX - ponto.x) * escala;
+    const dy = (ev.clientY - ponto.y) * escala;
+    ponto.andou += Math.hypot(ev.clientX - ponto.x, ev.clientY - ponto.y);
+    ponto.x = ev.clientX;
+    ponto.y = ev.clientY;
+    if (ponto.andou > 4) {
+      if (!canvas.hasPointerCapture(ev.pointerId)) canvas.setPointerCapture(ev.pointerId);
+      engolirClique = true;
+      mover(dx, dy);
+    }
+  });
+  const soltar = (ev: PointerEvent) => {
+    if (ponto?.id === ev.pointerId) ponto = null;
+  };
+  canvas.addEventListener('pointerup', soltar);
+  canvas.addEventListener('pointercancel', soltar);
+  canvas.addEventListener('click', (ev) => {
+    if (!engolirClique) return;
+    engolirClique = false;
+    ev.stopImmediatePropagation();
+  }, true);
+}
+
 export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: boolean, destino?: () => { x: number; y: number } | null): Minimapa {
   const lado = toque ? 90 : 120;
   const intervalo = toque ? 333 : 100;
@@ -77,10 +117,25 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
   const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx, cy).y : oy + (cy + 0.5) * escala;
   let ultimo = -Infinity;
   let zoom = 1;
-  if (mundo) ligarZoomMapa(canvas, fator => {
-    zoom = Math.max(1, Math.min(4, zoom * fator));
-    ultimo = -Infinity;
-  });
+  // Marco 53 (22/11/2026, D-203): ampliado, o minimapa se arrasta (o desvio, em px do canvas, a partir do jogador);
+  // o clique sem arrastar segue abrindo o mapa grande. Os marcos (portões, casas, serviços) vêm da fase.
+  const desvio = { x: 0, y: 0 };
+  const marcosFixos = mundo ? marcosDaFase(fase) : [];
+  if (mundo) {
+    ligarZoomMapa(canvas, fator => {
+      zoom = Math.max(1, Math.min(4, zoom * fator));
+      if (zoom <= 1) desvio.x = desvio.y = 0;
+      ultimo = -Infinity;
+    });
+    ligarArrastoDoMinimapa(canvas, () => zoom, (dx, dy) => {
+      const limiteX = (canvas.width / 2) * (1 - 1 / zoom) + canvas.width / 2;
+      const limiteY = (canvas.height / 2) * (1 - 1 / zoom) + canvas.height / 2;
+      desvio.x = Math.max(-limiteX, Math.min(limiteX, desvio.x - dx / zoom));
+      desvio.y = Math.max(-limiteY, Math.min(limiteY, desvio.y - dy / zoom));
+      ultimo = -Infinity;
+    });
+    canvas.title = t('minimapa.arrastar');
+  }
 
   const ponto = (x: number, y: number, r: number, cor: string) => {
     if (!g) return;
@@ -100,7 +155,8 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       const eu = estado.entidades.find(e => e.id === idLocal);
       g.save();
       if (mundo && zoom > 1) {
-        const centro = eu ? mapa.ponto(eu.x, eu.y) : { x: canvas.width / 2, y: canvas.height / 2 };
+        const base = eu ? mapa.ponto(eu.x, eu.y) : { x: canvas.width / 2, y: canvas.height / 2 };
+        const centro = { x: base.x + desvio.x, y: base.y + desvio.y };
         g.translate(canvas.width / 2, canvas.height / 2);
         g.scale(zoom, zoom);
         g.translate(-centro.x, -centro.y);
@@ -114,6 +170,14 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
         g.restore();
 
       } else g.drawImage(fundo, ox, oy, fase.largura * escala, fase.altura * escala);
+      // Marco 53 (D-203): os marcos do lugar, do tamanho que se lê também ampliado.
+      if (mundo) {
+        const lado = 7 / Math.sqrt(zoom);
+        for (const m of [...marcosFixos, ...marcosDoEstado(estado)]) {
+          const q = mapa.ponto(m.x, m.y);
+          desenharMarco(g, m.tipo, q.x, q.y, lado);
+        }
+      }
       // Portas e saída: pontos fixos, para a orientação.
       const volta = fase.portaRetorno;
       if (volta) ponto(volta.x, volta.y, 2.5, '#65d7ee');

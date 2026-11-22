@@ -12,6 +12,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armadilhaParaDesarmar } from '../world/armadilhas-ocultas';
 import { alvoDeInteracao, podeConverterArmadilha, recargaLojaRestante } from '../world/interacao';
+import { acabouDeSoltar } from '../world/objetos';
 import { destinoDaPorta, esperaNaPorta, naSaidaAberta } from '../world/portas';
 
 const INTERVALO_MS = 200;
@@ -34,6 +35,8 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
   const texto = (estado: EstadoJogo): string => {
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (!eu?.bolsa || eu.morto || eu.interacao) return '';
+    // Marco 53 (22/11/2026, D-203): parado sobre o que acabou de soltar, o aviso de que ainda não se recolhe.
+    if (estado.objetos.some((x) => x.x === eu.x && x.y === eu.y && acabouDeSoltar(x, eu.id, estado.tick))) return t('prompt.acabouDeSoltar');
     const o = alvoDeInteracao(estado, ctx, eu);
     if (o?.tipo === 'loja' && ctx.fase.exterior && lojaFechadaANoite(ctx, o, horaDoMundo(agoraDoMundo(), ctx.balance.mundo.ciclo).noite)) return t('prompt.lojaFechadaANoite');
     if (o?.tipo === 'loja') {
@@ -72,8 +75,19 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
       if (agoraMs - ultimo < INTERVALO_MS) return;
       ultimo = agoraMs;
       const novo = texto(estado);
-      if (el.textContent !== novo) el.textContent = novo;
       el.hidden = novo === '';
+      if (el.dataset.texto === novo) return;
+      el.dataset.texto = novo;
+      // Marco 53 (22/11/2026, D-203): a tecla vira um selo destacado à esquerda do pergaminho (antes, só texto).
+      const k = tecla();
+      if (novo.startsWith(`${k}: `)) {
+        const selo = document.createElement('kbd');
+        selo.className = 'tecla-prompt';
+        selo.textContent = k;
+        const resto = document.createElement('span');
+        resto.textContent = novo.slice(k.length + 2);
+        el.replaceChildren(selo, resto);
+      } else el.textContent = novo;
     },
   };
 }

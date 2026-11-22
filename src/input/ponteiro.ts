@@ -20,8 +20,29 @@ const ZONA_MORTA_MOUSE_PX = 6;
 const SUPRIME_CLIQUE_PX = 4;
 const PASSO_RODA = 0.1;
 const CACHE_RETANGULO_MS = 100;
-/** D-115: segurando o botão esquerdo por isto (ou movendo o cursor), o mouse passa a guiar. */
-export const GUIAR_APOS_MS = 120;
+/**
+ * D-115: segurando o botão esquerdo por isto (ou movendo o cursor), o mouse passa a guiar. Marco 53 (22/11/2026,
+ * D-203): eram 120 ms, menos que um clique comum; o clique virava "guiar" e, ao soltar, o personagem parava.
+ */
+export const GUIAR_APOS_MS = 260;
+/**
+ * Marco 53 (22/11/2026, D-203): no modo janela, o cursor encostado na borda da tela desliza a câmera para aquele lado
+ * (antes, só arrastando com o botão do meio ou o direito). A faixa da borda (px) e a velocidade máxima (px de tela por
+ * segundo), que cresce quanto mais perto da beirada.
+ */
+export const BORDA_PX = 28;
+export const BORDA_VELOCIDADE = 900;
+
+/** Marco 53 (D-203): quanto a câmera anda num eixo (px de tela por segundo, com sinal) com o cursor em `p` de `lado`. */
+export function velocidadeDaBorda(p: number, lado: number): number {
+  if (lado <= BORDA_PX * 3) return 0;
+  if (p < BORDA_PX) return -BORDA_VELOCIDADE * (1 - Math.max(0, p) / BORDA_PX);
+  if (p > lado - BORDA_PX) return BORDA_VELOCIDADE * (1 - Math.max(0, lado - p) / BORDA_PX);
+  return 0;
+}
+
+/** Marco 53 (D-203): soltar até aqui depois de apertar, sem arrastar, ainda é um clique: segue até o ponto. */
+const CLIQUE_ATE_MS = 400;
 /** D-115: com o cursor a menos disto do personagem (px de tela), ele para. */
 export const PARADO_PERTO_PX = 14;
 
@@ -37,6 +58,12 @@ interface Ponto {
 
 export interface OpcoesPonteiro {
   camera: Camera;
+  /** Marco 53 (22/11/2026, D-203): a sensibilidade do zoom das Configurações (1 = a de sempre). */
+  sensibilidade?: () => number;
+  /** Marco 53 (D-203): a câmera olha para onde o mouse aponta (Configurações). */
+  cameraNoMouse?: () => boolean;
+  /** Marco 53 (D-203): o cursor na borda desliza a câmera (no modo janela; Configurações). */
+  cameraNaBorda?: () => boolean;
   /** A célula tocada (para achar quem está nela) e o ponto contínuo exato. `false`: não andou (selecionou um alvo). */
   aoIrPara: (celula: Celula, ponto: Celula) => boolean;
   /** D-115: o mouse guiando como o joystick (sem isto, o mouse se comporta como o toque). */
@@ -68,6 +95,19 @@ interface MouseGuiando {
   semGuiar: boolean;
 }
 
+/**
+ * Marco 53 (22/11/2026, D-203): o zoom da roda proporcional ao giro. A roda comum (um "clique" de 100 px) dá os
+ * mesmos ±0,1 de antes; a pinça do touchpad (o navegador manda a roda com Ctrl, dezenas de eventos pequenos) passava
+ * ±0,1 a cada um e voava do mínimo ao máximo num gesto. Agora cada evento conta o quanto girou.
+ */
+export function zoomDaRoda(zoom: number, ev: Pick<WheelEvent, 'deltaY' | 'deltaMode' | 'ctrlKey'>, sensibilidade = 1): number {
+  const px = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaMode === 2 ? ev.deltaY * 400 : ev.deltaY;
+  const giro = Math.max(-200, Math.min(200, px));
+  // A pinça (Ctrl) vem em passos de poucos px: pesa mais por px, mas sem o salto fixo de antes.
+  const porPx = (ev.ctrlKey ? 0.006 : PASSO_RODA / 100) * sensibilidade;
+  return zoom * Math.exp(-giro * porPx);
+}
+
 export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Ponteiro {
   const { camera, guiar } = opcoes;
   const pontos = new Map<number, Ponto>();
@@ -77,6 +117,9 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   let pinca = { distancia: 1, zoom: 1, meioX: 0, meioY: 0 };
   let mouse: MouseGuiando | null = null;
   let rumo: Rumo = PARADO;
+  /** Marco 53 (D-203): o cursor do mouse sobre o mapa (null fora dele) e o último quadro, para a borda. */
+  let mouseNaTela: { x: number; y: number } | null = null;
+  let quadroAntes = -1;
 
   let retangulo = alvo.getBoundingClientRect();
   let retanguloEm = 0;
@@ -162,11 +205,17 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
 
   const aoMover = (ev: PointerEvent) => {
     const p = local(ev);
-    if (ev.pointerType === 'mouse') cursor = p;
+    if (ev.pointerType === 'mouse') {
+      cursor = p;
+      mouseNaTela = p;
+      // Marco 53 (D-203): a câmera olha para onde o mouse aponta (no computador, com o mouse guiando).
+      if (guiar && (opcoes.cameraNoMouse?.() ?? true)) camera.mirar({ x: (p.x / Math.max(1, retangulo.width)) * 2 - 1, y: (p.y / Math.max(1, retangulo.height)) * 2 - 1 });
+    }
     if (mouse && ev.pointerId === mouse.id) {
       mouse.x = p.x;
       mouse.y = p.y;
-      if (!mouse.semGuiar && !mouse.guiando && Math.hypot(p.x - mouse.inicioX, p.y - mouse.inicioY) > ZONA_MORTA_MOUSE_PX) mouse.guiando = true;
+      // Marco 53 (D-203): só arrastar de verdade (o dobro da zona morta) vira "guiar" antes do tempo.
+      if (!mouse.semGuiar && !mouse.guiando && Math.hypot(p.x - mouse.inicioX, p.y - mouse.inicioY) > ZONA_MORTA_MOUSE_PX * 2) mouse.guiando = true;
       if (mouse.guiando) guiarAgora();
       return;
     }
@@ -180,7 +229,8 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
     if (gesto === 'pinca') {
       const m = medidasPinca();
       if (!m) return;
-      camera.zoomEm(pinca.zoom * (m.distancia / pinca.distancia), m.meioX, m.meioY);
+      // Marco 53 (D-203): a sensibilidade amansa (ou acelera) a pinça dos dedos também.
+      camera.zoomEm(pinca.zoom * Math.pow(m.distancia / pinca.distancia, opcoes.sensibilidade?.() ?? 1), m.meioX, m.meioY);
       camera.arrastar(m.meioX - pinca.meioX, m.meioY - pinca.meioY);
       pinca.meioX = m.meioX;
       pinca.meioY = m.meioY;
@@ -202,7 +252,15 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   const aoSoltar = (ev: PointerEvent) => {
     if (mouse && ev.pointerId === mouse.id) {
       // Depois de guiar, soltar para na hora (como soltar o joystick); o clique curto segue até o ponto.
-      if (mouse.guiando) emitirRumo(PARADO);
+      if (mouse.guiando) {
+        emitirRumo(PARADO);
+        // Marco 53 (D-203): um clique um pouco mais longo, sem arrastar, continua sendo "ir até lá".
+        const curto = performance.now() - mouse.desdeMs <= CLIQUE_ATE_MS && Math.hypot(mouse.x - mouse.inicioX, mouse.y - mouse.inicioY) <= ZONA_MORTA_MOUSE_PX * 2;
+        if (curto) {
+          ultimaCelula = null;
+          irParaPonto({ x: mouse.inicioX, y: mouse.inicioY });
+        }
+      }
       mouse = null;
       pontos.delete(ev.pointerId);
       return;
@@ -221,9 +279,16 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   const aoRolar = (ev: WheelEvent) => {
     ev.preventDefault();
     const p = local(ev);
-    camera.zoomEm(camera.zoom + (ev.deltaY < 0 ? PASSO_RODA : -PASSO_RODA), p.x, p.y);
+    camera.zoomEm(zoomDaRoda(camera.zoom, ev, opcoes.sensibilidade?.() ?? 1), p.x, p.y);
   };
 
+  const aoSairDaTela = (ev: PointerEvent) => {
+    if (ev.pointerType !== 'mouse') return;
+    // Marco 53 (D-203): o cursor sobre o HUD ou fora da janela não desliza a câmera.
+    mouseNaTela = null;
+    if (!mouse) camera.mirar(null);
+  };
+  alvo.addEventListener('pointerleave', aoSairDaTela);
   alvo.addEventListener('pointerdown', aoBaixar);
   alvo.addEventListener('pointermove', aoMover);
   alvo.addEventListener('pointerup', aoSoltar);
@@ -231,6 +296,14 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
   alvo.addEventListener('wheel', aoRolar, { passive: false });
   return {
     atualizar: (agoraMs) => {
+      const dt = quadroAntes < 0 ? 0 : Math.min(0.1, (agoraMs - quadroAntes) / 1000);
+      quadroAntes = agoraMs;
+      // Marco 53 (D-203): a borda desliza a câmera (não com o botão segurado, que guia o personagem).
+      if (guiar && mouseNaTela && !mouse && dt > 0 && camera.modo === 'janela' && (opcoes.cameraNaBorda?.() ?? true)) {
+        const vx = velocidadeDaBorda(mouseNaTela.x, retangulo.width);
+        const vy = velocidadeDaBorda(mouseNaTela.y, retangulo.height);
+        if (vx !== 0 || vy !== 0) camera.arrastar(-vx * dt, -vy * dt);
+      }
       if (!mouse || mouse.semGuiar) return;
       if (!mouse.guiando && agoraMs - mouse.desdeMs >= GUIAR_APOS_MS) mouse.guiando = true;
       if (mouse.guiando) guiarAgora();
@@ -238,6 +311,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
     celulaDoCursor: () => (cursor ? camera.celulaSob(cursor.x, cursor.y) : null),
     desligar: () => {
       clearTimeout(temporizador);
+      alvo.removeEventListener('pointerleave', aoSairDaTela);
       alvo.removeEventListener('pointerdown', aoBaixar);
       alvo.removeEventListener('pointermove', aoMover);
       alvo.removeEventListener('pointerup', aoSoltar);

@@ -10,7 +10,8 @@
 // Marco 38 (08/11/2026, D-142): os mercadores errantes andando, as escoltas, os andarilhos que dão missão, a pedra de
 // save no centro das regiões sem vila e a Pedra de retorno com conjuração (mundo/retorno.ts).
 
-import { atenderCaixa, avisoDaCaixa, refDoAcampamento, garantirAcampamento, pertoDaCaixa, registrarAcampamentos, renascerNoAcampamento } from './acampamento-sala';
+import { atenderCaixa, avisoDaCaixa, refDoAcampamento, garantirAcampamento, pertoDaCaixa, registrarAcampamentos } from './acampamento-sala';
+import { ondeRenascer, type LugarDeRenascer } from './renascer';
 import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import { estadoPublico } from '../arena/estado-publico';
@@ -85,8 +86,8 @@ const ID_MERCADOR_ERRANTE = 'evento-mercador';
 interface Presenca {
   identidade: string;
   ficha: FichaDoMundo;
-  /** Morreu fora de dungeon: ao renascer, volta à vila salva (se não for esta região). */
-  morreu: boolean;
+  /** Morreu fora de dungeon: ao renascer, volta onde escolheu (marco 53, D-203: `renascerEm`; sem escolha, a vila salva). */
+  morreu: boolean; renascerEm?: LugarDeRenascer | undefined;
   /** Marco 30: o grupo do Mundo (o servidor define; null fora de grupo). */
   grupo: string | null;
   /** Marco 41 (D-169): a vizinha cuja sala já foi aquecida nesta ida à passagem. */
@@ -124,7 +125,7 @@ export class SalaMundo extends SalaArena {
   ) {
     const molde = opcoesMundo.molde;
     const montado = molde ? { ...molde, estado: clonarEstado(molde.estado) } : montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
-    const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo() };
+    const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo(), reservaReconexaoMs: montado.ctx.balance.mundo.reconexaoS * 1000 };
     super(montado.ctx, opcoes, montado.estado);
     this.lugar = lugar;
     this.canal = opcoesMundo.canal ?? 1;
@@ -493,13 +494,11 @@ export class SalaMundo extends SalaArena {
     if (!p.morreu) return false;
     p.morreu = false;
     const aqui = this.lugar.tipo === 'regiao' ? this.lugar.regiao.id : null;
-    // Marco 44 (D-178): quem tem acampamento renasce na fogueira, não na vila.
-    const acamp = renascerNoAcampamento(p.ficha, this.opcoesMundo.agora());
-    if (acamp?.regiao === aqui) colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, acamp));
-    if (acamp) return acamp.regiao === aqui ? false : (this.trocar(s, p, `regiao:${acamp.regiao}`, acamp, null), true);
-    if (aqui === p.ficha.vilaSalva) return false;
-    this.trocar(s, p, `regiao:${p.ficha.vilaSalva}`, null, null);
-    return true;
+    // Marco 44 (D-178): o acampamento (a fogueira); marco 53 (D-203): ou o que o jogador escolheu na tela da morte.
+    const d = ondeRenascer(p.ficha, p.renascerEm, this.reino, this.opcoesMundo.agora());
+    p.renascerEm = undefined;
+    if (d.regiao === aqui && d.chegada) colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, d.chegada));
+    return d.regiao === aqui ? false : (this.trocar(s, p, `regiao:${d.regiao}`, d.chegada, null), true);
   }
 
   /** D-169: no meio da passagem, vai à vizinha no mesmo ponto; ao entrar nela, pede a sala de lá pronta. */
@@ -612,6 +611,7 @@ export class SalaMundo extends SalaArena {
       case 'portal':
         this.abrirPortal(s, e, p, { lugar: acao.lugar, x: acao.x, y: acao.y });
         break;
+      case 'renascer': if (e.morto) p.renascerEm = acao.onde; break; // Marco 53 (D-203): a escolha da tela da morte
     }
     p.ficha = fichaAtualizada(p.ficha, e);
   }

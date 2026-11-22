@@ -12,7 +12,12 @@ import type { IdentidadeClasse } from './barra-classe';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { criarPainelEstatisticas, estatisticasDoJogador } from './estatisticas';
+import { xpParaProximo } from '../progression/nivel';
+import { AlertaDeControle } from './alerta-controle';
 
+/** Marco 53 (D-203): os destaques no canto do registro (quantos e por quanto tempo). */
+const MAX_DESTAQUES = 4;
+const DESTAQUE_MS = 5000;
 const MAX_LINHAS_LOG = 6;
 
 export function classeDoHp(fracao: number): 'alto' | 'medio' | 'baixo' {
@@ -41,6 +46,8 @@ export class Hud {
   private readonly mana = barra('mana');
   /** Marco 21 (D-088): a fúria do Guerreiro; marco 22 (D-089): também a Mira firme do Arqueiro. Escondida nas outras. */
   private readonly classe = barra('classe');
+  /** Marco 53 (22/11/2026, D-203): o XP até o próximo nível, sempre à vista (antes, só na Ficha). */
+  private readonly xp = barra('xp');
   /** Marco 22 (D-089): o elemento encarnado do Mago. */
   private readonly encarnacao = document.createElement('span');
   private readonly tema = document.createElement('span');
@@ -56,7 +63,12 @@ export class Hud {
   private ultimo = '';
   /** 15/11/2026: o dano, a velocidade de ataque e a de movimento no canto inferior esquerdo (só no computador). */
   private readonly estatisticas = criarPainelEstatisticas();
+  /** Marco 53 (22/11/2026, D-203): o selo grande do controle de grupo. */
+  private readonly controle: AlertaDeControle;
   private proximaEstatistica = 0;
+  /** Marco 53 (D-203): o modo não põe o registro na tela; os destaques (o importante, por alguns segundos) ficam. */
+  private readonly semRegistro: boolean;
+  private readonly destaques = document.createElement('ol');
 
   constructor(
     raiz: HTMLElement,
@@ -77,7 +89,9 @@ export class Hud {
     barras.className = 'barras';
     this.classe.raiz.hidden = true;
     this.classe.raiz.setAttribute('aria-valuemax', '100');
-    barras.append(this.vida.raiz, this.mana.raiz, this.classe.raiz);
+    this.xp.raiz.hidden = true;
+    this.xp.raiz.setAttribute('aria-valuemin', '0');
+    barras.append(this.vida.raiz, this.mana.raiz, this.classe.raiz, this.xp.raiz);
     this.encarnacao.className = 'chip-encarnacao';
     this.encarnacao.hidden = true;
     this.efeitos.className = 'chips-efeito';
@@ -92,6 +106,11 @@ export class Hud {
 
     this.log = document.createElement('ol');
     this.log.className = 'log-combate';
+    // Marco 53 (22/11/2026, D-203): sem o registro na tela (o Mundo), o importante vai para os destaques.
+    this.semRegistro = mundo?.ctx.modo.registroNaTela === false;
+    this.log.hidden = this.semRegistro;
+    this.destaques.className = 'destaques-hud';
+    this.destaques.setAttribute('aria-live', 'polite');
     this.log.setAttribute('aria-live', 'polite');
     this.log.setAttribute('aria-label', t('hud.log'));
 
@@ -117,7 +136,9 @@ export class Hud {
     this.morte.append(titulo, detalhe);
 
     this.estatisticas.elemento.hidden = true;
-    raiz.append(this.log, this.morte, this.estatisticas.elemento);
+    if (this.semRegistro) this.botaoLog.hidden = true;
+    raiz.append(this.log, this.destaques, this.morte, this.estatisticas.elemento);
+    this.controle = new AlertaDeControle(raiz);
   }
   /** Marco 16: desmonta o que prende a página (o ouvinte de teclado dos chips de efeito). */
   destruir(): void {
@@ -129,14 +150,16 @@ export class Hud {
   atualizar(jogador: Entidade | undefined, tick = 0, identidade: IdentidadeClasse = { barra: null, encarnacao: null }): void {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
+    this.controle.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
     this.atualizarEstatisticas(jogador, tick);
     const { barra: bc, encarnacao, encarnacaoS = 0, invocacoes: inv = null } = identidade;
     const pct = bc ? Math.round(bc.fracao * 100) : -1;
     const textoInv = inv ? `${inv.vivas}/${inv.limite}${inv.extras > 0 ? ` +${inv.extras}` : ''}` : '';
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}/${textoInv}`;
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}/${textoInv}/${jogador.nivel}/${jogador.xp}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
+    this.atualizarXp(jogador);
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
     this.vida.preenchimento.style.width = `${fracaoVida * 100}%`;
     this.vida.raiz.dataset.faixa = classeDoHp(fracaoVida);
@@ -175,6 +198,23 @@ export class Hud {
     this.morte.hidden = !jogador.morto;
   }
 
+  /** Marco 53 (D-203): a barra fina do XP, com o número no título e no leitor de tela. No nível máximo, some. */
+  private atualizarXp(jogador: Entidade): void {
+    const regras = this.mundo?.ctx.balance.xp;
+    const temXp = !!regras && !!jogador.bolsa && jogador.nivel < regras.nivelMax;
+    this.xp.raiz.hidden = !temXp;
+    if (!temXp) return;
+    const proximo = xpParaProximo(jogador.nivel, regras);
+    const pct = Math.min(100, Math.floor((jogador.xp / Math.max(1, proximo)) * 100));
+    this.xp.preenchimento.style.width = `${pct}%`;
+    const texto = t('hud.xp', { nivel: jogador.nivel, xp: jogador.xp, proximo, pct });
+    this.xp.raiz.title = texto;
+    this.xp.raiz.setAttribute('aria-valuemax', String(proximo));
+    this.xp.raiz.setAttribute('aria-valuenow', String(jogador.xp));
+    this.xp.raiz.setAttribute('aria-label', texto);
+    this.xp.raiz.dataset.pct = t('hud.xpCurto', { nivel: jogador.nivel, pct });
+  }
+
   /** O painel de estatísticas: a conta (a ficha derivada) roda umas 5 vezes por segundo, não a cada quadro. */
   private atualizarEstatisticas(jogador: Entidade, tick: number): void {
     if (!this.mundo || document.body.classList.contains('toque')) return;
@@ -201,10 +241,37 @@ export class Hud {
     this.rede.dataset.qualidade = !r.conectado ? 'ruim' : r.rttMs <= 150 ? 'boa' : r.rttMs <= 250 ? 'media' : 'ruim';
   }
 
-  registrar(texto: string): void {
+  /**
+   * Uma linha no registro. Marco 53 (D-203): `destaque` é o que importa ao jogador (uma recusa, um estudo, um buff); no
+   * modo sem registro na tela, só esses aparecem, maiores e por alguns segundos, no mesmo canto.
+   */
+  registrar(texto: string, destaque = false): void {
+    if (this.semRegistro) {
+      if (destaque) this.destacar(texto);
+      return;
+    }
     const linha = document.createElement('li');
     linha.textContent = texto;
     this.log.append(linha);
     while (this.log.children.length > MAX_LINHAS_LOG) this.log.firstElementChild?.remove();
+  }
+
+  private destacar(texto: string): void {
+    const ultima = this.destaques.lastElementChild;
+    if (ultima instanceof HTMLElement && ultima.dataset.texto === texto) {
+      // O mesmo aviso de novo (a recarga apertada várias vezes): conta em vez de repetir a linha.
+      const n = Number(ultima.dataset.n ?? '1') + 1;
+      ultima.dataset.n = String(n);
+      ultima.textContent = `${texto} ×${String(n)}`;
+      ultima.getAnimations().forEach((a) => { a.currentTime = 0; });
+      return;
+    }
+    const linha = document.createElement('li');
+    linha.textContent = texto;
+    linha.dataset.texto = texto;
+    this.destaques.append(linha);
+    while (this.destaques.children.length > MAX_DESTAQUES) this.destaques.firstElementChild?.remove();
+    const animacao = linha.animate([{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none', offset: 0.06 }, { opacity: 1, offset: 0.8 }, { opacity: 0 }], { duration: DESTAQUE_MS, fill: 'forwards' });
+    animacao.onfinish = () => { linha.remove(); };
   }
 }

@@ -83,10 +83,16 @@ export interface PedidoDoMundo {
   instancia?: string | null;
 }
 
+/** Marco 53 (D-203): umas 5 min de tentativas, a reserva do Mundo no servidor (`mundo.reconexaoS`). */
+const TENTATIVAS_RECONEXAO_MUNDO = 64;
+
 export async function conectarMundo(url: string, token: string, pedido: PedidoDoMundo): Promise<Omit<ConexaoArena, 'fase'>> {
   const cliente = new Client(url);
   cliente.auth.token = token;
   const sala = await cliente.joinOrCreate('mundo', { ...pedido, instancia: pedido.instancia ?? '' });
+  // Marco 53 (22/11/2026, D-203): no Mundo, a reserva do servidor dura minutos (o notebook que dorme, a aba suspensa);
+  // o SDK insiste por ela inteira (de 5 em 5 s, no máximo), em vez de desistir em menos de um minuto.
+  sala.reconnection.maxRetries = TENTATIVAS_RECONEXAO_MUNDO;
   return embrulhar(sala);
 }
 

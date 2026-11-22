@@ -12,11 +12,22 @@
 
 import { aleatorio, criarRng, type EstadoRng } from '../core/rng';
 import type { Bioma } from '../mundo/reino';
+import { passavel, type Fase } from './fase';
 
 /** O código do obstáculo natural de cada célula (0 = nenhum; as paredes construídas também ficam 0). */
 // 16/11/2026: o arbusto (5) é a árvore baixa da borda da mata: desenhado, mas sem tronco (world/cenario-baixo.ts).
 export const OBSTACULO = { nenhum: 0, montanha: 1, rochedo: 2, arvore: 3, objeto: 4, arbusto: 5 } as const;
 export type CodigoObstaculo = (typeof OBSTACULO)[keyof typeof OBSTACULO];
+
+/**
+ * Marco 53 (22/11/2026, D-203): a célula passável e sem nada de pé em cima (árvore, rochedo, arbusto, peça do
+ * cenário): onde um item pode cair e uma armadilha pode ser posta sem sumir embaixo do desenho.
+ */
+export function chaoAVista(fase: Fase, x: number, y: number): boolean {
+  if (!passavel(fase, x, y)) return false;
+  const o = fase.obstaculos;
+  return !o || o[y * fase.largura + x] === OBSTACULO.nenhum;
+}
 
 const SEMENTE_GEOGRAFIA = 51_437;
 /** A altura máxima da montanha (níveis). */

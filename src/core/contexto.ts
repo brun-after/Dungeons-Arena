@@ -73,7 +73,9 @@ export interface Balance {
       gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number };
       /** D-173: o que cada estilo do dono dá a cada companheiro (por estilo, companheiro e campo, o valor na faixa 10). */
       estilosDosPets?: Record<string, Partial<Record<string, Partial<Record<string, number>>>>>;
-      marca: { recargaBasicoPct: number; velocidadePct: number; danoPct: number; /** D-170: a marca dura isto depois do último golpe que a renovou. */ duracaoMs: number } };
+      marca: { recargaBasicoPct: number; velocidadePct: number; danoPct: number; /** D-170: a marca dura isto depois do último golpe que a renovou. */ duracaoMs: number };
+      /** D-204 (22/11/2026): com uma cópia da fera viva (as ultimates), o repasse do dano no bicho é dividido por isto. */
+      copiasDoPet: { repasseDivisor: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number;
       /** 14/11/2026 (D-171): o alcance ofensivo sem a Mira cheia (%) e o multiplicador da conjuração das skills. */
       alcanceSemMiraPct: number; conjuracaoMult: number;
@@ -236,6 +238,8 @@ export interface Balance {
    */
   movimentoClasse: {
     viagemPct: number;
+    /** Marco 53 (D-203): o recuo foge do inimigo que persegue a até tantas células (senão, o "para trás" de sempre). */
+    fugaRaio: number;
     /** D-172: a recarga dos movimentos que não são o principal, em combate (% da normal). */
     recargaEmCombatePct: number;
     viagemPesadaPct: number;
@@ -505,7 +509,8 @@ export interface Balance {
     /** Marco 44 (D-178): a vila à noite: a partir de que noite as lojas `fecham` e o estoque do vendedor da noite. */
     /** Marco 44 (D-178): os elementos mais fortes à noite e de dia, e quanto (% no auge). */
     elementosPelaHora: { noite: readonly string[]; dia: readonly string[]; pct: number };
-    vilaNoite: { fechaDesde: number; fecham: readonly string[]; estoque: readonly string[] };
+    /** Marco 53 (D-203): `sobretaxa`, o quanto a mais cobram à noite as lojas da lista (o vendedor da noite e o andarilho). */
+    vilaNoite: { fechaDesde: number; fecham: readonly string[]; estoque: readonly string[]; sobretaxa: { lojas: readonly string[]; pct: number } };
     acampamento: {
       acesaMin: number; duraMin: number; raioFogo: number; raioDescanso: number; noiteDesde: number; curaPctPorS: number;
       descansoMinS: number; marcaMin: number; bonusDanoPct: number; bonusMin: number; atraiChancePorMinPct: number;
@@ -527,6 +532,8 @@ export interface Balance {
     /** No covil, quem causou ao menos esta % do dano no boss leva o próprio sorteio. */
     covil: { contribuicaoMinPct: number };
     checkpointS: number;
+    /** Marco 53 (D-203): a reserva de quem caiu no Mundo, em segundos (a entidade fica parada até lá). */
+    reconexaoS: number;
     /** Invisível para inimigos por alguns segundos depois de passar de região. */
     passagemProtecaoS: number;
     /** Marco 38 (08/11/2026, D-142): o passo do mercador errante e a distância em que ele para perto de alguém. */
@@ -602,6 +609,7 @@ export interface Balance {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
     capacidade: number;
     pilhaMax: number;
+    soltarEsperaMs: number; soltarEsperaMaxMs: number; // Marco 53 (D-203): a espera de quem soltou (ms) e o teto.
   };
   /** Marco 14 (D-059): ranks, barra e pontos de habilidade; orçamento de poder; habilidades geradas. */
   habilidades: RegrasHabilidades;

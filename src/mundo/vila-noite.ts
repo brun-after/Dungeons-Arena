@@ -20,6 +20,16 @@ export function lojaFechadaANoite(ctx: ContextoSimulacao, o: Pick<ObjetoNoMundo,
   return o.tipo === 'loja' && noite >= ctx.balance.mundo.vilaNoite.fechaDesde && ctx.balance.mundo.vilaNoite.fecham.includes(o.ref ?? '');
 }
 
+/**
+ * Marco 53 (22/11/2026, D-203): à noite, o vendedor da noite e o comerciante andarilho cobram mais que a loja comum
+ * (são o que está aberto). `noite` como em `lojaFechadaANoite`. Devolve o fator (1 = preço de sempre).
+ */
+export function fatorDaNoite(ctx: ContextoSimulacao, loja: Pick<ObjetoNoMundo, 'tipo' | 'ref'> | null, noite = ctx.modo.noite ?? 0): number {
+  const r = ctx.balance.mundo.vilaNoite;
+  if (!loja || loja.tipo !== 'loja' || noite < r.fechaDesde || !r.sobretaxa.lojas.includes(loja.ref ?? '')) return 1;
+  return 1 + r.sobretaxa.pct / 100;
+}
+
 /** A cada segundo, pela sala: o vendedor da noite chega à praça ao escurecer e vai embora ao clarear. */
 export function conferirVilaANoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo): void {
   const vila = regiao.vila;

@@ -463,7 +463,9 @@ test.describe('desktop', () => {
     await expect(page.locator('canvas.minimapa')).toBeVisible();
     await expect(page.locator('canvas.minimapa')).toHaveAttribute('data-atualizado', /^\d+$/);
     await irPara(page, diag, 10, 2);
-    await expect(page.locator('.prompt-interacao')).toHaveText('E: abrir baú');
+    // Marco 53 (D-203): a tecla fica num selo à parte do texto.
+    await expect(page.locator('.prompt-interacao')).toContainText('abrir baú');
+    await expect(page.locator('.prompt-interacao .tecla-prompt')).toHaveText('E');
     expect(erros).toEqual([]);
   });
 

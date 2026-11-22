@@ -1,6 +1,6 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
-import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro } from './pets';
+import { ehCopiaDoPet, fatorDasCopias, golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro } from './pets';
 import { cansacoDoDano, fatorMontado, gastarFolego, montadoEm, repasseDoPet } from './feras';
 import { barradoPelaContencao } from './movimento-feras';
 import { aposGolpeDoCompanheiro, golpeDoCompanheiro } from './pets-estilos';
@@ -149,6 +149,11 @@ export function aplicarImpacto(
   if (!vivo(alvo)) return;
   // Marco 22 (D-089): o golpe no falcão do Aventureiro cai no dono, com as defesas, os escudos e as proteções dele.
   const dono = alvo.invocacao?.companheiro ? buscarEntidade(estado, alvo.invocacao.donoId) : undefined;
+  // D-204 (22/11/2026): a cópia da fera é atingida pelo que atinge a fera (o falcão, só por projéteis), na vida dela.
+  if (ehCopiaDoPet(alvo) && impacto.hab.formulaDano !== null && !golpeAlcancaOPet(petDoCompanheiro(alvo), impacto.hab)) {
+    saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
+    return;
+  }
   // Marco 24 (25/10/2026, D-098): só parte do dano chega ao dono (o reflexo cai com o nível); cura e estados seguem inteiros.
   if (dono && vivo(dono)) {
     // Marco 40 (13/11/2026, D-165): cada companheiro é atingido por uma coisa (o falcão, no ar, só por projéteis) e
@@ -165,12 +170,14 @@ export function aplicarImpacto(
     }
     // D-188 (19/11/2026): chega ao dono só o repasse (30%, 20%, 10% no nível 1), na vida atual; o que o bicho segura
     // vira cansaço (o Sobrevivente segura mais e cansa menos).
-    const repasse = repasseDoPet(ctx, dono, pet);
+    // D-204: com uma cópia viva, chega só 1/3 disso; o cansaço segue o repasse de sempre (as cópias dividem o peso).
+    const base = repasseDoPet(ctx, dono, pet);
+    const repasse = base * fatorDasCopias(estado, ctx, dono);
     const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * repasse };
     const antes = dono.hp;
     aplicarImpacto(estado, ctx, dono, { ...impacto, fonte }, saida);
     const chegou = Math.max(0, antes - dono.hp);
-    if (chegou > 0 && repasse > 0) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, (chegou * (1 - repasse)) / repasse), saida);
+    if (chegou > 0 && repasse > 0) gastarFolego(estado, ctx, dono, pet, cansacoDoDano(ctx, dono, pet, (chegou * (1 - base)) / repasse), saida);
     return;
   }
   // D-188: o Círculo de Contenção do urso barra as magias de fora.

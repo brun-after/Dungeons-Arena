@@ -2,6 +2,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Entidade } from '../entities/entidade';
+import { ticksDe } from '../core/tempo';
 import { largarItem, largarPerto } from '../world/objetos';
 import { recusarItem } from './inventario';
 
@@ -22,9 +23,22 @@ export function soltarItem(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entida
     if (!largarItem(estado, entrada.itemId, x, y, saida, qtd, objetoId, entrada.ref)) return false;
     const objeto = estado.objetos.at(-1);
     if (objeto && x === origem.x && y === origem.y) objeto.aguardaSaidaDe = e.id;
+    // Marco 53 (22/11/2026, D-203): quem soltou não recolhe enquanto a mochila estiver aberta (o teto) nem 5 s depois.
+    if (objeto) {
+      objeto.soltoPor = e.id;
+      objeto.soltoAteTick = estado.tick + ticksDe(ctx.balance.inventario.soltarEsperaMaxMs);
+    }
     return true;
   });
   if (!soltou) { recusarItem(e, 'sem_espaco_no_chao', estado.tick, saida); return; }
   entrada.qtd -= qtd;
   if (entrada.qtd === 0) bolsa.mochila.splice(indice, 1);
+}
+
+/** Marco 53 (D-203): a mochila fechou; o que o jogador soltou fica recolhível por ele em `soltarEsperaMs`. */
+export function mochilaFechada(estado: EstadoJogo, ctx: ContextoSimulacao, id: string): void {
+  const ate = estado.tick + ticksDe(ctx.balance.inventario.soltarEsperaMs);
+  for (const o of estado.objetos) {
+    if (o.soltoPor === id && o.soltoAteTick !== undefined) o.soltoAteTick = Math.min(o.soltoAteTick, ate);
+  }
 }

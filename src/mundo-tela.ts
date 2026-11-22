@@ -31,10 +31,13 @@ import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPaineisDaEconomia } from './ui/mundo-economia';
 import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
+import { criarAnuncioDeChefe } from './ui/anuncio-chefe';
 import { criarRelogioDoMundo } from './ui/relogio-mundo';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
-import { criarGuiaMundo, criarOrientacaoMundo, marcarLapide, type OrientacaoMundo } from './ui/orientacao-mundo';
+import { criarCondutor } from './ui/condutor';
+import { criarEscolhaDeRenascer } from './ui/escolha-renascer';
+import { criarGuiaMundo, criarOrientacaoMundo, esquecerLapide, marcarLapide, type OrientacaoMundo } from './ui/orientacao-mundo';
 import { abrirPortalTemporario } from './ui/portal-mapa';
 import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
 import type { ContextoSimulacao } from './core/contexto';
@@ -370,6 +373,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   const vazio = criarEstado({ semente: 0, faseId: ctx.fase.id });
   const monitor = new MonitorDeConexao();
   const faixa = criarFaixaDoLugar();
+  const anuncioChefe = criarAnuncioDeChefe(); // Marco 53 (22/11/2026, D-203): o chefe que surge, em destaque.
   let pararLaco: (() => void) | null = null;
   let cena: Cena | null = null;
   let saindo = false;
@@ -377,11 +381,20 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     mostrarAviso(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, texto, ms);
   };
   const idDoJogador = () => eu.entidadeId ?? 'p1';
+  const vilaSalvaAgora = (): string | null => ultimoLugar?.vilaSalva ?? vilaSalva;
   const estadoAtual = () => eu.previsto;
   const enviarAcao = (acao: AcaoDoMundo) => {
     eu.acaoDoMundo(acao);
   };
-  const social = criarPainelSocial({ ctx, reino, estado: estadoAtual, idLocal: idDoJogador, enviar: enviarAcao, avisar: (texto) => { avisar(texto, 4000); } });
+  // Marco 53 (22/11/2026, D-203): o condutor anda sozinho até o ponto do mapa ou atrás do companheiro seguido.
+  const condutor = criarCondutor(() => ctx.fase, (cmd) => { eu.enviarComando(cmd); }, (c) => {
+    if (c) avisar(c.tipo === 'seguir' ? t('mundo.condutor.seguindo', { nome: c.nome }) : t('mundo.condutor.indo'), 3500);
+  });
+  const social = criarPainelSocial({
+    ctx, reino, estado: estadoAtual, idLocal: idDoJogador, enviar: enviarAcao, avisar: (texto) => { avisar(texto, 4000); },
+    seguir: (nome) => { condutor.conduzir(nome ? { tipo: 'seguir', nome } : null); },
+    seguindo: () => { const c = condutor.atual(); return c?.tipo === 'seguir' ? c.nome : null; },
+  });
   const economia = criarPaineisDaEconomia({
     ctx,
     reino,
@@ -401,7 +414,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     document.querySelector('.mapa-expandido')?.remove();
   };
   const verMapa = () => {
-    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty, orientacao });
+    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty, orientacao, andar: (p) => { condutor.conduzir({ tipo: 'ponto', x: p.x, y: p.y }); } });
   };
   const teclaMapa = (ev: KeyboardEvent) => {
     // 19/11/2026 (D-187): a tecla do mapa vem das Configurações (o M, por padrão).
@@ -413,6 +426,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
       ultimoLugar = a;
       enviarAcao({a:'grupo',op:'consultar'});
       faixa.mostrar(a);
+      anuncioChefe.chegou();
       if (a.pvp) avisar(t('mundo.perigo.perigoso'), 6000);
     } else if (a.tipo === 'portais') {
       abrirPortal(a, Date.now(), (destino, pagamento) => {
@@ -519,6 +533,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     idLocal,
     estado: () => eu.previsto ?? vazio,
     emitir: (cmd) => {
+      condutor.comandoDoJogador(cmd);
       eu.enviarComando(cmd);
     },
     acoesExtras: [mapa, portal, retorno, sair],
@@ -541,7 +556,12 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   }
   const c = cena;
   const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
-  camada.querySelector('.camada-ui')?.append(faixa.elemento, relogio.elemento, social.elemento, guia.elemento);
+  camada.querySelector('.camada-ui')?.append(faixa.elemento, anuncioChefe.elemento, relogio.elemento, social.elemento, guia.elemento);
+  // Marco 53 (22/11/2026, D-203): morto fora de dungeon, a escolha de onde renascer.
+  const nomeDaRegiao = (id: string | undefined) => reino.regioes.find((r) => r.id === id)?.nome ?? id ?? '';
+  const renascer = criarEscolhaDeRenascer(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, enviarAcao, () => ({
+    save: nomeDaRegiao(vilaSalvaAgora() ?? undefined), central: nomeDaRegiao(reino.inicio),
+  }));
   camada.querySelector('.cabecalho h1')?.remove();
   const mini = camada.querySelector<HTMLElement>('.minimapa');
   if (mini) {
@@ -564,19 +584,40 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {
       c.bus.emitir(ev.t, ev);
-      // Marco 44 (15/11/2026, D-178): na noite fechada não fica túmulo (objetoId vazio).
-      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId && !ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
-      else if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) {
-        // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
-        marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
-        avisar(t('mundo.tumulo'), 6000);
+      const meu = 'id' in ev && ev.id === eu.entidadeId;
+      if (ev.t === 'tumuloCriado' && meu) {
+        // Marco 53 (22/11/2026, D-203): a escolha de onde renascer.
+        renascer.abrir();
+        // Marco 44 (15/11/2026, D-178): na noite fechada não fica túmulo (objetoId vazio).
+        if (!ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
+        else {
+          // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
+          marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
+          avisar(t('mundo.tumulo'), 6000);
+        }
+      } else if (ev.t === 'tumuloAberto' && meu) {
+        // Marco 53 (D-203): recolheu o túmulo: a marca e a seta saem.
+        esquecerLapide(orientacao);
       }
     }
   };
   eu.aoMundo = tratarAviso;
   for (const a of avisosAntes.splice(0)) tratarAviso(a);
   conexao.aoMudar((estado) => {
-    if (!saindo) avisar(t(`conexao.${estado}`));
+    if (saindo) return;
+    avisar(t(`conexao.${estado}`));
+    // Marco 53 (22/11/2026, D-203): a sala caiu de vez (o notebook dormiu, a aba ficou suspensa além da reserva):
+    // o personagem volta sozinho pela vila salva, em vez de ficar parado numa tela sem conexão.
+    const vila = ultimoLugar?.vilaSalva ?? vilaSalva;
+    const slot = pedido.slot;
+    if (estado !== 'encerrada' || slot === undefined || !vila) return;
+    saindo = true;
+    avisar(t('conexao.voltando'), 4000);
+    setTimeout(() => {
+      desmontar();
+      camada.remove();
+      void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vila}`, slot }, orientacao);
+    }, 1500);
   });
   // D-169: a cena de antes sai quando o personagem aparece aqui com o chão à vista pronto (ou em poucos segundos).
   // Na hora, o jogador volta ao ponto da vista em que estava na de antes (a câmera desliza dali até o centro).
@@ -604,7 +645,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     },
     renderizar: (alpha) => {
       guia.atualizar(eu.previsto, agoraMs());
+      if (eu.previsto) anuncioChefe.atualizar(eu.previsto, agoraMs());
       const id = eu.entidadeId ?? idLocal;
+      const euAgora = eu.previsto ? buscarEntidade(eu.previsto, id) : undefined;
+      condutor.atualizar(eu.previsto, euAgora, agoraMs());
+      renascer.atualizar(euAgora?.morto ?? false);
       const conectado = eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id));
       if (monitor.atualizar(agoraMs(), eu.rttMs, conectado)) avisar(t('rede.instavel'));
       c.quadro({

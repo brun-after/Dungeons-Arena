@@ -29,6 +29,26 @@ const PRESETS: Record<Pet, string> = { falcao: 'falcao_companheiro', lobo: 'lobo
 /** O companheiro ativo do Aventureiro (sem escolha, o falcão). */
 export const petDe = (e: Entidade): Pet => e.bolsa?.pet ?? e.petAtivo ?? 'falcao';
 export const presetDoPet = (pet: Pet): string => PRESETS[pet];
+/**
+ * D-204 (22/11/2026): a cópia da fera que as ultimates do Aventureiro trazem no lugar das criaturas. Faz o que a fera
+ * faz (caça a marca, segue o dono, o urso provoca), com vida própria e o tempo das criaturas que substitui.
+ */
+export const ehCopiaDoPet = (c: Entidade): boolean => c.invocacao?.copiaDoPet === true;
+
+/** D-204: a fera ou uma cópia dela (quem caça a marca do dono). */
+const cacaPelaMarca = (c: Entidade): boolean => c.invocacao?.companheiro === true || ehCopiaDoPet(c);
+
+/** D-204: com uma cópia viva, o repasse do dano na fera ao dono cai (dividido por `copiasDoPet.repasseDivisor`). */
+export function fatorDasCopias(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade): number {
+  const viva = estado.entidades.some((c) => vivo(c) && ehCopiaDoPet(c) && c.invocacao?.donoId === dono.id);
+  return viva ? 1 / Math.max(1, ctx.balance.ajustesClasses.aventureiro.copiasDoPet.repasseDivisor) : 1;
+}
+
+/** D-204: a caça acaba (a troca de fera e o Chamado). A fera e as cópias param de perseguir e voltam ao dono. */
+export function soltarACaca(dono: Entidade): void {
+  if (dono.cacaMarcada) dono.cacaMarcada = null; // null, não delete: o patch da arena não remove campos.
+}
+
 /** Qual dos três é este companheiro (pelo preset). */
 export const petDoCompanheiro = (c: Entidade): Pet => PETS.find((p) => PRESETS[p] === c.preset) ?? 'falcao';
 
@@ -77,9 +97,10 @@ export function processarPets(estado: EstadoJogo, ctx: ContextoSimulacao, saida:
   const u = ctx.balance.ajustesClasses.aventureiro.pets.urso;
   if (estado.tick % ticksDe(u.provocarMs) !== 0) return;
   for (const urso of estado.entidades) {
-    if (!vivo(urso) || !urso.invocacao?.companheiro || petDoCompanheiro(urso) !== 'urso') continue;
+    if (!vivo(urso) || !urso.invocacao || !cacaPelaMarca(urso) || petDoCompanheiro(urso) !== 'urso') continue;
     const dono = buscarEntidade(estado, urso.invocacao.donoId);
-    if (!dono || !feraDisponivel(dono, 'urso')) continue;
+    // D-204: a cópia do urso provoca como ele (e não cansa: o fôlego é o da fera).
+    if (!dono || (!ehCopiaDoPet(urso) && !feraDisponivel(dono, 'urso'))) continue;
     // D-173: o urso do Mestre de Feras provoca mais longe.
     const raio = u.provocarRaio + Math.floor(leituraDoCompanheiro(estado, ctx, urso, 'provocarRaio'));
     for (const o of estado.entidades) {
@@ -103,7 +124,7 @@ const companheiroVivo = (estado: EstadoJogo, dono: Entidade): Entidade | undefin
 export function marcarACaca(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, alvo: Entidade, saida: EventoSimulacao[]): boolean {
   if (!marcaComOBasico(dono)) return false;
   // Marcar o companheiro de outro marca o dono dele (o falcão no ar nem leva mordida; a caça é quem o comanda). A marca
-  // fica no dono: o companheiro que chega na troca segue caçando.
+  // fica no dono; D-204: a troca de fera a solta (o que chega não segue caçando).
   const presa = alvo.invocacao?.companheiro ? (buscarEntidade(estado, alvo.invocacao.donoId) ?? alvo) : alvo;
   marcar(estado, ctx, dono, presa.id);
   saida.push({ t: 'cacaMarcada', tick: estado.tick, id: dono.id, alvoId: presa.id });
@@ -121,7 +142,7 @@ export function marcar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidad
  * 5 s depois do último golpe que a renovou.
  */
 export function cacaDoPet(estado: EstadoJogo, pet: Entidade): Entidade | null {
-  if (!pet.invocacao?.companheiro) return null;
+  if (!pet.invocacao || !cacaPelaMarca(pet)) return null;
   const dono = buscarEntidade(estado, pet.invocacao.donoId);
   const id = dono?.cacaMarcada;
   if (!dono || !id) return null;

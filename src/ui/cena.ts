@@ -24,7 +24,7 @@ import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
-import { ligarPonteiro } from '../input/ponteiro';
+import { ligarPonteiro } from '../input/ponteiro'; import { criarCliqueEmObjeto } from './clique-objeto';
 import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
@@ -339,10 +339,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
   const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
+  const cliqueObjeto = criarCliqueEmObjeto(ctx, o.estado, jogador, emitir, isometrico); // Marco 53 (22/11/2026, D-203)
   const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
     // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick. D-168: a mira do movimento antes.
-    if (movToque.tocar(c) || golpeQuebravel.tocar(c, performance.now())) return false;
+    if (movToque.tocar(c) || golpeQuebravel.tocar(c, performance.now()) || cliqueObjeto.tocar(c, performance.now())) return false; // D-203: a loja clicada abre
     golpeQuebravel.esquecer();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
@@ -595,6 +596,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   let posicaoVisual: { x: number; y: number } | null = null; let vistaAtual: readonly number[] = [];
   const ponteiro = ligarPonteiro(palco.canvas, {
     camera,
+    sensibilidade: () => lerPreferencias().sensibilidadeZoom, cameraNoMouse: () => lerPreferencias().cameraNoMouse, cameraNaBorda: () => lerPreferencias().cameraNaBorda,
     aoIrPara: aoTocarCelula,
     guiar: {
       posicaoNaTela: () => (posicaoVisual ? camera.paraTela(posicaoVisual.x, posicaoVisual.y) : null),
@@ -604,9 +606,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       isometrico,
     },
   });
-  palco.canvas.addEventListener('contextmenu', (ev) => {
-    ev.preventDefault();
-  });
+  palco.canvas.addEventListener('contextmenu', (ev) => { ev.preventDefault(); });
 
   const feedback = ligarFeedback({
     bus,
@@ -679,7 +679,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         ...(h.cargas && { cargas: cargasProntas(estado, chaveRecarga(j.id, h.id), h) }),
       }));
     }
-    ponteiro.atualizar(q.agoraMs);
+    ponteiro.atualizar(q.agoraMs); cliqueObjeto.atualizar(q.agoraMs);
     golpeQuebravel.atualizar(performance.now());
     centralizar.marcar(camera.estaSolta);
     hud.atualizar(j, estado.tick, { ...identidadeDaClasse(ctx, j, estado.tick), invocacoes: invocacoesDoNecromante(estado, ctx, j) });

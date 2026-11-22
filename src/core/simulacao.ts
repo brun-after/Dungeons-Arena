@@ -40,8 +40,8 @@ import { aplicarAtualizacao } from '../progression/atualizacao-39';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { definirPassiva } from '../progression/passivas-gerais';
-import { comprar, vender } from '../progression/loja';
-import { soltarItem } from '../progression/soltar-item';
+import { comprar, desfazerVenda, vender } from '../progression/loja';
+import { mochilaFechada, soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarIrPara, rumoDe } from '../world/movimento';
@@ -258,6 +258,9 @@ function aplicarComandos(
       case 'abrirMenu':
         usarRefugio(estado, ctx, ator, saida);
         break;
+      case 'fecharMochila':
+        mochilaFechada(estado, ctx, ator.id);
+        break;
       case 'interagir':
         interagir(estado, ctx, ator, saida);
         break;
@@ -265,7 +268,10 @@ function aplicarComandos(
         comprar(estado, ctx, ator, cmd.itemId, saida);
         break;
       case 'vender':
-        vender(estado, ctx, ator, cmd.invId, saida);
+        vender(estado, ctx, ator, cmd.invId, saida, cmd.qtd);
+        break;
+      case 'desfazerVenda':
+        desfazerVenda(estado, ctx, ator, cmd.indice, saida);
         break;
       case 'fecharLoja':
         fecharLoja(estado, ctx, ator, saida);

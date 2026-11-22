@@ -14,7 +14,8 @@ import type { AvisoDoMundo } from '../mundo/avisos';
 import { liquidoDaVenda, taxaDeAnuncio } from '../mundo/mercado';
 import { metaDa, type MissaoDoMundo } from '../mundo/missoes-mundo';
 import type { Reino } from '../mundo/reino';
-import { botao, campoNumero, comChave, linhaDeAcoes, linhaDeItem, lista, painel, paragrafo, subtitulo } from './mundo-dialogos';
+import { botao, campoNumero, comChave, linhaDeAcoes, linhaDeItem, lista, painel, paragrafo, seletorDeQuantidade, subtitulo } from './mundo-dialogos';
+import { nomeDaEntrada } from './nome-do-item';
 
 type Aviso<T extends AvisoDoMundo['tipo']> = Extract<AvisoDoMundo, { tipo: T }>;
 
@@ -37,7 +38,8 @@ export interface PaineisDaEconomia {
 export function criarPaineisDaEconomia(o: OpcoesDaEconomia): PaineisDaEconomia {
   const itens = o.ctx.conteudo.itens;
   const nomeDoItem = (id: string) => itens.get(id)?.nome ?? id;
-  const pilha = (i: { itemId: string; qtd: number }) => (i.qtd > 1 ? t('mundo.pilha', { nome: nomeDoItem(i.itemId), qtd: i.qtd }) : nomeDoItem(i.itemId));
+  // Marco 53 (D-203): o livro raro diz a skill que ensina.
+  const pilha = (i: { itemId: string; qtd: number; ref?: string | null }) => (i.qtd > 1 ? t('mundo.pilha', { nome: nomeDaEntrada(o.ctx, i), qtd: i.qtd }) : nomeDaEntrada(o.ctx, i));
   const missoes = new Map(o.reino.missoes.map((m) => [m.id, m]));
   const mochila = (): ItemNaMochila[] => o.eu()?.bolsa?.mochila ?? [];
   const ouro = () => o.eu()?.bolsa?.ouro ?? 0;
@@ -114,11 +116,17 @@ export function criarPaineisDaEconomia(o: OpcoesDaEconomia): PaineisDaEconomia {
       corpo.append(subtitulo(t('mundo.banco.bau')));
       const bau = lista();
       if (a.itens.length === 0) corpo.append(paragrafo(t('mundo.banco.vazio')));
-      for (const i of a.itens) bau.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.tirar'), () => { o.enviar({ a: 'banco', op: 'tirar', invId: i.invId, qtd: i.qtd, ...caixa }); }), `tirar-${i.invId}`)));
+      // Marco 53 (22/11/2026, D-203): a pilha escolhe quantas unidades vão (antes, sempre a pilha inteira).
+      const comQuantidade = (i: ItemNaMochila, op: 'tirar' | 'guardar', texto: string) => {
+        const q = i.qtd > 1 ? seletorDeQuantidade(i.qtd, `${op}-${i.invId}-qtd`, pilha(i)) : null;
+        const b = comChave(botao(texto, () => { o.enviar({ a: 'banco', op, invId: i.invId, qtd: q?.valor() ?? i.qtd, ...caixa }); }), `${op}-${i.invId}`);
+        return linhaDeItem(pilha(i), ...(q ? [q.el, b] : [b]));
+      };
+      for (const i of a.itens) bau.append(comQuantidade(i, 'tirar', t('mundo.banco.tirar')));
       corpo.append(bau);
       corpo.append(subtitulo(t('mundo.banco.mochila')));
       const sua = lista();
-      for (const i of mochila()) sua.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.guardar'), () => { o.enviar({ a: 'banco', op: 'guardar', invId: i.invId, qtd: i.qtd, ...caixa }); }), `guardar-${i.invId}`)));
+      for (const i of mochila()) sua.append(comQuantidade(i, 'guardar', t('mundo.banco.guardar')));
       corpo.append(sua);
     });
   };

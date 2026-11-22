@@ -9,6 +9,7 @@
 // - o Portal temporário (09/11/2026, D-143): abrir daqui até o ponto marcado no mapa.
 // Aqui só a forma: as regras ficam em cada módulo. Puro.
 
+import { LUGARES_DE_RENASCER, type LugarDeRenascer } from './renascer';
 import { ehObjeto } from '../core/validar';
 
 export type CanalDoChat = 'local' | 'regiao' | 'grupo';
@@ -43,7 +44,9 @@ export type AcaoDoMundo =
   | { a: 'mercado'; op: 'cancelar'; id: string }
   | { a: 'mercado'; op: 'receber' }
   /** 09/11/2026 (D-143): abrir o Portal temporário daqui até o ponto marcado no mapa. */
-  | { a: 'portal'; lugar: string; x: number; y: number };
+  | { a: 'portal'; lugar: string; x: number; y: number }
+  /** Marco 53 (22/11/2026, D-203): morto, onde renascer (o acampamento, a vila salva ou a vila central). */
+  | { a: 'renascer'; onde: LugarDeRenascer };
 
 const MAX_ID = 64;
 const MAX_TEXTO = 500;
@@ -106,6 +109,8 @@ export function lerAcaoDoMundo(v: unknown): AcaoDoMundo | null {
       if (v.op === 'comprar' && id(v.id) && inteiro(v.preco, 1, MAX_OURO)) return { a: 'mercado', op: 'comprar', id: v.id, preco: v.preco };
       if (v.op === 'cancelar' && id(v.id)) return { a: 'mercado', op: 'cancelar', id: v.id };
       return v.op === 'receber' ? { a: 'mercado', op: 'receber' } : null;
+    case 'renascer':
+      return umDe(LUGARES_DE_RENASCER, v.onde) ? { a: 'renascer', onde: v.onde } : null;
     case 'portal':
       return id(v.lugar) && inteiro(v.x, 0, 1000) && inteiro(v.y, 0, 1000) ? { a: 'portal', lugar: v.lugar, x: v.x, y: v.y } : null;
     default:

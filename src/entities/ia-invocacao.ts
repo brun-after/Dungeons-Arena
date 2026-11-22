@@ -177,6 +177,13 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
       perseguirEAtacar(estado, ctx, e, ia, preset, caca, 1, e.ataqueBasico, saida);
       return;
     }
+    // D-204 (22/11/2026): a caça acabou (a troca, o Chamado, a marca vencida): o lobo e o urso largam o caminho até a
+    // presa e voltam (o falcão refaz o voo dele a cada tick).
+    if (ia.modo === 'perseguindo' && petDoCompanheiro(e) !== 'falcao') {
+      mudarModo(ia, 'patrulha', null, estado.tick);
+      if (!emPasso(e)) pararMovimento(e);
+      else e.caminho = [];
+    }
     // Marco 40 (D-165): o lobo e o urso andam junto do dono (o lobo, colado; as skills saem deles).
     if (petDoCompanheiro(e) === 'falcao') processarFalcao(estado, ctx, e, ia, dono, saida);
     else seguirDono(estado, ctx, e, dono);

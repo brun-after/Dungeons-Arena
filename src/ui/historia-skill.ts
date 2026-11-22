@@ -143,7 +143,7 @@ function receitaDe(ctx: ContextoSimulacao, j: Entidade, id: string, h: Habilidad
     const veiculo = ctx.conteudo.veiculos.get(classeDeQuem);
     const invoca = h.efeitos.some((e) => e.tipo === 'invocar_temporario');
     const etapa = veiculo?.etapas ? Object.values(veiculo.etapas) : [];
-    if (invoca && veiculo?.invocacoes) linhas.push(t('receita.ultimateVeiculoInvoca', { classe: nomeDaClasse(classeDeQuem) }));
+    if (invoca && veiculo?.invocacoes) linhas.push(veiculo.copiasDoPet ? t('receita.ultimateVeiculoCopias') : t('receita.ultimateVeiculoInvoca', { classe: nomeDaClasse(classeDeQuem) }));
     if (h.efeitos.some((e) => e.tipo === 'fase' && e.ref !== null && etapa.includes(e.ref))) linhas.push(t('receita.ultimateVeiculoEtapa', { classe: nomeDaClasse(classeDeQuem) }));
     if (h.lanca?.junto) linhas.push(t('receita.ultimateLanca'));
   }
