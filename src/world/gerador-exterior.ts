@@ -26,6 +26,7 @@ import { gerarGeografia, OBSTACULO } from './geografia';
 import { abrirEstrada, type TerrenoDaEstrada } from './estradas-exterior';
 import { comporCenario, type PecaDoCenario } from './composicao-cenario';
 import { emPassagem } from './passagem';
+import { posicionarNinhos, type NinhoDaFase } from './ninhos';
 
 export { LARGURA_PASSAGEM } from './passagens-exterior';
 /** Distância mínima (Chebyshev) entre os inimigos e a vila ou os spawns. */
@@ -78,6 +79,8 @@ export interface ExteriorGerado {
   obstaculos: Uint8Array;
   /** Marco 43 (D-177): o que fica em pé pela função de cada lugar (world/composicao-cenario.ts). */
   pecas: readonly PecaDoCenario[];
+  /** Marco 53 (22/11/2026, D-203): os ninhos da região (world/ninhos.ts). */
+  ninhos: readonly NinhoDaFase[];
 }
 
 class Grade {
@@ -503,6 +506,10 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
   }
 
+  // Marco 53 (22/11/2026, D-203): os ninhos das criaturas que guardam receitas, com os guardiões (RNG próprio).
+  const ninhos = posicionarNinhos(regiao.ninhos ?? [], regiao.semente, livres, (c) => ehLivre[c.y * n + c.x] === 1 && !naVila(c), (c) => longeDaVila(c) && !naVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS * 2), inimigos, regiao.nivel[1], BALANCE_PADRAO.engaste.ninho);
+  inimigos.push(...ninhos.guardioes);
+
   // 06/11/2026 (D-135): os círculos escondidos do exterior, pela densidade do perigo (fora da vila e longe das chegadas).
   // RNG próprio: o resto da região sai igual.
   const rngArmadilhas = criarRng(regiao.semente + SEMENTE_ARMADILHAS);
@@ -560,7 +567,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
     ...(ambientes.length > 0 && { ambientes }),
   };
-  return { fase, alturas, obstaculos, pecas, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
+  return { fase, alturas, obstaculos, pecas, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas, ninhos: ninhos.ninhos };
 }
 
 /**

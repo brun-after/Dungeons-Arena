@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.64 · **Data:** 22/11/2026
+**Versão do documento:** 3.65 · **Data:** 22/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.65 (22/11/2026)**: marco 53: os ninhos das receitas da forja, no mapa e na receita (D-203).
 > - **3.64 (22/11/2026)**: marco 53: o item solto espera 5 s, o Mundo sem o registro lateral, o XP subindo do personagem e a faixa do chefe (D-203).
 > - **3.63 (22/11/2026)**: marco 53: o conforto (clique e mapa para andar, câmera no mouse, zoom do touchpad, seguir o companheiro, avisos, cartas de skill, receitas da forja, renascer com escolha e consertos) (D-203).
 > - **3.62 (21/11/2026)**: marco 52: reaprender a skill consumida de graça e na hora, e a chance que sobe a cada tentativa (D-198).
@@ -398,6 +399,8 @@ Ajustes pedidos por quem jogou o Mundo.
   controle de grupo aparece grande no alto da tela. A barra de XP fica no HUD.
 - **Menus.** As cartas de skill ficam compactas. A ficha separa o inicial da classe dos seus pontos. Vender e guardar
   escolhem a quantidade, a venda pode ser desfeita até você sair da loja, e a receita da forja diz para quem serve, a raridade e onde cai.
+- **Ninhos.** Onze regiões têm o ninho de uma criatura que guarda receita da forja (a Teia das tecelãs, a Toca dos
+  trolls). Lá vivem mais delas, e a receita cai 4 vezes mais. O ninho aparece no mapa, e a receita diz onde fica.
 - **Regras.** A compreensão sobe com inimigos de qualquer nível. À noite, o vendedor da noite e o andarilho cobram
   50% a mais. Quem morre escolhe onde renascer. Nada cai embaixo de árvore, e o recuo do Arqueiro foge de quem o
   persegue.

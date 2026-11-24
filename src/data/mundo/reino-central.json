@@ -81,7 +81,7 @@
   "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "cota_malha", "botas_rapidas", "essencia_arcana"],
   "regioes": [
     {
-      "id": "vila_do_centro", "matas": [{ "x": 192, "y": 96, "raio": 16 }],
+      "id": "vila_do_centro", "ninhos": [{ "preset": "candelinha", "nome": "Velário das candelinhas" }], "matas": [{ "x": 192, "y": 96, "raio": 16 }],
       "nome": "Vila do Centro",
       "gx": 1,
       "gy": 1,
@@ -122,7 +122,7 @@
       ]
     },
     {
-      "id": "encosta_do_leste", "matas": [{ "x": 152, "y": 96, "raio": 14 }],
+      "id": "encosta_do_leste", "ninhos": [{ "preset": "pedrico", "nome": "Veio de geodo" }], "matas": [{ "x": 152, "y": 96, "raio": 14 }],
       "andarilhos": [],
       "mercadoresErrantes": 1,
       "nome": "Encosta do Leste",
@@ -145,7 +145,7 @@
       ]
     },
     {
-      "id": "floresta_antiga", "escuroBase": 1,
+      "id": "floresta_antiga", "ninhos": [{ "preset": "aranha", "nome": "Teia das tecelãs" }], "escuroBase": 1,
       "andarilhos": [{"id": "irma_celina", "nome": "Irmã Celina, peregrina", "aparencia": "gente", "fala": "Vou rezar na Cripta das Raízes, mas os lobos não me deixam passar. Você me acompanha?"}],
       "mercadoresErrantes": 1,
       "nome": "Floresta Antiga",
@@ -167,7 +167,7 @@
       ]
     },
     {
-      "id": "ruinas_do_norte",
+      "id": "ruinas_do_norte", "ninhos": [{ "preset": "fornalheiro", "nome": "Fornalha caída" }],
       "nome": "Ruínas do Norte",
       "gx": 1,
       "gy": 0,
@@ -187,7 +187,7 @@
       ]
     },
     {
-      "id": "pico_gelado",
+      "id": "pico_gelado", "ninhos": [{ "preset": "troll", "nome": "Toca dos trolls" }],
       "nome": "Pico Gelado",
       "gx": 2,
       "gy": 0,
@@ -207,7 +207,7 @@
       ]
     },
     {
-      "id": "pantano_sombrio",
+      "id": "pantano_sombrio", "ninhos": [{ "preset": "vampiro", "nome": "Cripta alagada" }],
       "andarilhos": [{"id": "ossinho", "nome": "Ossinho, esqueleto educado", "aparencia": "esqueleto", "fala": "Perdão por assustar. Eu era alquimista em vida e ainda preciso de resina para os meus estudos."}],
       "nome": "Pântano Sombrio",
       "gx": 0,

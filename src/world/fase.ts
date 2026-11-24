@@ -2,6 +2,7 @@
 // a `simular()` pelo contexto. Marco 2: só terreno e spawns; objetos e inimigos posicionados
 // entram nos marcos seguintes.
 
+import type { NinhoDaFase } from './ninhos';
 import type { Afinidade } from '../combat/afinidade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Elemento } from '../combat/elementos';
@@ -262,6 +263,8 @@ export interface Fase {
   /** Marco 42 (D-176): o escuro próprio da região (0 a 1) e as matas fechadas (sempre escuras). */
   readonly escuroBase?: number;
   readonly matas?: readonly { x: number; y: number; raio: number }[];
+  /** Marco 53 (22/11/2026, D-203): os ninhos das criaturas que guardam receitas (world/ninhos.ts). */
+  readonly ninhos?: readonly NinhoDaFase[];
   /** Marco 42 (D-176): a altura de cada célula do exterior (world/relevo.ts); ausente = plano. */
   readonly alturas?: Uint8Array;
   /** Marco 43 (D-177): o obstáculo natural de cada célula (world/geografia.ts, OBSTACULO); ausente = nenhum. */

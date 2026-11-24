@@ -242,7 +242,7 @@
       ]
     },
     {
-      "id": "garganta_do_sol",
+      "id": "garganta_do_sol", "ninhos": [{ "preset": "fornalheiro", "nome": "Fornos do sol" }],
       "nome": "Garganta do Sol",
       "tamanho": 220,
       "gx": 0,

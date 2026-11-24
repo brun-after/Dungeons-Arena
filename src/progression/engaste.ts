@@ -8,6 +8,7 @@
 // - um par instável (pela matriz da alquimia): a reação do par entra na peça, mas os efeitos caem 15%.
 // Puro.
 
+import type { RegrasDoNinho } from '../world/ninhos';
 import type { CatalogoAlquimia, MaterialNaMagia } from '../combat/fusao/catalogo';
 import { chaveDoPar } from '../combat/fusao/catalogo';
 import type { DefinicaoElemento, Elemento } from '../combat/elementos';
@@ -44,6 +45,8 @@ export interface RegrasDeEngaste {
   /** Um material alquímico da dimensão da criatura (e no chefe dela). */
   dropMaterialPct: number;
   dropMaterialChefePct: number;
+  /** Marco 53 (22/11/2026, D-203): o ninho da criatura que guarda a receita (world/ninhos.ts). */
+  ninho: RegrasDoNinho;
 }
 
 export const ehIdEngastado = (id: string): boolean => id.startsWith(PREFIXO);

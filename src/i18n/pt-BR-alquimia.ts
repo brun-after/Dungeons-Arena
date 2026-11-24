@@ -120,6 +120,8 @@ export const textosAlquimia = {
   'forja.receita.lugares': 'em {lista}',
   'forja.receita.dimensao': 'criaturas de {nome}',
   'forja.receita.chefes': 'chefes',
+  'forja.receita.ninhos': 'mais no ninho delas: {lista}',
+  'forja.receita.ninho': '{nome} ({regiao})',
   'forja.receita.cai': 'Onde cai: {lista}',
   'raridade.comum': 'Comum',
   'raridade.incomum': 'Incomum',

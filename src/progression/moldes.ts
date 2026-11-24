@@ -259,12 +259,14 @@ export function extrair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
  * O que a forja deixa no abate (os ids): a receita que a criatura guarda (pelo preset, pela dimensão ou, no chefe,
  * as de chefe) e um material alquímico da dimensão dela. O RNG é o da instância (não desloca o do combate).
  */
-export function dropsDaForja(ctx: Ctx, preset: string, boss: boolean, rng: EstadoRng): string[] {
+export function dropsDaForja(ctx: Ctx, preset: string, boss: boolean, rng: EstadoRng, noNinho = false): string[] {
   const r = ctx.balance.engaste;
   const dimensao = ctx.conteudo.presets.get(preset)?.dimensao ?? null;
   const saida: string[] = [];
   const guardadas = [...ctx.conteudo.moldes.values()].filter((m) => m.cai.presets.includes(preset) || (dimensao !== null && m.cai.dimensoes.includes(dimensao)) || (boss && m.cai.chefes));
-  if (guardadas.length > 0 && aleatorio(rng) * 100 < (boss ? r.dropReceitaChefePct : r.dropReceitaPct)) {
+  // Marco 53 (22/11/2026, D-203): no ninho dela, a criatura guarda a receita mais vezes (world/ninhos.ts).
+  const pct = (boss ? r.dropReceitaChefePct : r.dropReceitaPct) * (noNinho ? r.ninho.receitaMult : 1);
+  if (guardadas.length > 0 && aleatorio(rng) * 100 < pct) {
     const m = guardadas[inteiro(rng, 0, guardadas.length - 1)];
     if (m) saida.push(`${PREFIXO_RECEITA}${m.id}`);
   }

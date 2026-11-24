@@ -1,7 +1,7 @@
 // Os marcos da cartografia do Mundo (marco 53, 22/11/2026, D-203): o que ajuda o jogador a se achar no minimapa e no
 // mapa do lugar. Portões nas passagens para as outras regiões, casinhas onde há casa, o prédio de cada serviço da vila
 // (taverna, banco, mercado, ferraria, botica) com a sua cor e o seu sinal, a entrada das dungeons, as pedras de save e
-// de portal, as fogueiras e o vendedor da noite. Tudo vem da fase e do estado (nada fixo por região). Desenho em
+// de portal, as fogueiras, o vendedor da noite e os ninhos das criaturas que guardam receitas. Tudo vem da fase e do estado (nada fixo por região). Desenho em
 // canvas 2D, em vetor, do tamanho pedido.
 
 import type { EstadoJogo } from '../core/estado';
@@ -9,7 +9,7 @@ import type { Fase, TipoPredio } from '../world/fase';
 import { REF_NOTURNO } from '../mundo/vila-noite';
 import { t, type ChaveTexto } from '../i18n';
 
-export type TipoDeMarco = 'portao' | 'casa' | TipoPredio | 'masmorra' | 'pedra_save' | 'pedra_portal' | 'fogueira' | 'noturno';
+export type TipoDeMarco = 'portao' | 'casa' | TipoPredio | 'masmorra' | 'pedra_save' | 'pedra_portal' | 'fogueira' | 'noturno' | 'ninho';
 
 export interface MarcoDoMapa {
   tipo: TipoDeMarco;
@@ -31,6 +31,7 @@ export function marcosDaFase(fase: Fase, nomeDoDestino: (lugar: string) => strin
     const y = c.y + (c.altura - 1) / 2;
     marcos.push(c.predio ? { tipo: c.predio, x, y, rotulo: t(`mapa.predio.${c.predio}` as ChaveTexto) } : { tipo: 'casa', x, y });
   }
+  for (const n of fase.ninhos ?? []) marcos.push({ tipo: 'ninho', x: n.x, y: n.y, rotulo: n.nome });
   return marcos;
 }
 
@@ -58,6 +59,7 @@ export function corDoMarco(tipo: TipoDeMarco): string {
   if (tipo in COR_PREDIO) return COR_PREDIO[tipo as TipoPredio];
   if (tipo === 'portao') return '#ffd77a';
   if (tipo === 'noturno') return '#c9a0ff';
+  if (tipo === 'ninho') return '#ff8a6a';
   return '#e6dccb';
 }
 
@@ -137,6 +139,19 @@ export function desenharMarco(g: CanvasRenderingContext2D, tipo: TipoDeMarco, x:
     g.quadraticCurveTo(x - h * 0.8, y, x, y - h);
     g.fill();
     g.stroke();
+  } else if (tipo === 'ninho') {
+    // Marco 53 (D-203): o ninho, três garras vermelhas (a toca de quem guarda a receita).
+    g.fillStyle = '#ff5a3c';
+    g.lineWidth = Math.max(1, l / 16);
+    for (const dx of [-0.6, 0, 0.6]) {
+      g.beginPath();
+      g.moveTo(x + dx * h - h * 0.34, y + h * 0.85);
+      g.quadraticCurveTo(x + dx * h - h * 0.2, y - h * 0.2, x + dx * h + h * 0.2, y - h * (dx === 0 ? 1 : 0.75));
+      g.quadraticCurveTo(x + dx * h + h * 0.12, y + h * 0.1, x + dx * h + h * 0.3, y + h * 0.85);
+      g.closePath();
+      g.fill();
+      g.stroke();
+    }
   }
   g.restore();
 }
