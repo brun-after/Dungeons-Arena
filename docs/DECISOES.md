@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.61 · **Data:** 25/11/2026
+**Versão:** 1.62 · **Data:** 25/11/2026
 
 > **Histórico**
+> - **1.62 (25/11/2026)**: D-205, continuação: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório, d20), a troca nova e o botão do ataque automático.
 > - **1.61 (25/11/2026)**: D-205: a fonte própria do jogo (Runas de Filo) e o nome novo, Dungeons Dimensions.
 > - **1.60 (22/11/2026)**: D-203: os ninhos das receitas (o lugar da região onde a criatura que guarda uma receita se junta e a deixa cair 4 vezes mais), no mapa e no texto da receita.
 > - **1.59 (22/11/2026)**: D-203: o item solto espera 5 s depois de fechar a mochila para voltar a quem soltou; o Mundo sem o registro lateral (o importante em destaque, o XP subindo do personagem e a faixa do chefe que surge).
@@ -6754,3 +6755,28 @@ O nome Dungeons Arena também já não descrevia o jogo, que hoje é sobretudo c
 **Fora.** Kerning por pares: o opentype.js não grava a tabela, e os recuos de cada letra compensam por ora. A fonte
 sai em OTF (56 KB); o WOFF2 fica para quando houver compressor no projeto.
 
+### D-205, continuação: a entrega visual, a troca e o ataque automático (25/11/2026)
+
+**Problema.** A entrega visual da VPS (base 5f339a0) trazia landing, menu, ficha, mapa, grimório, d20 e chefes novos,
+misturados com mudanças de jogo (chefes, passiva do Atirador, Carisma) e com a conta própria da VPS. Na troca do
+Mundo, o botão "Atualizar oferta" ficava ao lado do ouro e parecia ser dele, ninguém via quanto ouro tinha, e não
+havia como pedir um preço. No computador, a tecla F desligava o básico sem nada na tela dizer, e trocar de alvo o
+religava sozinho.
+
+**Decisão.**
+- Só o visual da entrega, refeito no nosso código (textos no dicionário, a fonte do jogo no lugar de Georgia): a
+  landing na raiz da web (o app e o PWA abrem o menu, `?jogar=1`), o menu em cartões, o tema de madeira, latão e
+  pergaminho nos painéis do Mundo, a sala de seleção com palco e retrato, os avisos em pergaminho, o mapa do terreno
+  (papel, rótulos que não se sobrepõem, índice dos pontos, marcos de saída e de caça, clique no marco para segui-lo),
+  o grimório (arrastar entre as teclas, rank nas cartas, ultimate, sintonia e combos recolhidos) e o d20 desenhado
+  em icosaedro, que para com a face do combate de frente.
+- **Troca**: os dois lados lado a lado, como inventários; o ouro com "Adicionar gold" e o saldo à vista; **cobrar**
+  (`LadoDaTroca.cobra`) pede um valor no lugar de dar ouro: enquanto há cobrança sem pagamento, ninguém confirma
+  (`troca_cobranca`); o outro paga, faz contraproposta (cobra outro valor de volta) ou sai. Chat da troca (canal
+  `troca`, só os dois), silenciável só nesta troca ou para sempre (guardado no aparelho).
+- **Ataque automático**: botão no computador ao lado da ultimate, com a tecla; desligado, a espada riscada pulsa
+  em vermelho com a faixa "Ataque automático desligado". Trocar de alvo não religa mais; só o botão, a tecla ou
+  sair e entrar no jogo (o estado viaja entre regiões na bagagem).
+
+**Fora.** Os chefes da entrega (mecânicas e marcos no mapa), a passiva do Atirador, o ajuste do Carisma e a conta
+própria da VPS (a nossa segue Google e Supabase, então a landing não tem "Minha conta").
