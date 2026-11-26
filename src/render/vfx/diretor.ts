@@ -24,6 +24,7 @@ import type { Eixo } from '../../combat/eixos';
 import { gestoDoNucleo, type PalcoDoNucleo } from './nucleo-no-visual';
 import { raridadeNaArea, raridadeNaConjuracao, raridadeNoAcerto, raridadeNoRastro, type NivelVisual } from './manifestacao-raridade';
 import type { Emissao } from '../presets-particula';
+import { misturaEmSi, misturaNaArea, misturaNaConjuracao, misturaNoAcerto, misturaNoRastro, retratoDaMistura } from './manifestacao-mistura';
 
 export interface OpcoesDiretor {
   efeitos: Container;
@@ -202,6 +203,32 @@ export class DiretorVfx {
 
   raridadeNoRastro(n: NivelVisual, x: number, y: number, cor: number): void {
     if (this.ativo) raridadeNoRastro(this.cena(), n, x, y, cor);
+  }
+
+  /** D-206 (26/11/2026): a mescla dos elementos da fusão — a matéria de cada um, as ligas e a trança. */
+  misturaNaConjuracao(els: readonly Runa[] | undefined, pos: P): void {
+    const r = retratoDaMistura(els);
+    if (r && this.ativo) misturaNaConjuracao(this.cena(), r, pos);
+  }
+
+  misturaNoRastro(els: readonly Runa[] | undefined, x: number, y: number): void {
+    const r = retratoDaMistura(els);
+    if (r && this.ativo) misturaNoRastro(this.cena(), r, x, y);
+  }
+
+  misturaNoAcerto(els: readonly Runa[] | undefined, a: Acerto): void {
+    const r = retratoDaMistura(els);
+    if (r && this.ativo) misturaNoAcerto(this.cena(), r, a);
+  }
+
+  misturaNaArea(els: readonly Runa[] | undefined, a: AreaVfx): void {
+    const r = retratoDaMistura(els);
+    if (r && this.ativo) misturaNaArea(this.cena(), r, a);
+  }
+
+  misturaEmSi(els: readonly Runa[] | undefined, a: EmSi): void {
+    const r = retratoDaMistura(els);
+    if (r && this.ativo) misturaEmSi(this.cena(), r, a);
   }
 
   /** D-151: a runa na mão de quem conjura. */

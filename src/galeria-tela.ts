@@ -184,10 +184,14 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
     const ultimate = /^ult_|^dom_/.test(h.id);
     const conjuraMs = ultimate ? 700 : 360;
     if (ultimate) diretor.circuloDaUltimate('conjurador', 'mago', cor, conjuraMs);
-    for (let t = 0; t < conjuraMs; t += 120) depois(t, () => (diretor.conjurar(nome, CONJURADOR, cor), undefined));
+    // D-206 (26/11/2026): a fusão mostra a mescla dos elementos em cada fase (manifestacao-mistura.ts).
+    const els = h.elementosFusao;
+    for (let t = 0; t < conjuraMs; t += 120) depois(t, () => (diretor.conjurar(nome, CONJURADOR, cor), diretor.misturaNaConjuracao(els, CONJURADOR), undefined));
     const forma = formaVfx(h);
     const acerto = () => {
-      diretor.acertar(nome, { chave: h.id, fonteId: 'conjurador', alvoId: 'boneco', de: CONJURADOR, ate: boneco, cor, escala: ultimate ? 1.25 : 1, critico: false, indice: 0, tier }, h.visual?.variante, true);
+      const a = { chave: h.id, fonteId: 'conjurador', alvoId: 'boneco', de: CONJURADOR, ate: boneco, cor, escala: ultimate ? 1.25 : 1, critico: false, indice: 0, tier };
+      diretor.acertar(nome, a, h.visual?.variante, true);
+      diretor.misturaNoAcerto(els, a);
       if (def.camera) impacto.pedir(def.camera, relogio);
       // O puxão e o empurrão deslizam o boneco (a corrente espera o gancho chegar).
       const tipos = h.efeitos.map((e) => e.tipo);
@@ -215,6 +219,7 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
           if (t - ultimoRastro > 30) {
             ultimoRastro = t;
             diretor.rastro(nome, x, y, cor, dir);
+            diretor.misturaNoRastro(els, x, y);
           }
           if (f >= 1) {
             acerto();
@@ -225,7 +230,7 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
         return undefined;
       });
     } else if (forma === 'contato') depois(conjuraMs, () => (acerto(), undefined));
-    else if (forma === 'proprio') depois(conjuraMs, () => (diretor.emSi(nome, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }, h.visual?.variante), undefined));
+    else if (forma === 'proprio') depois(conjuraMs, () => (diretor.emSi(nome, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }, h.visual?.variante), diretor.misturaEmSi(els, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }), undefined));
     else {
       depois(conjuraMs, () => {
         const mira = h.tipoArea === 'ao_redor' ? CONJURADOR : boneco;
@@ -233,6 +238,7 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
         const centro = celulas.length ? { x: celulas.reduce((s, c) => s + c.x, 0) / celulas.length, y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length } : mira;
         const area = { chave: h.id, atorId: 'conjurador', origem: CONJURADOR, mira, centro, celulas, cor, escala: ultimate ? 1.25 : 1, tipoArea: h.tipoArea, raio: h.raioArea };
         if (!diretor.area(nome, area, h.visual?.variante)) diretor.rajada(nome, area);
+        diretor.misturaNaArea(els, area);
         depois(260, () => (acerto(), undefined));
         return undefined;
       });

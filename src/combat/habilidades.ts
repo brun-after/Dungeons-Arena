@@ -211,6 +211,11 @@ export interface Habilidade {
   entrega?: Entrega;
   /** Marco 52 (21/11/2026, D-198): o 2º ou o 1º nível de raridade da fusão (ausente = o 3º, o comum), para o visual. */
   raridadeFusao?: 1 | 2;
+  /**
+   * 26/11/2026 (D-206): os elementos da fusão (das partes, na ordem da receita, e os das runas novas; sem elemento conta
+   * como Físico). Usar a fusão alimenta o vínculo de todos; a barra divide a tecla entre eles; o visual mostra a mescla.
+   */
+  elementosFusao?: readonly ('fisico' | Elemento)[];
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */
