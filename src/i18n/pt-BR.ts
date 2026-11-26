@@ -14,6 +14,7 @@ import { textosTeclas } from './pt-BR-teclas';
 import { textosEstilos } from './pt-BR-estilos';
 import { textosPecas } from './pt-BR-pecas';
 import { textosAlquimia } from './pt-BR-alquimia';
+import { textosPortal } from './pt-BR-portal';
 
 export const ptBR = {
   'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
@@ -614,30 +615,6 @@ export const ptBR = {
   'menu.arenaOnline': 'Arena online',
   'menu.treino': 'Treino de arena (contra um bot)',
   'menu.editor': 'Editor de fases',
-  // D-205 (25/11/2026): o menu da cidadela e a landing.
-  'menu.modos': 'Modos de jogo',
-  'menu.descricao.campanha': 'Comece uma jornada ou retome seu progresso.',
-  'menu.descricao.mundo': 'Explore um reino compartilhado.',
-  'menu.descricao.arena': 'Enfrente outros jogadores.',
-  'menu.descricao.treino': 'Pratique contra um bot.',
-  'menu.descricao.editor': 'Crie suas próprias fases.',
-  'landing.navegacao': 'Navegação principal',
-  'landing.modos': 'Modos de jogo',
-  'landing.jogar': 'Jogar',
-  'landing.legenda': 'RPG de ação em tempo real',
-  'landing.titulo1': 'Dungeons',
-  'landing.titulo2': 'Dimensions',
-  'landing.descricao': 'Explore masmorras, forje seu equipamento e leve seu personagem para o Mundo ou para a arena.',
-  'landing.entrar': 'Entrar no jogo',
-  'landing.explorar': 'Explorar os modos',
-  'landing.jornada': 'Escolha sua jornada',
-  'landing.campanha': 'Desbrave masmorras, enfrente chefes e evolua seu personagem. Continue sozinho ou reúna seu grupo.',
-  'landing.abrirCampanha': 'Abrir a campanha',
-  'landing.mundo': 'Explore um reino compartilhado, visite vilas e encontre outros aventureiros para missões e trocas.',
-  'landing.abrirMundo': 'Explorar o Mundo',
-  'landing.arena': 'Entre em uma sala multiplayer ou pratique contra um bot antes do duelo.',
-  'landing.abrirArena': 'Abrir a arena',
-  'landing.treino': 'Treino',
   'menu.pesquisa': 'Participar do teste de jogabilidade',
   'pesquisa.boasVindas': 'Obrigado por testar! Jogue do seu jeito. Quando quiser parar, toque em "Terminar teste".',
   'pesquisa.terminar': 'Terminar teste',
@@ -712,12 +689,6 @@ export const ptBR = {
   'arena.titulo': 'Arena (loopback)',
   'morte.titulo': 'Você caiu',
   'morte.reviver': 'Revivendo no início da fase…',
-  'renascer.titulo': 'Onde você quer renascer?',
-  'renascer.acampamento': 'No acampamento',
-  'renascer.save': 'No último save ({nome})',
-  'renascer.central': 'Na vila central ({nome})',
-  'renascer.escolhido': 'Você vai renascer: {nome}',
-  'renascer.padrao': 'Sem escolha, renasce no acampamento (se houver) ou no último save.',
   'numero.esquiva': 'esquivou',
   'aviso.girar': 'Dica: o jogo fica melhor com o aparelho deitado.',
   'diag.rotulo': 'Diagnóstico',
@@ -819,6 +790,7 @@ export const ptBR = {
   ...textosEstilos,
   ...textosPecas,
   ...textosAlquimia,
+  ...textosPortal,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

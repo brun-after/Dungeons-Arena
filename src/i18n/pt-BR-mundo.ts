@@ -3,6 +3,13 @@
 // Marco 30 (30/10/2026, D-129): o quadro de missões, o banco, o mercado, o chat, o grupo e a troca.
 
 export const textosMundo = {
+  // 25/11/2026: onde renascer no Mundo (veio do pt-BR.ts, no limite de 800 linhas).
+  'renascer.titulo': 'Onde você quer renascer?',
+  'renascer.acampamento': 'No acampamento',
+  'renascer.save': 'No último save ({nome})',
+  'renascer.central': 'Na vila central ({nome})',
+  'renascer.escolhido': 'Você vai renascer: {nome}',
+  'renascer.padrao': 'Sem escolha, renasce no acampamento (se houver) ou no último save.',
   'mundo.party.visao': 'Visão da party no Mundo (até seis câmeras)',
   'mundo.grupo.codigo': 'Código da party: {codigo}',
   'mundo.grupo.criarCodigo': 'Criar party por código',
