@@ -107,7 +107,7 @@ for som in ['zunido','invocacao']:
  if som in antigo.get('efeitos',{}): effects[som]=antigo['efeitos'][som]
 manifest=dict(versao=2,fontes={**{k:dict(autor=a,titulo=t,pagina=p,licenca=l,licencaUrl=LIC[l]) for k,(a,t,p,l) in SOURCES.items()},**{k:v for k,v in antigo.get('fontes',{}).items() if k in {a['fonte'] for a in adaptados.values()}}},arquivos=files,efeitos=effects,ambientes={k:'ambiente-'+k for k in ['fogo','agua','vento','goteira']},musicas=dict(exploracao=['musica-jornada','musica-coro-1','musica-caverna'],combate=['musica-esperanca','musica-coro-3'],chefe=['musica-coro-2','musica-coro-3']))
 (OUT/'manifesto.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-credits=['# Créditos de áudio — Dungeons Arena','', 'Gravações de terceiros distribuídas com o jogo. As licenças abaixo aplicam-se aos arquivos de áudio indicados, independentemente da licença do código.','', 'Adaptações: conversão para MP3, ajuste de volume e fades curtos nas músicas. O áudio de arco adaptado mantém CC-BY-SA 3.0. Não há mudança de autoria.','']
+credits=['# Créditos de áudio — Dungeons Dimensions','', 'Gravações de terceiros distribuídas com o jogo. As licenças abaixo aplicam-se aos arquivos de áudio indicados, independentemente da licença do código.','', 'Adaptações: conversão para MP3, ajuste de volume e fades curtos nas músicas. O áudio de arco adaptado mantém CC-BY-SA 3.0. Não há mudança de autoria.','']
 for key,(a,t,p,l) in SOURCES.items():
  used=[v for v in files.values() if v['fonte']==key]
  credits.extend([f'## {t}',f'Autor: {a}. Fonte: {p}',f'Licença: {l} — {LIC[l]}','Arquivos: '+', '.join(v['arquivo']+' (original: '+v['original']+')' for v in used),''])

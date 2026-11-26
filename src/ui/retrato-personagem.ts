@@ -100,7 +100,9 @@ const redesenhos = new WeakMap<Element, () => void>();
  * O retrato e o resumo. `escolherSkin` (telas de seleção de personagem, D-179) põe a escolha da skin sob o retrato;
  * a troca redesenha todos os painéis da mesma classe na tela.
  */
-export function painelPersonagem(classeId: string, personagem?: DadosResumoPersonagem & Pick<Entidade, 'aparencia'>, opcoes: { escolherSkin?: boolean } = {}): HTMLElement {
+// D-205 (25/11/2026): `atualizarRetratoExterno` é para quem mostra o retrato fora do painel (o palco da seleção do
+// Mundo): o painel fica só com a escolha da skin e avisa a troca, para o retrato de fora se refazer.
+export function painelPersonagem(classeId: string, personagem?: DadosResumoPersonagem & Pick<Entidade, 'aparencia'>, opcoes: { escolherSkin?: boolean; atualizarRetratoExterno?: () => void } = {}): HTMLElement {
   const painel = document.createElement('div');
   painel.className = 'painel-personagem';
   painel.dataset.classe = classeId;
@@ -110,10 +112,14 @@ export function painelPersonagem(classeId: string, personagem?: DadosResumoPerso
   }
   const coluna = document.createElement('div');
   coluna.className = 'coluna-retrato';
+  if (opcoes.atualizarRetratoExterno) painel.classList.add('painel-personagem-sem-retrato');
   const desenhar = () => {
-    coluna.replaceChildren(retratoPersonagem(classeId, personagem), seletorDeSkin(classeId, () => {
+    const seletor = seletorDeSkin(classeId, () => {
+      opcoes.atualizarRetratoExterno?.();
       for (const outro of document.querySelectorAll(`.painel-personagem[data-classe="${CSS.escape(classeId)}"]`)) redesenhos.get(outro)?.();
-    }));
+    });
+    if (opcoes.atualizarRetratoExterno) coluna.replaceChildren(seletor);
+    else coluna.replaceChildren(retratoPersonagem(classeId, personagem), seletor);
   };
   redesenhos.set(painel, desenhar);
   desenhar();

@@ -348,7 +348,7 @@ def main():
     manifesto_caminho = SAIDA / 'manifesto.json'
     manifesto = json.loads(manifesto_caminho.read_text(encoding='utf-8'))
     manifesto['fontes']['golpes'] = {
-        'autor': 'Dungeons Arena',
+        'autor': 'Dungeons Dimensions',
         'titulo': 'Golpes corpo a corpo (sintetizados por tools/audio/golpes.py)',
         'pagina': 'https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/golpes.py',
         'licenca': 'CC0-1.0',

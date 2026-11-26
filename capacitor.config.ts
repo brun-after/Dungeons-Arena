@@ -6,7 +6,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.github.brunafter.dungeonsarena',
-  appName: 'Dungeons Arena',
+  appName: 'Dungeons Dimensions',
   webDir: 'dist',
   server: {
     androidScheme: 'http',

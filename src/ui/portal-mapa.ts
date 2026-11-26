@@ -26,17 +26,15 @@ export interface OpcoesDoPortal {
 }
 
 export function abrirPortalTemporario(o: OpcoesDoPortal): void {
-  if (document.querySelector('.mapa-expandido')) return;
+  if (document.querySelector('.mapa-expandido, .aviso-pergaminho')) return;
   const d = dialogo(t('mundo.portalT.titulo'));
+  // D-205 (25/11/2026): sem o item (ou fora de uma região), um aviso compacto em pergaminho, não o mapa inteiro.
+  if (o.quantos <= 0 || !o.lugar.startsWith('regiao:')) {
+    d.el.classList.add('aviso-pergaminho');
+    d.corpo.append(paragrafo(t(o.quantos <= 0 ? 'mundo.portalT.semItem' : 'mundo.recusa.portal_dungeon')));
+    return;
+  }
   d.el.classList.add('mapa-expandido');
-  if (o.quantos <= 0) {
-    d.corpo.append(paragrafo(t('mundo.portalT.semItem')));
-    return;
-  }
-  if (!o.lugar.startsWith('regiao:')) {
-    d.corpo.append(paragrafo(t('mundo.recusa.portal_dungeon')));
-    return;
-  }
   const ajuda = document.createElement('details');
   ajuda.className = 'ajuda-mapa';
   const resumo = document.createElement('summary');

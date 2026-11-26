@@ -1,5 +1,6 @@
 // Ponto de entrada do cliente: registra o Service Worker no bootstrap (§3.8; no app Android, não há) e escolhe a tela pela URL:
-//   (nada)            menu inicial
+//   (nada)            a landing na web (D-205); no app, o menu
+//   ?jogar=1          menu inicial
 //   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar; com &skills=a,b, essas na barra)
 //   ?jogo=grupo&slot=N&criar=1 | &codigo=XXXXXX   campanha cooperativa (marco 15)
 //   ?jogo=mundo       o Mundo aberto (marco 29): personagens no servidor, regiões, vilas e dungeons
@@ -18,12 +19,18 @@ import { faseSeguinte } from './save/fases-campanha';
 import './estilos.css';
 import { registerSW } from 'virtual:pwa-register';
 import { iniciarJogo } from './jogo';
-import { ligarAppNativo } from './plataforma/nativo';
+import './ui/portal.css';
+import './ui/tema-mundo.css';
+import { ehAppNativo, ligarAppNativo } from './plataforma/nativo';
 import { prepararPreferencias } from './plataforma/preferencias';
 import { mostrarMenu } from './ui/menu';
 import { mostrarSlots } from './ui/slots';
+import { FONTE_DO_JOGO } from './ui/runa-texto';
 
 registerSW({ immediate: true });
+// 25/11/2026: a fonte do jogo (títulos e números) já carrega no começo; o Pixi desenha os números com ela e não
+// espera o CSS pedir. Sem a fonte, tudo cai na serifada do sistema.
+void document.fonts.load(`16px "${FONTE_DO_JOGO}"`).catch(() => undefined);
 // Marco 20: no app Android, o botão voltar e o segundo plano (fora do app, não faz nada).
 void ligarAppNativo();
 
@@ -101,7 +108,10 @@ function rotear(raiz: HTMLElement): void {
         ...(ehDificuldade(dificuldade) && { dificuldade }),
       });
     } else void mostrarSlots(raiz);
-  } else {
+  } else if (params.has('jogar') || ehAppNativo()) {
     mostrarMenu(raiz);
+  } else {
+    // 25/11/2026 (D-205): na web, a raiz é a landing; o menu fica em `?jogar=1` (o app abre direto no menu).
+    void import('./ui/landing').then((m) => { m.mostrarLanding(raiz); });
   }
 }

@@ -118,6 +118,10 @@ export const textosClasses = {
   'feedback.habilidadeLiberada': 'Livro lido: {nome} liberada. Aprenda com um ponto de habilidade.',
   // Interface do marco 24 (D-094, D-095, D-097)
   'controles.pararAtaque': 'Parar ataque',
+  // D-205 (25/11/2026): o botão do ataque automático no computador.
+  'autoAtaque.desligado': 'Ataque automático desligado',
+  'autoAtaque.desligar': 'Desligar o ataque automático ({tecla})',
+  'autoAtaque.ligar': 'Ligar o ataque automático ({tecla})',
   'ultimate.semPar': 'Sem ultimate: as teclas 1 e 2 não formam par',
   'ultimate.pronta': '{nome} pronta (R)',
   'ultimate.carregando': '{nome}: {pct}% (R)',

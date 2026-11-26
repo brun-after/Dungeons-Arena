@@ -14,6 +14,7 @@ import { textosTeclas } from './pt-BR-teclas';
 import { textosEstilos } from './pt-BR-estilos';
 import { textosPecas } from './pt-BR-pecas';
 import { textosAlquimia } from './pt-BR-alquimia';
+import { textosPortal } from './pt-BR-portal';
 
 export const ptBR = {
   'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
@@ -27,7 +28,7 @@ export const ptBR = {
   'habilidades.motivo.usar_acelerador': 'Use Aceleração da mente na mochila; acelerar não gasta mais pontos.',
   'habilidades.motivo.essencia_incompativel': 'A essência não é compatível com esta habilidade conhecida.',
   'habilidades.motivo.rank_desatualizado': 'O rank mudou. Confira a habilidade novamente.',
-  'app.titulo': 'Dungeons Arena',
+  'app.titulo': 'Dungeons Dimensions',
   'app.carregando': 'Carregando…',
   'erro.graficos': 'Não foi possível iniciar os gráficos (WebGL). Tente atualizar o navegador ou usar outro.',
   'controles.faixa': 'Controles de toque',
@@ -688,12 +689,6 @@ export const ptBR = {
   'arena.titulo': 'Arena (loopback)',
   'morte.titulo': 'Você caiu',
   'morte.reviver': 'Revivendo no início da fase…',
-  'renascer.titulo': 'Onde você quer renascer?',
-  'renascer.acampamento': 'No acampamento',
-  'renascer.save': 'No último save ({nome})',
-  'renascer.central': 'Na vila central ({nome})',
-  'renascer.escolhido': 'Você vai renascer: {nome}',
-  'renascer.padrao': 'Sem escolha, renasce no acampamento (se houver) ou no último save.',
   'numero.esquiva': 'esquivou',
   'aviso.girar': 'Dica: o jogo fica melhor com o aparelho deitado.',
   'diag.rotulo': 'Diagnóstico',
@@ -770,7 +765,7 @@ export const ptBR = {
   'slots.erroLeitura': 'Não foi possível ler este save. Volte aos slots para exportar ou excluir.',
   'slots.faseAusente': 'A fase deste save não existe mais.',
   'slots.falhaGravar': 'Não foi possível salvar o progresso neste navegador.',
-  'slots.erroImportar.formato': 'Arquivo inválido: não é um save do Dungeons Arena.',
+  'slots.erroImportar.formato': 'Arquivo inválido: não é um save do Dungeons Dimensions.',
   'slots.erroImportar.versao_futura': 'Este save é de uma versão mais nova do jogo.',
   'slots.erroImportar.slot': 'Slot inválido no arquivo.',
   'slots.erroImportar.fase': 'O save aponta para uma fase inválida.',
@@ -795,6 +790,7 @@ export const ptBR = {
   ...textosEstilos,
   ...textosPecas,
   ...textosAlquimia,
+  ...textosPortal,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

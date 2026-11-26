@@ -34,6 +34,8 @@ export interface EstadoQueViaja {
   feras?: Entidade['feras'];
   furia?: Entidade['furia'];
   cargaUltimate?: number;
+  /** D-205 (25/11/2026): o básico automático desligado segue desligado na troca de região. */
+  autoAtaque?: false;
   encarnacao?: Entidade['encarnacao'];
   encarnacaoAteTick?: number;
   encarnacaoUltimoTick?: number;
@@ -100,6 +102,7 @@ export function recolherBagagem(estado: EstadoJogo, e: Entidade, daComitiva: Rea
     ...(e.feras && { feras: Object.fromEntries(Object.entries(e.feras).map(([k, v]) => [k, { ...v, descansoAteTick: relativo(v.descansoAteTick, base) }])) }),
     ...(e.furia && { furia: deslocarFuria(e.furia, base, true) }),
     ...(e.cargaUltimate !== undefined && { cargaUltimate: e.cargaUltimate }),
+    ...(!e.autoAtaque && { autoAtaque: false as const }),
     ...(e.encarnacao !== undefined && { encarnacao: e.encarnacao }),
     ...(e.encarnacaoAteTick !== undefined && { encarnacaoAteTick: relativo(e.encarnacaoAteTick, base) }),
     ...(e.encarnacaoUltimoTick !== undefined && { encarnacaoUltimoTick: relativo(e.encarnacaoUltimoTick, base) }),
@@ -137,6 +140,7 @@ export function aplicarBagagem(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 
   if (b.feras) e.feras = Object.fromEntries(Object.entries(b.feras).map(([k, v]) => [k, { ...v, descansoAteTick: absoluto(v.descansoAteTick, base) }]));
   if (b.furia) e.furia = deslocarFuria(b.furia, base, false);
   if (b.cargaUltimate !== undefined) e.cargaUltimate = b.cargaUltimate;
+  if (b.autoAtaque === false) e.autoAtaque = false;
   if (b.encarnacao !== undefined) e.encarnacao = b.encarnacao;
   if (b.encarnacaoAteTick !== undefined) e.encarnacaoAteTick = absoluto(b.encarnacaoAteTick, base);
   if (b.encarnacaoUltimoTick !== undefined) e.encarnacaoUltimoTick = absoluto(b.encarnacaoUltimoTick, base);

@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.60 · **Data:** 22/11/2026
+**Versão:** 1.62 · **Data:** 25/11/2026
 
 > **Histórico**
+> - **1.62 (25/11/2026)**: D-205, continuação: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório, d20), a troca nova e o botão do ataque automático.
+> - **1.61 (25/11/2026)**: D-205: a fonte própria do jogo (Runas de Filo) e o nome novo, Dungeons Dimensions.
 > - **1.60 (22/11/2026)**: D-203: os ninhos das receitas (o lugar da região onde a criatura que guarda uma receita se junta e a deixa cair 4 vezes mais), no mapa e no texto da receita.
 > - **1.59 (22/11/2026)**: D-203: o item solto espera 5 s depois de fechar a mochila para voltar a quem soltou; o Mundo sem o registro lateral (o importante em destaque, o XP subindo do personagem e a faixa do chefe que surge).
 > - **1.58 (22/11/2026)**: D-204: a caça do pet do Aventureiro solta na troca de fera e no Chamado (o X); as ultimates dele trazem cópias da fera da vez no lugar das criaturas, e com uma cópia viva o dano na fera chega ao dono a 1/3.
@@ -6729,3 +6731,52 @@ invocação traziam as criaturas da classe (lobo espiritual, coruja, javali), se
 **Observação.** A ultimate inicial do Aventureiro (Mergulho + Grito do falcão, Execução presa) não invoca. As cópias
 aparecem nas famílias com invocação (Matilha, Exército em fúria, Carcereiros, Guardiões, Muralha viva, Legião), uma
 por criatura.
+
+## D-205 — A fonte do jogo e o nome Dungeons Dimensions (25/11/2026)
+
+**Problema.** Os títulos e os números usavam a fonte do sistema (outra em cada aparelho) e nada ligava a escrita do
+jogo às runas, que já são a assinatura visual das classes e dos elementos. A entrega visual da VPS sugeria Georgia.
+O nome Dungeons Arena também já não descrevia o jogo, que hoje é sobretudo campanha e Mundo.
+
+**Decisão.**
+- Fonte própria, **Runas de Filo**, gerada por código em `tools/fonte` (`npm run fonte`): capitulares romanas traçadas
+  por uma pena de bico chato (o contraste grosso/fino sai da pena, não de contorno à mão), com ornamentos tirados das
+  runas só onde a letra continua legível: o losango do arcano em A, H, O, X e no zero, a ponta em V no A e na cauda do
+  Q, os chifres do guerreiro no T, o pingo do i e do j em losango. Minúsculas, acentos do português, algarismos de
+  largura fixa (o dano e o d20 não dançam) e pontuação.
+- As 15 runas (10 elementos em U+E000, 5 classes em U+E010) são caracteres da fonte, desenhados dos mesmos traços de
+  `render/runas.ts` e `render/runas-elementos.ts`; a ordem fica em `ui/runa-texto.ts` (`caractereDaRuna`).
+- Uso: títulos (`h1`–`h3`, subtítulos de modal e do seletor), o número do d20 e os números que sobem no Pixi. O texto
+  corrido e os controles seguem na fonte do sistema, mais legível no celular. Um peso só, sem negrito falso no CSS.
+- O nome visível passa a ser **Dungeons Dimensions** (título, PWA, app Android, áudio, mensagens). Os identificadores
+  técnicos com `dungeons-arena` (chaves de save e de `localStorage`, banco, `applicationId`, formato de exportação,
+  repositório, imagens Docker e o APK) ficam, porque trocá-los apagaria saves e quebraria a atualização do app.
+
+**Fora.** Kerning por pares: o opentype.js não grava a tabela, e os recuos de cada letra compensam por ora. A fonte
+sai em OTF (56 KB); o WOFF2 fica para quando houver compressor no projeto.
+
+### D-205, continuação: a entrega visual, a troca e o ataque automático (25/11/2026)
+
+**Problema.** A entrega visual da VPS (base 5f339a0) trazia landing, menu, ficha, mapa, grimório, d20 e chefes novos,
+misturados com mudanças de jogo (chefes, passiva do Atirador, Carisma) e com a conta própria da VPS. Na troca do
+Mundo, o botão "Atualizar oferta" ficava ao lado do ouro e parecia ser dele, ninguém via quanto ouro tinha, e não
+havia como pedir um preço. No computador, a tecla F desligava o básico sem nada na tela dizer, e trocar de alvo o
+religava sozinho.
+
+**Decisão.**
+- Só o visual da entrega, refeito no nosso código (textos no dicionário, a fonte do jogo no lugar de Georgia): a
+  landing na raiz da web (o app e o PWA abrem o menu, `?jogar=1`), o menu em cartões, o tema de madeira, latão e
+  pergaminho nos painéis do Mundo, a sala de seleção com palco e retrato, os avisos em pergaminho, o mapa do terreno
+  (papel, rótulos que não se sobrepõem, índice dos pontos, marcos de saída e de caça, clique no marco para segui-lo),
+  o grimório (arrastar entre as teclas, rank nas cartas, ultimate, sintonia e combos recolhidos) e o d20 desenhado
+  em icosaedro, que para com a face do combate de frente.
+- **Troca**: os dois lados lado a lado, como inventários; o ouro com "Adicionar gold" e o saldo à vista; **cobrar**
+  (`LadoDaTroca.cobra`) pede um valor no lugar de dar ouro: enquanto há cobrança sem pagamento, ninguém confirma
+  (`troca_cobranca`); o outro paga, faz contraproposta (cobra outro valor de volta) ou sai. Chat da troca (canal
+  `troca`, só os dois), silenciável só nesta troca ou para sempre (guardado no aparelho).
+- **Ataque automático**: botão no computador ao lado da ultimate, com a tecla; desligado, a espada riscada pulsa
+  em vermelho com a faixa "Ataque automático desligado". Trocar de alvo não religa mais; só o botão, a tecla ou
+  sair e entrar no jogo (o estado viaja entre regiões na bagagem).
+
+**Fora.** Os chefes da entrega (mecânicas e marcos no mapa), a passiva do Atirador, o ajuste do Carisma e a conta
+própria da VPS (a nossa segue Google e Supabase, então a landing não tem "Minha conta").

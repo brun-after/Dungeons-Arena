@@ -35,11 +35,11 @@ export default defineConfig(({ mode }) => ({
       injectRegister: false,
       includeAssets: ['icones/icone.svg'],
       manifest: {
-        name: 'Dungeons Arena',
+        name: 'Dungeons Dimensions',
         short_name: 'Dungeons',
         description: 'RPG de ação em tempo real: campanha, arena e editor de fases.',
         lang: 'pt-BR',
-        start_url: './',
+        start_url: './?jogar=1', // D-205: a raiz da web é a landing; o jogo instalado abre no menu
         scope: './',
         display: 'standalone',
         // Ajuste de 16/10/2026 (D-067): o jogo instalado abre deitado.

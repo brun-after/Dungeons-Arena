@@ -48,6 +48,8 @@ export type MotivoDoMundo =
   | 'convite_expirado'
   | 'troca_invalida'
   | 'troca_ocupado'
+  /** D-205: há uma cobrança da troca que o ouro do outro lado ainda não cobre. */
+  | 'troca_cobranca'
   | 'mercado_cheio'
   | 'preco_invalido'
   | 'anuncio_indisponivel'
@@ -63,6 +65,8 @@ export interface PilhaVista {
 export interface OfertaVista {
   itens: PilhaVista[];
   ouro: number;
+  /** D-205: o ouro que este lado cobra do outro. */
+  cobra: number;
 }
 
 export interface MembroVisto {
@@ -104,7 +108,8 @@ export type AvisoDoMundo =
   | { tipo: 'missao'; id: string; progresso: number; meta: number }
   // Marco 44 (D-178): `caixa` é a caixa do acampamento (sem ouro), no mesmo painel do banco.
   | { tipo: 'banco'; itens: ItemNaMochila[]; ouro: number; slots: number; caixa?: true }
-  | { tipo: 'chat'; canal: CanalDoChat | 'sistema'; de: string; texto: string }
+  // D-205: 'troca' é o chat de dentro da troca, só entre os dois.
+  | { tipo: 'chat'; canal: CanalDoChat | 'sistema' | 'troca'; de: string; texto: string }
   | { tipo: 'grupo'; id: string | null; codigo?: string; membros: MembroVisto[] }
   | { tipo: 'convite'; grupo: string; de: string }
   /**

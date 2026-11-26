@@ -58,6 +58,7 @@ import { velocidade } from '../world/movimento';
 import { faixaSuperior, mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
 import { criarBarraConsumiveis } from './consumiveis';
+import { criarBotaoAutoAtaque } from './botao-auto-ataque';
 import { criarBotaoUltimate } from './ultimate';
 import { cargaDe, ultimateDe } from '../combat/carga-ultimate';
 import { criarControles, type Controles } from './controles';
@@ -459,6 +460,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const alternarBasico = () => {
     emitir({ t: 'autoAtaque', ligado: !(jogador()?.autoAtaque ?? true) });
   };
+  const botaoBasico = toque ? null : criarBotaoAutoAtaque(alternarBasico); // D-205: o botão também no computador
   const usarAtalhoDeConsumivel = (n: number) => {
     const bolsa = jogador()?.bolsa;
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
@@ -484,11 +486,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       aoInteragir: () => {
         emitir({ t: 'interagir' });
       },
-      aoTrocarAlvo: () => {
-        trocarAlvo(1);
-        // Marco 24 (D-097): tocar no alvo também liga o básico.
-        emitir({ t: 'autoAtaque', ligado: true });
-      },
+      aoTrocarAlvo: () => { trocarAlvo(1); }, // D-205: trocar de alvo não religa mais o básico desligado
       aoTravarAlvo: travarAlvo,
       aoPararAtaque: alternarBasico,
       isometrico,
@@ -500,7 +498,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const fila = document.createElement('div');
     fila.className = 'fila-barra';
     // 05/11/2026: o d20 entra na fila, à esquerda da barra (fixo na tela, a barra crescida o cobria).
-    fila.append(dado.elemento, barra.elemento, botaoUltimate.elemento, movToque.botoes); // D-173: o movimento no HUD
+    fila.append(dado.elemento, barra.elemento, botaoUltimate.elemento, ...(botaoBasico ? [botaoBasico.elemento] : []), movToque.botoes); // D-173
     ui.append(fila);
     centralizar.elemento.classList.add('flutuante');
     ui.append(centralizar.elemento);
@@ -688,6 +686,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quadroAlvo.atualizar(j, alvo);
     controles?.marcarTrava(!!alvo && j?.alvoTravado === true);
     controles?.marcarBasico(j?.autoAtaque ?? true);
+    botaoBasico?.marcar(j?.autoAtaque ?? true, aparencia.atalhos.alternarBasico);
     if (j) {
       const u = ultimateDe(ctx, j);
       botaoUltimate.atualizar(cargaDe(j) / ctx.balance.ultimate.max, u ? (ctx.conteudo.definicoes.get(u.id)?.base.nome ?? u.id) : null, u ? ctx.conteudo.definicoes.get(u.id)?.base.icone : undefined);

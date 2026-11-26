@@ -14,6 +14,7 @@ import { enderecoDoServidor } from '../plataforma/servidor';
 import { ligarNuvemNosSlots } from './nuvem-slots';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
 import classesJson from '../data/classes.json';
+import { ENDERECO_DO_MENU } from './menu';
 
 /** 25/10/2026: o nome da classe do slot, direto do catálogo (a tela de slots não monta o conteúdo inteiro). */
 const NOMES_DAS_CLASSES = new Map(classesJson.classes.map((c) => [c.id, c.nome]));
@@ -119,7 +120,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
   titulo.id = 'titulo-slots';
   const status = el('p', 'erro-lobby');
   status.setAttribute('role', 'alert');
-  tela.append(link('./', t('menu.voltar'), 'link-menu voltar-selecao'), titulo);
+  tela.append(link(ENDERECO_DO_MENU, t('menu.voltar'), 'link-menu voltar-selecao'), titulo);
   raiz.append(tela);
 
   let slots: EstadoSlot[];

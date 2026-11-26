@@ -237,6 +237,11 @@ export const textosHabilidades = {
   'habilidades.aprendiveis': 'Para aprender',
   'habilidades.passivas': 'Passivas',
   'habilidades.barra': 'Teclas 1–6 (1 e 2 de classe; R: ultimate)',
+  // D-205 (25/11/2026): o grimório com arrastar e as seções recolhidas.
+  'habilidades.dicaArrastar': 'Arraste entre números ou leve uma habilidade até a barra. As teclas 1 e 2 são de classe; as teclas 3 a 6 são gerais.',
+  'habilidades.teclaRecusada': 'Essa habilidade não pode ocupar esta tecla.',
+  'habilidades.avancado': 'Ultimate, sintonia e combos',
+  'habilidades.rank': 'Rank {n}',
   'habilidades.tecla': 'Tecla {n}',
   'habilidades.teclaVazia': 'Tecla {n}: vazia',
   'habilidades.subir': 'Subir para o nível {rank}',
@@ -300,6 +305,7 @@ export const textosHabilidades = {
 
   // O d20 perto da barra (ajuste de 15/10/2026).
   'dado.critico': 'Crítico!',
+  'dado.d20': 'D20',
   'dado.falha': 'Falha',
 
   // HUD, cartão e avisos.

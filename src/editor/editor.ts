@@ -18,6 +18,7 @@ import {
 import { validarFase } from '../world/validacao-fase';
 import { deFaseJson, novaFaseEditavel } from './grade';
 import { abrirTelaDeEdicao } from './tela';
+import { ENDERECO_DO_MENU } from '../ui/menu';
 
 const TAMANHOS = [
   { id: 'pequena', largura: 16, altura: 12 },
@@ -181,5 +182,5 @@ async function mostrarMinhasFases(raiz: HTMLElement, mensagem: string): Promise<
     cartao.append(acoes);
     tela.append(cartao);
   }
-  tela.append(status, link('./', t('menu.voltar'), 'link-menu'));
+  tela.append(status, link(ENDERECO_DO_MENU, t('menu.voltar'), 'link-menu'));
 }

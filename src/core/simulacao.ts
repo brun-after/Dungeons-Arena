@@ -188,8 +188,8 @@ function aplicarComandos(
         // Marco 26 (D-121): escolher um alvo de propósito desfaz o cancelamento do seguir alvo.
         delete ator.seguirCanceladoDe;
         ator.alvoTravado = ator.alvoSelecionado !== null && cmd.travar !== false;
-        // Marco 24 (D-097): escolher um alvo de propósito religa o básico (que o Parar ataque desliga).
-        if (ator.alvoTravado) ator.autoAtaque = true;
+        // D-205 (25/11/2026): escolher alvo não religa mais o básico desligado (D-097 religava); só o botão, a tecla
+        // ou entrar de novo no jogo.
         break;
       }
       case 'autoAtaque':

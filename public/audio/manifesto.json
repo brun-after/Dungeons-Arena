@@ -135,14 +135,14 @@
       "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     },
     "necromancia": {
-      "autor": "Dungeons Arena",
+      "autor": "Dungeons Dimensions",
       "titulo": "Sons do Necromante (sintetizados por tools/audio/necromancia.py)",
       "pagina": "https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/necromancia.py",
       "licenca": "CC0-1.0",
       "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     },
     "golpes": {
-      "autor": "Dungeons Arena",
+      "autor": "Dungeons Dimensions",
       "titulo": "Golpes corpo a corpo (sintetizados por tools/audio/golpes.py)",
       "pagina": "https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/golpes.py",
       "licenca": "CC0-1.0",

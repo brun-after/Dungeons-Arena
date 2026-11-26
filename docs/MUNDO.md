@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.7 · **Data:** 20/11/2026
+**Versão:** 1.8 · **Data:** 25/11/2026
 
 > **Histórico**
+> - **1.8 (25/11/2026)**: D-205: a janela da troca com os dois lados, o ouro com botões próprios, a cobrança, a contraproposta e o chat da troca; o mapa em pergaminho.
 > - **1.7 (20/11/2026)**: D-191: a pé, o muro até 6 níveis se escala e a queda até 10 se desce num pulo curto; a saída das passagens sem muro.
 > - **1.6 (16/11/2026)**: marco 45: as criaturas de Filo, as fendas, as reações aos terrenos e o monstruário.
 > - **1.5 (15/11/2026)**: marco 44: a noite, a tocha, a fogueira de acampamento, a caça noturna e a vila pela hora.
@@ -54,7 +55,9 @@ D-129 ([DECISOES.md](DECISOES.md)); aqui fica como jogar, como rodar e onde mexe
   - **grupo** de até 6, por convite pelo nome: a XP de quem abate é dividida com quem está perto, os do grupo
     aparecem em azul no minimapa, nunca se ferem (nem no PvP) e entram juntos nas masmorras;
   - **troca** com quem está a até 4 células: cada um põe itens e ouro, os dois confirmam e o servidor troca tudo de
-    uma vez.
+    uma vez. Desde o D-205 a janela mostra os dois lados como inventários; em vez de dar ouro, um lado pode **cobrar**
+    um valor (o outro paga, faz uma contraproposta ou recusa), e a troca tem um chat próprio que cada um pode
+    silenciar só nela ou para sempre.
 - **Eventos por região** (sorteados a cada hora, valem 20 min): a **lua sangrenta** dobra o loot das regiões normais
   e perigosas; o **mercador errante** aparece perto da entrada da região com um estoque próprio. O começo vai para o
   chat.
