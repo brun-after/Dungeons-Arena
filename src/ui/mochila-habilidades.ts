@@ -32,6 +32,7 @@ import { ehFusao } from '../combat/fusao/receita';
 import { seletorDeRuna } from './seletor-runa';
 import { listaDeLeituras } from './leituras-skill';
 import { blocoDaHistoria } from './historia-skill';
+import { teclaRecusa } from '../progression/habilidades-classe';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -39,6 +40,7 @@ export interface EstadoAbaHabilidades {
   essenciaInvId?: string | null;
   /** Marco 53 (22/11/2026, D-203): as cartas abertas (as outras ficam compactas, e cabem mais na tela). */
   expandidas?: Set<string>;
+  secoesAbertas?: Set<string>;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -77,8 +79,6 @@ export function desenharHabilidades(
   const pontos = el('p', 'linha-pontos', t('habilidades.pontos', { n: bolsa.pontosHabilidade }));
   pontos.dataset.pontosHabilidade = String(bolsa.pontosHabilidade);
   corpo.append(pontos);
-  // 08/11/2026: a ultimate de agora (o par das teclas 1 e 2) no topo, explicada como uma skill.
-  if (!ui.essenciaInvId) desenharUltimate(corpo, j, ctx, tick, emitir, redesenhar);
   const essenciaSelecionada = ui.essenciaInvId ? bolsa.mochila.find((i) => i.invId === ui.essenciaInvId) : undefined;
   const familiaSelecionada = essenciaSelecionada ? ctx.conteudo.itens.get(essenciaSelecionada.itemId)?.progressao : undefined;
   if (ui.essenciaInvId) {
@@ -87,16 +87,59 @@ export function desenharHabilidades(
   }
 
   // As 4 teclas: blocos com o ícone e o nome; "tirar" esvazia a tecla.
-  corpo.append(el('h3', 'subtitulo-modal', t('habilidades.barra')));
+  // D-205 (25/11/2026): a barra do grimório aceita arrastar (entre teclas e dos cartões), com os botões ainda valendo;
+  // a ultimate, a sintonia e os combos ficam recolhidos abaixo dos cartões.
+  const barra = el('section', 'grimorio-barra');
+  barra.append(el('h3', 'subtitulo-modal', t('habilidades.barra')));
+  barra.append(el('p', 'grimorio-dica', t('habilidades.dicaArrastar')));
+  const status = el('p', 'grimorio-status');
+  status.setAttribute('role', 'status');
+  let arrastando: string | null = null;
+  const arrastar = (elemento: HTMLElement, id: string) => {
+    elemento.draggable = true;
+    elemento.addEventListener('dragstart', (ev) => {
+      if (!ev.dataTransfer) return;
+      arrastando = id;
+      ev.dataTransfer.effectAllowed = 'move';
+      ev.dataTransfer.setData('text/plain', id);
+      barra.classList.add('arrastando');
+    });
+    elemento.addEventListener('dragend', () => {
+      arrastando = null;
+      barra.classList.remove('arrastando');
+      barra.querySelectorAll('.destino-skill').forEach((destino) => { destino.classList.remove('destino-skill'); });
+    });
+  };
   const teclas = el('ul', 'teclas-habilidade');
   for (let slot = 0; slot < SLOTS_BARRA; slot++) {
     const id = bolsa.barra[slot] ?? null;
     const h = id ? compilada(id) : undefined;
     const li = el('li', h ? 'bloco-tecla' : 'bloco-tecla vazio');
     li.dataset.tecla = String(slot + 1);
+    li.addEventListener('dragover', (ev) => {
+      if (!arrastando) return;
+      ev.preventDefault();
+      const valido = !teclaRecusa(ctx, bolsa, slot, arrastando);
+      if (ev.dataTransfer) ev.dataTransfer.dropEffect = valido ? 'move' : 'none';
+      li.classList.toggle('destino-skill', valido);
+    });
+    li.addEventListener('dragleave', (ev) => {
+      if (!(ev.relatedTarget instanceof Node) || !li.contains(ev.relatedTarget)) li.classList.remove('destino-skill');
+    });
+    li.addEventListener('drop', (ev) => {
+      if (!arrastando) return;
+      ev.preventDefault();
+      li.classList.remove('destino-skill');
+      if (teclaRecusa(ctx, bolsa, slot, arrastando)) {
+        status.textContent = t('habilidades.teclaRecusada');
+        return;
+      }
+      if (id !== arrastando) emitir({ t: 'equiparHabilidade', id: arrastando, slot });
+    });
     li.append(el('span', 'numero-tecla', String(slot + 1)), h ? icone(h.icone) : el('span', 'icone-vazio'), el('span', 'nome-tecla', h ? h.nome : t('habilidades.livre')));
     li.setAttribute('aria-label', h ? t('habilidades.tecla', { n: slot + 1 }) + `: ${h.nome}` : t('habilidades.teclaVazia', { n: slot + 1 }));
     if (id) {
+      arrastar(li, id);
       const tirar = botao('', `limpar-${slot}`, () => { emitir({ t: 'equiparHabilidade', id: null, slot }); });
       tirar.append(icone('fechar'));
       tirar.setAttribute('aria-label', t('habilidades.tirarDaTecla', { n: slot + 1 }));
@@ -104,11 +147,15 @@ export function desenharHabilidades(
     }
     teclas.append(li);
   }
-  corpo.append(teclas);
+  barra.append(teclas, status);
+  corpo.append(barra);
+  const avancado = el('details', 'grimorio-secao');
+  avancado.append(el('summary', undefined, t('habilidades.avancado')));
+  if (!ui.essenciaInvId) desenharUltimate(avancado, j, ctx, tick, emitir, redesenhar);
   // Marco 24 (D-095): a Sintonia das gerais de tecla e as passivas gerais ligadas.
-  desenharSintonia(corpo, j, ctx, tick);
-  desenharPassivasGerais(corpo, j, ctx, emitir, redesenhar);
-  corpo.append(catalogoCombos(ctx, j));
+  desenharSintonia(avancado, j, ctx, tick);
+  desenharPassivasGerais(avancado, j, ctx, emitir, redesenhar);
+  avancado.append(catalogoCombos(ctx, j));
   // Marco 26 (26/10/2026, D-110): os números da classe (que saíram da escolha) e as afinidades, num bloco dobrável.
   const classe = ctx.conteudo.classes.get(j.classeId ?? bolsa.classeId);
   if (classe) {
@@ -116,7 +163,7 @@ export function desenharHabilidades(
     dom.append(el('summary', undefined, t('classe.domTitulo')), el('p', 'detalhe-item', t(`classe.${classe.id}.dom` as ChaveTexto)));
     const afinidades = classe.afinidades.flatMap((a) => descreverBonus(a));
     if (afinidades.length > 0) dom.append(el('p', 'detalhe-item', t('escolhaClasse.afinidades', { lista: afinidades.join('; ') })));
-    corpo.append(dom);
+    avancado.append(dom);
   }
   /** Os botões 1 2 3 4 de uma habilidade ativa conhecida: põe na tecla; na tecla em que já está, tira. */
   const botoesDeTecla = (id: string, nome: string): HTMLElement => {
@@ -131,6 +178,7 @@ export function desenharHabilidades(
         redesenhar();
       });
       b.classList.add('botao-tecla');
+      b.disabled = !ja && teclaRecusa(ctx, bolsa, slot, id) !== null;
       b.setAttribute('aria-pressed', String(ja));
       b.setAttribute('aria-label', ja ? t('habilidades.tirarDaTecla', { n: slot + 1 }) : t('habilidades.porEmTecla', { n: slot + 1, nome }));
       grupo.append(b);
@@ -149,6 +197,8 @@ export function desenharHabilidades(
     const cor = h.elemento ? ctx.conteudo.elementos.get(h.elemento)?.cor : undefined;
     const titulo = el('strong', 'nome-item');
     titulo.append(icone(h.icone), ` ${h.nome}`);
+    if (conhecida && !h.passiva && !ui.essenciaInvId) arrastar(titulo, id);
+    if (conhecida) titulo.append(el('span', 'grimorio-rank', t('habilidades.rank', { n: conhecida.rank })));
     if (cor) titulo.style.color = cor;
     // Marco 26 (28/10/2026, D-116): a skill de classe leva a runa no nome e no começo da descrição.
     const classeDona = classeDaHabilidade(ctx.conteudo, id);
@@ -269,21 +319,30 @@ export function desenharHabilidades(
   if (ui.essenciaInvId && conhecidasVisiveis.length === 0) corpo.append(el('p', 'detalhe-item', t('progressao.semCompativeis')));
   const ativas = conhecidasVisiveis.filter((c) => !resolverHabilidade(ctx, c.id)?.passiva);
   const passivas = conhecidasVisiveis.filter((c) => resolverHabilidade(ctx, c.id)?.passiva);
-  const secao = (titulo: string, itens: (HTMLLIElement | null)[]) => {
+  const secao = (titulo: string, itens: (HTMLLIElement | null)[], recolher = false) => {
     const presentes = itens.filter((x): x is HTMLLIElement => x !== null);
     if (presentes.length === 0) return;
-    corpo.append(el('h3', 'subtitulo-modal', titulo));
     const ul = el('ul', 'lista-itens');
     ul.append(...presentes);
-    corpo.append(ul);
+    if (!recolher) {
+      corpo.append(el('h3', 'subtitulo-modal', titulo), ul);
+      return;
+    }
+    const grupos = (ui.secoesAbertas ??= new Set());
+    const bloco = el('details', 'grimorio-secao');
+    bloco.open = grupos.has(titulo);
+    bloco.addEventListener('toggle', () => { if (bloco.open) grupos.add(titulo); else grupos.delete(titulo); });
+    bloco.append(el('summary', undefined, `${titulo} (${presentes.length})`), ul);
+    corpo.append(bloco);
   };
   secao(t('habilidades.conhecidas'), ativas.map((c) => cartao(c.id, c)));
-  secao(t('habilidades.passivas'), passivas.map((c) => cartao(c.id, c)));
+  secao(t('habilidades.passivas'), passivas.map((c) => cartao(c.id, c)), !ui.essenciaInvId);
   const novas = (ui.essenciaInvId ? [] : aprendiveisDa(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
-  secao(t('habilidades.aprendiveis'), novas.map((id) => cartao(id, null)));
+  secao(t('habilidades.aprendiveis'), novas.map((id) => cartao(id, null)), !bolsa.estudo);
   // Marco 50 (D-196): a fusão em estudo aparece aqui; as novas se fazem na aba Alquimia.
   const estudo = bolsa.estudo;
   if (estudo && ehFusao(estudo.id) && !ui.essenciaInvId) secao(t('habilidades.fusoes'), [cartao(estudo.id, null)]);
+  if (!ui.essenciaInvId) corpo.append(avancado);
 }
 
 /** Marco 50 (D-196): as partes de que a fusão nasceu, na ordem núcleo, forma e eco. */

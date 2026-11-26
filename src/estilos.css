@@ -3931,7 +3931,7 @@ body:not(.toque) .botao-acao.centralizar.flutuante {
 .linha-tecla {
   min-height: 36px;
 }
-.botao-tecla {
+.botao-config.botao-tecla {
   min-width: 96px;
   font-family: inherit;
   font-variant-numeric: tabular-nums;

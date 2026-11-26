@@ -279,6 +279,9 @@
 .cartao-habilidade .grimorio-rank { margin-inline: 0.4rem; color: #e6bc83; font: 600 0.76rem/1.2 system-ui, sans-serif; white-space: nowrap; }
 .conteudo-modal .cartao-habilidade { border-color: #6d5040; background: linear-gradient(150deg, #302228, #211923); }
 .cartao-habilidade .botao-tecla:disabled { opacity: 0.43; cursor: default; }
+/* 25/11/2026: as seis teclas cabem na carta compacta (os botões encolhem). */
+.teclas-da-carta { flex-wrap: wrap; }
+.teclas-da-carta .botao-tecla { min-width: 30px; min-height: 30px; padding: 0; }
 .grimorio-secao { margin-block: 0.65rem; border: 1px solid #634a3b; border-radius: 0.25rem; background: #241b23; padding: 0.65rem; }
 .grimorio-secao > summary { cursor: pointer; color: #f5d29d; font-weight: 700; }
 .grimorio-secao[open] > summary { margin-bottom: 0.65rem; }
