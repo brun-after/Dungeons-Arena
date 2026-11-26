@@ -15,6 +15,7 @@ import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import type { AcaoDoMundo } from '../mundo/acoes';
 import type { AvisoDoMundo } from '../mundo/avisos';
+import { svgDoIcone } from '../data/icones';
 import { iconeDoItem } from './icones';
 import { botao, comChave, painel, paragrafo } from './mundo-dialogos';
 import './troca.css';
@@ -294,7 +295,10 @@ export function criarJanelaTroca(o: OpcoesDaTroca): JanelaDaTroca {
       const eu = o.eu();
       corpo.append(paragrafo(t('mundo.troca.texto', { nome: a.com }), 'texto-mundo'));
       const grade = el('div', 'grade-troca');
-      grade.append(minhaColuna(a, eu), el('div', 'seta-troca', '⇄'), colunaDele(a, eu));
+      // 26/11/2026 (D-067): o ícone da troca desenhado, sem pictograma no texto.
+      const seta = el('div', 'seta-troca', '');
+      seta.innerHTML = svgDoIcone('troca', '#c39356', 28);
+      grade.append(minhaColuna(a, eu), seta, colunaDele(a, eu));
       corpo.append(grade, suaMochila(a, eu));
       if (chatLigado) corpo.append(secaoChat(a));
       const pendente = a.minha.cobra > a.dele.ouro || a.dele.cobra > a.minha.ouro;

@@ -46,7 +46,7 @@ function cenario(ctx: ContextoSimulacao, dificuldade: Dificuldade, inimigos: [st
 
 describe('caminho com custo de perigo', () => {
   const ctx = comAreas([BRASAS]);
-  const vazio = new Uint8Array(ctx.fase.largura * ctx.fase.altura);
+  const vazio = new Set<number>();
 
   it('sem perigo, é o mesmo caminho da busca em largura', () => {
     expect(caminhoComCusto(ctx.fase, { x: 2, y: 5 }, { x: 9, y: 5 }, 60, vazio, 8)).toEqual(caminho(ctx.fase, { x: 2, y: 5 }, { x: 9, y: 5 }, 60));
@@ -59,7 +59,7 @@ describe('caminho com custo de perigo', () => {
     expect(r.status).toBe('alcancado');
     expect(r.passos.some((c) => dentroDaArea(BRASAS, c.x, c.y))).toBe(false);
     // Uma parede inteira de perigo: o destino continua alcançável.
-    const tudo = new Uint8Array(mapa.length).fill(1);
+    const tudo = new Set(Array.from({ length: ctx.fase.largura * ctx.fase.altura }, (_, i) => i));
     expect(caminhoComCusto(ctx.fase, { x: 2, y: 5 }, { x: 9, y: 5 }, 60, tudo, 8).status).toBe('alcancado');
   });
 });

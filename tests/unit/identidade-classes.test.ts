@@ -219,7 +219,8 @@ describe('IA do falcão (ajuste de 24/10/2026, D-091)', () => {
 
   it('em combate, vai até a caça marcada pelo básico do dono e ataca (marco 40, D-166)', () => {
     const a = arena('aventureiro', 5);
-    a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
+    // D-205 (25/11/2026): escolher o alvo não religa mais o básico; o teste liga o ataque automático.
+    a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }], ['j', { t: 'autoAtaque', ligado: true }]]);
     a.ticks(600);
     const falcao = falcaoDe(a);
     expect(a.j.cacaMarcada).toBe('b');

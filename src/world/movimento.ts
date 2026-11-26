@@ -111,7 +111,7 @@ export function planejarCaminho(
   saida: EventoSimulacao[],
   maxPassos = ctx.balance.navegacao.maxPassosToque,
   // Marco 25 (25/10/2026, D-100): a IA que evita perigo passa o mapa dele (world/perigos.ts).
-  perigo: Uint8Array | null = null,
+  perigo: ReadonlySet<number> | null = null,
 ): boolean {
   const origem = { x: e.x, y: e.y };
   const celula = { x: Math.round(destino.x), y: Math.round(destino.y) };
@@ -124,7 +124,7 @@ export function planejarCaminho(
   const r = raioNoTerreno(e,ctx);
   const largura = ctx.fase.largura;
   // Na suavização, o perigo que a IA evita conta como parede (o atalho não corta pelas brasas).
-  const barreira: Barreira | null = perigo ? (x, y) => perigo[y * largura + x] === 1 : null;
+  const barreira: Barreira | null = perigo ? (x, y) => perigo.has(y * largura + x) : null;
   const celulas = resultado.passos.length > 0 ? resultado.passos : [celula];
   const pontos = suavizarCaminho(ctx.fase, { x: e.px, y: e.py }, celulas, r, barreira);
   const ultimo = pontos.at(-1);

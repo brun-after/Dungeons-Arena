@@ -31,3 +31,23 @@ export function recortarPorInteresse(publico: EstadoJogo, propriaId: string, rai
     respawns: publico.respawns.filter(ve),
   };
 }
+
+type EventoComPosicao = { x?: number; y?: number; id?: string; fonteId?: string | null; alvoId?: string | null; porId?: string | null };
+
+/**
+ * Marco 54 (26/11/2026, D-207): os eventos do tique que a sessão vê. No Mundo contínuo a sala é o atlas inteiro, e o
+ * golpe do outro lado do reino não interessa a ninguém aqui. Vai o evento sem posição nem entidade (os gerais), o que
+ * é da própria entidade, e o que acontece (ou envolve quem está) a até `raio` células dela.
+ */
+export function eventosPorInteresse<E extends object>(eventos: readonly E[], posicoes: ReadonlyMap<string, Posicionado>, propriaId: string, raio: number): E[] {
+  const eu = posicoes.get(propriaId);
+  if (!eu) return [];
+  return eventos.filter((ev) => {
+    const e = ev as EventoComPosicao;
+    const ids = [e.id, e.fonteId, e.alvoId, e.porId].filter((x): x is string => typeof x === 'string' && x !== '');
+    if (ids.includes(propriaId)) return true;
+    if (typeof e.x === 'number' && typeof e.y === 'number') return perto(eu, { x: e.x, y: e.y }, raio);
+    const quem = ids.map((id) => posicoes.get(id)).filter((p): p is Posicionado => p !== undefined);
+    return quem.length === 0 ? ids.length === 0 : quem.some((p) => perto(eu, p, raio));
+  });
+}

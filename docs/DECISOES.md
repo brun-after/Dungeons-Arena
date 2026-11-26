@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.63 · **Data:** 26/11/2026
+**Versão:** 1.64 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.64 (26/11/2026)**: D-207: o Mundo contínuo no núcleo e no servidor (atlas, costuras, zonas, hibernação, sala única) e a medida da lotação.
 > - **1.63 (26/11/2026)**: D-206: a fusão leva todos os elementos dela, no vínculo e no visual (as ligas: lava, vapor, cristal ígneo, fulgurito…).
 > - **1.62 (25/11/2026)**: D-205, continuação: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório, d20), a troca nova e o botão do ataque automático.
 > - **1.61 (25/11/2026)**: D-205: a fonte própria do jogo (Runas de Filo) e o nome novo, Dungeons Dimensions.
@@ -6805,3 +6806,72 @@ núcleo, mesmo com veneno e trevas na mistura.
   com a mescla.
 
 **Fora.** O vento (só dos inimigos) não tem liga; a cor base da fusão segue a do núcleo.
+
+## D-207 — O Mundo contínuo no núcleo e no servidor (26/11/2026)
+
+**Problema.** O Mundo eram 24 regiões, cada uma uma fase quadrada, uma sala e uma cena próprias, ligadas por
+passagens de 28 células onde a sala trocava com bilhete (D-169, D-202). O pedido: o mundo inteiro contínuo, sem
+separação entre as regiões, e sem mexer no uso de núcleos (um processo Node, como hoje). É o marco 54 de três: o 54
+faz o núcleo e o servidor, atrás de `mundo.json → continuo` (desligado); o 55 faz o cliente e liga; o 56 põe as
+escadas e os andares nas masmorras, que seguem instâncias.
+
+**Decisão.**
+- **O atlas** (`mundo/atlas.ts`): cada território é uma grade de colunas e linhas; a largura da coluna é o maior
+  `tamanho` dela, a altura da linha também, e as regiões encostam umas nas outras. Os lados com `passagens` viram
+  **costuras abertas** (`costuras`, todas conferidas por `conferirAtlas`); os outros continuam fechados (montanha ou
+  mar, e o Central só fala com o Eclipse pela Travessia).
+- **A costura sem um lado conhecer o outro** (`world/costura.ts`): cada região segue gerada sozinha (num quadrado
+  com a fase deslocada para o recorte dela, `mundo/atlas-fase.ts`, depois cortado por `world/recorte-exterior.ts`).
+  Num lado aberto, a montanha da borda sai e, numa faixa de 16 células, a altura, a água e a serra puxam para um
+  **perfil da borda** que só depende do par (`perfilDaCostura`); as estradas vão ao **cruzamento** do par. As 33
+  costuras chegam à mesma altura dos dois lados, e o cruzamento é alcançável dos dois.
+- **A fase do mundo** (`mundo/mundo-continuo.ts`): as regiões são carimbadas no atlas (2020×888), com os ids dos
+  objetos prefixados pela região e as listas (spawns, áreas, refúgios, estruturas, matas, ninhos, cenário, telhados)
+  deslocadas. A montagem vai em etapas (`etapasDoMundoContinuo`), uma por região, com uma pausa entre elas no
+  servidor (o coordenador aquece ao subir e responde `mundo_aquecendo` até acabar).
+- **Zonas pela posição** (`mundo/zonas.ts`): a região de cada célula, com o limite da costura ondulado em até 8
+  células (`desvioDaZona`). PvP e loot leem a zona da posição (`modos/regras-por-zona.ts`: `pvpEm`, `lootPctEm`), e
+  o PvP só vale com **os dois** lados em zona com PvP. Evento, mercador errante, noite e focos são por zona; o chat
+  "região" é a mesma zona; o aviso `lugar` sai quando a zona muda.
+- **Viagens que reposicionam** (`mundo/sala-continua.ts`): pedra de save e portal, pedra de retorno, renascer e a
+  saída do interior só levam o personagem dentro da mesma sala. A ficha não muda: vila salva, acampamento e pontos
+  seguem em coordenadas locais da região, e a sala converte (`paraOAtlas`).
+- **Hibernação** (`mundo/hibernacao.ts`): o que está a mais de 40 células (Chebyshev) de todo jogador dorme num
+  depósito por bloco de 16; o bloco acorda quando alguém chega a 30 dele. Monstro com alvo, em ação ou invocação
+  não dorme; o túmulo também não. Os números estão em `balance.mundo.hibernacao` (eram 60/46/32: com 40 jogadores o
+  tique caiu pela metade, e 40 ainda passa da maior detecção, 35 com a batalha e a tocha).
+- **Eventos recortados por interesse** (`arena/interesse.ts → eventosPorInteresse`): cada sessão recebe só os
+  eventos a até o raio de interesse mais 8.
+- **O tique com centenas acordados**: as buscas "quem está perto" usam a vizinhança por bloco do tique
+  (`entities/vizinhanca.ts → vizinhosDe`: detecção, auto-alvo, batalha por perto, tocha); `buscarEntidade` tem um
+  índice por id conferido na lista; a ordem rotativa fica guardada no tique; as áreas fixas têm índice por bloco
+  (`areasEfetivasEm`); a navegação guarda só as células visitadas.
+
+**Medida** (`npm run carga:continuo`, a sala no próprio processo, neste notebook, tique a 60 Hz; `--hoje` é a base,
+uma sala por região como antes):
+
+| Bots | Arranjo | Tique médio | p95 | Acordadas | Banda por bot |
+|---|---|---|---|---|---|
+| 10 | uma sala por região (hoje) | 19,6 ms | 40,7 ms | 2063 | 13,6 KiB/s |
+| 10 | contínuo, espalhados | 6,8 ms | 14,0 ms | 206 | 11,7 KiB/s |
+| 20 | uma sala por região (hoje) | 40,0 ms | 82,5 ms | 4413 | 16,0 KiB/s |
+| 20 | contínuo, espalhados | 21,3 ms | 45,9 ms | 374 | 15,2 KiB/s |
+| 40 | uma sala por região (hoje) | 48,2 ms | 109,9 ms | 5671 | 18,4 KiB/s |
+| 40 | contínuo, espalhados | 26 a 29 ms | 60 a 74 ms | 475 | 29 KiB/s |
+| 60 | contínuo, espalhados | 29,4 ms | 60,2 ms | 508 | 21,7 KiB/s |
+| 80 | contínuo, espalhados | 24,6 ms | 48,9 ms | 485 | 15,4 KiB/s |
+| 100 | contínuo, espalhados | 34,6 ms | 80,6 ms | 491 | 12,1 KiB/s |
+| 100 | contínuo, todos na Vila do Centro | 3,6 ms | 7,7 ms | 65 | 19,3 KiB/s |
+
+Os bots entram nas 24 pedras de save, então passar de 24 junta gente nos mesmos lugares: o tique cresce com a área
+acordada, não com o número de jogadores. Antes das otimizações deste marco, 10 bots davam 150 ms. O notebook é
+ruidoso (a mesma medida varia uns 20%), e os números de hoje também passam do orçamento nele.
+
+**Lotação.** Com o contínuo ligado (marco 55), o canal leva **100 jogadores** (`maxJogadores`): o tique com 100 espalhados fica
+abaixo do de hoje com 40 numa sala por região, porque o mundo inteiro acordado nunca passa de umas 500 entidades. Até
+lá, o `maxJogadores` segue 40 (o das salas por região). O próximo ganho, se a VM pedir, é a IA de quem patrulha pensar
+a cada poucos tiques.
+
+**Fora (marco 55).** O cliente contínuo (geração no Worker, carimbo, camadas por bloco, uma cena só, HUD e mapas),
+ligar `continuo` e apagar passagens, bilhetes e vizinha. Ainda por região no servidor: as escoltas e o lugar ao acaso
+do desvio (convertidos na chegada) e o escuro base da zona.

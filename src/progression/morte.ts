@@ -1,4 +1,5 @@
 import { dropsDaForja } from './moldes';
+import { lootPctEm } from '../modos/regras-por-zona';
 import { ninhoDe } from '../world/ninhos';
 import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
 import { morteSemTumulo, PREFIXO_NOITE, recompensaDaNoite } from '../mundo/noite';
@@ -296,7 +297,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
   // Marco 30 (D-129): o loot do lugar (no Mundo, pelo perigo da região).
   const renascido = Math.max(d.pisoRenascidoPct / 100, ctx.balance.xp.decaimentoAntifarm ** e.abates);
-  const lootMult = ((ctx.modo.lootPct ?? 100) / 100) * renascido * recompensaDaNoite(ctx);
+  const lootMult = (lootPctEm(ctx.modo, e.x, e.y) / 100) * renascido * recompensaDaNoite(ctx);
   const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa * lootMult);
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).

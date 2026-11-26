@@ -1,10 +1,11 @@
 // 02/11/2026: exército próprio do boss e atenção atraída por combate recente no Mundo.
+import { vizinhosDe } from './vizinhanca';
 import { fogoAceso } from '../world/fogo-aceso';
 import { fatorDaNoite, percepcaoNoEscuro } from '../mundo/noite';
 import { temLuzPropria } from '../combat/luz-propria';
 import { hashTexto } from '../core/rng';
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo } from '../core/estado';
+import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { invocar } from '../combat/efeitos-fluxo';
@@ -59,9 +60,10 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   // Marco 44 (15/11/2026, D-178): à noite, a batalha por perto é notada de mais perto (50% na noite fechada). O bônus
   // fica inteiro aqui: o raio todo já cai pela noite em raioContra (16/11/2026: antes caía duas vezes, ~32% do dia).
   const raioBatalha=r.raio*fatorDaNoite(ctx);
-  const porId=new Map(estado.entidades.map(a=>[a.id,a]));
-  const batalha=estado.entidades.some(a=>{
-    if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>raioBatalha)return false;
+  // Marco 54 (26/11/2026, D-207): a distância primeiro e o mapa por id só se alguém estiver perto (era O(n²) por tique).
+  const porId = { get: (id: string) => buscarEntidade(estado, id) };
+  const batalha=vizinhosDe(estado,e.x,e.y,raioBatalha).some(a=>{
+    if(a===e||chebyshev(e,a)>raioBatalha||!vivo(a)||!podeAjudar(e,a,ctx.modo))return false;
     const recebeu=a.participacao.some(p=>{const alvo=porId.get(p.id);return p.tick>=desde&&alvo&&alvoOfensivoValido(estado,ctx,e,alvo);});
     const alvo=a.ia?.alvoId?porId.get(a.ia.alvoId):undefined;
     const atacou=alvo&&alvoOfensivoValido(estado,ctx,e,alvo)&&alvo.participacao.some(p=>p.id===a.id&&p.tick>=desde);
@@ -120,7 +122,7 @@ export function raioContra(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: 
 export function fogoQueAfasta(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: Entidade): Entidade | null {
   if (!ctx.fase.exterior) return null;
   const r = ctx.balance.mundo.tocha.afastaRaio;
-  for (const a of estado.entidades) {
+  for (const a of vizinhosDe(estado, monstro.x, monstro.y, r)) {
     if (a === monstro || !vivo(a) || a.controlador === 'ia' || chebyshev(a, monstro) >= r) continue;
     if (!alvoOfensivoValido(estado, ctx, monstro, a) || provocou(monstro, a)) continue;
     if (reacaoAoFogo(estado, ctx, monstro, a) === 'evita') return a;

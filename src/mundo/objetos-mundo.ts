@@ -6,6 +6,7 @@
 // - o túmulo guarda a mochila e o equipado de quem morreu fora de dungeon. Fora do PvP, só o dono abre por um tempo.
 // Puro.
 
+import { pvpEm } from '../modos/regras-por-zona';
 import { acenderAcampamento, apagadaDeAcampamento } from './acampamento';
 import { temLuzPropria } from '../combat/luz-propria';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -154,7 +155,7 @@ export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
     return;
   }
   const regras = ctx.balance.mundo.tumulo;
-  const liberaTick = ctx.modo.fogoAmigo ? estado.tick : estado.tick + ticksDe(regras.donoExclusivoS * 1000);
+  const liberaTick = pvpEm(ctx.modo, e) ? estado.tick : estado.tick + ticksDe(regras.donoExclusivoS * 1000);
   const objetoId = `t${estado.tick}_${e.id}`;
   estado.objetos.push(novoObjeto(objetoId, 'tumulo', e.x, e.y, { itens, ref: chaveDoDono(e), valor: liberaTick, largadoTick: estado.tick }));
   saida.push({ t: 'tumuloCriado', tick: estado.tick, id: e.id, objetoId, x: e.x, y: e.y, itens: itens.length });

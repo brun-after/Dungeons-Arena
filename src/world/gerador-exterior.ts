@@ -27,6 +27,7 @@ import { abrirEstrada, type TerrenoDaEstrada } from './estradas-exterior';
 import { comporCenario, type PecaDoCenario } from './composicao-cenario';
 import { emPassagem } from './passagem';
 import { posicionarNinhos, type NinhoDaFase } from './ninhos';
+import { fixarCostura, type LadoAberto, type Recorte } from './costura';
 
 export { LARGURA_PASSAGEM } from './passagens-exterior';
 /** Distância mínima (Chebyshev) entre os inimigos e a vila ou os spawns. */
@@ -324,22 +325,38 @@ export function naMata(regiao: { matas?: readonly { x: number; y: number; raio: 
   return (regiao.matas ?? []).some((m) => Math.hypot(x - m.x, y - m.y) <= m.raio);
 }
 
-export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGerado {
-  const n = regiao.tamanho ?? reino.tamanhoRegiao;
+/**
+ * Marco 54 (26/11/2026, D-207): a região do Mundo contínuo. Gera-se o quadrado `n` (com o conteúdo da região já
+ * deslocado para dentro do recorte) e, no fim, só o `recorte` fica (world/recorte-exterior.ts). Os lados abertos não
+ * têm passagem: a estrada vai até o cruzamento, na borda, onde encontra a da vizinha.
+ */
+export interface OpcoesContinuas {
+  n: number;
+  recorte: Recorte;
+  abertos: readonly LadoAberto[];
+  /** Onde a estrada de cada lado aberto chega à borda (no recorte) e a altura do perfil ali. */
+  cruzamentos: readonly { x: number; y: number; nivel: number }[];
+}
+
+export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo, continuo?: OpcoesContinuas): ExteriorGerado {
+  const n = continuo?.n ?? regiao.tamanho ?? reino.tamanhoRegiao;
   const rng = criarRng(regiao.semente);
   const perfil = PERFIS[regiao.bioma];
   const g = new Grade(n, '#');
   // Marco 43 (15/11/2026, D-177): a geografia primeiro (a altura, a água, a montanha, a mata e os rochedos).
-  const geo = gerarGeografia({ n, semente: regiao.semente, bioma: regiao.bioma, matas: regiao.matas ?? [] });
+  const geo = gerarGeografia({ n, semente: regiao.semente, bioma: regiao.bioma, matas: regiao.matas ?? [], ...(continuo && { recorte: continuo.recorte, abertos: continuo.abertos }) });
   for (let y = 1; y < n - 1; y++) {
     for (let x = 1; x < n - 1; x++) {
       const k = y * n + x;
       g.por(x, y, geo.agua[k] ? '~' : (geo.obstaculos[k] ?? 0) > 0 ? '#' : perfil.chao);
     }
   }
-  // Marco 38 (D-142): a região estreita é um corredor entre as passagens, com paredões de arenito dos lados.
-  if (regiao.estreita) escavarCorredor(g, entradasDosLados(reino, regiao, n), perfil.chao, regiao.semente);
   const protegidas = new Set<number>();
+  // Marco 54 (D-207): fora do recorte é rocha que nada usa (é cortada no fim).
+  const r = continuo?.recorte;
+  if (r) for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (x < r.x || y < r.y || x >= r.x + r.largura || y >= r.y + r.altura) { g.por(x, y, '#'); protegidas.add(y * n + x); }
+  // Marco 38 (D-142): a região estreita é um corredor entre as passagens, com paredões de arenito dos lados.
+  if (regiao.estreita) escavarCorredor(g, continuo ? continuo.cruzamentos : entradasDosLados(reino, regiao, n), perfil.chao, regiao.semente);
   const pontos: PontoDoExterior[] = [];
   const centro: Celula = regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y } : { x: Math.floor(n / 2), y: Math.floor(n / 2) };
   // As fachadas primeiro (com uma margem de chão), para a estrada não as cortar.
@@ -365,7 +382,9 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // Marco 38 (D-142): toda região sem vila tem a pedra de save no centro, numa clareira abrigada.
   const abrigo = regiao.vila ? null : abrigoDoCentro(g, centro, protegidas);
   if (abrigo) pontos.push({ tipo: 'npc', papel: 'save', x: centro.x, y: centro.y });
-  const { passagens, areas, enfeites, entradas } = abrirPassagens(g, reino, regiao, protegidas);
+  const { passagens, areas, enfeites, entradas } = continuo
+    ? { passagens: { norte: [], sul: [], leste: [], oeste: [] }, areas: [], enfeites: [], entradas: continuo.cruzamentos.map((c) => ({ x: c.x, y: c.y })) }
+    : abrirPassagens(g, reino, regiao, protegidas);
   // Das portas da vila (ou do centro) até cada passagem e cada porta de estrutura.
   const saidaDaVila = (alvo: Celula): Celula => {
     if (!regiao.vila) return centro;
@@ -386,7 +405,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
 
   const spawns: SpawnJson[] = regiao.vila
     ? [-2, 0, 2].flatMap((dx) => [-2, 2].map((dy) => ({ x: centro.x + dx, y: centro.y + dy })))
-    : entradas.length > 0
+    : entradas.length > 0 && !continuo
       ? entradas.map((c) => ({ x: c.x, y: c.y }))
       : [{ x: centro.x, y: centro.y }];
   for (const s of spawns) if (!ANDA.has(g.em(s.x, s.y))) g.por(s.x, s.y, regiao.vila ? '.' : '=');
@@ -412,10 +431,11 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   const naPassagemDaRegiao = (c: Celula) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y);
   const alturas = gerarRelevo({
     n, base: geo.alturas, em: (x, y) => g.em(x, y),
-    planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 })), ...entradas.map((c) => ({ x: c.x, y: c.y, raio: BOCA_DA_PASSAGEM, nivel: 0 }))],
+    planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 })), ...(continuo ? continuo.cruzamentos.map((c) => ({ x: c.x, y: c.y, raio: BOCA_DA_PASSAGEM, nivel: c.nivel })) : entradas.map((c) => ({ x: c.x, y: c.y, raio: BOCA_DA_PASSAGEM, nivel: 0 })))],
     retangulos: [...telhados, ...regiao.estruturas], passagem: naPassagemDaRegiao, origens: spawns, encostaMax: BALANCE_PADRAO.relevo.encostaMax,
     encostas: regiao.estruturas.filter((e) => !e.escondida && (e.tipo === 'caverna' || e.tipo === 'mina')), alturaDoMorro: BALANCE_PADRAO.relevo.muroAltoMax - 1,
   });
+  if (continuo) fixarCostura(alturas, n, continuo.recorte, continuo.abertos);
   const alcance = alcancaveis(g, spawns[0] as Celula, alturas);
   const livres: Celula[] = [];
   const ehLivre = new Uint8Array(n * n);

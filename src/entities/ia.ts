@@ -3,6 +3,7 @@
 // internas que os comandos usam (iniciarAcao, planejarCaminho), nunca por atalho (D-025).
 // Alvo, detecção e dano passam sempre por `relacao()` (via alvoOfensivoValido).
 
+import { vizinhosDe } from './vizinhanca';
 import type { Celula, Dir8 } from '../core/comandos';
 import type { ContextoSimulacao, RegrasIa } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -100,9 +101,13 @@ function detectar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, raio:
   const origem = celulaOcupada(e);
   let melhor: Entidade | null = null;
   let melhorDist = Infinity;
-  for (const outro of estado.entidades) {
-    if (outro.id === e.id || !alvoDaIa(estado, ctx, e, outro)) continue;
+  // Marco 54 (26/11/2026, D-207): a distância antes das contas caras (no Mundo contínuo há centenas acordados por perto).
+  // O raio contra o alvo nunca passa de `raio` vezes o da tocha que atrai (raioContra), então quem está além nem conta.
+  const alcanceMax = raio * Math.max(1, ctx.balance.mundo.tocha.atraiMult);
+  for (const outro of vizinhosDe(estado, e.x, e.y, alcanceMax)) {
+    if (outro.id === e.id) continue;
     const d = manhattan(origem, celulaOcupada(outro));
+    if (d > alcanceMax || !alvoDaIa(estado, ctx, e, outro)) continue;
     // Marco 44 (D-178): no Mundo, o raio depende do alvo (o escuro, a tocha).
     if (d > raioContra(estado, ctx, e, outro, raio)) continue;
     // Avatar hostil primeiro (§2.9, marco 10A-3); depois o mais próximo, menor HP e id.

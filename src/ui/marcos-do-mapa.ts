@@ -112,8 +112,19 @@ export function desenharMarco(g: CanvasRenderingContext2D, tipo: TipoDeMarco, x:
     g.moveTo(x, y - h); g.lineTo(x + h, y); g.lineTo(x, y + h); g.lineTo(x - h, y);
     g.closePath(); g.fill(); g.stroke();
     g.fillStyle = '#241719';
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${String(l * 0.67)}px "${FONTE_DO_JOGO}", Georgia, serif`;
-    g.fillText(tipo === 'saida' ? '↗' : '×', x, y);
+    if (tipo === 'saida') {
+      // 26/11/2026 (D-067): a seta da saída em traços, sem pictograma.
+      const s = h * 0.42;
+      g.strokeStyle = '#241719';
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(x - s, y + s); g.lineTo(x + s, y - s);
+      g.moveTo(x - s * 0.1, y - s); g.lineTo(x + s, y - s); g.lineTo(x + s, y + s * 0.1);
+      g.stroke();
+    } else {
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${String(l * 0.67)}px "${FONTE_DO_JOGO}", Georgia, serif`;
+      g.fillText('×', x, y);
+    }
   } else if (tipo === 'portao') {
     // Dois pilares e o arco, em dourado.
     g.fillStyle = '#ffd77a';
