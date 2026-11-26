@@ -134,7 +134,7 @@ def main():
     manifesto_caminho = SAIDA / 'manifesto.json'
     manifesto = json.loads(manifesto_caminho.read_text(encoding='utf-8'))
     manifesto['fontes']['necromancia'] = {
-        'autor': 'Dungeons Arena',
+        'autor': 'Dungeons Dimensions',
         'titulo': 'Sons do Necromante (sintetizados por tools/audio/necromancia.py)',
         'pagina': 'https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/necromancia.py',
         'licenca': 'CC0-1.0',

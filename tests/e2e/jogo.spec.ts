@@ -618,7 +618,7 @@ test.describe('menu e arena online', () => {
 
   test('o menu leva à campanha, à arena online e ao treino', async ({ page }) => {
     await page.goto('./');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dungeons Arena');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dungeons Dimensions');
     for (const nome of ['Campanha', 'Arena online', 'Treino de arena (contra um bot)', 'Editor de fases']) {
       await expect(page.getByRole('link', { name: nome })).toBeVisible();
     }

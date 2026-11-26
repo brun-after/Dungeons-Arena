@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => ({
       injectRegister: false,
       includeAssets: ['icones/icone.svg'],
       manifest: {
-        name: 'Dungeons Arena',
+        name: 'Dungeons Dimensions',
         short_name: 'Dungeons',
         description: 'RPG de ação em tempo real: campanha, arena e editor de fases.',
         lang: 'pt-BR',

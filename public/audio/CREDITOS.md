@@ -1,4 +1,4 @@
-# Créditos de áudio — Dungeons Arena
+# Créditos de áudio — Dungeons Dimensions
 
 Gravações de terceiros distribuídas com o jogo. As licenças abaixo aplicam-se aos arquivos de áudio indicados, independentemente da licença do código.
 
