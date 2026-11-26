@@ -41,9 +41,9 @@ export function idDoChefeDoFoco(foco: FocoDaRegiao): string {
 }
 
 /** Onde o foco nasce: perto do que o explica. Null se não há lugar (a estrutura não existe, o chefe não está). */
-function ancora(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, foco: FocoDaRegiao, sorte: () => number): Celula | null {
+function ancora(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, foco: FocoDaRegiao, sorte: () => number, naZona: (c: Celula) => boolean): Celula | null {
   if (foco.perto === 'boss') {
-    const chefe = estado.entidades.find((e) => vivo(e) && TERRENO_DO_CHEFE[e.preset] === foco.tipo);
+    const chefe = estado.entidades.find((e) => vivo(e) && TERRENO_DO_CHEFE[e.preset] === foco.tipo && naZona(e));
     return chefe ? { x: chefe.x, y: chefe.y } : null;
   }
   if (foco.perto !== 'livre') {
@@ -55,7 +55,7 @@ function ancora(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMund
     && ctx.fase.spawns.every((s) => Math.max(Math.abs(s.x - c.x), Math.abs(s.y - c.y)) > 12);
   for (let t = 0; t < 200; t++) {
     const c = { x: Math.floor(sorte() * ctx.fase.largura), y: Math.floor(sorte() * ctx.fase.altura) };
-    if (passavel(ctx.fase, c.x, c.y) && longe(c)) return c;
+    if (passavel(ctx.fase, c.x, c.y) && longe(c) && naZona(c)) return c;
   }
   return null;
 }
@@ -79,12 +79,12 @@ function lugarPerto(ctx: ContextoSimulacao, centro: Celula, de: number, ate: num
  * Acende o foco na janela (uma vez: se já há terreno com a marca, não faz nada): as áreas em volta da âncora até `fimMs`
  * e, com a chance do foco, o chefe do elemento perto delas.
  */
-export function acenderFoco(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, foco: FocoDaRegiao, janela: { inicio: number; fim: number }, agoraMs: number): void {
+export function acenderFoco(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, foco: FocoDaRegiao, janela: { inicio: number; fim: number }, agoraMs: number, naZona: (c: Celula) => boolean = () => true): void {
   const marca = marcaDoFoco(foco, janela.inicio);
   if (estado.terrenos?.some((t) => t.foco === marca)) return;
   const rng = criarRng(hashTexto(`${regiao.id}/${marca}`));
   const sorte = () => aleatorio(rng);
-  const centro = ancora(estado, ctx, regiao, foco, sorte);
+  const centro = ancora(estado, ctx, regiao, foco, sorte, naZona);
   if (!centro) return;
   const ateTick = estado.tick + Math.max(1, ticksDe(janela.fim - agoraMs));
   const vivos = (estado.terrenos ??= []);

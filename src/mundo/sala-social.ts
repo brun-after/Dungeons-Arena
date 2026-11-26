@@ -22,6 +22,8 @@ export interface SalaSocial {
   ctx: ContextoSimulacao;
   agora: number;
   participantes: () => Participante[];
+  /** Marco 54 (D-207): os dois estão na mesma região (no Mundo contínuo, a zona); ausente = a sala é a região. */
+  mesmaRegiao?: (a: Entidade, b: Entidade) => boolean;
   /** O pedido social que passa entre salas (o chat do grupo). */
   pedirAoServidor: (acao: AcaoSocial) => void;
 }
@@ -48,7 +50,8 @@ export function atenderChat(sala: SalaSocial, quem: Participante, acao: Extract<
     return;
   }
   const aviso: AvisoDoMundo = { tipo: 'chat', canal: acao.canal, de: quem.e.nome, texto };
-  for (const p of sala.participantes()) if (acao.canal === 'regiao' || distancia(p.e, quem.e) <= regras.raioLocal) p.avisar(aviso);
+  // Marco 54 (D-207): no Mundo contínuo, a região é a zona de quem fala.
+  for (const p of sala.participantes()) if ((acao.canal === 'regiao' && (sala.mesmaRegiao?.(p.e, quem.e) ?? true)) || distancia(p.e, quem.e) <= regras.raioLocal) p.avisar(aviso);
 }
 
 function lados(t: Troca, quem: EntidadeId): { meu: Troca['a']; outro: Troca['a'] } {

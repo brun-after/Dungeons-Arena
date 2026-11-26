@@ -2,6 +2,7 @@
 // `if (modo === 'x')` espalhado pelo código: são consultadas por funções pequenas
 // (relacao.ts, regras.ts, arena/ficha-sessao.ts).
 
+import type { RegrasPorZona } from './regras-por-zona';
 import { TIPOS_DE_COMANDO } from '../core/comandos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { ATRIBUTOS_NEUTROS, type Atributos } from '../entities/entidade';
@@ -146,6 +147,16 @@ export interface ModoDeJogo {
   areaDeInteresse?: { raio: number };
   /** Marco 29 (D-128): a IA só pensa a até estas células de algum jogador. Ausente = sempre pensa. */
   iaRaioAtivacao?: number;
+  /**
+   * Marco 54 (26/11/2026, D-207): o Mundo contínuo (o atlas inteiro numa sala por canal, mundo/sala-continua.ts).
+   * Ausente ou false = uma sala por região, como antes.
+   */
+  continuo?: boolean;
+  /**
+   * Marco 54 (26/11/2026, D-207): no Mundo contínuo, o PvP e o loot por zona (modos/regras-por-zona.ts). Não vem do
+   * json: a sala do atlas põe. Ausente = valem `fogoAmigo` e `lootPct` do modo inteiro.
+   */
+  zonas?: RegrasPorZona;
   /** Marco 42 (15/11/2026, D-176): a luz em volta do jogador só com a tocha acesa (no Mundo); ausente = sempre. */
   luzSoComTocha?: boolean;
   /** Marco 44 (15/11/2026, D-178): a lenha monta a fogueira de acampamento (no Mundo); ausente = não monta. */
@@ -327,6 +338,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.pvp === undefined ? {} : { pvp: { danoClassePct: l.numero(l.objeto(o.pvp, 'pvp'), 'danoClassePct', { min: 0, max: 100 }) } }),
     ...(o.areaDeInteresse === undefined ? {} : { areaDeInteresse: { raio: l.numero(l.objeto(o.areaDeInteresse, 'areaDeInteresse'), 'raio', { min: 8, max: 64, inteiro: true }) } }),
     ...(o.iaRaioAtivacao === undefined ? {} : { iaRaioAtivacao: l.numero(o, 'iaRaioAtivacao', { min: 8, max: 128, inteiro: true }) }),
+    ...(o.continuo === undefined ? {} : { continuo: l.booleano(o, 'continuo') }),
     ...(o.luzSoComTocha === undefined ? {} : { luzSoComTocha: l.booleano(o, 'luzSoComTocha') }),
     ...(o.acampamento === undefined ? {} : { acampamento: l.booleano(o, 'acampamento') }),
     ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),

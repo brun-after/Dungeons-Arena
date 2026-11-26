@@ -1,6 +1,7 @@
 // Hostilidade é por equipe, nunca por tipo (§2.5). Uma única função decide; mira, auto-alvo,
 // IA, colisão configurável, efeitos, dano em área e XP passam por ela. Critério de aceite 7.
 
+import { pvpEm } from './regras-por-zona';
 import type { EntidadeId } from '../core/comandos';
 import type { ModoDeJogo } from './modo';
 
@@ -14,6 +15,9 @@ export interface Lado {
   invocacao?: { donoId: EntidadeId } | null;
   /** Marco 30 (D-129): o grupo do Mundo; quem é do mesmo grupo nunca se fere, nem com fogo amigo. */
   grupo?: string | null;
+  /** Marco 54 (D-207): onde está (no Mundo contínuo, o PvP é da zona dos dois). */
+  x?: number;
+  y?: number;
   /** Marco 49 (D-195): os estados ativos (o enfeitiçado vira a relação). */
   efeitos?: readonly { tipo: string }[];
 }
@@ -46,14 +50,15 @@ function relacaoDaEquipe(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelac
 }
 
 /** Pode causar dano em `b`? Fogo amigo é parâmetro do modo (§2.5). */
-export function podeFerir(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao' | 'fogoAmigo'>): boolean {
+export function podeFerir(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao' | 'fogoAmigo' | 'zonas'>): boolean {
   // Correção de 02/11/2026: PvP não torna o dono e seu próprio exército alvos entre si.
   const donoA = a.invocacao?.donoId;
   const donoB = b.invocacao?.donoId;
   if (donoA === b.id || donoB === a.id || (donoA !== undefined && donoA === donoB)) return false;
   const r = relacao(a, b, modo);
   if (r === 'aliado' && !!a.grupo && a.grupo === b.grupo) return false;
-  return r === 'hostil' || (r === 'aliado' && modo.fogoAmigo);
+  // Marco 54 (26/11/2026, D-207): no Mundo contínuo, o fogo amigo só vale com os dois numa zona de PvP.
+  return r === 'hostil' || (r === 'aliado' && pvpEm(modo, a) && pvpEm(modo, b));
 }
 
 /** Marco 14: pode ajudar `b` (curar, proteger, fortalecer)? O próprio e os aliados, pela relação do modo. */

@@ -27,7 +27,7 @@ import { povoarFase } from '../world/populacao';
 import { entrarNaArena } from './entrada';
 import { estadoPublico } from './estado-publico';
 import { GeradorDePatches, novoCacheDeCampos } from './patches';
-import { recortarPorInteresse } from './interesse';
+import { eventosPorInteresse, recortarPorInteresse } from './interesse';
 import { construirFichaDeSessao, type PreviaDeFicha } from './ficha-sessao';
 import { lerMensagemCliente, MAX_ADIANTAMENTO_TICKS, type MensagemCliente, type MensagemServidor, type MotivoErro, type MotivoRejeicao } from './protocolo';
 export { MAX_ADIANTAMENTO_TICKS } from './protocolo';
@@ -546,9 +546,7 @@ export class SalaArena {
     this.eventosDoTick.length = 0;
     this.aplicarTetoDeRecompensa();
     simular(this.estado, this.ctx, comandos, this.eventosDoTick, dtMs);
-    if (this.eventosDoTick.length > 0) {
-      this.transmitir({ t: 'eventos', tick: this.estado.tick, eventos: this.eventosDoTick });
-    }
+    if (this.eventosDoTick.length > 0) this.transmitirEventos();
     if (this.estado.tick % TICKS_POR_ESTADO === 0) this.transmitirEstado();
     this.depoisDoTick?.();
     if (this.estado.tick % TICKS_POR_ESTADO === 0) this.mandarPrivados();
@@ -634,6 +632,21 @@ export class SalaArena {
     for (const s of [...this.sessoes.values()]) {
       if (s.conectada || this.estado.tick - s.desconectadaEmTick < limite) continue;
       this.removerSessao(s);
+    }
+  }
+
+  /** Marco 54 (26/11/2026, D-207): com a área de interesse, cada sessão recebe só os eventos perto dela. */
+  private transmitirEventos(): void {
+    const area = this.ctx.modo.areaDeInteresse;
+    if (!area) {
+      this.transmitir({ t: 'eventos', tick: this.estado.tick, eventos: this.eventosDoTick });
+      return;
+    }
+    const posicoes = new Map(this.estado.entidades.map((e) => [e.id, e]));
+    for (const s of this.sessoes.values()) {
+      if (!s.conectada) continue;
+      const eventos = eventosPorInteresse(this.eventosDoTick, posicoes, s.entidadeId, area.raio + 8);
+      if (eventos.length > 0) s.enviar(JSON.stringify({ t: 'eventos', tick: this.estado.tick, eventos }));
     }
   }
 

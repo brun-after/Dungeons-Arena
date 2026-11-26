@@ -3,6 +3,7 @@
 // outro monstro com quem se estranhou, por sorteio (`balance.ia.estranhamento`). O golpe em área ainda pega quem
 // estiver no caminho, mas não vira revide. A hostilidade continua decidida por `relacao()` (§2.5).
 
+import { pvpEm } from '../modos/regras-por-zona';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { aleatorio } from '../core/rng';
@@ -32,7 +33,7 @@ export function alvoDaIa(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
  * por perto e quando o fogo amigo do modo permite feri-lo.
  */
 export function sortearEstranhamento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): Entidade | null {
-  if (!ctx.modo.fogoAmigo || e.invocacao) return null;
+  if (!pvpEm(ctx.modo, e) || e.invocacao) return null;
   const r = ctx.balance.ia.estranhamento;
   if (estado.tick < (ia.proximoEstranhamentoTick ?? 0)) return null;
   ia.proximoEstranhamentoTick = estado.tick + ticksDe(r.intervaloMs);

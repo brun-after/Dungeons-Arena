@@ -83,7 +83,7 @@ export type { PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
 const CONFERIR_EVENTO_TICKS = 60;
 const ID_MERCADOR_ERRANTE = 'evento-mercador';
 
-interface Presenca {
+export interface Presenca {
   identidade: string;
   ficha: FichaDoMundo;
   /** Morreu fora de dungeon: ao renascer, volta onde escolheu (marco 53, D-203: `renascerEm`; sem escolha, a vila salva). */
@@ -100,10 +100,10 @@ export class SalaMundo extends SalaArena {
   private readonly exterior: ExteriorGerado | null;
   private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null; comitiva: readonly InvocacaoQueViaja[]; viagem: EstadoQueViaja | null; decorridoTicks: number }>();
   /** Por entidade: quem é e a ficha que entrou (a progressão vem da entidade na hora de gravar). */
-  private readonly presencas = new Map<EntidadeId, Presenca>();
+  protected readonly presencas = new Map<EntidadeId, Presenca>();
   /** Marco 30: o evento da região em curso e o modo sem ele (a lua sangrenta troca o modo enquanto dura). */
-  private evento: EventoAtivo | null = null;
-  private readonly modoDaRegiao: ModoDeJogo;
+  protected evento: EventoAtivo | null = null;
+  protected readonly modoDaRegiao: ModoDeJogo;
   private readonly despedidos = new Set<string>();
   private pendencias: PendenciaDoMundo[] = [];
   /** Dano no chefe do covil por jogador (a contribuição do loot). */
@@ -116,12 +116,14 @@ export class SalaMundo extends SalaArena {
   private readonly retornos = new RetornosDaSala();
   private readonly portais: PortaisTemporarios;
   private semanaDaLoja = Number.NaN; // D-144: a semana do estoque aplicado à loja da dungeon
+  /** Marco 54 (26/11/2026, D-207): no Mundo contínuo, as estruturas de todas as regiões (em coordenadas do atlas). */
+  protected readonly regiaoDoAtlas: RegiaoDoMundo | null;
 
   constructor(
     readonly reino: Reino,
     lugar: Lugar,
     conteudo: Conteudo,
-    private readonly opcoesMundo: OpcoesSalaMundo,
+    protected readonly opcoesMundo: OpcoesSalaMundo,
   ) {
     const molde = opcoesMundo.molde;
     const montado = molde ? { ...molde, estado: clonarEstado(molde.estado) } : montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
@@ -135,7 +137,8 @@ export class SalaMundo extends SalaArena {
     this.limiteDoChat = new LimiteDoChat(chat.porJanela, chat.janelaS * 1000);
     this.modoDaRegiao = this.ctx.modo;
     this.errantes = new ErrantesDaRegiao(this.exterior?.rotas ?? []);
-    this.escoltas = new EscoltasDaRegiao(lugar.tipo === 'regiao' ? lugar.regiao : null);
+    this.regiaoDoAtlas = montado.regiaoDoAtlas ?? null;
+    this.escoltas = new EscoltasDaRegiao(lugar.tipo === 'regiao' ? lugar.regiao : this.regiaoDoAtlas);
     this.portais = opcoesMundo.portais ?? new PortaisTemporarios();
     this.renovarLojaDaDungeon();
   }
@@ -187,7 +190,7 @@ export class SalaMundo extends SalaArena {
     if (reserva.viagem) aplicarBagagem(this.estado, this.ctx, e, reserva.viagem, reserva.decorridoTicks, (id) => novos.get(id) ?? e.id); // D-169
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
     this.presencas.set(entidadeId, { identidade, ficha, morreu: false, grupo: reserva.grupo });
-    if (this.lugar.tipo === 'regiao') garantirAcampamento(this.estado, this.ctx, ficha, this.lugar.regiao.id, chaveDoDono(e), this.opcoesMundo.agora()); // D-178
+    this.garantirAcampamentoDe(ficha, e); // D-178
     if (reserva.grupo) e.grupo = reserva.grupo;
     // Marco 30 (30/10/2026, D-129): a proteção na passagem. Quem chega (pela borda, pela porta, pelo portal ou ao
     // entrar no jogo) fica uns segundos sem levar dano: ninguém espera do outro lado para pegar quem ainda carrega.
@@ -200,14 +203,11 @@ export class SalaMundo extends SalaArena {
   protected override aoEntrar(s: Sessao): void {
     const p = this.presencas.get(s.entidadeId);
     if (!p) return;
-    const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
-    if (descobrir(p.ficha, this.idLugar)) this.avisar(s, { tipo: 'descoberta', lugar: this.idLugar, nome: this.nomeDoLugar() });
+    const aqui = this.descreverLugar(buscarEntidade(this.estado, s.entidadeId));
+    if (descobrir(p.ficha, aqui.lugar)) this.avisar(s, { tipo: 'descoberta', lugar: aqui.lugar, nome: aqui.nome });
     this.avisar(s, {
       tipo: 'lugar',
-      lugar: this.idLugar,
-      nome: this.nomeDoLugar(),
-      perigo: regiao ? regiao.perigo : 'dungeon',
-      pvp: this.ctx.modo.fogoAmigo,
+      ...aqui,
       canal: this.canal,
       vilaSalva: p.ficha.vilaSalva,
       descobertas: [...p.ficha.descobertas],
@@ -255,7 +255,7 @@ export class SalaMundo extends SalaArena {
    * Marco 30 (30/10/2026, D-129): o evento da região (mundo/eventos-mundo.ts). A lua sangrenta multiplica o loot do
    * modo; o mercador errante é uma loja que aparece perto da entrada da região. Começo e fim vão a todos da sala.
    */
-  private conferirEvento(): void {
+  protected conferirEvento(): void {
     if (this.lugar.tipo !== 'regiao') return;
     const agora = eventoDaRegiao(this.lugar.regiao.id, this.lugar.regiao.perigo, this.opcoesMundo.agora(), this.ctx.balance.mundo.eventos);
     if (agora?.evento === this.evento?.evento && agora?.fim === this.evento?.fim) return;
@@ -276,7 +276,7 @@ export class SalaMundo extends SalaArena {
    * 08/11/2026 (D-138): os focos elementais acendem e apagam pela janela (mundo/focos.ts), sem aviso. Marco 42
    * (15/11/2026, D-176): e a noite (mundo/noite.ts): o escuro da região vai no modo, e os monstros da noite chegam.
    */
-  private conferirFocos(): void {
+  protected conferirFocos(): void {
     if (this.lugar.tipo === 'regiao') this.ctx = conferirFocosENoite(this.estado, this.ctx, this.lugar.regiao, this.opcoesMundo.agora());
     else if (this.lugar.tipo === 'covil') conferirSonoDoCovil(this.estado, this.ctx, this.opcoesMundo.agora()); // D-178
   }
@@ -311,7 +311,7 @@ export class SalaMundo extends SalaArena {
       p.ficha = fichaAtualizada(p.ficha, e);
       if (fim === 'concluido') this.trocar(s, p, `regiao:${p.ficha.vilaSalva}`, null, null);
       else if (fim === 'desviado') {
-        const destino = lugarAoAcaso(this.reino, this.regiaoAtual()?.id ?? p.ficha.vilaSalva, `${p.identidade}:${this.estado.tick}`);
+        const destino = lugarAoAcaso(this.reino, this.regiaoAtual(e)?.id ?? p.ficha.vilaSalva, `${p.identidade}:${this.estado.tick}`);
         if (destino) this.trocar(s, p, `regiao:${destino.regiao.id}`, destino.chegada, null);
       }
     }
@@ -319,7 +319,7 @@ export class SalaMundo extends SalaArena {
 
   /** 09/11/2026 (D-144): a loja da dungeon com o estoque da semana dela (renova na quarta, mundo/lojas-mundo.ts). */
   private renovarLojaDaDungeon(): void {
-    if (this.lugar.tipo === 'regiao') return;
+    if (this.lugar.tipo === 'regiao' || this.lugar.tipo === 'mundo') return;
     const r = this.ctx.balance.mundo.lojaDungeon;
     const semana = semanaDaLoja(this.opcoesMundo.agora(), r);
     if (semana === this.semanaDaLoja) return;
@@ -330,8 +330,8 @@ export class SalaMundo extends SalaArena {
 
   /** Marco 30 (D-129): a estrutura escondida perto de quem passa entra no mapa (mundo/sala-viagem.ts). */
   private conferirEscondidas(s: Sessao, e: Entidade, p: Presenca): void {
-    if (this.lugar.tipo !== 'regiao') return;
-    for (const d of escondidasReveladas(this.lugar.regiao, e, p.ficha, this.ctx.balance)) this.avisar(s, { tipo: 'descoberta', ...d });
+    const r = this.lugar.tipo === 'regiao' ? this.lugar.regiao : this.regiaoDoAtlas;
+    for (const d of r ? escondidasReveladas(r, e, p.ficha, this.ctx.balance) : []) this.avisar(s, { tipo: 'descoberta', ...d });
   }
 
   protected override aoViajar(s: Sessao, destino: string, pagamento: 'ouro' | 'pergaminho'): void {
@@ -350,7 +350,7 @@ export class SalaMundo extends SalaArena {
     // Marco 38 (D-142): a pedra de retorno vai à pedra de save de qualquer região; o portal, só às vilas.
     const alvo = this.reino.regioes.find((r) => r.id === destino && (r.vila || pagamento === 'pergaminho'));
     if (!alvo) return 'destino_invalido';
-    if (this.lugar.tipo === 'regiao' && this.lugar.regiao.id === alvo.id && pagamento !== 'pergaminho') return 'mesmo_lugar';
+    if (this.regiaoDe(e)?.id === alvo.id && pagamento !== 'pergaminho') return 'mesmo_lugar';
     if (!p.ficha.descobertas.includes(`regiao:${alvo.id}`) && !capitalDoAtlas(this.reino,alvo.id)) return 'nao_descoberto';
     const agora = this.opcoesMundo.agora();
     if (pagamento === 'pergaminho') {
@@ -368,7 +368,7 @@ export class SalaMundo extends SalaArena {
     } else {
       if (!this.pertoDe(e, 'pedra_portal')) return 'destino_invalido';
       if (agora < p.ficha.portalLivreEm) return 'portal_em_recarga';
-      const custo = this.custoDoPortal(alvo);
+      const custo = this.custoDoPortal(alvo, e);
       if (bolsa.ouro < custo) return 'sem_ouro';
       bolsa.ouro -= custo;
       p.ficha.portalLivreEm = agora + this.ctx.balance.mundo.portal.recargaS * 1000;
@@ -399,14 +399,38 @@ export class SalaMundo extends SalaArena {
   }
 
   private nomeDoLugar(): string {
-    return this.lugar.tipo === 'regiao' ? this.lugar.regiao.nome : this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.nome : this.lugar.covil.nome;
+    return this.lugar.tipo === 'regiao' ? this.lugar.regiao.nome : this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.nome : this.lugar.tipo === 'covil' ? this.lugar.covil.nome : this.reino.nome;
   }
 
-  private avisar(s: Sessao, aviso: AvisoDoMundo): void {
+  /** O lugar como o aviso o mostra (no Mundo contínuo, a zona onde a entidade está). */
+  protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean } {
+    return { lugar: this.idLugar, nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo };
+  }
+
+  /** A região onde o ponto está (a da sala; no Mundo contínuo, a zona dele). Marco 54 (D-207). */
+  protected regiaoDe(_p: { x: number; y: number }): RegiaoDoMundo | null {
+    return this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
+  }
+
+  /** D-178: quem entra encontra a fogueira do acampamento dele, se for aqui. */
+  protected garantirAcampamentoDe(ficha: FichaDoMundo, e: Entidade): void {
+    if (this.lugar.tipo === 'regiao') garantirAcampamento(this.estado, this.ctx, ficha, this.lugar.regiao.id, chaveDoDono(e), this.opcoesMundo.agora());
+  }
+
+  /** D-178: a fogueira acesa neste tique vai para a ficha do dono. */
+  protected registrarAcampamentosDoTick(): void {
+    if (this.lugar.tipo === 'regiao') registrarAcampamentos(this.eventosDoTick, this.lugar.regiao.id, (d) => this.fichaDoDono(d), this.opcoesMundo.agora(), this.estado.tick, this.ctx);
+  }
+
+  protected fichaDoDono(dono: string): FichaDoMundo | undefined {
+    return [...this.presencas].find(([id]) => { const x = buscarEntidade(this.estado, id); return x && chaveDoDono(x) === dono; })?.[1].ficha;
+  }
+
+  protected avisar(s: Sessao, aviso: AvisoDoMundo): void {
     this.enviarPara(s, { t: 'mundo', aviso });
   }
 
-  private trocar(s: Sessao, p: Presenca, destino: string, chegada: Celula | null, instancia: string | null): void {
+  protected trocar(s: Sessao, p: Presenca, destino: string, chegada: Celula | null, instancia: string | null): void {
     if (this.despedidos.has(s.sessaoId) || this.pendencias.some((x) => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return;
     this.pendencias.push(pendenciaDeTroca(this.estado, buscarEntidade(this.estado, s.entidadeId), { identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia })); // D-169
   }
@@ -416,20 +440,21 @@ export class SalaMundo extends SalaArena {
     return this.estado.objetos.some((o) => o.tipo === tipo && Math.max(Math.abs(o.x - e.x), Math.abs(o.y - e.y)) <= alcance);
   }
 
-  private regiaoAtual(): RegiaoDoMundo | null {
+  protected regiaoAtual(e?: { x: number; y: number }): RegiaoDoMundo | null {
     if (this.lugar.tipo === 'regiao') return this.lugar.regiao;
+    if (this.lugar.tipo === 'mundo') return e ? this.regiaoDe(e) : null;
     const id = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.id : this.lugar.covil.id;
     return estruturaDoDestino(this.reino, id)?.regiao ?? null;
   }
 
-  custoDoPortal(alvo: RegiaoDoMundo): number {
-    const aqui = this.regiaoAtual();
+  custoDoPortal(alvo: RegiaoDoMundo, e?: { x: number; y: number }): number {
+    const aqui = this.regiaoAtual(e);
     const distancia = aqui ? Math.max(Math.abs(aqui.gx - alvo.gx), Math.abs(aqui.gy - alvo.gy)) : 1;
     const regras = this.ctx.balance.mundo.portal;
     return regras.ouroBase + regras.ouroPorRegiao * distancia;
   }
 
-  private sessaoDaEntidade(id: EntidadeId): Sessao | undefined {
+  protected sessaoDaEntidade(id: EntidadeId): Sessao | undefined {
     return [...this.sessoes.values()].find((s) => s.entidadeId === id);
   }
 
@@ -441,8 +466,7 @@ export class SalaMundo extends SalaArena {
       else if (ev.t === 'morreu' && this.danoNoChefe.has(ev.id)) this.lootDoCovil(ev.id);
       if (ev.t === 'morreu') this.aoMorrer(ev.id, ev.porId);
     }
-    // Marco 44 (15/11/2026, D-178): a fogueira de acampamento acesa vai para a ficha do dono (mundo/acampamento-sala.ts).
-    if (this.lugar.tipo === 'regiao') registrarAcampamentos(this.eventosDoTick, this.lugar.regiao.id, (d) => [...this.presencas].find(([id]) => { const x = buscarEntidade(this.estado, id); return x && chaveDoDono(x) === d; })?.[1].ficha, this.opcoesMundo.agora(), this.estado.tick, this.ctx);
+    this.registrarAcampamentosDoTick(); // Marco 44 (15/11/2026, D-178): a fogueira acesa vai para a ficha do dono
   }
 
   private atenderPedido(entidadeId: EntidadeId, tipo: string, ref: string): void {
@@ -450,7 +474,7 @@ export class SalaMundo extends SalaArena {
     const p = this.presencas.get(entidadeId);
     const e = buscarEntidade(this.estado, entidadeId);
     if (!s || !p || !e) return;
-    const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
+    const regiao = this.regiaoDe(e);
     if (tipo === 'pedra_save' && regiao) {
       p.ficha.vilaSalva = regiao.id;
       this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
@@ -458,7 +482,7 @@ export class SalaMundo extends SalaArena {
     } else if (tipo === 'pedra_portal') {
       const destinos: DestinoDePortal[] = this.reino.regioes
         .filter((r) => r.vila && r.id !== regiao?.id && (p.ficha.descobertas.includes(`regiao:${r.id}`) || capitalDoAtlas(this.reino,r.id)))
-        .map((r) => ({ regiao: r.id, nome: `${territorioDoLugar(this.reino,r.id).nome} · ${r.vila?.nome ?? r.nome}`, custo: this.custoDoPortal(r) }));
+        .map((r) => ({ regiao: r.id, nome: `${territorioDoLugar(this.reino,r.id).nome} · ${r.vila?.nome ?? r.nome}`, custo: this.custoDoPortal(r, e) }));
       const temPergaminho = e.bolsa?.mochila.some((m) => m.itemId === PERGAMINHO_RETORNO) ?? false;
       this.avisar(s, { tipo: 'portais', destinos, livreEm: p.ficha.portalLivreEm, temPergaminho });
     } else if (tipo === 'porta_estrutura' && regiao) {
@@ -515,7 +539,7 @@ export class SalaMundo extends SalaArena {
   /** Na saída aberta do interior, volta à frente da porta da estrutura (e a masmorra concluída entrega a recompensa). */
   private conferirSaidaDoInterior(s: Sessao, e: Entidade, p: Presenca): void {
     // 08/11/2026 (D-138): só com o E na saída (a espera completa vem de `usarPortal`).
-    if (this.lugar.tipo === 'regiao' || tipoEm(this.ctx.fase, e.x, e.y) !== 'saida' || !naSaidaAberta(this.estado, this.ctx, e) || !esperouNaPorta(this.estado, this.ctx, e)) return;
+    if (this.lugar.tipo === 'regiao' || this.lugar.tipo === 'mundo' || tipoEm(this.ctx.fase, e.x, e.y) !== 'saida' || !naSaidaAberta(this.estado, this.ctx, e) || !esperouNaPorta(this.estado, this.ctx, e)) return;
     const id = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.id : this.lugar.covil.id;
     const porta = estruturaDoDestino(this.reino, id);
     if (!porta) return;
@@ -667,22 +691,14 @@ export class SalaMundo extends SalaArena {
   private balcao(s: Sessao, e: Entidade, p: Presenca): Balcao | null {
     const bolsa = e.bolsa;
     if (!bolsa) return null;
-    const vila = this.lugar.tipo === 'regiao' && this.lugar.regiao.vila ? this.lugar.regiao.id : null;
+    const rz = this.regiaoDe(e);
+    const vila = rz?.vila ? rz.id : null;
     const fonte = fonteDeMissoesPerto(this.estado, e, this.ctx.balance.economia.alcanceInteracao, vila);
-    const andarilho = fonte?.andarilho && this.lugar.tipo === 'regiao' ? this.lugar.regiao.andarilhos?.find((a) => a.id === fonte.andarilho) : undefined;
+    const andarilho = fonte?.andarilho ? rz?.andarilhos?.find((a) => a.id === fonte.andarilho) : undefined;
     return {
-      ctx: this.ctx,
-      reino: this.reino,
-      e,
-      bolsa,
-      ficha: p.ficha,
-      vila,
-      fonte: fonte?.fonte ?? null,
+      ctx: this.ctx, reino: this.reino, e, bolsa, ficha: p.ficha, vila, fonte: fonte?.fonte ?? null,
       ...(andarilho ? { falante: { nome: andarilho.nome, fala: andarilho.fala } } : {}),
-      agora: this.opcoesMundo.agora(),
-      perto: (papel) => this.pertoDoNpc(e, papel),
-      avisar: (a) => { this.avisar(s, a); },
-      dar: (itemId) => { this.dar(e, itemId); },
+      agora: this.opcoesMundo.agora(), perto: (papel) => this.pertoDoNpc(e, papel), avisar: (a) => { this.avisar(s, a); }, dar: (itemId) => { this.dar(e, itemId); },
       // Fora do tick: os eventos de nível não vão ao cliente (o estado leva o nível novo).
       darXp: (xp) => { concederXpDeProgressao(e, this.ctx, xp, this.estado.tick, []); },
     };
@@ -695,35 +711,16 @@ export class SalaMundo extends SalaArena {
   }
 
   private participante(s: Sessao, e: Entidade, p: Presenca): Participante {
-    return {
-      sessaoId: s.sessaoId,
-      e,
-      identidade: p.identidade,
-      avisar: (a) => {
-        this.avisar(s, a);
-      },
-    };
+    return { sessaoId: s.sessaoId, e, identidade: p.identidade, avisar: (a) => { this.avisar(s, a); } };
   }
 
   private participantes(): Participante[] {
-    const lista: Participante[] = [];
-    for (const s of this.sessoes.values()) {
-      const e = buscarEntidade(this.estado, s.entidadeId);
-      const p = this.presencas.get(s.entidadeId);
-      if (e && p) lista.push(this.participante(s, e, p));
-    }
-    return lista;
+    return [...this.sessoes.values()].flatMap((s) => { const e = buscarEntidade(this.estado, s.entidadeId); const p = this.presencas.get(s.entidadeId); return e && p ? [this.participante(s, e, p)] : []; });
   }
 
   private social(p: Presenca | null = null, e: Entidade | null = null): SalaSocial {
-    return {
-      ctx: this.ctx,
-      agora: this.opcoesMundo.agora(),
-      participantes: () => this.participantes(),
-      pedirAoServidor: (acao) => {
-        if (p && e) this.pedirSocial(p, e, acao);
-      },
-    };
+    // Marco 54 (D-207): o chat da região é de quem está na mesma zona (`mesmaRegiao`).
+    return { ctx: this.ctx, agora: this.opcoesMundo.agora(), participantes: () => this.participantes(), mesmaRegiao: (a, b) => this.regiaoDe(a)?.id === this.regiaoDe(b)?.id, pedirAoServidor: (acao) => { if (p && e) this.pedirSocial(p, e, acao); } };
   }
 
   private pedirSocial(p: Presenca, e: Entidade, acao: AcaoSocial): void {
@@ -763,7 +760,7 @@ export class SalaMundo extends SalaArena {
     const matador = porId ? buscarEntidade(this.estado, porId) : undefined;
     const dono = matador?.invocacao ? buscarEntidade(this.estado, matador.invocacao.donoId) : matador;
     if (!preset || !dono?.bolsa) return;
-    const fato: FatoDeMissao = { tipo: 'abate', preset, regiao: this.regiaoAtual()?.id ?? null };
+    const fato: FatoDeMissao = { tipo: 'abate', preset, regiao: this.regiaoAtual(dono)?.id ?? null };
     const raio = this.ctx.modo.partilhaXp?.raio ?? 0;
     for (const s of this.sessoes.values()) {
       const e = buscarEntidade(this.estado, s.entidadeId);

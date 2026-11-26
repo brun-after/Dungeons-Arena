@@ -15,7 +15,7 @@ import { montarAtlas, paraOAtlas, type AreaNoAtlas, type Atlas } from './atlas';
 import { gerarRegiaoNoAtlas } from './atlas-fase';
 import { comMateriais, type LugarMontado } from './lugares';
 import { objetosDoExterior } from './objetos-mundo';
-import { territorioDoLugar, type MaterialDeInimigo, type Reino } from './reino';
+import { territorioDoLugar, type MaterialDeInimigo, type Reino, type RegiaoDoMundo } from './reino';
 import { mapaDeZonas, type MapaDeZonas } from './zonas';
 
 export const ID_DO_MUNDO = 'mundo_atlas';
@@ -23,6 +23,19 @@ export const ID_DO_MUNDO = 'mundo_atlas';
 export interface MundoMontado extends LugarMontado {
   atlas: Atlas;
   zonas: MapaDeZonas;
+  /** As regiões com vila, estruturas e matas em coordenadas do atlas (as regras por zona leem estas). */
+  regioesNoAtlas: ReadonlyMap<string, RegiaoDoMundo>;
+  regiaoDoAtlas: RegiaoDoMundo;
+}
+
+/** A região com o que ela tem de posição (vila, estruturas, matas) levado ao atlas. */
+export function regiaoNoAtlas(r: RegiaoDoMundo, a: AreaNoAtlas): RegiaoDoMundo {
+  return {
+    ...r,
+    vila: r.vila && { ...r.vila, ...paraOAtlas(a, r.vila.x, r.vila.y) },
+    estruturas: r.estruturas.map((e) => ({ ...e, ...paraOAtlas(a, e.x, e.y) })),
+    ...(r.matas && { matas: r.matas.map((m) => ({ ...m, ...paraOAtlas(a, m.x, m.y) })) }),
+  };
 }
 
 const mover = <T extends { x: number; y: number }>(o: T, a: AreaNoAtlas): T => ({ ...o, x: o.x + a.x, y: o.y + a.y });
@@ -152,5 +165,14 @@ export function* etapasDoMundoContinuo(conteudo: Conteudo, reino: Reino, modoBas
     pecas: fase.cenario ?? [],
     ninhos: fase.ninhos ?? [],
   };
-  return { ctx, estado, exterior, atlas, zonas: mapaDeZonas(reino, atlas) };
+  const regioesNoAtlas = new Map<string, RegiaoDoMundo>();
+  for (const r of reino.regioes) {
+    const a = atlas.areas.get(r.id);
+    if (a) regioesNoAtlas.set(r.id, regiaoNoAtlas(r, a));
+  }
+  const inicio = regioesNoAtlas.get(reino.inicio) ?? [...regioesNoAtlas.values()][0];
+  if (!inicio) throw new Error('atlas sem regiões');
+  // As estruturas de todas as regiões numa só (as escoltas e as escondidas procuram por id e posição).
+  const regiaoDoAtlas: RegiaoDoMundo = { ...inicio, estruturas: [...regioesNoAtlas.values()].flatMap((r) => r.estruturas) };
+  return { ctx, estado, exterior, atlas, zonas: mapaDeZonas(reino, atlas), regioesNoAtlas, regiaoDoAtlas };
 }
