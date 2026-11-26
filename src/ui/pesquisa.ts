@@ -12,6 +12,7 @@ import { VERSAO_RELATORIO, type RelatorioPesquisa } from '../pesquisa/relatorio'
 import { enderecoDoServidor, enderecoHttp } from '../plataforma/servidor';
 import { abrirQuestionario } from './questionario';
 import { pontosAteONivel } from '../progression/nivel';
+import { ENDERECO_DO_MENU } from './menu';
 
 /** Eventos que o coletor usa. */
 const EVENTOS = ['acaoIniciada', 'impacto', 'iaNotou', 'morreu', 'coletou', 'equipou', 'subiuNivel'] as const;
@@ -73,7 +74,7 @@ export function criarPesquisa(o: { ctx: ContextoSimulacao; estado: () => EstadoJ
           respostas,
         }),
       aoConcluir: () => {
-        location.href = './';
+        location.href = ENDERECO_DO_MENU;
       },
     });
   });

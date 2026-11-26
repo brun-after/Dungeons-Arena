@@ -13,7 +13,8 @@ export interface Dialogo {
 /** `aoFecharPeloJogador`: o jogador fechou pelo X ou pelo Esc (09/11/2026, D-144: a troca avisa o servidor). */
 export function dialogo(titulo: string, aoFecharPeloJogador?: () => void): Dialogo {
   const el = document.createElement('dialog');
-  el.className = 'modal';
+  el.className = 'modal modal-mundo'; // D-205: madeira e latão (tema-mundo.css)
+  el.setAttribute('aria-label', titulo);
   const topo = document.createElement('div');
   topo.className = 'modal-topo';
   const h = document.createElement('h2');

@@ -4,6 +4,7 @@ import type { Conteudo } from '../core/conteudo';
 import { t } from '../i18n';
 import { painelPersonagem } from './retrato-personagem';
 import { svgDaRuna } from './runa-dom';
+import { ENDERECO_DO_MENU } from './menu';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -20,7 +21,7 @@ export function mostrarEscolhaDeClasse(raiz: HTMLElement, conteudo: Conteudo, ba
   const titulo = el('h1', undefined, t('escolhaClasse.titulo'));
   titulo.id = 'titulo-escolha-classe';
   const voltar = el('a', 'link-menu voltar-selecao', t('menu.voltar'));
-  voltar.href = './';
+  voltar.href = ENDERECO_DO_MENU;
   tela.append(voltar, titulo, el('p', 'aviso-classe', t('escolhaClasse.aviso')));
   const faixa = el('div', 'colunas-classe');
   for (const c of conteudo.classes.values()) {

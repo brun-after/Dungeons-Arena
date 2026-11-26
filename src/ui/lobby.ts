@@ -10,6 +10,7 @@ import { faixaDoNivel } from '../modos/regras';
 import { listarSlots } from '../plataforma/saves';
 import { enderecoHttp } from '../plataforma/servidor';
 import type { PedidoDeSala } from '../plataforma/transporte-colyseus';
+import { ENDERECO_DO_MENU } from './menu';
 
 export interface OpcoesLobby {
   raiz: HTMLElement;
@@ -76,7 +77,7 @@ export function mostrarLobby(o: OpcoesLobby): void {
   tela.append(titulo, status);
 
   const voltar = el('a', 'link-menu', t('menu.voltar'));
-  voltar.href = './';
+  voltar.href = ENDERECO_DO_MENU;
 
   if (!o.servidor) {
     status.textContent = t('lobby.semServidor');

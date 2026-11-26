@@ -46,6 +46,7 @@ import { vigiaDaPassagem } from './ui/passagem-mundo';
 import type { CenaDoMundo } from './ui/cena-mundo';
 import { recorteDaVizinha } from './world/recorte-vizinha';
 import { temaDaFase } from './combat/clima';
+import { ENDERECO_DO_MENU } from './ui/menu';
 
 // 09/11/2026 (D-144): 20 s (a sala nova pode estar nascendo: gerar a região leva tempo no servidor).
 const ESPERA_ENTRADA_MS = 20_000;
@@ -96,7 +97,7 @@ function botao(texto: string, fazer: () => void, classe = 'botao-menu'): HTMLBut
 function voltarAoMenu(): HTMLAnchorElement {
   const a = document.createElement('a');
   a.className = 'link-menu';
-  a.href = './';
+  a.href = ENDERECO_DO_MENU;
   a.textContent = t('mundo.voltar');
   return a;
 }

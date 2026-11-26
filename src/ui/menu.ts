@@ -1,8 +1,11 @@
 // Menu inicial (§2.15): campanha, arena online e treino de arena (loopback). Links simples, para
 // funcionar com teclado, toque e leitores de tela, e para cada modo ter um endereço próprio.
+// 25/11/2026 (D-205): o menu da cidadela (entrega visual da VPS): a arte do portão ao fundo e cada modo num cartão de
+// madeira com ícone e uma linha do que é. Na web ele fica em `?jogar=1` (a raiz é a landing); no app, na raiz.
 
-import { t } from '../i18n';
-import { criarFundoMenu } from './fundo-menu';
+import capa from '../assets/dungeons-portao.webp';
+import { t, type ChaveTexto } from '../i18n';
+import { icone } from './icones';
 import { criarCampoServidor } from './servidor-menu';
 import { baixarAtualizacao, procurarAtualizacao, versaoDoApp, type VersaoPublicada } from '../plataforma/atualizacao';
 import { ehAppNativo } from '../plataforma/nativo';
@@ -28,10 +31,14 @@ function criarAvisoDeAtualizacao(nova: VersaoPublicada): HTMLElement {
   return aviso;
 }
 
+/** Onde fica o menu (a raiz da web é a landing, D-205); os "Voltar ao menu" levam aqui. */
+export const ENDERECO_DO_MENU = './?jogar=1';
+
 export function mostrarMenu(raiz: HTMLElement): void {
   raiz.textContent = '';
   const tela = document.createElement('section');
-  tela.className = 'tela-menu';
+  tela.className = 'tela-menu menu-cidadela';
+  tela.style.setProperty('--capa-menu', `url("${capa}")`);
   tela.setAttribute('aria-labelledby', 'titulo-menu');
   const titulo = document.createElement('h1');
   titulo.id = 'titulo-menu';
@@ -39,24 +46,33 @@ export function mostrarMenu(raiz: HTMLElement): void {
   const subtitulo = document.createElement('p');
   subtitulo.className = 'subtitulo-menu';
   subtitulo.textContent = t('menu.subtitulo');
-  // Marco 12: plano de fundo procedural (masmorra com tochas).
-  tela.append(criarFundoMenu(), titulo, subtitulo);
+  tela.append(titulo, subtitulo);
 
-  const opcoes: [string, string][] = [
-    ['./?jogo=campanha', t('menu.campanha')],
+  // [endereço, nome, a linha do que é, ícone]
+  const opcoes: [string, ChaveTexto, ChaveTexto, string][] = [
+    ['./?jogo=campanha', 'menu.campanha', 'menu.descricao.campanha', 'livro'],
     // Marco 29 (D-128): o Mundo aberto.
-    ['./?jogo=mundo', t('menu.mundo')],
-    ['./?arena=online', t('menu.arenaOnline')],
-    ['./?arena=loopback', t('menu.treino')],
-    ['./?editor', t('menu.editor')],
+    ['./?jogo=mundo', 'menu.mundo', 'menu.descricao.mundo', 'mapa'],
+    ['./?arena=online', 'menu.arenaOnline', 'menu.descricao.arena', 'espada'],
+    ['./?arena=loopback', 'menu.treino', 'menu.descricao.treino', 'alvo'],
+    ['./?editor', 'menu.editor', 'menu.descricao.editor', 'martelo'],
   ];
-  for (const [href, rotulo] of opcoes) {
+  const grade = document.createElement('nav');
+  grade.className = 'opcoes-cidadela';
+  grade.setAttribute('aria-label', t('menu.modos'));
+  for (const [href, rotulo, descricao, simbolo] of opcoes) {
     const a = document.createElement('a');
     a.className = 'botao-menu';
     a.href = href;
-    a.textContent = rotulo;
-    tela.append(a);
+    a.setAttribute('aria-label', t(rotulo));
+    const nome = document.createElement('strong');
+    nome.textContent = t(rotulo);
+    const detalhe = document.createElement('small');
+    detalhe.textContent = t(descricao);
+    a.append(icone(simbolo), nome, detalhe);
+    grade.append(a);
   }
+  tela.append(grade);
   // Marco 7A: entrada discreta para quem foi convidado a testar.
   const pesquisa = document.createElement('a');
   pesquisa.className = 'link-menu';

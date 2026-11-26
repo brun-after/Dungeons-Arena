@@ -1,0 +1,226 @@
+/* 25/11/2026 (D-205): madeira escura, latão e pergaminho no HUD e nos painéis do Mundo (avisos, diálogos, mapa,
+   minimapa e menu), portados da entrega visual da VPS. */
+:root {
+  --arena-tinta: #352014;
+  --arena-papel: #f0dbaf;
+  --arena-ouro: #c39356;
+  --arena-metal: #65462b;
+  --arena-madeira: #211612;
+  --arena-borda: #94663c;
+}
+
+:is(.aviso, .faixa-lugar) {
+  position: relative;
+  box-sizing: border-box;
+  max-width: min(92vw, 36rem);
+  padding: .65rem 1.25rem;
+  color: var(--arena-tinta);
+  font: 700 .92rem/1.3 var(--fonte-titulo);
+  background:
+    repeating-linear-gradient(12deg, #8d582009 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 50% 30%, #f9e7bf, #debb83 73%, #b8814c);
+  border: 1px solid #80532e;
+  border-radius: 2px;
+  box-shadow: inset 0 0 8px #824a39a0, 0 5px 14px #150b09a6;
+}
+
+:is(.aviso, .faixa-lugar)::before,
+:is(.aviso, .faixa-lugar)::after {
+  content: '';
+  position: absolute;
+  inset-block: -2px;
+  width: 5px;
+  border: 1px solid #55301a;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #6b3e24, #e0b071 50%, #8c5b32);
+}
+
+:is(.aviso, .faixa-lugar)::before { left: -3px; }
+:is(.aviso, .faixa-lugar)::after { right: -3px; }
+.aviso { animation: abrir-aviso-arena 220ms ease-out both; }
+.faixa-lugar {
+  position: absolute;
+  top: calc(108px + var(--seguro-topo));
+  opacity: 0;
+  pointer-events: none;
+}
+.faixa-lugar strong { color: #442517; font-size: 1.16rem; }
+.faixa-lugar[data-pvp='1'] { background: radial-gradient(ellipse, #f7dbb2 30%, #d78e6c); border-color: #7d3729; }
+@keyframes abrir-aviso-arena {
+  from { opacity: 0; clip-path: inset(-20% 39%); }
+  to { opacity: 1; clip-path: inset(-20% -6%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aviso { animation: none; }
+}
+body.movimento-reduzido .aviso { animation: none; }
+body.toque .mensagens-topo .aviso { padding: .38rem .6rem; font-size: .78rem; }
+
+dialog.modal:is(.modal-mundo, .pausa, .configuracoes, .mochila) {
+  --borda: #826041;
+  --destaque: #ffe0a5;
+  --texto: #f1e0cb;
+  color: #f1e0cb;
+  background: radial-gradient(ellipse at top, #39261d, #211613 68%);
+  border: 1px solid #9d6e44;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 3px #251812, inset 0 0 0 4px #604227, 0 24px 84px #090503d9;
+}
+
+dialog.modal:is(.modal-mundo, .pausa, .configuracoes, .mochila) .modal-topo {
+  padding: .75rem clamp(.8rem, 3vw, 1.45rem);
+  border-bottom: 1px solid #865d38;
+  background: linear-gradient(115deg, #3d2719, #291a15);
+}
+
+dialog.modal:is(.modal-mundo, .pausa, .configuracoes, .mochila) .modal-topo h2 {
+  margin: 0;
+  color: #f7d9a0;
+  font: 700 clamp(1.14rem, 2.5vw, 1.6rem)/1.15 var(--fonte-titulo);
+  letter-spacing: .015em;
+}
+
+dialog.modal:is(.modal-mundo, .pausa, .configuracoes) .modal-corpo { padding: .85rem clamp(.8rem, 3vw, 1.45rem); }
+dialog.modal.modal-mundo::backdrop { background: #0e0806ab; backdrop-filter: none; }
+
+:is(.modal-mundo, .pausa, .configuracoes, .mochila, .camada-mundo) :is(.botao-cabecalho, .botao-menu, .marcar-lugar) {
+  color: #f4d7a8;
+  background: linear-gradient(#482f20, #2c1d17);
+  border-color: #9b6c41;
+  border-radius: 4px;
+}
+
+:is(.modal-mundo, .pausa, .configuracoes, .mochila, .camada-mundo) :is(.botao-cabecalho, .botao-menu, .marcar-lugar):not(:disabled):is(:hover, :focus-visible, [aria-pressed='true']) {
+  color: #fff0d1;
+  background: linear-gradient(#744925, #4b2d1c);
+  border-color: #d3a061;
+}
+
+dialog.modal.aviso-pergaminho {
+  width: min(29rem, calc(100% - 1.5rem));
+  max-width: 29rem;
+}
+.aviso-pergaminho .modal-corpo { background: radial-gradient(ellipse, #f7e5bf, #ddbb88); }
+.aviso-pergaminho .modal-corpo .vazio-modal { margin: .25rem 0; color: var(--arena-tinta); font: 1.04rem/1.55 var(--fonte-titulo); }
+
+dialog.modal.mapa-expandido {
+  width: min(96vw, 1170px);
+  max-width: 1170px;
+}
+dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
+.localizacao-cartografia { margin: 0; color: #f0d0a0; font-size: .9rem; }
+.abas-cartografia { margin: 0; padding-bottom: .45rem; border-bottom: 1px solid #65462e; }
+.prancha-cartografia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(10rem, 14rem); gap: .75rem; }
+.prancha-cartografia:not(:has(.indice-cartografia)) { grid-template-columns: minmax(0, 1fr); }
+.mapa-expandido .janela-cartografia {
+  align-self: start;
+  max-height: max(150px, calc(100dvh - 244px));
+  background: #bd9a6b;
+  border: 1px solid #ad8756;
+  border-radius: 3px;
+}
+.mapa-expandido .janela-cartografia .mapa-terreno {
+  width: calc(min(100%, max(150px, 100dvh - 247px) * 1.923) * var(--zoom-mapa, 1));
+}
+.mapa-expandido .zoom-cartografia { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: .35rem; margin: 0 0 .55rem; }
+.mapa-expandido .zoom-cartografia button { min-height: 36px; }
+.chaves-cartografia {
+  display: flex;
+  flex: 1 1 23rem;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem .8rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: #f0d8b6;
+  font-size: .78rem;
+}
+.chaves-cartografia li { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
+.chaves-cartografia li::before { content: '◆'; color: #edb85d; }
+.chaves-cartografia [data-simbolo='eu']::before { content: '●'; color: #fff6df; }
+.chaves-cartografia [data-simbolo='chefe']::before { color: #f59078; }
+.chaves-cartografia [data-simbolo='saida']::before { color: #a9d499; }
+.chaves-cartografia [data-simbolo='portao']::before { content: '∩'; font-weight: 900; }
+.chaves-cartografia [data-simbolo='ponto']::before { content: '★'; }
+
+.indice-cartografia {
+  max-height: max(175px, calc(100dvh - 240px));
+  overflow: auto;
+  border: 1px solid #795435;
+  border-radius: 4px;
+  background: #2d1d15;
+  color: #eed7ad;
+  scrollbar-color: #956840 #2f1e17;
+}
+.indice-cartografia details + details { border-top: 1px solid #684528; }
+.mapa-expandido .indice-cartografia summary {
+  padding: .55rem .65rem;
+  color: #f4d095;
+  font: 700 .91rem/1.25 var(--fonte-titulo);
+  background: #3b281d;
+}
+.indice-cartografia button {
+  display: block;
+  width: 100%;
+  min-height: 31px;
+  padding: .3rem .65rem;
+  border: 0;
+  border-top: 1px solid #48301e;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: .78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.indice-cartografia button:is(:hover, :focus-visible) { background: #53341f; color: #fff0cb; }
+.indice-cartografia button::before { content: '◆'; color: #d9a459; font-size: .67rem; margin-right: .4rem; }
+.indice-cartografia [data-marco='saida']::before { color: #a9d499; }
+.indice-cartografia [data-marco='chefe']::before { color: #f59078; }
+.mapa-expandido .ajuda-mapa summary { padding: .55rem 0 .2rem; }
+.mapa-expandido .regiao-mapa { border-color: #7d5638; background: #38251a; color: #ebd5b1; }
+.mapa-expandido .regiao-mapa > span { color: #f0d7b1; }
+.mapa-expandido .atlas-reino { background: radial-gradient(ellipse, #654930, #302015 77%); }
+.mapa-expandido .atlas-reino [data-perigo='desconhecido'] polygon { fill: #443229; stroke: #755739; }
+body .minimapa.minimapa-mundo {
+  background: radial-gradient(ellipse, #35261bbf, #1c120dd9);
+  border: 1px solid #9d7345;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px #110a07a6;
+}
+@media (max-width: 720px) {
+  .prancha-cartografia { grid-template-columns: minmax(0, 1fr); }
+  .indice-cartografia { max-height: 10rem; }
+  .chaves-cartografia { flex-basis: 100%; }
+  .mapa-expandido[data-zoom='1'] .indice-cartografia { display: none; }
+}
+@media (max-height: 500px) {
+  .mapa-expandido .modal-corpo { padding-block: .5rem; }
+  .mapa-expandido .janela-cartografia .mapa-terreno {
+    width: calc(min(100%, max(150px, 100dvh - 195px) * 1.923) * var(--zoom-mapa, 1));
+  }
+}
+
+.menu-cidadela .opcoes-cidadela .botao-menu {
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: center;
+  column-gap: .72rem;
+  min-height: 4.7rem;
+  padding: .6rem .9rem;
+  background: linear-gradient(145deg, #482f20f5, #241711f5);
+  box-shadow: inset 0 0 0 2px #291a13, 0 5px 15px #0c070583;
+}
+.menu-cidadela .opcoes-cidadela .botao-menu:is(:hover, :focus-visible) { background: linear-gradient(145deg, #654225, #2e1c14); }
+.opcoes-cidadela .botao-menu > .icone {
+  grid-row: 1 / 3;
+  width: 1.7rem;
+  height: 1.7rem;
+  justify-self: center;
+  color: #dba966;
+}
+.opcoes-cidadela .botao-menu strong { font: 700 1.14rem/1.2 var(--fonte-titulo); }
+.opcoes-cidadela .botao-menu small { grid-column: 2; }
+@media (max-width: 450px) {
+  .menu-cidadela .opcoes-cidadela { grid-template-columns: 1fr; }
+}
