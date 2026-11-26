@@ -55,7 +55,7 @@ export function modoDaRegiao(modo: ModoDeJogo, perigo: RegrasDePerigo): ModoDeJo
  * Marco 30 (D-129): o modo em todo lugar do reino leva os materiais que os monstros deixam. Marco 38 (08/11/2026,
  * D-142): os do atlas (os troféus dos chefes valem em todo reino) somados aos do reino do lugar.
  */
-function comMateriais(modo: ModoDeJogo, reino: Reino, lugarId: string): ModoDeJogo {
+export function comMateriais(modo: ModoDeJogo, reino: Reino, lugarId: string): ModoDeJogo {
   const proprio = territorioDoLugar(reino, lugarId).materiais;
   const materiais: Record<string, MaterialDeInimigo[]> = {};
   for (const fonte of proprio === reino.materiais ? [reino.materiais] : [reino.materiais, proprio]) {

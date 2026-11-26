@@ -3,6 +3,7 @@
 
 import type { Celula } from '../core/comandos';
 import type { Recorte } from './costura';
+import { celulaNormalizada } from './fase';
 import type { ExteriorGerado, PontoDoExterior } from './gerador-exterior';
 
 function mover<T extends { x: number; y: number }>(o: T, dx: number, dy: number): T {
@@ -32,7 +33,13 @@ export function recortarExterior(ex: ExteriorGerado, n: number, r: Recorte): Ext
       mapa: f.mapa.slice(r.y, r.y + r.altura).map((linha) => linha.slice(r.x, r.x + r.largura)),
       spawns: f.spawns.filter(dentro).map((s) => mover(s, dx, dy)),
       ...(f.inimigos && { inimigos: f.inimigos.filter(dentro).map((i) => mover(i, dx, dy)) }),
-      ...(f.objetos && { objetos: f.objetos.filter(dentro).map((o) => mover(o, dx, dy)) }),
+      // Os objetos do json ficam em fração do mapa (0 a 1, `celulaNormalizada`): de célula do quadrado à do recorte.
+      ...(f.objetos && {
+        objetos: f.objetos
+          .map((o) => ({ o, c: { x: celulaNormalizada(o.x, n), y: celulaNormalizada(o.y, n) } }))
+          .filter(({ c }) => dentro(c))
+          .map(({ o, c }) => ({ ...o, x: (c.x + dx + 0.5) / r.largura, y: (c.y + dy + 0.5) / r.altura })),
+      }),
       ...(f.ambientes && { ambientes: f.ambientes.filter(dentro).map((a) => mover(a, dx, dy)) }),
       ...(f.telhados && { telhados: f.telhados.filter(dentro).map((t) => mover(t, dx, dy)) }),
     },

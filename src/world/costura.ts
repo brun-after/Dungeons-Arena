@@ -120,3 +120,11 @@ export function fixarCostura(alturas: Uint8Array, n: number, r: Recorte, abertos
     }
   }
 }
+
+/** O limite das zonas não é a reta da borda: ele ondula até este tanto para cada lado (mundo/zonas.ts). */
+export const DESVIO_DA_ZONA = 8;
+
+/** Quanto o limite das zonas sai da borda na posição `t` (negativo: para o lado de `a`; positivo: para o de `b`). */
+export function desvioDaZona(par: string, t: number): number {
+  return Math.round((ruido1(t, 22, hashTexto(`zona:${par}`)) * 2 - 1) * DESVIO_DA_ZONA);
+}
