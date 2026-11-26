@@ -17,7 +17,7 @@ import { prepararSequencia, participaDeCombo } from './sequencias';
 import { atributosDeFormula, multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
 import { estilosNaFonte, poderBase } from './poder-base';
 import { efeitosDeEstiloDe } from '../progression/estilos';
-import { registrarUsoDaSkill } from '../progression/vinculo';
+import { registrarUso } from '../progression/vinculo';
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -576,9 +576,8 @@ function lancar(
   }
   if (!daFase) {
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
-    // Marco 39 (D-150): usar a skill alimenta o vínculo com o elemento dela (o básico não conta). D-206: a fusão, com
-    // todos os elementos dela.
-    if (ator.bolsa && !ehBasico(ator, hab.id)) registrarUsoDaSkill(ctx, ator.bolsa, hab, estado.tick);
+    // Marco 39 (D-150): usar a skill alimenta o vínculo com o elemento dela (o básico não conta).
+    if (ator.bolsa && !ehBasico(ator, hab.id)) registrarUso(ctx, ator.bolsa, hab.elemento, estado.tick);
     // Marco 46 (D-189): as botas que aceleram ao usar o elemento (o básico não conta, como no vínculo).
     if (ator.bolsa && !ehBasico(ator, hab.id)) aoUsarHabilidadeDasPecas(estado, ctx, ator, hab, saida);
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.

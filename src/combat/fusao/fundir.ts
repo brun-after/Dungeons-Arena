@@ -180,9 +180,6 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
   const raro = receita.raridade ?? 3;
   const mRaro = 1 + bonusDaRaridade(r, raro) / 100;
   const comRaridade = mRaro === 1 ? finais : finais.map((e) => ({ ...e, valor: e.valor > 0 ? Math.max(1, Math.round(e.valor * mRaro)) : 0 }));
-  // D-206 (26/11/2026): todos os elementos da mistura, na ordem da receita (o vínculo e o visual da mescla).
-  const elementosFusao: ('fisico' | Elemento)[] = [];
-  for (const el of [...defs.map((d) => d.base.elemento ?? 'fisico'), ...receita.runas]) if (!elementosFusao.includes(el)) elementosFusao.push(el);
   const saltosBase = desenho.saltos ?? nucleo.saltos;
   const saltosExtra = (material?.saltos ?? 0) + (m.assinatura?.saltos ?? 0);
   const base: Habilidade = {
@@ -211,7 +208,6 @@ export function definicaoDaFusao(ctx: Ctx, id: string, resolver: Resolver): Defi
     grau: receita.partes.length === 3 ? 'S' : grauMaior(defs.map((d) => d.base.grau)),
     ...(entrega ? { entrega } : {}),
     ...(raro !== 3 && { raridadeFusao: raro }),
-    elementosFusao,
   };
   if (!entrega) delete base.entrega;
   base.nome = `${nomeDa(ctx, m, nucleo, entrega)}${raro === 3 ? '' : (ctx.conteudo.alquimia.nomes.raridade[String(raro)] ?? '')}`;
