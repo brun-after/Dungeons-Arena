@@ -28,7 +28,10 @@ function caminho(forma: MultiPolygon): opentype.Path {
   for (const poli of forma) poli.forEach((anel, i) => {
     const externo = i === 0;
     const pts = (area(anel) > 0) === externo ? anel : [...anel].reverse();
-    pts.slice(0, -1).forEach(([x, y], j) => (j ? path.lineTo(Math.round(x), Math.round(y)) : path.moveTo(Math.round(x), Math.round(y))));
+    pts.slice(0, -1).forEach(([x, y], j) => {
+      if (j) path.lineTo(Math.round(x), Math.round(y));
+      else path.moveTo(Math.round(x), Math.round(y));
+    });
     path.close();
   });
   return path;

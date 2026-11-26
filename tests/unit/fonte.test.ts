@@ -29,7 +29,7 @@ describe('fonte Runas de Filo', () => {
   it('cobre as letras, os acentos e os números dos títulos', () => {
     const f = guardada();
     const texto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzáàâãéêíóôõúüçÁÀÂÃÉÊÍÓÔÕÚÜÇ0123456789 .,:;·-–+×/!?\'()%';
-    const faltam = [...texto].filter((c) => f.charToGlyphIndex(c) === 0);
+    const faltam = Array.from(texto).filter((c) => f.charToGlyphIndex(c) === 0);
     expect(faltam).toEqual([]);
   });
 
