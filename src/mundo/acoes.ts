@@ -35,7 +35,10 @@ export type AcaoDoMundo =
   | { a: 'grupo'; op: 'entrar_codigo'; codigo: string }
   | { a: 'troca'; op: 'propor'; alvo: string }
   | { a: 'troca'; op: 'aceitar'; de: string }
-  | { a: 'troca'; op: 'oferecer'; itens: OfertaDeItem[]; ouro: number }
+  /** D-205: `cobra` é o ouro pedido ao outro lado (a cobrança); manda ouro ou cobra, nunca os dois. */
+  | { a: 'troca'; op: 'oferecer'; itens: OfertaDeItem[]; ouro: number; cobra?: number }
+  /** D-205: o chat de dentro da troca (só o outro lado recebe). */
+  | { a: 'troca'; op: 'falar'; texto: string }
   | { a: 'troca'; op: 'confirmar' | 'cancelar' }
   | { a: 'mercado'; op: 'listar'; pagina: number; busca: string }
   | { a: 'mercado'; op: 'anunciar'; invId: string; qtd: number; preco: number }
@@ -99,8 +102,10 @@ export function lerAcaoDoMundo(v: unknown): AcaoDoMundo | null {
       if (v.op === 'aceitar' && id(v.de)) return { a: 'troca', op: 'aceitar', de: v.de };
       if (v.op === 'oferecer') {
         const itens = lerOferta(v.itens);
-        return itens && inteiro(v.ouro, 0, MAX_OURO) ? { a: 'troca', op: 'oferecer', itens, ouro: v.ouro } : null;
+        const cobra = v.cobra ?? 0;
+        return itens && inteiro(v.ouro, 0, MAX_OURO) && inteiro(cobra, 0, MAX_OURO) ? { a: 'troca', op: 'oferecer', itens, ouro: v.ouro, ...(cobra > 0 && { cobra }) } : null;
       }
+      if (v.op === 'falar' && texto(v.texto)) return { a: 'troca', op: 'falar', texto: v.texto };
       return v.op === 'confirmar' || v.op === 'cancelar' ? { a: 'troca', op: v.op } : null;
     }
     case 'mercado':

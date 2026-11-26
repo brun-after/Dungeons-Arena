@@ -86,8 +86,12 @@ function juntos(sala: SalaSocial, a: EntidadeId, b: EntidadeId): [Entidade, Enti
   return [ea, eb];
 }
 
-export function atenderTroca(sala: SalaSocial, quem: Participante, acao: Extract<AcaoDoMundo, { a: 'troca' }>, trocas: TrocasDaSala): void {
+export function atenderTroca(sala: SalaSocial, quem: Participante, acao: Extract<AcaoDoMundo, { a: 'troca' }>, trocas: TrocasDaSala, limite?: LimiteDoChat): void {
   const eu = quem.e.id;
+  if (acao.op === 'falar') {
+    falarNaTroca(sala, quem, acao.texto, trocas, limite);
+    return;
+  }
   if (acao.op === 'propor') {
     const motivo = juntos(sala, eu, acao.alvo) ? trocas.propor(eu, acao.alvo) : 'longe';
     const t = trocas.de(eu);
@@ -104,7 +108,7 @@ export function atenderTroca(sala: SalaSocial, quem: Participante, acao: Extract
   } else if (acao.op === 'oferecer') {
     const bolsa = quem.e.bolsa;
     const valida = bolsa !== null && acao.ouro <= bolsa.ouro && acao.itens.every((o) => (bolsa.mochila.find((m) => m.invId === o.invId)?.qtd ?? 0) >= o.qtd);
-    const t = valida ? trocas.oferecer(eu, acao.itens, acao.ouro, sala.ctx.balance.mundo.troca.maxItens) : 'troca_invalida';
+    const t = valida ? trocas.oferecer(eu, acao.itens, acao.ouro, sala.ctx.balance.mundo.troca.maxItens, acao.cobra ?? 0) : 'troca_invalida';
     if (typeof t === 'string') recusar(quem, t);
     else avisarTroca(sala, t, 'aberta');
   } else if (acao.op === 'confirmar') {
@@ -129,6 +133,19 @@ export function atenderTroca(sala: SalaSocial, quem: Participante, acao: Extract
   } else {
     cancelarTrocaDe(sala, eu, trocas);
   }
+}
+
+/** D-205: o chat de dentro da troca aberta: vai aos dois lados (quem fala vê a própria fala), com o limite do chat. */
+function falarNaTroca(sala: SalaSocial, quem: Participante, bruto: string, trocas: TrocasDaSala, limite?: LimiteDoChat): void {
+  const t = trocas.de(quem.e.id);
+  const texto = limparTexto(bruto, sala.ctx.balance.mundo.chat.maxTexto);
+  const motivo: MotivoDoMundo | null = !t?.aberta ? 'troca_invalida' : !texto ? 'chat_vazio' : limite && !limite.permitir(quem.identidade, sala.agora) ? 'chat_rapido' : null;
+  if (motivo || !t) {
+    recusar(quem, motivo ?? 'troca_invalida');
+    return;
+  }
+  const aviso: AvisoDoMundo = { tipo: 'chat', canal: 'troca', de: quem.e.nome, texto };
+  for (const p of sala.participantes()) if (p.e.id === t.a.id || p.e.id === t.b.id) p.avisar(aviso);
 }
 
 /** Desfaz a troca de quem pediu, saiu da sala ou morreu (os dois lados ficam sabendo). */

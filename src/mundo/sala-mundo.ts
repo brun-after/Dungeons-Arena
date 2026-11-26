@@ -599,7 +599,7 @@ export class SalaMundo extends SalaArena {
         atenderChat(this.social(p, e), this.participante(s, e, p), acao, this.limiteDoChat);
         break;
       case 'troca':
-        atenderTroca(this.social(p, e), this.participante(s, e, p), acao, this.trocas);
+        atenderTroca(this.social(p, e), this.participante(s, e, p), acao, this.trocas, this.limiteDoChat);
         break;
       case 'grupo':
       case 'denunciar':

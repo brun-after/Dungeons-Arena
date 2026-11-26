@@ -195,6 +195,43 @@ describe('sala do Mundo: social e economia', () => {
     expect(a.ultimo('recusa')).toEqual({ tipo: 'recusa', motivo: 'longe' });
   });
 
+  it('a cobrança da troca, a contraproposta e o chat da troca (D-205)', () => {
+    const s = sala('regiao:vila_do_centro');
+    const a = entrar(s, 'u1', 'Ana');
+    const b = entrar(s, 'u2', 'Bia');
+    const c = entrar(s, 'u3', 'Caio');
+    posicionar(a.e(), 60, 60);
+    posicionar(b.e(), 61, 60);
+    posicionar(c.e(), 60, 61);
+    dar(a.e(), 'minerio_ferro', 1);
+    obter(b.e().bolsa, 'bolsa').ouro = 90;
+    a.acao({ a: 'troca', op: 'propor', alvo: b.bem.entidadeId });
+    b.acao({ a: 'troca', op: 'aceitar', de: a.bem.entidadeId });
+    const ferro = obter(a.e().bolsa?.mochila.find((i) => i.itemId === 'minerio_ferro'), 'ferro');
+    // A Ana cobra 80 pelo minério; mandar ouro e cobrar ao mesmo tempo não vale.
+    a.acao({ a: 'troca', op: 'oferecer', itens: [{ invId: ferro.invId, qtd: 1 }], ouro: 5, cobra: 80 });
+    expect(a.ultimo('recusa')).toEqual({ tipo: 'recusa', motivo: 'troca_invalida' });
+    a.acao({ a: 'troca', op: 'oferecer', itens: [{ invId: ferro.invId, qtd: 1 }], ouro: 0, cobra: 80 });
+    expect(b.ultimo('troca')).toMatchObject({ estado: 'aberta', dele: { cobra: 80, ouro: 0 } });
+    // Sem pagar, ninguém confirma.
+    b.acao({ a: 'troca', op: 'confirmar' });
+    expect(b.ultimo('recusa')).toEqual({ tipo: 'recusa', motivo: 'troca_cobranca' });
+    // A Bia faz uma contraproposta de 50; a Ana aceita baixando a cobrança.
+    b.acao({ a: 'troca', op: 'oferecer', itens: [], ouro: 50 });
+    expect(a.ultimo('troca')).toMatchObject({ dele: { ouro: 50 }, minha: { cobra: 80 } });
+    a.acao({ a: 'troca', op: 'oferecer', itens: [{ invId: ferro.invId, qtd: 1 }], ouro: 0, cobra: 50 });
+    // O chat da troca vai aos dois lados e a mais ninguém.
+    b.acao({ a: 'troca', op: 'falar', texto: 'fechado?' });
+    expect(a.ultimo('chat')).toEqual({ tipo: 'chat', canal: 'troca', de: 'Bia', texto: 'fechado?' });
+    expect(b.ultimo('chat')).toMatchObject({ canal: 'troca', de: 'Bia' });
+    expect(c.ultimo('chat')).toBeUndefined();
+    a.acao({ a: 'troca', op: 'confirmar' });
+    b.acao({ a: 'troca', op: 'confirmar' });
+    expect(a.ultimo('troca')?.estado).toBe('feita');
+    expect(obter(b.e().bolsa, 'bolsa').ouro).toBe(40);
+    expect(b.e().bolsa?.mochila.some((i) => i.itemId === 'minerio_ferro')).toBe(true);
+  });
+
   it('quem sai da sala no meio da troca a desfaz para o outro', () => {
     const s = sala('regiao:vila_do_centro');
     const a = entrar(s, 'u1', 'Ana');

@@ -4,6 +4,10 @@
 //   confirmações (ninguém confirma uma oferta e recebe outra).
 // - Com as duas confirmações, a troca acontece de uma vez: tudo é feito em cópias das duas mochilas e só vale se as
 //   duas ofertas ainda existirem e os dois lados couberem; senão nada muda.
+// - D-205 (25/11/2026): a cobrança. Em vez de mandar ouro, um lado pode cobrar um valor (o preço de um item, por
+//   exemplo). O outro paga pondo esse ouro na oferta, ou faz uma contraproposta pondo menos; quem cobrou aceita
+//   baixando a cobrança. Ninguém confirma enquanto uma cobrança não estiver coberta. Um lado manda ouro ou cobra,
+//   nunca os dois.
 // Puro.
 
 import type { ContextoSimulacao } from '../core/contexto';
@@ -17,6 +21,8 @@ export interface LadoDaTroca {
   id: EntidadeId;
   itens: OfertaDeItem[];
   ouro: number;
+  /** D-205: o ouro que este lado pede ao outro (0 = não cobra). */
+  cobra: number;
   confirmou: boolean;
 }
 
@@ -28,7 +34,12 @@ export interface Troca {
   aberta: boolean;
 }
 
-const lado = (id: EntidadeId): LadoDaTroca => ({ id, itens: [], ouro: 0, confirmou: false });
+const lado = (id: EntidadeId): LadoDaTroca => ({ id, itens: [], ouro: 0, cobra: 0, confirmou: false });
+
+/** D-205: alguma cobrança ainda não coberta pelo ouro do outro lado? */
+export function cobrancaPendente(t: Troca): boolean {
+  return t.a.cobra > t.b.ouro || t.b.cobra > t.a.ouro;
+}
 
 export class TrocasDaSala {
   private readonly trocas: Troca[] = [];
@@ -59,12 +70,13 @@ export class TrocasDaSala {
     return t;
   }
 
-  oferecer(quem: EntidadeId, itens: OfertaDeItem[], ouro: number, maxItens: number): Troca | MotivoDoMundo {
+  oferecer(quem: EntidadeId, itens: OfertaDeItem[], ouro: number, maxItens: number, cobra = 0): Troca | MotivoDoMundo {
     const t = this.de(quem);
-    if (!t?.aberta || itens.length > maxItens) return 'troca_invalida';
+    if (!t?.aberta || itens.length > maxItens || (ouro > 0 && cobra > 0)) return 'troca_invalida';
     const meu = t.a.id === quem ? t.a : t.b;
     meu.itens = itens.map((i) => ({ ...i }));
     meu.ouro = ouro;
+    meu.cobra = cobra;
     t.a.confirmou = false;
     t.b.confirmou = false;
     return t;
@@ -74,6 +86,7 @@ export class TrocasDaSala {
   confirmar(quem: EntidadeId): { troca: Troca; pronta: boolean } | MotivoDoMundo {
     const t = this.de(quem);
     if (!t?.aberta) return 'troca_invalida';
+    if (cobrancaPendente(t)) return 'troca_cobranca';
     (t.a.id === quem ? t.a : t.b).confirmou = true;
     return { troca: t, pronta: t.a.confirmou && t.b.confirmou };
   }
@@ -102,7 +115,7 @@ export function ofertaVista(l: LadoDaTroca, bolsa: Bolsa | null): OfertaVista {
     const m = bolsa?.mochila.find((x) => x.invId === o.invId);
     return m ? [{ itemId: m.itemId, qtd: Math.min(o.qtd, m.qtd) }] : [];
   });
-  return { itens, ouro: l.ouro };
+  return { itens, ouro: l.ouro, cobra: l.cobra };
 }
 
 interface Copia {
@@ -137,6 +150,7 @@ function receber(ctx: ContextoSimulacao, c: Copia, vem: readonly ItemNaMochila[]
 
 /** Executa a troca nas duas bolsas, de uma vez; null se deu certo, senão o motivo (e nada muda). */
 export function executarTroca(ctx: ContextoSimulacao, t: Troca, bolsaA: Bolsa, bolsaB: Bolsa): MotivoDoMundo | null {
+  if (cobrancaPendente(t)) return 'troca_cobranca';
   const a = tirarOferta(bolsaA, t.a);
   const b = tirarOferta(bolsaB, t.b);
   if (!a || !b) return 'troca_invalida';
