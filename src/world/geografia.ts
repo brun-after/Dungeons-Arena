@@ -13,6 +13,9 @@
 import { aleatorio, criarRng, type EstadoRng } from '../core/rng';
 import type { Bioma } from '../mundo/reino';
 import { passavel, type Fase } from './fase';
+import { aoLongoDoLado, costuraPerto, distanciaAoLado, FAIXA_DA_COSTURA, type LadoAberto, type LadoDoRecorte, type Recorte } from './costura';
+
+const LADOS_DO_RECORTE: readonly LadoDoRecorte[] = ['norte', 'sul', 'leste', 'oeste'];
 
 /** O código do obstáculo natural de cada célula (0 = nenhum; as paredes construídas também ficam 0). */
 // 16/11/2026: o arbusto (5) é a árvore baixa da borda da mata: desenhado, mas sem tronco (world/cenario-baixo.ts).
@@ -114,6 +117,13 @@ export interface EntradaGeografia {
   bioma: Bioma;
   /** As matas fechadas (a mata dobra). */
   matas: readonly { x: number; y: number; raio: number }[];
+  /**
+   * Marco 54 (26/11/2026, D-207): no Mundo contínuo, o retângulo da região dentro do quadrado (o resto é cortado) e os
+   * lados dele que são costura aberta. A faixa de montanha só fica nos lados fechados; nos abertos, o chão é puxado
+   * para o perfil da costura (world/costura.ts), o mesmo que a vizinha usa.
+   */
+  recorte?: Recorte;
+  abertos?: readonly LadoAberto[];
 }
 
 export interface Geografia {
@@ -137,6 +147,13 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
   const aspereza = fractal(rng, n, 7);
   const borda = 14;
   const total = n * n;
+  const { recorte, abertos = [] } = e;
+  const fechados = recorte ? LADOS_DO_RECORTE.filter((l) => !abertos.some((a) => a.lado === l)) : [];
+  /** A distância à borda que tem montanha (no recorte, só os lados fechados). */
+  const aBorda = (x: number, y: number) => (recorte ? Math.min(Infinity, ...fechados.map((l) => Math.max(0, distanciaAoLado(recorte, l, x, y)))) : Math.min(x, y, n - 1 - x, n - 1 - y));
+  // Marco 54 (D-207): o peso (0 a 1) e a altura do perfil da costura em cada célula da faixa.
+  const pesoCostura = abertos.length ? new Float32Array(total) : null;
+  const alvoCostura = abertos.length ? new Uint8Array(total) : null;
   // 1ª passada: o chão (normalizado de 0 a 1 na região) e a força da montanha.
   const base = new Float32Array(total);
   const montanha = new Float32Array(total);
@@ -152,8 +169,17 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
       // A crista: o ruído dobrado (alto perto de 0,5) e a macro decidindo onde a serra existe.
       const dobra = 1 - Math.abs(crista(x, y) * 2 - 1);
       const serra = p.serra * suaviza(0.5, 0.8, macro(x, y)) * suaviza(0.55, 0.95, dobra);
-      const naBorda = 1 - suaviza(0, borda, Math.min(x, y, n - 1 - x, n - 1 - y));
+      const naBorda = 1 - suaviza(0, borda, aBorda(x, y));
       montanha[k] = Math.max(serra * 1.8, naBorda * (0.8 + 0.4 * crista(x * 2.5, y * 2.5)));
+      const c = recorte && pesoCostura && alvoCostura ? costuraPerto(recorte, abertos, x, y) : null;
+      if (c && pesoCostura && alvoCostura) {
+        const w = 1 - suaviza(0, FAIXA_DA_COSTURA, c.d);
+        const ponto = c.lado.em(aoLongoDoLado(c.lado.lado, x, y));
+        pesoCostura[k] = w;
+        alvoCostura[k] = ponto.altura;
+        // A serra da costura passa de um lado ao outro; fora dela, a serra de dentro some perto da borda.
+        montanha[k] = ponto.serra ? Math.max(montanha[k] ?? 0, w * (0.8 + 0.4 * crista(x * 2.5, y * 2.5))) : (montanha[k] ?? 0) * (1 - w);
+      }
     }
   }
   const faixa = Math.max(1e-6, bMax - bMin);
@@ -179,14 +205,17 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
       // Marco 43 (D-177): a serra é áspera (a altura oscila célula a célula, penhascos de alturas variadas), não uma
       // escada de degraus iguais; o platô em degraus fica no chão de fora da serra.
       let h = b0 * p.suave + m * ALTURA_MONTANHA_MAX + m * (aspereza(x, y) - 0.5) * 7;
-      if (m < 0.15 && zonaPlato(x, y) > 1 - p.plato) h = Math.round(h / p.degrau) * p.degrau;
+      const w = pesoCostura?.[k] ?? 0;
+      if (m < 0.15 && w < 0.3 && zonaPlato(x, y) > 1 - p.plato) h = Math.round(h / p.degrau) * p.degrau;
+      // Marco 54 (D-207): na faixa da costura, a altura vai até a do perfil (na borda, a mesma dos dois lados).
+      if (w > 0 && m < 0.25) h = h * (1 - w) + w * (alvoCostura?.[k] ?? 0);
       const hi = Math.max(0, Math.min(ALTURA_MONTANHA_MAX, Math.floor(h)));
       alturas[k] = hi;
       if (hi >= limiteMontanha && m > 0.25) {
         obstaculos[k] = OBSTACULO.montanha;
         continue;
       }
-      if (b0 <= limiarAgua && m < 0.08) {
+      if (b0 <= limiarAgua && m < 0.08 && w < 0.4) {
         agua[k] = 1;
         alturas[k] = nivelAgua;
         continue;
