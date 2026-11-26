@@ -236,6 +236,8 @@
   box-shadow: none;
 }
 .mundo-retrato-palco canvas { width: 100%; height: 100%; object-fit: contain; }
+/* Com a ficha aberta o cartão cresce; o retrato fica no alto do palco, à vista. */
+.mundo-palco:has(.mundo-ficha-selecionada[open]) { align-items: start; }
 .mundo-selecao-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.55rem; }
 .mundo-slot-seletor {
   display: grid;

@@ -1,4 +1,5 @@
-import { painelPersonagem } from './ui/retrato-personagem';
+import { painelPersonagem, retratoPersonagem } from './ui/retrato-personagem';
+import capaSelecao from './assets/dungeons-portao.webp';
 import { normalizarCodigo } from './input/atalhos';
 import { lerPreferencias } from './plataforma/preferencias';
 import { ConsultaParty } from './plataforma/consulta-party';
@@ -72,7 +73,7 @@ function terrenoDe(id: string): ContextoSimulacao | null {
 function tela(raiz: HTMLElement): HTMLElement {
   raiz.textContent = '';
   const el = document.createElement('section');
-  el.className = 'tela-menu';
+  el.className = 'tela-menu tela-mundo';
   const h = document.createElement('h1');
   h.textContent = t('mundo.titulo');
   const sub = document.createElement('p');
@@ -160,14 +161,31 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
     return;
   }
   carregando.remove();
+  // D-205 (25/11/2026): a sala de seleção (entrega visual da VPS): o palco com o retrato do escolhido e o cartão dele
+  // (jogar, excluir, a ficha e a aparência num recolhível), e os cinco espaços embaixo para escolher ou criar.
+  el.classList.add('sala-selecao-mundo');
+  el.style.setProperty('--capa-selecao', `url("${capaSelecao}")`);
+  const grade = document.createElement('div');
+  grade.className = 'mundo-grade-personagens';
+  const palco = document.createElement('div');
+  palco.className = 'mundo-palco';
+  const selecao = document.createElement('nav');
+  selecao.className = 'mundo-selecao-slots';
+  selecao.setAttribute('aria-label', t('mundo.selecao.rotulo'));
+  grade.append(palco, selecao);
+  el.append(grade);
+  const inicial = lista[0]?.slot ?? 1;
   for (let slot = 1; slot <= SLOTS_DO_MUNDO; slot++) {
     const p = lista.find((x) => x.slot === slot);
     const cartao = document.createElement('div');
     cartao.className = 'cartao-slot';
     const h = document.createElement('h2');
-    h.textContent = p?.nome ?? t('mundo.slot', { n: slot });
+    h.textContent = p?.nome ?? t('mundo.selecao.criar');
     cartao.append(h);
+    const classeEnivel = p ? t('mundo.selecao.classe', { classe: conteudo.classes.get(p.classeId)?.nome ?? p.classeId, nivel: p.nivel }) : '';
+    let montar = () => { palco.replaceChildren(cartao); };
     if (p) {
+      cartao.append(paragrafo(classeEnivel, 'mundo-classe-selecionada'));
       const resumo = document.createElement('p');
       resumo.className = 'resumo-slot';
       resumo.textContent = t('mundo.localDoPersonagem', { slot, vila: nomeDaVila(p.vilaSalva) });
@@ -210,17 +228,40 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       const acoes = document.createElement('div');
       acoes.className = 'acoes-slot';
       acoes.append(jogar, excluir);
-      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined, { escolherSkin: true }));
-      if (!p.previa?.atributos) {
-        cartao.append(paragrafo('A ficha completa deste personagem ainda não está disponível no servidor.'));
-      }
-      cartao.append(acoes);
+      const ficha = document.createElement('details');
+      ficha.className = 'mundo-ficha-selecionada';
+      const abrirFicha = document.createElement('summary');
+      abrirFicha.textContent = t('mundo.selecao.ficha');
+      ficha.append(abrirFicha);
+      // A troca de skin refaz o retrato do palco sem fechar a ficha.
+      ficha.addEventListener('toggle', () => {
+        if (ficha.open && ficha.childElementCount === 1) ficha.append(painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined, { escolherSkin: true, atualizarRetratoExterno: () => { montar(); } }));
+      });
+      cartao.append(resumo, acoes, ficha);
+      if (!p.previa?.atributos) cartao.append(paragrafo(t('mundo.selecao.semFicha')));
+      montar = () => {
+        const retrato = retratoPersonagem(p.classeId, p.previa);
+        retrato.classList.add('mundo-retrato-palco');
+        const anterior = palco.querySelector('.mundo-retrato-palco');
+        if (anterior && cartao.parentElement === palco) anterior.replaceWith(retrato);
+        else palco.replaceChildren(retrato, cartao);
+      };
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });
       }));
     }
-    el.append(cartao);
+    const seletor = botao(p?.nome ?? t('mundo.selecao.vazio'), () => {
+      for (const outro of selecao.querySelectorAll('button')) outro.setAttribute('aria-pressed', String(outro === seletor));
+      montar();
+    }, 'mundo-slot-seletor');
+    seletor.setAttribute('aria-label', p ? t('mundo.selecao.escolher', { nome: p.nome }) : t('mundo.selecao.criarNo', { n: slot }));
+    seletor.setAttribute('aria-pressed', 'false');
+    const detalhe = document.createElement('small');
+    detalhe.textContent = p ? classeEnivel : t('mundo.slot', { n: slot });
+    seletor.append(detalhe);
+    selecao.append(seletor);
+    if (slot === inicial) seletor.click();
   }
 }
 
