@@ -5,7 +5,7 @@ import type { ContextoSimulacao } from '../../core/contexto';
 import type { EstadoJogo } from '../../core/estado';
 import { celulaOcupada } from '../../combat/geometria';
 import { dentroDaArea, type TipoTerrenoVivo } from '../../world/ambiente-tipos';
-import { areasEfetivas } from '../../world/terrenos-vivos';
+import { areasEfetivasEm } from '../../world/terrenos-vivos';
 import type { Entidade } from '../entidade';
 import type { PresetInimigo } from '../presets';
 import { REACAO_NEUTRA, type ReacaoNaFenda } from './tipos';
@@ -14,7 +14,7 @@ import { REACAO_NEUTRA, type ReacaoNaFenda } from './tipos';
 export function terrenoNa(estado: EstadoJogo, ctx: ContextoSimulacao, x: number, y: number): TipoTerrenoVivo | null {
   const fixas = ctx.fase.ambientes ?? [];
   if (fixas.length === 0 && !(estado.terrenos ?? []).length) return null;
-  return areasEfetivas(estado, fixas).find((a) => dentroDaArea(a, x, y))?.tipo ?? null;
+  return areasEfetivasEm(estado, fixas, x, y).find((a) => dentroDaArea(a, x, y))?.tipo ?? null;
 }
 
 export function terrenoSob(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): TipoTerrenoVivo | null {

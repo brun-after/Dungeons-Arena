@@ -28,6 +28,7 @@ import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { bonusDeAtributo } from '../progression/ficha';
 import { ordemRotativa } from '../world/colisao';
+import { vizinhosDe } from '../entities/vizinhanca';
 import { resolverHabilidade } from './compilar-habilidade';
 import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
@@ -212,10 +213,11 @@ export function autoAlvo(
 ): Entidade | null {
   let melhor: Entidade | null = null;
   let melhorDist = Infinity;
-  for (const e of estado.entidades) {
-    if (e.id === ator.id || !alvoOfensivoValido(estado, ctx, ator, e) || !filtro(e)) continue;
+  // Marco 54 (26/11/2026, D-207): só os vizinhos e a distância antes da validação (o empate é por id, a ordem não importa).
+  for (const e of vizinhosDe(estado, origem.x, origem.y, alcance)) {
+    if (e.id === ator.id) continue;
     const d = chebyshev(origem, celulaOcupada(e));
-    if (d > alcance) continue;
+    if (d > alcance || !alvoOfensivoValido(estado, ctx, ator, e) || !filtro(e)) continue;
     const p = prioridadeDeAlvo(e);
     const pm = melhor ? prioridadeDeAlvo(melhor) : Infinity;
     const melhorQue =
@@ -231,8 +233,8 @@ export function autoAlvo(
 /** Marco 14: o aliado (ou o próprio) no alcance com a menor fração de vida; empate pelo id. */
 function aliadoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alcance: number, origem: Celula): Entidade | null {
   let melhor: Entidade | null = null;
-  for (const e of estado.entidades) {
-    if (!alvoDeSuporteValido(ctx, ator, e) || chebyshev(origem, celulaOcupada(e)) > alcance) continue;
+  for (const e of vizinhosDe(estado, origem.x, origem.y, alcance)) {
+    if (chebyshev(origem, celulaOcupada(e)) > alcance || !alvoDeSuporteValido(ctx, ator, e)) continue;
     const f = e.hp / Math.max(1, e.hpMax);
     const fm = melhor ? melhor.hp / Math.max(1, melhor.hpMax) : Infinity;
     if (!melhor || f < fm || (f === fm && e.id < melhor.id)) melhor = e;

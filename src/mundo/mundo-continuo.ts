@@ -11,6 +11,8 @@ import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { codigoDeTipo, type Fase } from '../world/fase';
 import type { ExteriorGerado, PontoDoExterior } from '../world/gerador-exterior';
 import type { Refugio } from '../world/refugio';
+import { copaEm } from '../world/camuflagem';
+import { areasEfetivasEm } from '../world/terrenos-vivos';
 import { montarAtlas, paraOAtlas, type AreaNoAtlas, type Atlas } from './atlas';
 import { gerarRegiaoNoAtlas } from './atlas-fase';
 import { comMateriais, type LugarMontado } from './lugares';
@@ -174,5 +176,10 @@ export function* etapasDoMundoContinuo(conteudo: Conteudo, reino: Reino, modoBas
   if (!inicio) throw new Error('atlas sem regiões');
   // As estruturas de todas as regiões numa só (as escoltas e as escondidas procuram por id e posição).
   const regiaoDoAtlas: RegiaoDoMundo = { ...inicio, estruturas: [...regioesNoAtlas.values()].flatMap((r) => r.estruturas) };
+  // O que o tique só calcularia na primeira vez (as copas do atlas, o índice das áreas fixas) sai daqui, numa etapa
+  // própria, para não travar o primeiro tique da sala.
+  yield 'copas';
+  copaEm(ctx.fase, 0, 0);
+  areasEfetivasEm(estado, ctx.fase.ambientes ?? [], 0, 0);
   return { ctx, estado, exterior, atlas, zonas: mapaDeZonas(reino, atlas), regioesNoAtlas, regiaoDoAtlas };
 }

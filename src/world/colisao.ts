@@ -56,7 +56,25 @@ export function celulaLivrePara(
  * Ordem de processamento do tick: IDs estáveis, começando num ponto que gira a cada tick.
  * Nenhuma entidade tem prioridade fixa por ordem de entrada ou por ser o criador (§2.3).
  */
+// Marco 54 (26/11/2026, D-207): o tique pede a ordem várias vezes (IA, ação, movimento, objetos, portas, efeitos), e
+// com centenas de entidades ordenar por id cada vez pesava. A última ordem fica guardada por lista; vale de novo se a
+// lista tem exatamente os mesmos objetos (a ordem por id só depende deles) e o tique é o mesmo.
+interface OrdemGuardada {
+  tick: number;
+  membros: Set<object>;
+  ordem: readonly object[];
+}
+const ORDENS = new WeakMap<readonly object[], OrdemGuardada>();
+
 export function ordemRotativa<T extends { id: string }>(itens: readonly T[], tick: number): T[] {
+  const g = ORDENS.get(itens);
+  if (g && g.tick === tick && g.membros.size === itens.length && itens.every((e) => g.membros.has(e))) return [...(g.ordem as readonly T[])];
+  const ordem = ordemRotativaSemGuardar(itens, tick);
+  if (itens.length >= 64) ORDENS.set(itens, { tick, membros: new Set(itens), ordem });
+  return [...ordem];
+}
+
+function ordemRotativaSemGuardar<T extends { id: string }>(itens: readonly T[], tick: number): T[] {
   const ordenados = [...itens].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   if (ordenados.length === 0) return ordenados;
   const inicio = tick % ordenados.length;

@@ -22,7 +22,8 @@ export interface Refugio {
 export function emRefugio(fase: Fase, x: number, y: number): boolean {
   const lista = fase.refugios;
   if (!lista) return false;
-  for (const r of lista) if (Math.hypot(x - r.x, y - r.y) <= r.raio) return true;
+  // Marco 54 (D-207): o atlas tem os refúgios de todas as regiões; a caixa descarta antes da raiz.
+  for (const r of lista) if (Math.abs(x - r.x) <= r.raio && Math.abs(y - r.y) <= r.raio && Math.hypot(x - r.x, y - r.y) <= r.raio) return true;
   return false;
 }
 
@@ -38,10 +39,10 @@ export const barradoNoRefugio = (e: Entidade): boolean => e.controlador === 'ia'
 /** Um golpe entre os dois (dado ou levado, por eles ou pelas invocações deles) há pouco? */
 export function emCombateCom(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<ContextoSimulacao, 'balance'>, a: Entidade, b: Entidade): boolean {
   const janela = ticksDe(ctx.balance.mundo.refugio.combateS * 1000);
-  const ladoA = new Set([a.id, a.invocacao?.donoId].filter((x): x is string => !!x));
-  const ladoB = new Set([b.id, b.invocacao?.donoId].filter((x): x is string => !!x));
+  // Marco 54 (26/11/2026, D-207): sem montar conjuntos a cada pergunta (vem por par de entidades a cada tique).
+  const doLado = (x: Entidade, id: string) => id === x.id || (!!x.invocacao?.donoId && id === x.invocacao.donoId);
   const recente = (tick: number) => estado.tick - tick <= janela;
-  return a.participacao.some((p) => ladoB.has(p.id) && recente(p.tick)) || b.participacao.some((p) => ladoA.has(p.id) && recente(p.tick));
+  return a.participacao.some((p) => doLado(b, p.id) && recente(p.tick)) || b.participacao.some((p) => doLado(a, p.id) && recente(p.tick));
 }
 
 /**

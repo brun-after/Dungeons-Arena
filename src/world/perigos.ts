@@ -13,7 +13,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { perfilDaIa } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
 import { AMBIENTE_FERE, ELEMENTO_DO_AMBIENTE, dentroDaArea, type AreaAmbiente, type TipoTerrenoVivo } from './ambiente-tipos';
-import { areasEfetivas } from './terrenos-vivos';
+import { areasEfetivas, areasEfetivasEm } from './terrenos-vivos';
 import { passavel } from './fase';
 
 /** A área fere a entidade (fere e não é do elemento dela)? */
@@ -33,7 +33,7 @@ function armadilhaTemida(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
 /** A célula é perigo para a entidade agora? */
 export function emPerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
   // 08/11/2026 (D-138): com os terrenos vivos (a água congelada fere; a área apagada não).
-  if (areasEfetivas(estado, ctx.fase.ambientes ?? []).some((a) => ambienteFere(e, a) && dentroDaArea(a, x, y))) return true;
+  if (areasEfetivasEm(estado, ctx.fase.ambientes ?? [], x, y).some((a) => ambienteFere(e, a) && dentroDaArea(a, x, y))) return true;
   if (estado.rastros.some((r) => r.x === x && r.y === y && r.ateTick > estado.tick && podeFerir({ id: r.donoId, equipe: r.equipeDono }, e, ctx.modo))) return true;
   if (estado.camposTaticos?.some((c) => c.tipo === 'veneno' && c.ateTick > estado.tick && Math.max(Math.abs(c.x - x), Math.abs(c.y - y)) <= c.raio && podeFerir({ id: c.donoId, equipe: c.equipe }, e, ctx.modo))) return true;
   return estado.armadilhas.some((a) => armadilhaCobre(a, x, y) && armadilhaTemida(estado, ctx, e, a));

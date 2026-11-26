@@ -12,6 +12,7 @@
     "dev:server": "tsx watch server/main.ts",
     "servidor": "tsx server/main.ts",
     "carga": "tsx tools/carga/carga.ts",
+    "carga:continuo": "tsx tools/carga/mundo-continuo.ts",
     "relatorios": "tsx tools/relatorios/resumo.ts",
     "balancear": "tsx tools/balanceamento/balancear.ts",
     "fonte": "tsx tools/fonte/gerar.ts src/assets/fontes/runas-de-filo.otf",
