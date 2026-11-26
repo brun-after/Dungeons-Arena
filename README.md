@@ -1,9 +1,10 @@
-# Dungeons Arena: RPG de ação em tempo real
+# Dungeons Dimensions: RPG de ação em tempo real
 
-**Versão do documento:** 3.65 · **Data:** 22/11/2026
+**Versão do documento:** 3.66 · **Data:** 25/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.66 (25/11/2026)**: o jogo passa a se chamar Dungeons Dimensions e ganha a fonte própria, Runas de Filo, nos títulos e nos números (D-205).
 > - **3.65 (22/11/2026)**: marco 53: os ninhos das receitas da forja, no mapa e na receita (D-203).
 > - **3.64 (22/11/2026)**: marco 53: o item solto espera 5 s, o Mundo sem o registro lateral, o XP subindo do personagem e a faixa do chefe (D-203).
 > - **3.63 (22/11/2026)**: marco 53: o conforto (clique e mapa para andar, câmera no mouse, zoom do touchpad, seguir o companheiro, avisos, cartas de skill, receitas da forja, renascer com escolha e consertos) (D-203).

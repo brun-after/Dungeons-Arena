@@ -1,6 +1,6 @@
-# Dungeons Arena: guia para quem trabalha no código
+# Dungeons Dimensions: guia para quem trabalha no código
 
-**Versão:** 0.18 · **Data:** 22/11/2026
+**Versão:** 0.19 · **Data:** 25/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -20,6 +20,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   `VITE_SUPABASE_ANON_KEY` no build. O certificado do personagem é assinado só pelo servidor (`CHAVE_CERTIFICADO`).
   O personagem do Mundo é gravado só pelo servidor (`SUPABASE_URL` e `SUPABASE_SERVICE_KEY`; sem elas, em memória e só
   com contas `local:`)
+- `npm run fonte`: regera a fonte do jogo (`src/assets/fontes/runas-de-filo.otf`) a partir de `tools/fonte` (D-205)
 - `npm run balancear`: simulador de balanceamento contra `balance.metas` (`-- --registrar` grava docs/BALANCEAMENTO.md)
 - `npm run bench`: benchmarks do cliente no Chromium sem tela (`-- --registrar` grava docs/BENCHMARKS.md)
 - `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)
@@ -63,6 +64,9 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Engaste no id** (marco 51, D-197): a peça engastada é `en_<materiais>__<peça>`, resolvida pelo `CatalogoDeItens`
   (`progression/engaste.ts`), com a fusão elemental `fu_` por dentro; nada de campo novo no item para engaste. A
   receita da forja é o item `receita_<id>` com o molde em `forja.json → moldes` (`progression/moldes.ts`).
+- **Fonte do jogo pelo gerador** (D-205): títulos e números usam `var(--fonte-titulo)` (Runas de Filo); o `.otf` sai
+  de `tools/fonte` (`npm run fonte`), nunca editado à mão, e a runa no texto vem de `caractereDaRuna` (`ui/runa-texto.ts`).
+  O nome do jogo mudou para Dungeons Dimensions, mas chaves de save, `applicationId` e `dungeons-arena` técnicos ficam.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.
