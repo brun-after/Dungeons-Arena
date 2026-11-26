@@ -30,7 +30,7 @@
 }
 
 /* Títulos e números na fonte do jogo; o texto corrido e os controles continuam na do sistema. */
-:where(h1, h2, h3, .subtitulo-modal, .titulo-seletor, .titulo-descricao, .numero-dado) {
+:where(h1, h2, h3, .subtitulo-modal, .titulo-seletor, .titulo-descricao) {
   font-family: var(--fonte-titulo);
   font-weight: normal;
   font-synthesis: none;
@@ -637,73 +637,62 @@ body.toque .faixa-controles {
   color: var(--texto-suave);
 }
 
-/* Ajuste de 15/10/2026 (D-060): o d20 perto da barra de habilidades. Gira a cada rolagem e esmaece parado. */
+/* Ajuste de 15/10/2026 (D-060): o d20 perto da barra de habilidades. D-205 (25/11/2026): o icosaedro desenhado
+   (ui/dado-modelo.ts) no lugar do hexágono, com a face do combate de frente no fim da rolagem. */
 .dado-d20 {
   position: absolute;
-  left: calc(50% - 190px);
+  left: calc(50% - 196px);
   bottom: calc(18px + var(--seguro-base));
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 58px;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  background: #2a2633;
-  color: var(--texto);
-  font-variant-numeric: tabular-nums;
+  width: 74px;
+  height: 66px;
+  color: #f2d8ab;
   pointer-events: none;
-  transition: opacity 400ms ease;
+  transition: opacity 260ms ease;
 }
 
-.dado-d20 .numero-dado {
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1;
+.modelo-dado {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 5px 4px #000c);
 }
 
 .dado-d20 .rotulo-dado {
   position: absolute;
-  bottom: 6px;
-  font-size: 0.55rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.dado-d20[data-faixa='bom'] {
-  background: #5a4510;
-  color: #f7d774;
+  bottom: -2px;
+  max-width: 100%;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #1b1513e8;
+  font-size: 0.63rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
 }
 
 .dado-d20[data-faixa='critico'] {
-  background: #8a6408;
-  color: #fff3c4;
-  transform: scale(1.15);
+  color: #ffe284;
+}
+
+.dado-d20[data-faixa='critico'] .modelo-dado {
+  filter: drop-shadow(0 0 6px #fba83b90) drop-shadow(0 5px 4px #000c);
 }
 
 .dado-d20[data-faixa='falha'] {
-  background: #5b1f1f;
-  color: #ff9b8f;
+  color: #ffb29f;
+}
+
+.dado-d20.girando .rotulo-dado {
+  color: #fff0d5;
 }
 
 .dado-d20.esmaecido {
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
-.dado-d20.girando {
-  animation: girar-dado 300ms ease-out;
-}
-
-@keyframes girar-dado {
-  from {
-    rotate: -200deg;
-    scale: 0.7;
-  }
-  to {
-    rotate: 0deg;
-    scale: 1;
-  }
-}
-
-/* 05/11/2026: no desktop o d20 é o primeiro item da fila da barra; oculto, guarda o lugar (a barra não pula). */
 .fila-barra .dado-d20 {
   position: relative;
   left: auto;
@@ -711,21 +700,20 @@ body.toque .faixa-controles {
   flex: none;
 }
 
-.fila-barra .dado-d20[hidden] {
-  display: grid;
+.dado-d20[hidden] {
   visibility: hidden;
-}
-
-body.movimento-reduzido .dado-d20.girando {
-  animation: none;
 }
 
 body.toque .dado-d20 {
   left: auto;
-  right: calc(150px + var(--seguro-dir));
-  bottom: calc(150px + var(--seguro-base));
-  width: 44px;
-  height: 48px;
+  right: calc(146px + var(--seguro-dir));
+  bottom: calc(146px + var(--seguro-base));
+  width: 60px;
+  height: 56px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dado-d20 { transition: none; }
 }
 
 .chip-rede {

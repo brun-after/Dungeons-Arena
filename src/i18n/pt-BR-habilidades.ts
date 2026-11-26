@@ -305,6 +305,7 @@ export const textosHabilidades = {
 
   // O d20 perto da barra (ajuste de 15/10/2026).
   'dado.critico': 'Crítico!',
+  'dado.d20': 'D20',
   'dado.falha': 'Falha',
 
   // HUD, cartão e avisos.
