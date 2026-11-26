@@ -196,7 +196,7 @@ export class EfeitosDeHabilidade {
         // Marco 27 (D-126): o básico da arma fica mais bonito com a raridade dela.
         const tier = nome.startsWith('arma_') ? { tier: tierDaArma(quem) } : {};
         // D-174: com a runa de outro elemento, a assinatura sai inteira dele.
-        this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.o.diretor.acertar(nome, { ...acerto, cor, ...corEtapa, ...tier }, h.visual?.variante, comParticulas); });
+        this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.o.diretor.acertar(nome, { ...acerto, cor, ...corEtapa, ...tier }, h.visual?.variante, comParticulas); }, h.elementosFusao);
       }
       // Marco 39 (D-151): a runa conta de que a skill é feita agora, na intensidade do vínculo.
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNoAcerto(quem?.classeId ?? quem?.bolsa?.classeId, h.runa, h.faixaRuna, acerto, comParticulas);
@@ -209,7 +209,7 @@ export class EfeitosDeHabilidade {
       if (ev.indice > 0) return;
       // D-175: o gesto do núcleo da skill comum (as de área e em si desenham no lançamento).
       const comum = h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio' ? null : this.o.comum?.(h.id);
-      if (comum) this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.o.diretor.nucleo(comum.nucleo, { de: fonte, em: alvo, cor, raio: 0 }); });
+      if (comum) this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.o.diretor.nucleo(comum.nucleo, { de: fonte, em: alvo, cor, raio: 0 }); }, h.elementosFusao);
       // D-174: o toque da afinidade dominante do personagem (quando não é a da própria skill).
       const dominante = h.runa ? this.o.perfilVisual?.(ev.fonteId)?.dominante : null;
       if (dominante && dominante.runa !== h.runa) this.o.diretor.toqueNoAcerto(dominante.runa, dominante.faixa, alvo);
@@ -340,7 +340,7 @@ export class EfeitosDeHabilidade {
       if (h.raridadeFusao) this.o.diretor.raridadeNaConjuracao(h.raridadeFusao, pos, v.cor);
       this.o.diretor.misturaNaConjuracao(h.elementosFusao, pos);
       // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
-      if (this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.conjurar(assinaturaDe(h), pos, cor))) continue;
+      if (this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.conjurar(assinaturaDe(h), pos, cor), h.elementosFusao)) continue;
       if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
       // Marco 24 (25/10/2026): a matéria do elemento na mão de quem conjura (chamas, geada, arcos, bolhas…).
       if (h.elemento) p.emitir(presetDeConjuracao(h.elemento), pos.x, pos.y, v.cor);
@@ -360,7 +360,7 @@ export class EfeitosDeHabilidade {
       // D-194: o rastro sai na altura da rota (a parábola sobe, a queda desce).
       const no = pr.rota ? p.elevar(pr.x, pr.y, pontoEm(pr.rota, pr.t ?? 0).z) : pr;
       // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
-      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), no.x, no.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, no.x, no.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), this.runaVisual(h), v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), no.x, no.y, cor, { x: pr.dirX, y: pr.dirY }), h.elementosFusao) && v.viagem) p.emitir(v.viagem, no.x, no.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
       if (h?.raridadeFusao && v) this.o.diretor.raridadeNoRastro(h.raridadeFusao, no.x, no.y, v.cor);
       if (h) this.o.diretor.misturaNoRastro(h.elementosFusao, no.x, no.y);
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
@@ -396,7 +396,7 @@ export class EfeitosDeHabilidade {
     const agoraPos = this.posicoes.get(a.atorId) ?? a.origem;
     if (a.ultimate) this.o.diretor.lancouUltimate(agoraPos, v.cor);
     // D-174: a assinatura sai no elemento da runa; a ultimate leva a classe, o estilo e a afinidade de quem lança.
-    this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.desenharArea(a, h, nome, cor, escala, agoraPos); });
+    this.o.diretor.naRuna(nome, this.runaVisual(h), v.cor, (cor) => { this.desenharArea(a, h, nome, cor, escala, agoraPos); }, h.elementosFusao);
   }
 
   /** D-175: o elemento em que a assinatura sai — a runa; na comum que divide a assinatura com outra, o elemento dela. */
