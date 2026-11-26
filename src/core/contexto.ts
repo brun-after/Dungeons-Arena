@@ -474,14 +474,8 @@ export interface Balance {
   };
   /** Marco 29 (30/10/2026, D-128): o modo Mundo (túmulo, portais, coleta, covis e o checkpoint). */
   mundo: {
-    populacaoMax: number;
-    resgate: { mortesDesconto: number; mortesGratis: number };
-    /**
-     * Marco 54 (26/11/2026, D-207): no Mundo contínuo, o que está a mais de `raioDormir` (Chebyshev) de todo jogador sai
-     * da simulação (por bloco de `bloco` células) e volta quando alguém chega a `raioAcordar`; conferido a cada
-     * `aCadaTicks`.
-     */
-    hibernacao: { raioDormir: number; raioAcordar: number; bloco: number; aCadaTicks: number };
+    populacaoMax: number; resgate: { mortesDesconto: number; mortesGratis: number };
+    hibernacao: { raioDormir: number; raioAcordar: number; bloco: number; aCadaTicks: number }; // Marco 54 (D-207): mundo/hibernacao.ts.
     /**
      * 08/11/2026 (D-138): o XP do chefe da masmorra para quem repete: × `fatorPorVez` a cada vez já feita (até 1 XP); o
      * chefe acima do jogador dá `bonusPorNivelPct` por nível (até `bonusMaxPct`); abaixo, cai pela metade a cada

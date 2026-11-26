@@ -321,7 +321,7 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
 }
 
 // Marco 54 (26/11/2026, D-207): com centenas de entidades acordadas no Mundo contínuo, procurar por id na lista a cada
-// pedido pesava. Um índice id → posição por lista: o acerto é conferido na própria lista (`entidades[i].id === id`),
+// pedido pesava. Um índice id para a posição por lista: o acerto é conferido na própria lista (`entidades[i].id === id`),
 // e quem não acha (o índice ficou velho, ou a entidade não está) cai na busca de sempre, então a resposta é a mesma.
 const INDICES_POR_ID = new WeakMap<readonly Entidade[], Map<EntidadeId, number>>();
 

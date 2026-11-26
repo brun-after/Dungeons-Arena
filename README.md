@@ -1,9 +1,10 @@
 # Dungeons Dimensions: RPG de ação em tempo real
 
-**Versão do documento:** 3.67 · **Data:** 25/11/2026
+**Versão do documento:** 3.68 · **Data:** 26/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.68 (26/11/2026)**: marco 54: o Mundo contínuo no núcleo e no servidor, ainda desligado (D-207).
 > - **3.67 (25/11/2026)**: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório e d20), a troca com cobrança e chat, e o botão do ataque automático, que não religa ao trocar de alvo (D-205).
 > - **3.66 (25/11/2026)**: o jogo passa a se chamar Dungeons Dimensions e ganha a fonte própria, Runas de Filo, nos títulos e nos números (D-205).
 > - **3.65 (22/11/2026)**: marco 53: os ninhos das receitas da forja, no mapa e na receita (D-203).
@@ -387,6 +388,21 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 54 — o Mundo contínuo, no servidor (26/11/2026)
+
+O primeiro de três passos para o Mundo sem separação entre as regiões.
+- **Um mapa só.** As 24 regiões encostam num atlas, e onde havia passagem a borda se abre: o chão, a água e as
+  estradas dos dois lados se encontram.
+- **A região é onde você está.** PvP, loot, eventos, noite e o chat da região passam a ler a posição. O PvP só vale
+  com os dois em terra perigosa.
+- **Viajar sem trocar de sala.** Pedra de save, portal, retorno e renascer só levam o personagem para outro ponto do
+  mesmo mapa.
+- **Só o que está perto vive.** O que está longe de todos dorme e acorda antes de aparecer na tela.
+- **Mais leve que hoje.** Com os mesmos jogadores, a sala contínua gasta menos que uma sala por região.
+
+Ainda desligado: o cliente contínuo vem no marco 55, e as escadas e os andares das masmorras, no 56. Detalhes em
+D-207.
 
 ### Marco 53 — o conforto (22/11/2026)
 

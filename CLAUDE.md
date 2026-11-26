@@ -1,6 +1,6 @@
 # Dungeons Dimensions: guia para quem trabalha no código
 
-**Versão:** 0.20 · **Data:** 26/11/2026
+**Versão:** 0.21 · **Data:** 26/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -70,6 +70,11 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Fonte do jogo pelo gerador** (D-205): títulos e números usam `var(--fonte-titulo)` (Runas de Filo); o `.otf` sai
   de `tools/fonte` (`npm run fonte`), nunca editado à mão, e a runa no texto vem de `caractereDaRuna` (`ui/runa-texto.ts`).
   O nome do jogo mudou para Dungeons Dimensions, mas chaves de save, `applicationId` e `dungeons-arena` técnicos ficam.
+- **Mundo contínuo pela posição** (marco 54, D-207): com `mundo.json → continuo`, o Mundo é uma sala só com o atlas
+  (`mundo/atlas.ts`, `mundo/mundo-continuo.ts`); a região de alguém é a zona da posição (`zonaEm`), e PvP e loot leem
+  `pvpEm`/`lootPctEm` (`modos/regras-por-zona.ts`), nunca a região da sala. A ficha guarda coordenadas locais da região;
+  a sala converte (`paraOAtlas`). O que está longe de todo jogador dorme (`mundo/hibernacao.ts`); busca por perto usa
+  `vizinhosDe` (`entities/vizinhanca.ts`), não a lista inteira.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

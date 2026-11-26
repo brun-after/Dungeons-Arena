@@ -403,11 +403,13 @@ export class SalaMundo extends SalaArena {
   }
 
   /** O lugar como o aviso o mostra (no Mundo contínuo, a zona onde a entidade está). */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean } {
     return { lugar: this.idLugar, nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo };
   }
 
   /** A região onde o ponto está (a da sala; no Mundo contínuo, a zona dele). Marco 54 (D-207). */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected regiaoDe(_p: { x: number; y: number }): RegiaoDoMundo | null {
     return this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
   }
