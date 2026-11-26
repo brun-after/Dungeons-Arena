@@ -3803,7 +3803,7 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
   .mapa-expandido .abas-cartografia { margin-bottom: 6px; }
   .mapa-expandido[data-zoom='1'] .modal-corpo { overflow: hidden; }
   .mapa-expandido[data-zoom='1'] .modal-corpo > :not(.painel-cartografia):not(.botao-menu) { display: none; }
-  .mapa-expandido[data-zoom='1'] .painel-cartografia > :not(.zoom-cartografia):not(.janela-cartografia) { display: none; }
+  .mapa-expandido[data-zoom='1'] .painel-cartografia > :not(.zoom-cartografia):not(.janela-cartografia):not(.prancha-cartografia) { display: none; }
   .mapa-expandido[data-zoom='1'] .zoom-cartografia { margin-bottom: 4px; }
   .mapa-expandido[data-zoom='1'] .janela-cartografia { height: calc(100dvh - 140px - var(--seguro-topo) - var(--seguro-base)); }
 }
