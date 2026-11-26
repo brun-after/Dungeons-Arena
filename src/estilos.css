@@ -1,5 +1,14 @@
+/* 25/11/2026: a fonte do jogo, Runas de Filo (tools/fonte): capitulares romanas com ornamentos das runas, nos títulos
+   e nos números. Um peso só; sem negrito falso (font-synthesis). As runas ficam em U+E000 (ui/runa-texto.ts). */
+@font-face {
+  font-family: 'Runas de Filo';
+  src: url('./assets/fontes/runas-de-filo.otf') format('opentype');
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
+  --fonte-titulo: 'Runas de Filo', Georgia, serif;
   --fundo: #080808;
   --painel: rgba(16, 16, 16, 0.96);
   --texto: #fafafa;
@@ -18,6 +27,13 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* Títulos e números na fonte do jogo; o texto corrido e os controles continuam na do sistema. */
+:where(h1, h2, h3, .subtitulo-modal, .titulo-seletor, .titulo-descricao, .numero-dado) {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-synthesis: none;
 }
 
 /* `hidden` sempre esconde, mesmo em elementos com display próprio. */

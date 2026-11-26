@@ -10,6 +10,10 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
+import { FONTE_DO_JOGO } from '../ui/runa-texto';
+
+/** 25/11/2026: os números na fonte do jogo (o negrito do Pixi engrossa o traço fino da serifa no tamanho pequeno). */
+const FONTE_NUMEROS = `"${FONTE_DO_JOGO}", Georgia, serif`;
 
 const VIDA_MS = 900;
 const SUBIDA_PX = 34;
@@ -92,7 +96,7 @@ export class CamadaNumeros {
     const texto = new Text({
       text: '',
       style: {
-        fontFamily: 'system-ui, sans-serif',
+        fontFamily: FONTE_NUMEROS,
         fontSize: estilo.tamanho,
         fontWeight: '700',
         fill: estilo.cor,
@@ -132,7 +136,7 @@ export class CamadaNumeros {
     forma.poly([0, -r, r * 0.6, r * 0.35, -r * 0.6, r * 0.35]).stroke({ width: 1, color: cor, alpha: 0.45 });
     const numero = new Text({
       text: String(valor),
-      style: { fontFamily: 'system-ui, sans-serif', fontSize: valor === 20 ? 16 : 13, fontWeight: '800', fill: cor, stroke: { color: 0x000000, width: 3 } },
+      style: { fontFamily: FONTE_NUMEROS, fontSize: valor === 20 ? 16 : 13, fontWeight: '800', fill: cor, stroke: { color: 0x000000, width: 3 } },
     });
     numero.anchor.set(0.5);
     numero.position.set(0, 2);

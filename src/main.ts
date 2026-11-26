@@ -22,8 +22,12 @@ import { ligarAppNativo } from './plataforma/nativo';
 import { prepararPreferencias } from './plataforma/preferencias';
 import { mostrarMenu } from './ui/menu';
 import { mostrarSlots } from './ui/slots';
+import { FONTE_DO_JOGO } from './ui/runa-texto';
 
 registerSW({ immediate: true });
+// 25/11/2026: a fonte do jogo (títulos e números) já carrega no começo; o Pixi desenha os números com ela e não
+// espera o CSS pedir. Sem a fonte, tudo cai na serifada do sistema.
+void document.fonts?.load(`16px "${FONTE_DO_JOGO}"`).catch(() => undefined);
 // Marco 20: no app Android, o botão voltar e o segundo plano (fora do app, não faz nada).
 void ligarAppNativo();
 

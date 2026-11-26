@@ -9,7 +9,7 @@ import { desenharTracos, type Runa } from './runas';
 /** A cor do arcano (a magia sem elemento). */
 const COR_ARCANA = 0xa98bff;
 
-const TRACOS: Readonly<Record<Elemento | 'arcano', Runa['tracos']>> = {
+export const TRACOS_ELEMENTOS: Readonly<Record<Elemento | 'arcano', Runa['tracos']>> = {
   // Chama: o triângulo com a língua de fogo dentro.
   fogo: [
     { t: 'linha', p: [50, 12, 84, 82, 16, 82], fechar: true },
@@ -79,7 +79,7 @@ export function runaDoElemento(elemento: Elemento | null, cor: number | null): R
   const chave = `${elemento}|${cor}`;
   let r = feitas.get(chave);
   if (!r) {
-    r = { cor: cor ?? COR_ARCANA, tracos: TRACOS[elemento ?? 'arcano'] };
+    r = { cor: cor ?? COR_ARCANA, tracos: TRACOS_ELEMENTOS[elemento ?? 'arcano'] };
     feitas.set(chave, r);
   }
   return r;
