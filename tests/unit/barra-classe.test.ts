@@ -6,6 +6,7 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { lerComando } from '../../src/arena/protocolo';
+import { aplicarBagagem, recolherBagagem } from '../../src/mundo/bagagem';
 import { MIGRACOES, VERSAO_SCHEMA } from '../../src/save/esquema';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -72,8 +73,8 @@ describe('migração 23 para 24', () => {
   });
 });
 
-describe('Parar ataque (D-097)', () => {
-  it('o comando desliga o básico automático, e escolher o alvo religa', () => {
+describe('Parar ataque (D-097, D-205)', () => {
+  it('o comando desliga o básico automático, e escolher o alvo não religa (só o comando)', () => {
     const ctx = contexto(faseDeTexto(SALA_ABERTA));
     const estado = criarEstado({ semente: 4, faseId: 'teste' });
     const j = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'j', 3, 5, ctx.balance);
@@ -85,7 +86,22 @@ describe('Parar ataque (D-097)', () => {
     tick({ t: 'autoAtaque', ligado: false });
     expect(j.autoAtaque).toBe(false);
     tick({ t: 'selecionarAlvo', alvo: 'b' });
+    expect(j.autoAtaque).toBe(false);
+    tick({ t: 'autoAtaque', ligado: true });
     expect(j.autoAtaque).toBe(true);
     expect(lerComando({ t: 'autoAtaque', ligado: 'sim' })).toBeNull();
+  });
+
+  it('desligado, segue desligado na troca de região do Mundo (a bagagem leva)', () => {
+    const ctx = contexto(faseDeTexto(SALA_ABERTA));
+    const estado = criarEstado({ semente: 4, faseId: 'teste' });
+    const j = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'j', 3, 5, ctx.balance);
+    estado.entidades.push(j);
+    j.autoAtaque = false;
+    const b = recolherBagagem(estado, j);
+    const chegada = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'j', 3, 5, ctx.balance);
+    expect(chegada.autoAtaque).toBe(true);
+    aplicarBagagem(criarEstado({ semente: 5, faseId: 'teste' }), ctx, chegada, b, 0);
+    expect(chegada.autoAtaque).toBe(false);
   });
 });
