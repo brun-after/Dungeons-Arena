@@ -15,7 +15,7 @@ import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import type { AcaoDoMundo } from '../mundo/acoes';
 import type { AvisoDoMundo } from '../mundo/avisos';
-import { iconeDoItem } from './icones';
+import { icone, iconeDoItem } from './icones';
 import { botao, comChave, painel, paragrafo } from './mundo-dialogos';
 import './troca.css';
 
@@ -46,6 +46,14 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, classe: string, texto
   if (texto !== undefined) e.textContent = texto;
   return e;
 };
+
+/** A seta entre os dois lados (o ícone da troca, sem pictograma de texto). */
+function seta(): HTMLElement {
+  const div = document.createElement('div');
+  div.className = 'seta-troca';
+  div.append(icone('troca'));
+  return div;
+}
 
 export function criarJanelaTroca(o: OpcoesDaTroca): JanelaDaTroca {
   const regras = o.ctx.balance.mundo.troca;
@@ -294,7 +302,7 @@ export function criarJanelaTroca(o: OpcoesDaTroca): JanelaDaTroca {
       const eu = o.eu();
       corpo.append(paragrafo(t('mundo.troca.texto', { nome: a.com }), 'texto-mundo'));
       const grade = el('div', 'grade-troca');
-      grade.append(minhaColuna(a, eu), el('div', 'seta-troca', '⇄'), colunaDele(a, eu));
+      grade.append(minhaColuna(a, eu), seta(), colunaDele(a, eu));
       corpo.append(grade, suaMochila(a, eu));
       if (chatLigado) corpo.append(secaoChat(a));
       const pendente = a.minha.cobra > a.dele.ouro || a.dele.cobra > a.minha.ouro;

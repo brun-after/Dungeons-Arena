@@ -7,7 +7,7 @@ import { proximaEtapa } from '../mundo/orientacao';
 import { tipoEm } from '../world/fase';
 import { cartografia, rosaDosVentos } from './cartografia';
 import { lapideAtiva, type OrientacaoMundo } from './orientacao-mundo';
-import { desenharMarco, marcosDaFase, marcosDeCaca, marcosDoEstado, type MarcoDoMapa, type TipoDeMarco } from './marcos-do-mapa';
+import { desenharMarco, marcosDaFase, marcosDoEstado, type MarcoDoMapa, type TipoDeMarco } from './marcos-do-mapa';
 import { FONTE_DO_JOGO } from './runa-texto';
 import { lerLugar } from '../mundo/lugares';
 
@@ -89,7 +89,6 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   const destinos: MarcoDoMapa[] = [
     ...marcosDaFase(fase, nomeDoDestino),
     ...entradas.map((estrutura): MarcoDoMapa => ({ tipo: 'masmorra', ...portaDa(estrutura).porta, rotulo: estrutura.nome })),
-    ...marcosDeCaca(ctx),
   ];
   const seguir = (marco: MarcoDoMapa) => {
     if (!marco.rotulo) return;
@@ -133,7 +132,7 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       const p = mapa.ponto(m.x, m.y);
       desenharMarco(g, m.tipo, p.x, p.y, m.tipo === 'casa' ? 11 : 21);
     }
-    // Só os lugares de passagem, de caça e os ninhos levam rótulo no papel; os serviços ficam no índice.
+    // Só os lugares de passagem e os ninhos levam rótulo no papel; os serviços ficam no índice.
     for (const m of marcos) {
       if (!m.rotulo || !COM_ROTULO.has(m.tipo)) continue;
       const p = mapa.ponto(m.x, m.y);
@@ -237,11 +236,10 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   return c;
 }
 
-const COM_ROTULO: ReadonlySet<TipoDeMarco> = new Set<TipoDeMarco>(['saida', 'portao', 'masmorra', 'caca', 'ninho']);
+const COM_ROTULO: ReadonlySet<TipoDeMarco> = new Set<TipoDeMarco>(['saida', 'portao', 'masmorra', 'ninho']);
 
-const GRUPOS_DO_INDICE: readonly { nome: 'mundo.mapa.indice.entradas' | 'mundo.mapa.indice.caca' | 'mundo.mapa.indice.ninhos' | 'mundo.mapa.indice.servicos'; tipos: readonly TipoDeMarco[] }[] = [
+const GRUPOS_DO_INDICE: readonly { nome: 'mundo.mapa.indice.entradas' | 'mundo.mapa.indice.ninhos' | 'mundo.mapa.indice.servicos'; tipos: readonly TipoDeMarco[] }[] = [
   { nome: 'mundo.mapa.indice.entradas', tipos: ['masmorra', 'portao', 'saida'] },
-  { nome: 'mundo.mapa.indice.caca', tipos: ['caca'] },
   { nome: 'mundo.mapa.indice.ninhos', tipos: ['ninho'] },
   { nome: 'mundo.mapa.indice.servicos', tipos: ['banco', 'ferreiro', 'mercado', 'taverna', 'alquimista'] },
 ];

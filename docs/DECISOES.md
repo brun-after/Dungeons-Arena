@@ -6767,7 +6767,7 @@ religava sozinho.
 - Só o visual da entrega, refeito no nosso código (textos no dicionário, a fonte do jogo no lugar de Georgia): a
   landing na raiz da web (o app e o PWA abrem o menu, `?jogar=1`), o menu em cartões, o tema de madeira, latão e
   pergaminho nos painéis do Mundo, a sala de seleção com palco e retrato, os avisos em pergaminho, o mapa do terreno
-  (papel, rótulos que não se sobrepõem, índice dos pontos, marcos de saída e de caça, clique no marco para segui-lo),
+  (papel, rótulos que não se sobrepõem, índice dos pontos, marcos de saída e de retorno, clique no marco para segui-lo),
   o grimório (arrastar entre as teclas, rank nas cartas, ultimate, sintonia e combos recolhidos) e o d20 desenhado
   em icosaedro, que para com a face do combate de frente.
 - **Troca**: os dois lados lado a lado, como inventários; o ouro com "Adicionar gold" e o saldo à vista; **cobrar**
@@ -6778,5 +6778,5 @@ religava sozinho.
   em vermelho com a faixa "Ataque automático desligado". Trocar de alvo não religa mais; só o botão, a tecla ou
   sair e entrar no jogo (o estado viaja entre regiões na bagagem).
 
-**Fora.** Os chefes da entrega (mecânicas e marcos no mapa), a passiva do Atirador, o ajuste do Carisma e a conta
+**Fora.** Os chefes da entrega (mecânicas e marcos no mapa), as áreas de caça com nível no mapa, a passiva do Atirador, o ajuste do Carisma e a conta
 própria da VPS (a nossa segue Google e Supabase, então a landing não tem "Minha conta").

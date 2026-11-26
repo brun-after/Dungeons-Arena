@@ -3,17 +3,15 @@
 // (taverna, banco, mercado, ferraria, botica) com a sua cor e o seu sinal, a entrada das dungeons, as pedras de save e
 // de portal, as fogueiras, o vendedor da noite e os ninhos das criaturas que guardam receitas. Tudo vem da fase e do estado (nada fixo por região). Desenho em
 // canvas 2D, em vetor, do tamanho pedido.
-// D-205 (25/11/2026, entrega visual da VPS): a saída das masmorras e as áreas de caça (os pontos de nascimento de
-// verdade, agrupados por setor, com a faixa de nível), em losango; o mapa grande tem um índice clicável deles.
+// D-205 (25/11/2026, entrega visual da VPS): a saída e o retorno das masmorras, em losango; o mapa grande tem um
+// índice clicável dos marcos. As áreas de caça com nível da entrega ficaram de fora.
 
-import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { Fase, TipoPredio } from '../world/fase';
 import { REF_NOTURNO } from '../mundo/vila-noite';
 import { t, type ChaveTexto } from '../i18n';
-import { FONTE_DO_JOGO } from './runa-texto';
 
-export type TipoDeMarco = 'portao' | 'casa' | TipoPredio | 'masmorra' | 'pedra_save' | 'pedra_portal' | 'fogueira' | 'noturno' | 'ninho' | 'saida' | 'caca';
+export type TipoDeMarco = 'portao' | 'casa' | TipoPredio | 'masmorra' | 'pedra_save' | 'pedra_portal' | 'fogueira' | 'noturno' | 'ninho' | 'saida';
 
 export interface MarcoDoMapa {
   tipo: TipoDeMarco;
@@ -39,33 +37,6 @@ export function marcosDaFase(fase: Fase, nomeDoDestino: (lugar: string) => strin
   if (fase.portaSaida) marcos.push({ tipo: 'saida', x: fase.portaSaida.x, y: fase.portaSaida.y, rotulo: t('mapa.marco.saida') });
   if (fase.portaRetorno) marcos.push({ tipo: 'saida', x: fase.portaRetorno.x, y: fase.portaRetorno.y, rotulo: t('mapa.marco.retorno') });
   return marcos;
-}
-
-/**
- * D-205: as áreas de caça das regiões abertas, pelos pontos de nascimento de verdade: agrupados em setores (um quarto
- * da largura), os de mais de um ponto viram um marco no ponto mais central, com a faixa de nível. No máximo 8, os
- * maiores; os chefes ficam de fora.
- */
-export function marcosDeCaca(ctx: Pick<ContextoSimulacao, 'fase' | 'conteudo'>): MarcoDoMapa[] {
-  if (!ctx.fase.exterior) return [];
-  const setores = new Map<string, { x: number; y: number; nivel: number }[]>();
-  const passo = Math.max(24, Math.ceil(ctx.fase.largura / 4));
-  for (const p of ctx.fase.inimigos) {
-    if (p.nivel === undefined || ctx.conteudo.presets.get(p.preset)?.arquetipo === 'boss') continue;
-    const chave = `${String(Math.floor(p.x / passo))}:${String(Math.floor(p.y / passo))}`;
-    const grupo = setores.get(chave) ?? [];
-    grupo.push({ x: p.x, y: p.y, nivel: p.nivel });
-    setores.set(chave, grupo);
-  }
-  return [...setores.values()].filter((g) => g.length > 1).sort((a, b) => b.length - a.length).slice(0, 8).map((grupo) => {
-    const min = Math.min(...grupo.map((p) => p.nivel));
-    const max = Math.max(...grupo.map((p) => p.nivel));
-    const x = grupo.reduce((s, p) => s + p.x, 0) / grupo.length;
-    const y = grupo.reduce((s, p) => s + p.y, 0) / grupo.length;
-    const ponto = grupo.reduce((a, b) => (Math.hypot(a.x - x, a.y - y) <= Math.hypot(b.x - x, b.y - y) ? a : b));
-    const faixa = min === max ? String(min) : `${String(min)}–${String(max)}`;
-    return { tipo: 'caca', x: ponto.x, y: ponto.y, rotulo: t('mapa.marco.caca', { faixa }) };
-  });
 }
 
 /** Os marcos que dependem do estado (as pedras, as fogueiras acesas, o vendedor que só vem à noite). */
@@ -94,7 +65,6 @@ export function corDoMarco(tipo: TipoDeMarco): string {
   if (tipo === 'noturno') return '#c9a0ff';
   if (tipo === 'ninho') return '#ff8a6a';
   if (tipo === 'saida') return '#9af1d4';
-  if (tipo === 'caca') return '#f0cc8c';
   return '#e6dccb';
 }
 
@@ -105,15 +75,19 @@ export function desenharMarco(g: CanvasRenderingContext2D, tipo: TipoDeMarco, x:
   g.lineJoin = 'round';
   g.lineWidth = Math.max(1, l / 9);
   g.strokeStyle = '#12100c';
-  if (tipo === 'saida' || tipo === 'caca') {
-    // D-205: o losango com a seta (saída) ou o x (caça).
+  if (tipo === 'saida') {
+    // D-205: o losango com a seta.
     g.fillStyle = corDoMarco(tipo);
     g.beginPath();
     g.moveTo(x, y - h); g.lineTo(x + h, y); g.lineTo(x, y + h); g.lineTo(x - h, y);
     g.closePath(); g.fill(); g.stroke();
-    g.fillStyle = '#241719';
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `${String(l * 0.67)}px "${FONTE_DO_JOGO}", Georgia, serif`;
-    g.fillText(tipo === 'saida' ? '↗' : '×', x, y);
+    // A seta traçada, sem caractere.
+    const r = h * 0.4;
+    g.strokeStyle = '#241719'; g.lineWidth = Math.max(1.5, h * 0.16); g.lineCap = 'round';
+    g.beginPath();
+    g.moveTo(x - r, y + r); g.lineTo(x + r, y - r);
+    g.moveTo(x, y - r); g.lineTo(x + r, y - r); g.lineTo(x + r, y);
+    g.stroke();
   } else if (tipo === 'portao') {
     // Dois pilares e o arco, em dourado.
     g.fillStyle = '#ffd77a';

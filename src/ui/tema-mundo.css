@@ -137,12 +137,13 @@ dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
   font-size: .78rem;
 }
 .chaves-cartografia li { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
-.chaves-cartografia li::before { content: '◆'; color: #edb85d; }
-.chaves-cartografia [data-simbolo='eu']::before { content: '●'; color: #fff6df; }
-.chaves-cartografia [data-simbolo='ninho']::before { content: '✕'; color: #ff8a6a; font-weight: 900; }
-.chaves-cartografia [data-simbolo='saida']::before { color: #a9d499; }
-.chaves-cartografia [data-simbolo='portao']::before { content: '∩'; font-weight: 900; }
-.chaves-cartografia [data-simbolo='ponto']::before { content: '★'; }
+/* 25/11/2026: os símbolos da chave são formas do CSS (losango, círculo, estrela), não pictogramas de texto. */
+.chaves-cartografia li::before { content: ''; width: .5rem; height: .5rem; background: #edb85d; transform: rotate(45deg); }
+.chaves-cartografia [data-simbolo='eu']::before { background: #fff6df; border-radius: 50%; transform: none; }
+.chaves-cartografia [data-simbolo='ninho']::before { content: '×'; width: auto; height: auto; background: none; transform: none; color: #ff8a6a; font-weight: 900; }
+.chaves-cartografia [data-simbolo='saida']::before { background: #a9d499; }
+.chaves-cartografia [data-simbolo='portao']::before { content: '∩'; width: auto; height: auto; background: none; transform: none; color: #edb85d; font-weight: 900; }
+.chaves-cartografia [data-simbolo='ponto']::before { width: .7rem; height: .7rem; transform: none; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 
 .indice-cartografia {
   max-height: max(175px, calc(100dvh - 240px));
@@ -175,9 +176,9 @@ dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
   cursor: pointer;
 }
 .indice-cartografia button:is(:hover, :focus-visible) { background: #53341f; color: #fff0cb; }
-.indice-cartografia button::before { content: '◆'; color: #d9a459; font-size: .67rem; margin-right: .4rem; }
-.indice-cartografia [data-marco='saida']::before { color: #a9d499; }
-.indice-cartografia [data-marco='chefe']::before { color: #f59078; }
+.indice-cartografia button::before { content: ''; display: inline-block; width: .4rem; height: .4rem; background: #d9a459; transform: rotate(45deg); margin-right: .5rem; vertical-align: .1em; }
+.indice-cartografia [data-marco='saida']::before { background: #a9d499; }
+.indice-cartografia [data-marco='ninho']::before { background: #ff8a6a; }
 .mapa-expandido .ajuda-mapa summary { padding: .55rem 0 .2rem; }
 .mapa-expandido .regiao-mapa { border-color: #7d5638; background: #38251a; color: #ebd5b1; }
 .mapa-expandido .regiao-mapa > span { color: #f0d7b1; }

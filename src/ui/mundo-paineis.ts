@@ -220,7 +220,7 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
     if (indice.childElementCount > 0) prancha.append(indice);
     const legenda = document.createElement('ul');
     legenda.className = 'chaves-cartografia';
-    for (const simbolo of ['eu', 'caca', 'saida', 'portao', 'ninho', 'ponto'] as const) {
+    for (const simbolo of ['eu', 'saida', 'portao', 'ninho', 'ponto'] as const) {
       const item = document.createElement('li');
       item.dataset.simbolo = simbolo;
       item.textContent = t(`mundo.mapa.chave.${simbolo}`);
