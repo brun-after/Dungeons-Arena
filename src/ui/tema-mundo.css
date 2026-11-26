@@ -15,7 +15,9 @@
   max-width: min(92vw, 36rem);
   padding: .65rem 1.25rem;
   color: var(--arena-tinta);
-  font: 700 .92rem/1.3 var(--fonte-titulo);
+  font-weight: 700;
+  line-height: 1.3;
+  font-family: var(--fonte-titulo);
   background:
     repeating-linear-gradient(12deg, #8d582009 0 1px, transparent 1px 4px),
     radial-gradient(ellipse at 50% 30%, #f9e7bf, #debb83 73%, #b8814c);
@@ -37,6 +39,8 @@
 
 :is(.aviso, .faixa-lugar)::before { left: -3px; }
 :is(.aviso, .faixa-lugar)::after { right: -3px; }
+/* 26/11/2026: o aviso do HUD herda o tamanho do quadro do alvo (ficam lado a lado); só a faixa do lugar cresce. */
+.faixa-lugar { font-size: .92rem; }
 .aviso { animation: abrir-aviso-arena 220ms ease-out both; }
 .faixa-lugar {
   position: absolute;
@@ -54,7 +58,7 @@
   .aviso { animation: none; }
 }
 body.movimento-reduzido .aviso { animation: none; }
-body.toque .mensagens-topo .aviso { padding: .38rem .6rem; font-size: .78rem; }
+body.toque .mensagens-topo .aviso { padding: .38rem .6rem; } /* 26/11/2026: o tamanho vem do quadro do alvo ao lado. */
 
 dialog.modal:is(.modal-mundo, .pausa, .configuracoes, .mochila) {
   --borda: #826041;
@@ -137,12 +141,13 @@ dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
   font-size: .78rem;
 }
 .chaves-cartografia li { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
-.chaves-cartografia li::before { content: '◆'; color: #edb85d; }
-.chaves-cartografia [data-simbolo='eu']::before { content: '●'; color: #fff6df; }
-.chaves-cartografia [data-simbolo='ninho']::before { content: '✕'; color: #ff8a6a; font-weight: 900; }
+/* 26/11/2026 (D-067): as marcas desenhadas com forma, sem pictograma no texto. */
+.chaves-cartografia li::before { content: ''; width: .5em; height: .5em; flex: none; background: currentColor; transform: rotate(45deg); color: #edb85d; }
+.chaves-cartografia [data-simbolo='eu']::before { transform: none; border-radius: 50%; color: #fff6df; }
+.chaves-cartografia [data-simbolo='ninho']::before { content: '×'; width: auto; height: auto; background: none; transform: none; color: #ff8a6a; font-weight: 900; }
 .chaves-cartografia [data-simbolo='saida']::before { color: #a9d499; }
-.chaves-cartografia [data-simbolo='portao']::before { content: '∩'; font-weight: 900; }
-.chaves-cartografia [data-simbolo='ponto']::before { content: '★'; }
+.chaves-cartografia [data-simbolo='portao']::before { content: '∩'; width: auto; height: auto; background: none; transform: none; font-weight: 900; }
+.chaves-cartografia [data-simbolo='ponto']::before { transform: none; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); width: .8em; height: .8em; }
 
 .indice-cartografia {
   max-height: max(175px, calc(100dvh - 240px));
@@ -175,7 +180,7 @@ dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
   cursor: pointer;
 }
 .indice-cartografia button:is(:hover, :focus-visible) { background: #53341f; color: #fff0cb; }
-.indice-cartografia button::before { content: '◆'; color: #d9a459; font-size: .67rem; margin-right: .4rem; }
+.indice-cartografia button::before { content: ''; display: inline-block; width: .45em; height: .45em; background: currentColor; transform: rotate(45deg); color: #d9a459; margin-right: .5rem; vertical-align: middle; }
 .indice-cartografia [data-marco='saida']::before { color: #a9d499; }
 .indice-cartografia [data-marco='chefe']::before { color: #f59078; }
 .mapa-expandido .ajuda-mapa summary { padding: .55rem 0 .2rem; }
@@ -223,4 +228,17 @@ body .minimapa.minimapa-mundo {
 .opcoes-cidadela .botao-menu small { grid-column: 2; }
 @media (max-width: 450px) {
   .menu-cidadela .opcoes-cidadela { grid-template-columns: 1fr; }
+}
+
+/* 26/11/2026: no celular estreito, os seis botões do cabeçalho do Mundo se espremiam numa linha só e cresciam até
+   ~100 px de altura, cobrindo o minimapa (o toque nele abria a mochila). Agora quebram em duas linhas compactas, sem
+   quebrar o texto, e o minimapa e o chat descem para baixo delas. */
+@media (max-width: 600px) {
+  .camada-mundo .acoes-cabecalho { flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; row-gap: 6px; }
+  .camada-mundo .acoes-cabecalho .botao-cabecalho { white-space: nowrap; min-height: 32px; padding: 4px 8px; font-size: .74rem; }
+  .camada-mundo .acoes-cabecalho .botao-mochila { display: inline-flex; align-items: center; gap: 4px; }
+  body.toque .minimapa.minimapa-mundo { top: calc(96px + var(--seguro-topo)); }
+  body.toque .relogio-mundo { top: calc(90px + var(--seguro-topo)); }
+  body.toque .barra-consumiveis { top: calc(122px + var(--seguro-topo)); }
+  body.toque .camada-mundo .painel-social, body.toque .painel-social { top: calc(186px + var(--seguro-topo)); max-height: calc(100dvh - 196px - var(--seguro-topo)); }
 }
