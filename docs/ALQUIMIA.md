@@ -1,8 +1,9 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.4 · **Data:** 22/11/2026
+**Versão:** 1.5 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.5 (26/11/2026)**: D-206. A fusão enche o vínculo de todos os elementos e mostra a mescla deles (as ligas).
 > - **1.4 (22/11/2026)**: marco 53 (D-203). A compreensão conta o acerto em inimigo de qualquer nível.
 > - **1.3 (21/11/2026)**: D-198, adendo. Reaprender de graça e na hora, e a chance que sobe a cada tentativa.
 > - **1.2 (21/11/2026)**: marco 52 (D-198). Os níveis de raridade da fusão e a fórmula refeita.
@@ -108,6 +109,33 @@ As 4 fusões fixas viraram a fusão aberta das mesmas partes (`alquimia.json →
 | Cadeia sombria | `f__corrente__recuo_psiquico` |
 
 As definições antigas ficam no catálogo, sem o campo `fusao`, porque inimigos e visuais ainda as usam.
+
+## A mescla dos elementos
+
+A fusão guarda todos os elementos dela (`Habilidade.elementosFusao`: os das partes, na ordem da receita, e os das runas
+novas; a parte sem elemento conta como Físico).
+
+- **Vínculo.** Cada uso soma o uso de todos esses elementos. Na barra, a tecla se divide entre eles.
+- **Visual.** Por cima da assinatura do núcleo (`render/vfx/manifestacao-mistura.ts`):
+  - a matéria de cada elemento, na mão, no rastro, no acerto e na área;
+  - a liga de cada par (`render/vfx/ligas.ts`), até três por skill, primeiro as do núcleo;
+  - com três elementos ou mais, a trança, em que a peça de cada um gira em volta do acerto.
+
+Algumas ligas mudam com o elemento dominante (o do núcleo):
+
+| Par | Dominante | Liga |
+|---|---|---|
+| Fogo e terra | fogo | Lava: gotas e bolhas de magma, a poça com veios acesos |
+| Fogo e terra | terra | Pedra em brasa: o meteoro que cai e racha o chão |
+| Fogo e gelo | fogo | Vapor: a coluna branca e a água que pinga |
+| Fogo e gelo | gelo | Cristal ígneo: cristais com brasa presa dentro |
+| Trevas e sagrado | sagrado | Eclipse com a coroa aberta em raios |
+
+As outras: plasma (fogo e raio), chama pestilenta (fogo e veneno), chama da mente, fogo negro, fogo solar, metal
+fundido, granizo carregado, gelo tóxico, prisma, permafrost, gelo da tumba, diamante, lâmina de gelo, descarga ácida,
+sinapse, fulgurito (raio e terra), relâmpago negro, raio divino, aço carregado, alucinógeno, lodo, praga, elixir,
+lâmina envenenada, monólito, pesadelo, epifania, telecinese, obsidiana, âmbar, cascalho, lâmina sombria e aço
+consagrado. Para ver, toque a fusão na galeria (`?galeria=efeitos`).
 
 ## Níveis de raridade
 

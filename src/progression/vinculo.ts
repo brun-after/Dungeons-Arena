@@ -66,6 +66,15 @@ export function registrarUso(ctx: CtxVinculo, bolsa: Bolsa, elemento: Elemento |
   uso[p] = { valor: Math.min(r.usoSaturacao, usoAtual(r, uso[p], tick) + 1), tick };
 }
 
+/** D-206 (26/11/2026): as pontas de uma skill — as da fusão, todas; as outras, a do elemento dela. */
+export const pontasDaSkill = (h: { elemento: Elemento | null; elementosFusao?: readonly PontaElemental[] }): readonly PontaElemental[] =>
+  h.elementosFusao && h.elementosFusao.length > 0 ? h.elementosFusao : [pontaDe(h.elemento)];
+
+/** D-206: usar a skill alimenta o uso de cada ponta dela (a fusão de fogo, veneno e trevas enche as três). */
+export function registrarUsoDaSkill(ctx: CtxVinculo, bolsa: Bolsa, h: { elemento: Elemento | null; elementosFusao?: readonly PontaElemental[] }, tick: number): void {
+  for (const p of pontasDaSkill(h)) registrarUso(ctx, bolsa, p === 'fisico' ? null : p, tick);
+}
+
 /**
  * O combate consulta o vínculo a cada golpe; ele só muda com a barra, o equipado, o uso e o tick. Fica guardado por
  * ficha (memória fraca) com essa assinatura. Não muda o resultado, só evita refazer a conta.
@@ -98,8 +107,16 @@ function calcularVinculo(ctx: CtxVinculo, bolsa: Bolsa, tick: number): Vinculo {
   const teclas = bolsa.barra.filter((id): id is string => id !== null);
   // Marco 39 (D-151): a skill com encaixe de runa conta pela runa padrão na barra (a escolhida se sustenta pelo uso; se
   // contasse na barra, nunca sumiria).
-  const ponta = (id: string) => (levaRuna(ctx, id) ? runaPadraoDaSkill(ctx, bolsa, id) : pontaDe(resolverHabilidade(ctx, id)?.elemento ?? null));
-  for (const id of teclas) barra[ponta(id)] += 1 / Math.max(1, teclas.length);
+  // D-206: a fusão divide a tecla entre os elementos dela (a soma da barra não muda).
+  const pontas = (id: string): readonly PontaElemental[] => {
+    if (levaRuna(ctx, id)) return [runaPadraoDaSkill(ctx, bolsa, id)];
+    const h = resolverHabilidade(ctx, id);
+    return h ? pontasDaSkill(h) : ['fisico'];
+  };
+  for (const id of teclas) {
+    const ps = pontas(id);
+    for (const p of ps) barra[p] += 1 / Math.max(1, teclas.length) / ps.length;
+  }
   const itens = vazio();
   const pecas = itensEquipados(bolsa, ctx.conteudo.itens).filter((i) => i.tipo === 'equipamento');
   for (const i of pecas) if (i.elemento) itens[i.elemento] += 1 / Math.max(1, pecas.length);

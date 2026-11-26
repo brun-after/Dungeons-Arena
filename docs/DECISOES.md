@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.62 · **Data:** 25/11/2026
+**Versão:** 1.63 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.63 (26/11/2026)**: D-206: a fusão leva todos os elementos dela, no vínculo e no visual (as ligas: lava, vapor, cristal ígneo, fulgurito…).
 > - **1.62 (25/11/2026)**: D-205, continuação: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório, d20), a troca nova e o botão do ataque automático.
 > - **1.61 (25/11/2026)**: D-205: a fonte própria do jogo (Runas de Filo) e o nome novo, Dungeons Dimensions.
 > - **1.60 (22/11/2026)**: D-203: os ninhos das receitas (o lugar da região onde a criatura que guarda uma receita se junta e a deixa cair 4 vezes mais), no mapa e no texto da receita.
@@ -6780,3 +6781,27 @@ religava sozinho.
 
 **Fora.** Os chefes da entrega (mecânicas e marcos no mapa), a passiva do Atirador, o ajuste do Carisma e a conta
 própria da VPS (a nossa segue Google e Supabase, então a landing não tem "Minha conta").
+
+## D-206 — A mescla dos elementos na fusão (26/11/2026)
+
+**Problema.** A fusão desenhava só a assinatura do núcleo (com as camadas da raridade): uma Bola de fogo com gelo era
+uma bola de fogo. O resultado de juntar e estudar skills não recompensava o olho, e o vínculo só subia no elemento do
+núcleo, mesmo com veneno e trevas na mistura.
+
+**Decisão.**
+- `Habilidade.elementosFusao`: os elementos das partes (sem elemento conta como Físico), na ordem da receita, e os das
+  runas novas. Sai de `definicaoDaFusao`; nada muda no id nem no save.
+- **Vínculo**: usar a fusão soma o uso de cada elemento dela (`registrarUsoDaSkill`); na barra, a tecla se divide entre
+  eles (a soma da barra não muda, e a paridade do eneágono fica).
+- **Visual** (`render/vfx/manifestacao-mistura.ts`), por cima da assinatura do núcleo, em todas as fases (mão, rastro,
+  acerto, área e em si):
+  - a matéria de cada elemento, o do núcleo mais discreto;
+  - a **liga** de cada par (`render/vfx/ligas.ts`, as 36 dos nove elementos, feitas à mão): fogo e terra, lava (gotas
+    incandescentes, bolhas de magma, a poça com veios acesos) ou, com a terra dominando, a pedra em brasa que cai do
+    alto; fogo e gelo, vapor (a coluna branca, a água que pinga) ou, com o gelo dominando, o cristal ígneo; fogo e
+    raio, plasma; raio e terra, fulgurito; trevas e luz, eclipse; gelo e psíquico, prisma; e assim por diante;
+  - com três elementos ou mais, a trança: a peça de cada um gira em volta do acerto.
+- Com movimento reduzido, ficam as partículas e a primeira silhueta. A galeria (`?galeria=efeitos`) toca as fusões
+  com a mescla.
+
+**Fora.** O vento (só dos inimigos) não tem liga; a cor base da fusão segue a do núcleo.
