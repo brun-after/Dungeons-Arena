@@ -122,7 +122,7 @@ export function alvoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
 }
 
 /** O mapa de perigo para planejar o caminho, se o perfil desta vez evita (null: anda reto, pisa no que houver). */
-export function perigoDoCaminho(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, perfil: PerfilIa): Uint8Array | null {
+export function perigoDoCaminho(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, perfil: PerfilIa): Set<number> | null {
   if (perfil.evitaPerigoPct <= 0) return null;
   const mapa = mapaDePerigo(estado, ctx, e);
   return mapa && sorteioPct(`perigo:${e.id}:${balde(estado, ctx)}`, perfil.evitaPerigoPct) ? mapa : null;

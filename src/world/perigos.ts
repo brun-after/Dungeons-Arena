@@ -39,14 +39,17 @@ export function emPerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   return estado.armadilhas.some((a) => armadilhaCobre(a, x, y) && armadilhaTemida(estado, ctx, e, a));
 }
 
-/** O mapa de perigo da fase para a entidade (1 = perigo), ou null se não há nenhum. */
-export function mapaDePerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): Uint8Array | null {
+/**
+ * O mapa de perigo da fase para a entidade (os índices `y*largura+x` das células de perigo), ou null se não há nenhum.
+ * Marco 54 (26/11/2026, D-207): um conjunto só com as células marcadas, não um vetor do mapa inteiro (o atlas).
+ */
+export function mapaDePerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): Set<number> | null {
   const { largura, altura } = ctx.fase;
-  let mapa: Uint8Array | null = null;
+  let mapa: Set<number> | null = null;
   const marcar = (x: number, y: number) => {
     if (x < 0 || y < 0 || x >= largura || y >= altura) return;
-    mapa ??= new Uint8Array(largura * altura);
-    mapa[y * largura + x] = 1;
+    mapa ??= new Set<number>();
+    mapa.add(y * largura + x);
   };
   for (const a of areasEfetivas(estado, ctx.fase.ambientes ?? [])) {
     if (!ambienteFere(e, a)) continue;
