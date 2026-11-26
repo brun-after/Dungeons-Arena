@@ -5,6 +5,9 @@ import { conteudoOficial } from '../../src/core/conteudo';
 import { montarMundoContinuo } from '../../src/mundo/mundo-continuo';
 import { reinoDoConteudo } from '../../src/mundo/reino';
 import { zonaEm } from '../../src/mundo/zonas';
+import { Hibernacao } from '../../src/mundo/hibernacao';
+import { clonarEstado } from '../../src/core/estado';
+import { criarJogador } from '../../src/entities/fabrica';
 import { passavel } from '../../src/world/fase';
 import { caminho } from '../../src/world/navegacao';
 
@@ -46,5 +49,32 @@ describe('Mundo contínuo montado', () => {
     const para = c.vertical ? { x: c.linha + 6, y: t } : { x: t, y: c.linha + 6 };
     expect(caminho(mundo.ctx.fase, de, para, 80).status).toBe('alcancado');
     expect(zonaEm(mundo.zonas, de.x, de.y)).not.toBe(zonaEm(mundo.zonas, para.x, para.y));
+  });
+
+  it('hiberna o que está longe do jogador e acorda ao chegar perto', () => {
+    const estado = clonarEstado(mundo.estado);
+    const s = mundo.ctx.fase.spawns[0];
+    const classe = conteudo.classes.get('mago');
+    if (!s || !classe) throw new Error('spawn');
+    const eu = criarJogador(classe, 'p1', s.x, s.y, mundo.ctx.balance);
+    estado.entidades.push(eu);
+    const h = new Hibernacao(mundo.ctx.balance.mundo.hibernacao);
+    const antes = estado.entidades.length;
+    h.conferir(estado, true);
+    expect(estado.entidades.length).toBeLessThan(antes / 10);
+    expect(estado.entidades).toContain(eu);
+    const r = mundo.ctx.balance.mundo.hibernacao;
+    // Ninguém acordado fica longe demais; ninguém dormindo fica perto.
+    for (const e of estado.entidades) if (e !== eu) expect(Math.max(Math.abs(e.x - eu.x), Math.abs(e.y - eu.y))).toBeLessThanOrEqual(r.raioDormir + r.bloco);
+    // Andando até outra região, o que estava lá acorda.
+    const c = mundo.atlas.areas.get('ruinas_do_norte');
+    if (!c) throw new Error('area');
+    eu.x = c.x + Math.floor(c.largura / 2);
+    eu.y = c.y + Math.floor(c.altura / 2);
+    const dormindo = h.dormindo().entidades;
+    h.conferir(estado, true);
+    expect(h.dormindo().entidades).not.toBe(dormindo);
+    expect(estado.entidades.some((e) => e !== eu && zonaEm(mundo.zonas, e.x, e.y) === 'ruinas_do_norte')).toBe(true);
+    expect(h.dormindo().entidades + estado.entidades.length).toBe(antes);
   });
 });

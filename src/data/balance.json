@@ -718,6 +718,8 @@
   "mundo": {
     "populacaoMax": 300,
     "resgate": {"mortesDesconto": 5, "mortesGratis": 10},
+    "_docHibernacao": "Marco 54 (D-207): no Mundo contínuo, o que está longe de todo jogador dorme por bloco e acorda antes de entrar na área de interesse (24).",
+    "hibernacao": { "raioDormir": 60, "raioAcordar": 46, "bloco": 32, "aCadaTicks": 20 },
     "refugio": { "combateS": 8 },
     "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
     "exercitoNecromante": {"noNivelBase": 4, "nivelBase": 8, "maximo": 10, "niveisPorVaga": 7, "recargaMs": 6000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
