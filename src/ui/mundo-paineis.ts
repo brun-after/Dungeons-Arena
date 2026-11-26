@@ -90,14 +90,16 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
   const atual = [...reino.regioes, ...reino.masmorras, ...reino.covis].find(x => lugar.endsWith(`:${x.id}`));
   // 09/11/2026 (D-143): as instruções e a bússola recolhidas (no celular, tomavam meia tela antes do mapa).
   const ajuda = document.createElement('details'); ajuda.className = 'ajuda-mapa';
-  const resumo = document.createElement('summary'); resumo.textContent = t('mundo.mapa.lugar', { nome: atual?.nome ?? lugar });
+  // D-205 (25/11/2026): o lugar fica à vista; a ajuda recolhida vai para baixo do mapa do terreno.
+  d.corpo.append(paragrafo(t('mundo.mapa.lugar', { nome: atual?.nome ?? lugar }), 'localizacao-cartografia'));
+  const resumo = document.createElement('summary'); resumo.textContent = t('mundo.mapa.comoUsar');
   ajuda.append(resumo, paragrafo(t('mundo.mapa.instrucoes')));
   const bussola = document.createElement('div'); bussola.className = 'bussola-mapa';
   for (const [direcao, seta] of [['norte', 'seta_ne'], ['leste', 'seta_se'], ['sul', 'seta_so'], ['oeste', 'seta_no']] as const) {
     const eixo = document.createElement('span'); eixo.append(icone(seta), t(`mundo.mapa.${direcao}`)); bussola.append(eixo);
   }
   ajuda.append(bussola);
-  d.corpo.append(ajuda);
+  if (!terreno) d.corpo.append(ajuda);
   const statusDestino = paragrafo('', 'destino-mapa');
   statusDestino.setAttribute('role', 'status');
   const selecionar = (id: string, nome: string) => {
@@ -205,10 +207,27 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
     escolhas.hidden = painel === local;
   };
   if (terreno) {
-    const canvas = mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas, terreno.orientacao, undefined, terreno.andar);
+    const indice = document.createElement('aside');
+    indice.className = 'indice-cartografia';
+    indice.setAttribute('aria-label', t('mundo.mapa.pontosTerreno'));
+    const canvas = mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas, terreno.orientacao, undefined, terreno.andar, indice);
     // 09/11/2026 (D-143): a janela com zoom é a mesma do Portal temporário (ampliada no celular, o mapa ocupa a tela).
     const { janela, zoom } = janelaComZoom(canvas, d.el, { reduzir: t('mundo.mapa.reduzir'), ampliar: t('mundo.mapa.ampliar') });
-    local.append(zoom, janela, paragrafo(t('mundo.mapa.legenda'), 'legenda-cartografia'));
+    // D-205 (25/11/2026): o mapa e o índice dos pontos lado a lado; a chave curta dos símbolos acima.
+    const prancha = document.createElement('div');
+    prancha.className = 'prancha-cartografia';
+    prancha.append(janela);
+    if (indice.childElementCount > 0) prancha.append(indice);
+    const legenda = document.createElement('ul');
+    legenda.className = 'chaves-cartografia';
+    for (const simbolo of ['eu', 'caca', 'saida', 'portao', 'ninho', 'ponto'] as const) {
+      const item = document.createElement('li');
+      item.dataset.simbolo = simbolo;
+      item.textContent = t(`mundo.mapa.chave.${simbolo}`);
+      legenda.append(item);
+    }
+    zoom.prepend(legenda);
+    local.append(zoom, prancha, ajuda);
   }
   d.corpo.append(abas, escolhas, local, geografia, lista);
   mostrar(terreno ? local : geografia);

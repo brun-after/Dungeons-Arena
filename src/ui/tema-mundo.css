@@ -139,7 +139,7 @@ dialog.modal.mapa-expandido .modal-corpo { gap: .5rem; }
 .chaves-cartografia li { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
 .chaves-cartografia li::before { content: '◆'; color: #edb85d; }
 .chaves-cartografia [data-simbolo='eu']::before { content: '●'; color: #fff6df; }
-.chaves-cartografia [data-simbolo='chefe']::before { color: #f59078; }
+.chaves-cartografia [data-simbolo='ninho']::before { content: '✕'; color: #ff8a6a; font-weight: 900; }
 .chaves-cartografia [data-simbolo='saida']::before { color: #a9d499; }
 .chaves-cartografia [data-simbolo='portao']::before { content: '∩'; font-weight: 900; }
 .chaves-cartografia [data-simbolo='ponto']::before { content: '★'; }
