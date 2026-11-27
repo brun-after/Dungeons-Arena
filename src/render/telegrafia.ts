@@ -12,6 +12,7 @@
 // partículas e o projétil é um núcleo de luz. As formas desenhadas ficam só para a qualidade sem partículas.
 
 import { naRunaDaSkill } from './vfx/transmutacao';
+import { retratoDaMistura, trocaDaMistura } from './vfx/manifestacao-mistura';
 import { MarcasDeFilo } from './marcas-de-filo';
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -193,7 +194,9 @@ export class CamadaTelegrafia {
         const def = hab ? ASSINATURAS[assinaturaDe(hab)] : undefined;
         const dir = { x: p.dirX, y: p.dirY };
         // D-174 (14/11/2026): com a runa de outro elemento, o corpo do projétil também é feito dele.
-        const corpo = def?.corpo ? naRunaDaSkill(def.familia, hab?.runa, def.corpo, visual?.cor ?? cor) : undefined;
+        // D-206, continuação (26/11/2026): o corpo da fusão também é feito da liga dos elementos dela.
+        const retrato = retratoDaMistura(hab?.elementosFusao);
+        const corpo = def?.corpo ? naRunaDaSkill(def.familia, retrato ? undefined : hab?.runa, def.corpo, visual?.cor ?? cor, retrato ? trocaDaMistura(retrato, def.familia) : null) : undefined;
         if (corpo) particulas.emitirLista(corpo.lista, p.x + p.dirX * avanco, p.y + p.dirY * avanco, corpo.cor, undefined, dir);
         else particulas.emitir(forma === 'flecha' ? 'projetil_flecha' : forma === 'teia' ? 'projetil_teia' : 'projetil', p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, dir);
         continue;

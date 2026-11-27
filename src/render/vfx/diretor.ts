@@ -13,18 +13,18 @@ import { circuloNoChao, clarao, ondaDeChoque, sortear } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, DefAssinatura, EmSi, P } from './cena';
 import { Deslizes } from './deslizes';
 import { formaNaArea, formaNaConjuracao, formaNoAcerto, type FormaVisual } from './manifestacao-forma';
-import { COR_DA_RUNA, ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
+import { ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
 import { Marcas } from './marcas';
 import { Animacoes, Pincel } from './pincel';
 import type { TexturaRica } from './texturas';
 import type { Gesto, Palco } from './gestos-base';
 import { classeNaUltimate, estiloNaUltimate, toqueDominante, type PalcoDaUltimate } from './classe-na-ultimate';
-import { cenaTrocada, emissoesTrocadas, trocaDe, type Troca } from './transmutacao';
+import { cenaTrocada, corDaTroca, emissoesTrocadas, trocaDe, type Troca } from './transmutacao';
 import type { Eixo } from '../../combat/eixos';
 import { gestoDoNucleo, type PalcoDoNucleo } from './nucleo-no-visual';
 import { raridadeNaArea, raridadeNaConjuracao, raridadeNoAcerto, raridadeNoRastro, type NivelVisual } from './manifestacao-raridade';
 import type { Emissao } from '../presets-particula';
-import { misturaEmSi, misturaNaArea, misturaNaConjuracao, misturaNoAcerto, misturaNoRastro, retratoDaMistura } from './manifestacao-mistura';
+import { misturaEmSi, misturaNaArea, misturaNaConjuracao, misturaNoAcerto, misturaNoRastro, retratoDaMistura, trocaDaMistura } from './manifestacao-mistura';
 
 export interface OpcoesDiretor {
   efeitos: Container;
@@ -65,11 +65,15 @@ export class DiretorVfx {
    * D-174 (14/11/2026): o que `fn` desenhar com a assinatura `nome` sai inteiro no elemento da runa (transmutacao.ts);
    * `fn` recebe a cor a usar (a da runa, quando há troca).
    */
-  naRuna<T>(nome: AssinaturaVisual, runa: Runa | undefined, cor: number, fn: (cor: number) => T): T {
+  naRuna<T>(nome: AssinaturaVisual, runa: Runa | undefined, cor: number, fn: (cor: number) => T, mistura?: readonly Runa[]): T {
     const antes = this.troca;
-    this.troca = trocaDe(ASSINATURAS[nome].familia, runa);
+    const familia = ASSINATURAS[nome].familia;
+    // D-206, continuação (26/11/2026): a fusão refaz a assinatura do núcleo na liga dos elementos dela (no lugar da
+    // matéria do elemento da skill comum que divide a assinatura; a fusão não leva runa de classe).
+    const retrato = retratoDaMistura(mistura);
+    this.troca = retrato ? trocaDaMistura(retrato, familia) : trocaDe(familia, runa);
     try {
-      return fn(this.troca ? COR_DA_RUNA[this.troca.para] : cor);
+      return fn(this.troca ? corDaTroca(this.troca) : cor);
     } finally {
       this.troca = antes;
     }

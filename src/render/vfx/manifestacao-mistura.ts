@@ -10,7 +10,9 @@
 import type { Emissao } from '../presets-particula';
 import { orbitar, sortear } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, EmSi, P } from './cena';
-import { ligaDe, ligaNaArea, type Liga } from './ligas';
+import { ligaDe, ligaNaArea, type LigaDoPar } from './ligas';
+import type { FamiliaVfx } from './cena';
+import { elementoDaFamilia, type Troca } from './transmutacao';
 import { COR_DA_RUNA, conjuracaoDaRuna, materiaDaRuna, type Runa } from './manifestacao-runa';
 import type { NomeTextura } from './pincel';
 
@@ -22,7 +24,9 @@ const FIO_DO_ELEMENTO: Readonly<Record<Runa, NomeTextura>> = {
 /** O que a mistura desenha, montado uma vez por skill (as ligas são fixas para os mesmos elementos). */
 interface Retrato {
   elementos: readonly Runa[];
-  ligas: readonly Liga[];
+  ligas: readonly LigaDoPar[];
+  /** A troca da assinatura por família (montada na primeira vez que a família pede). */
+  trocas: Map<FamiliaVfx, Troca | null>;
 }
 
 const MEMORIA = new Map<string, Retrato>();
@@ -33,7 +37,7 @@ function retratoDe(elementos: readonly Runa[]): Retrato {
   const pronto = MEMORIA.get(chave);
   if (pronto) return pronto;
   const dominante = elementos[0] ?? 'fisico';
-  const ligas: Liga[] = [];
+  const ligas: LigaDoPar[] = [];
   for (let i = 0; i < elementos.length; i++) {
     for (let j = i + 1; j < elementos.length; j++) {
       const a = elementos[i];
@@ -43,7 +47,7 @@ function retratoDe(elementos: readonly Runa[]): Retrato {
       if (l) ligas.push(l);
     }
   }
-  const r = { elementos, ligas: ligas.slice(0, 3) };
+  const r = { elementos, ligas: ligas.slice(0, 3), trocas: new Map<FamiliaVfx, Troca | null>() };
   if (MEMORIA.size > 128) MEMORIA.clear();
   MEMORIA.set(chave, r);
   return r;
@@ -54,9 +58,28 @@ export function retratoDaMistura(elementos: readonly Runa[] | undefined): Retrat
   return elementos && elementos.length >= 2 ? retratoDe(elementos) : null;
 }
 
+/**
+ * D-206, continuação: a troca que refaz a assinatura do núcleo na liga dele. O elemento de que a assinatura é feita (o
+ * da família; se a mistura não o tem, o do núcleo) escolhe a liga em que entra; a matéria que a liga dá a esse elemento
+ * entra no lugar da matéria da família, e toda cor cai na rampa da liga.
+ */
+export function trocaDaMistura(r: Retrato, familia: FamiliaVfx): Troca | null {
+  if (r.trocas.has(familia)) return r.trocas.get(familia) ?? null;
+  const de = elementoDaFamilia(familia);
+  const el = r.elementos.includes(de) ? de : (r.elementos[0] ?? de);
+  const liga = r.ligas.find((l) => l.par.includes(el)) ?? r.ligas[0];
+  const trans = liga?.trans;
+  const materia = trans?.materia[el];
+  const troca = trans ? { de, para: de, liga: { ...trans, materia: materia ? { [de]: materia } : {} } } : null;
+  r.trocas.set(familia, troca);
+  return troca;
+}
+
 /** A matéria de cada elemento: o do núcleo, discreto; os outros, por inteiro. */
 function materias(c: CenaVfx, r: Retrato, em: P, forca: number): void {
-  r.elementos.forEach((el, i) => { c.particulas.emitirLista(materiaDaRuna(el, (i === 0 ? 0.35 : 0.7) * forca), em.x, em.y, COR_DA_RUNA[el]); });
+  // D-206, continuação: a assinatura do núcleo já é a liga; a matéria de cada elemento sai junto (a do núcleo, menor,
+  // para não devolver a skill ao elemento puro).
+  r.elementos.forEach((el, i) => { c.particulas.emitirLista(materiaDaRuna(el, (i === 0 ? 0.5 : 0.85) * forca), em.x, em.y, COR_DA_RUNA[el]); });
 }
 
 /** A trança: a peça de cada elemento girando em volta, cada uma num raio e numa fase. */
@@ -75,7 +98,7 @@ const leve = (l: readonly Emissao[], n: number): Emissao[] => l.slice(0, 1).map(
 /** Na mão de quem conjura (a cada pulso da conjuração). */
 export function misturaNaConjuracao(c: CenaVfx, r: Retrato, pos: P): void {
   for (const l of r.ligas) c.particulas.emitirLista(l.fio, pos.x, pos.y, l.cor);
-  r.elementos.slice(1).forEach((el) => { c.particulas.emitirLista(conjuracaoDaRuna(el, 0.6), pos.x, pos.y, COR_DA_RUNA[el]); });
+  r.elementos.forEach((el) => { c.particulas.emitirLista(conjuracaoDaRuna(el, 0.8), pos.x, pos.y, COR_DA_RUNA[el]); });
 }
 
 /** No rastro do projétil (a cada 30 ms): o fio de uma liga e um grão de um elemento, alternando. */
@@ -83,7 +106,7 @@ export function misturaNoRastro(c: CenaVfx, r: Retrato, x: number, y: number): v
   const l = umDe(r.ligas);
   if (l) c.particulas.emitirLista(l.fio, x, y, l.cor);
   const el = umDe(r.elementos);
-  if (el && Math.random() < 0.5) c.particulas.emitirLista(leve(materiaDaRuna(el, 0.3), 2), x, y, COR_DA_RUNA[el]);
+  if (el) c.particulas.emitirLista(leve(materiaDaRuna(el, 0.4), 2), x, y, COR_DA_RUNA[el]);
 }
 
 /** No acerto: a matéria de cada elemento, o estouro e a silhueta das ligas e a trança. */
@@ -93,7 +116,7 @@ export function misturaNoAcerto(c: CenaVfx, r: Retrato, a: Acerto): void {
   if (a.indice >= 3) return;
   r.ligas.forEach((l, i) => {
     c.particulas.emitirLista(l.estouro, a.ate.x, a.ate.y, l.cor);
-    if (i === 0 || (i === 1 && !c.reduzido)) l.gesto(c, a.ate, a.de, (i === 0 ? 1 : 0.75) * e);
+    if (i === 0 || !c.reduzido) l.gesto(c, a.ate, a.de, (i === 0 ? 1.15 : 0.8) * e);
   });
   if (a.indice === 0) tranca(c, r, a.ate, e);
 }
@@ -104,7 +127,7 @@ export function misturaNaArea(c: CenaVfx, r: Retrato, a: AreaVfx): void {
   const celulas = sortear(a.celulas, Math.min(4, a.celulas.length));
   r.elementos.forEach((el, i) => {
     const q = celulas[i % Math.max(1, celulas.length)] ?? a.centro;
-    c.particulas.emitirLista(materiaDaRuna(el, i === 0 ? 0.35 : 0.7), q.x, q.y, COR_DA_RUNA[el]);
+    c.particulas.emitirLista(materiaDaRuna(el, 0.85), q.x, q.y, COR_DA_RUNA[el]);
   });
   tranca(c, r, a.centro, Math.max(1, Math.min(1.6, a.raio * 0.6)));
 }

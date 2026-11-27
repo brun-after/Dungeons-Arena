@@ -11,6 +11,8 @@ import { arcoDeGolpe, brotar, cair, circuloNoChao, clarao, ondaDeChoque, orbitar
 import type { AreaVfx, CenaVfx, P } from './cena';
 import { brasas, chamaViva, cintilar, em, faiscasMetal, fumacaEscura, nevoa, poeira } from './emissoes';
 import type { Runa } from './manifestacao-runa';
+import { MATERIA_DAS_LIGAS } from './ligas-materia';
+import type { Transmuta } from './transmutacao';
 
 export interface Liga {
   nome: string;
@@ -24,6 +26,12 @@ export interface Liga {
   gesto: (c: CenaVfx, em: P, de: P | null, e: number) => void;
   /** A silhueta da área, quando a liga tem uma própria (sem ela: a onda, o estouro nas células e o gesto no centro). */
   naArea?: (c: CenaVfx, a: AreaVfx) => void;
+}
+
+/** A liga já com o par de que nasceu e a matéria com que refaz a assinatura do núcleo (ligas-materia.ts). */
+export interface LigaDoPar extends Liga {
+  par: readonly [Runa, Runa];
+  trans: Transmuta | null;
 }
 
 // --- Matérias de mistura (as peças com que as ligas se montam).
@@ -560,8 +568,9 @@ const LIGAS: Readonly<Record<string, Fabrica>> = {
 export const chaveDaLiga = (a: Runa, b: Runa): string => [a, b].sort().join('+');
 
 /** A liga de dois elementos (com o dominante, o do núcleo); null quando o par não tem liga (o vento, por enquanto). */
-export function ligaDe(a: Runa, b: Runa, dominante: Runa): Liga | null {
-  return LIGAS[chaveDaLiga(a, b)]?.(dominante) ?? null;
+export function ligaDe(a: Runa, b: Runa, dominante: Runa): LigaDoPar | null {
+  const l = LIGAS[chaveDaLiga(a, b)]?.(dominante);
+  return l ? { ...l, par: [a, b], trans: MATERIA_DAS_LIGAS[l.nome] ?? null } : null;
 }
 
 /** A área de uma liga: a onda no tom dela, o estouro em algumas células e o gesto no centro (e em mais uma célula). */

@@ -20,6 +20,8 @@ import { ASSINATURAS } from './render/vfx/assinaturas';
 import type { P } from './render/vfx/cena';
 import { DiretorVfx } from './render/vfx/diretor';
 import { assinaturaDe, formaVfx } from './render/vfx/resolver';
+import { retratoDaMistura, trocaDaMistura } from './render/vfx/manifestacao-mistura';
+import { naRunaDaSkill } from './render/vfx/transmutacao';
 
 const LARGURA = 14;
 const ALTURA = 10;
@@ -186,11 +188,12 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
     if (ultimate) diretor.circuloDaUltimate('conjurador', 'mago', cor, conjuraMs);
     // D-206 (26/11/2026): a fusão mostra a mescla dos elementos em cada fase (manifestacao-mistura.ts).
     const els = h.elementosFusao;
-    for (let t = 0; t < conjuraMs; t += 120) depois(t, () => (diretor.conjurar(nome, CONJURADOR, cor), diretor.misturaNaConjuracao(els, CONJURADOR), undefined));
+    const naLiga = (fn: (c: number) => void) => { diretor.naRuna(nome, h.runa, cor, fn, els); };
+    for (let t = 0; t < conjuraMs; t += 120) depois(t, () => (naLiga((c) => diretor.conjurar(nome, CONJURADOR, c)), diretor.misturaNaConjuracao(els, CONJURADOR), undefined));
     const forma = formaVfx(h);
     const acerto = () => {
       const a = { chave: h.id, fonteId: 'conjurador', alvoId: 'boneco', de: CONJURADOR, ate: boneco, cor, escala: ultimate ? 1.25 : 1, critico: false, indice: 0, tier };
-      diretor.acertar(nome, a, h.visual?.variante, true);
+      naLiga((c) => { diretor.acertar(nome, { ...a, cor: c }, h.visual?.variante, true); });
       diretor.misturaNoAcerto(els, a);
       if (def.camera) impacto.pedir(def.camera, relogio);
       // O puxão e o empurrão deslizam o boneco (a corrente espera o gancho chegar).
@@ -215,10 +218,14 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
           const x = CONJURADOR.x + (boneco.x - CONJURADOR.x) * f;
           const y = CONJURADOR.y + (boneco.y - CONJURADOR.y) * f;
           const dir = { x: Math.sign(boneco.x - CONJURADOR.x), y: 0 };
-          if (def.corpo) particulas.emitirLista(def.corpo, x, y, cor, undefined, dir);
+          if (def.corpo) {
+            const r = retratoDaMistura(els);
+            const corpo = naRunaDaSkill(def.familia, h.runa, def.corpo, cor, r ? trocaDaMistura(r, def.familia) : null);
+            particulas.emitirLista(corpo.lista, x, y, corpo.cor, undefined, dir);
+          }
           if (t - ultimoRastro > 30) {
             ultimoRastro = t;
-            diretor.rastro(nome, x, y, cor, dir);
+            naLiga((c) => diretor.rastro(nome, x, y, c, dir));
             diretor.misturaNoRastro(els, x, y);
           }
           if (f >= 1) {
@@ -230,14 +237,14 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
         return undefined;
       });
     } else if (forma === 'contato') depois(conjuraMs, () => (acerto(), undefined));
-    else if (forma === 'proprio') depois(conjuraMs, () => (diretor.emSi(nome, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }, h.visual?.variante), diretor.misturaEmSi(els, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }), undefined));
+    else if (forma === 'proprio') depois(conjuraMs, () => (naLiga((c) => { diretor.emSi(nome, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor: c, escala: 1 }, h.visual?.variante); }), diretor.misturaEmSi(els, { chave: h.id, id: 'conjurador', pos: CONJURADOR, cor, escala: 1 }), undefined));
     else {
       depois(conjuraMs, () => {
         const mira = h.tipoArea === 'ao_redor' ? CONJURADOR : boneco;
         const celulas = celulasDe(h, CONJURADOR, mira);
         const centro = celulas.length ? { x: celulas.reduce((s, c) => s + c.x, 0) / celulas.length, y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length } : mira;
         const area = { chave: h.id, atorId: 'conjurador', origem: CONJURADOR, mira, centro, celulas, cor, escala: ultimate ? 1.25 : 1, tipoArea: h.tipoArea, raio: h.raioArea };
-        if (!diretor.area(nome, area, h.visual?.variante)) diretor.rajada(nome, area);
+        naLiga((c) => { if (!diretor.area(nome, { ...area, cor: c }, h.visual?.variante)) diretor.rajada(nome, { ...area, cor: c }); });
         diretor.misturaNaArea(els, area);
         depois(260, () => (acerto(), undefined));
         return undefined;

@@ -1,6 +1,6 @@
 # Dungeons Dimensions: guia para quem trabalha no código
 
-**Versão:** 0.22 · **Data:** 26/11/2026
+**Versão:** 0.23 · **Data:** 26/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -63,7 +63,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   raridade (marco 52, D-198) também está no id (`__g2`, `__g1`); o visual dele lê `Habilidade.raridadeFusao`.
 - **Mescla da fusão** (D-206): os elementos da fusão estão em `Habilidade.elementosFusao`; o vínculo usa
   `pontasDaSkill`/`registrarUsoDaSkill`, nunca só `h.elemento`. O visual da mistura são as ligas de `render/vfx/ligas.ts`
-  (uma por par, feita à mão), por cima da assinatura do núcleo.
+  (uma por par, feita à mão): a assinatura do núcleo é refeita na matéria e na rampa da liga (`ligas-materia.ts`, pela
+  troca de `transmutacao.ts`), e a liga ainda desenha por cima.
 - **Engaste no id** (marco 51, D-197): a peça engastada é `en_<materiais>__<peça>`, resolvida pelo `CatalogoDeItens`
   (`progression/engaste.ts`), com a fusão elemental `fu_` por dentro; nada de campo novo no item para engaste. A
   receita da forja é o item `receita_<id>` com o molde em `forja.json → moldes` (`progression/moldes.ts`).

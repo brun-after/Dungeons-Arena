@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.65 · **Data:** 26/11/2026
+**Versão:** 1.66 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.66 (26/11/2026)**: D-206, continuação: a fusão refaz a assinatura do núcleo na matéria da liga (o espinho de terra com fogo é lava incandescente).
 > - **1.65 (26/11/2026)**: D-208: o Mundo contínuo no cliente (o carimbo comum, as regiões do trabalhador, uma cena só, mapa, guia e minimapa no atlas) e o `continuo` ligado com 100 por canal.
 > - **1.64 (26/11/2026)**: D-207: o Mundo contínuo no núcleo e no servidor (atlas, costuras, zonas, hibernação, sala única) e a medida da lotação.
 > - **1.63 (26/11/2026)**: D-206: a fusão leva todos os elementos dela, no vínculo e no visual (as ligas: lava, vapor, cristal ígneo, fulgurito…).
@@ -6807,6 +6808,24 @@ núcleo, mesmo com veneno e trevas na mistura.
   com a mescla.
 
 **Fora.** O vento (só dos inimigos) não tem liga; a cor base da fusão segue a do núcleo.
+
+### D-206, continuação: a assinatura feita da liga (26/11/2026)
+
+**Problema.** Com a liga só por cima, a skill continuava sendo a do núcleo: as Raízes com fogo eram um espinho de
+pedra com faíscas em volta; a Bola de fogo com pedra, uma bola de fogo. A mistura não aparecia no golpe em si.
+
+**Decisão.**
+- A fusão transmuta a assinatura inteira do núcleo (a mesma máquina da runa, D-174), com a liga como destino
+  (`render/vfx/ligas-materia.ts`, todas as 38 ligas):
+  - a **rampa de cor** da liga, do escuro ao claro: cada cor da assinatura cai nela pela claridade;
+  - a **matéria** que a liga dá a cada elemento de origem, por papel (na lava, a chama vira pedra de magma e a lasca
+    vira brasa; no vapor, a chama vira fumaça branca; no fulgurito, a pedra vira caco de vidro e a poeira, faísca);
+  - o **brilho** das ligas incandescentes: a silhueta opaca sai na crosta escura, com o miolo aceso pulsando e um halo
+    (o espinho de lava, a pedra em brasa, o cristal ígneo). A matéria trocada para corpo deixa de ser luz somada.
+- A liga que refaz a assinatura é a do par com o elemento de que ela é feita (o da família; se a mistura não o tem, o do
+  núcleo). Vale na mão, no rastro, no corpo do projétil, no acerto, na área e na galeria.
+- As camadas de cima ficam mais fortes: a matéria de cada elemento por inteiro (a do núcleo um pouco menor) e a
+  silhueta de todas as ligas, não só da primeira.
 
 ## D-207 — O Mundo contínuo no núcleo e no servidor (26/11/2026)
 
