@@ -78,3 +78,35 @@ describe('Mundo contínuo montado', () => {
     expect(h.dormindo().entidades + estado.entidades.length).toBe(antes);
   });
 });
+
+// Marco 55 (26/11/2026, D-208): o cliente carimba as regiões conforme chegam (fora de ordem) e chega ao mesmo atlas.
+describe('atlas do cliente', () => {
+  it('carimbado em outra ordem, tem as mesmas células e listas do servidor', async () => {
+    const { criarAtlasDoCliente } = await import('../../src/mundo/atlas-cliente');
+    const { gerarRegiaoNoAtlas } = await import('../../src/mundo/atlas-fase');
+    const cliente = criarAtlasDoCliente(conteudo, reino, conteudo.modos.get('mundo') ?? conteudo.modoCampanha);
+    const ordem = cliente.ordemDePedido(1200, 600);
+    expect(new Set(ordem).size).toBe(reino.regioes.length);
+    const metade = Math.floor(ordem.length / 2);
+    for (const id of ordem.slice(0, metade)) {
+      const regiao = reino.regioes.find((r) => r.id === id);
+      if (regiao) expect(cliente.receber(id, gerarRegiaoNoAtlas(reino, cliente.atlas, regiao))).not.toBeNull();
+    }
+    // Pela metade: o que falta é vazio e não se anda.
+    const falta = ordem[metade];
+    const area = falta ? cliente.atlas.areas.get(falta) : undefined;
+    if (area) expect(passavel(cliente.ctx.fase, area.x + (area.largura >> 1), area.y + (area.altura >> 1))).toBe(false);
+    for (const id of ordem.slice(metade)) {
+      const regiao = reino.regioes.find((r) => r.id === id);
+      if (regiao) cliente.receber(id, gerarRegiaoNoAtlas(reino, cliente.atlas, regiao));
+    }
+    const a = cliente.ctx.fase;
+    const b = mundo.ctx.fase;
+    expect(a.celulas).toEqual(b.celulas);
+    expect(a.alturas).toEqual(b.alturas);
+    expect(a.obstaculos).toEqual(b.obstaculos);
+    for (const k of ['spawns', 'ambientes', 'refugios', 'telhados', 'ninhos', 'estruturas'] as const) expect(a[k]).toEqual(b[k]);
+    expect(a.cenario?.length).toBe(b.cenario?.length);
+    expect(cliente.regiaoEm(b.spawns[0]?.x ?? 0, b.spawns[0]?.y ?? 0)?.regiaoId).toBe(reino.inicio);
+  }, 120_000);
+});

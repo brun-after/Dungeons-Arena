@@ -114,7 +114,8 @@ export function listasDoAtlas(reino: Reino, partes: readonly RegiaoCarimbada[]):
       refugios,
       ninhos: ordem.flatMap(({ ex, area }) => ex.ninhos.map((n) => moverNoAtlas(n, area))),
       cenario: ordem.flatMap(({ ex, area }) => ex.pecas.map((p) => moverNoAtlas(p, area))),
-      telhados: ordem.flatMap(({ fase: f, area }) => (f.telhados ?? []).map((t) => moverNoAtlas(t, area))),
+      // Os telhados vêm do gerador (a leitura da fase não os guarda; mundo/lugares.ts fazia igual).
+      telhados: ordem.flatMap(({ fase: f, ex, area }) => (ex.fase.telhados ?? f.telhados ?? []).map((t) => moverNoAtlas(t, area))),
     },
     pontos,
     rotas,
