@@ -103,7 +103,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   });
   // Marco 55 (26/11/2026, D-208): o Mundo contínuo pronto para entrar (o atlas leva uns 20 s para montar ao subir); os
   // testes e2e esperam por este.
-  const saudeMundo = createEndpoint('/saude/mundo', { method: 'GET' }, async () => {
+  const saudeMundo = createEndpoint('/saude/mundo', { method: 'GET' }, () => {
     const pronto = !coordenador.continuo || coordenador.mundoMontado !== null;
     return resposta(pronto ? 200 : 503, { ok: pronto, continuo: coordenador.continuo });
   });
