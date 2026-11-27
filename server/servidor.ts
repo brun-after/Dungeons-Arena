@@ -105,7 +105,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   // testes e2e esperam por este.
   const saudeMundo = createEndpoint('/saude/mundo', { method: 'GET' }, () => {
     const pronto = !coordenador.continuo || coordenador.mundoMontado !== null;
-    return resposta(pronto ? 200 : 503, { ok: pronto, continuo: coordenador.continuo });
+    return Promise.resolve(resposta(pronto ? 200 : 503, { ok: pronto, continuo: coordenador.continuo }));
   });
   const buscarSala = createEndpoint('/salas/:codigo', { method: 'GET' }, async (ctx) => {
     const origem = ctx.request?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
