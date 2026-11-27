@@ -88,9 +88,18 @@ jobs:
           printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\nCHAVE_CERTIFICADO=%s\nSUPABASE_URL=%s\nSUPABASE_SERVICE_KEY=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' '$CHAVE_CERTIFICADO' '$SUPABASE_URL' '$SUPABASE_SERVICE_KEY' > .env
           chmod 600 .env
           echo '$TOKEN' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+          # 26/11/2026: o disco da VM encheu com as imagens antigas (o prune de depois só tirava as soltas) e a imagem nova
+          # não coube ("no space left on device"). Antes de baixar, sai toda imagem que nenhum contêiner usa (a versão no
+          # ar fica), o cache de build e os contêineres parados; o espaço livre vai para o log.
+          df -h / /var/lib/docker 2>/dev/null || df -h /
+          docker container prune -f
+          docker image prune -af
+          docker builder prune -af
+          df -h / /var/lib/docker 2>/dev/null || df -h /
           docker compose --profile producao pull
           docker compose --profile producao up -d --remove-orphans
-          docker image prune -f
+          docker image prune -af
+          docker system df
           EOF
       - name: Conferir /saude
         env:
