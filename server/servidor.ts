@@ -3,6 +3,7 @@ import { conferirPersonagem } from '../src/coop/personagem';
 // Servidor da arena (§3.1): Node + Colyseus sobre WebSocket. Rotas HTTP próprias:
 //   GET /saude          → { ok, versao, regiao, salas, tick } para o Caddy, o deploy, o lobby e a carga
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
+//   GET /saude/mundo    → 200 com o Mundo contínuo montado (503 enquanto monta; marco 55, D-208)
 //   GET /salas/:codigo  → existe ou não (tipo, fase), com limite de tentativas por origem (§2.13)
 //   GET /salas?faixa=X  → marco 17: até 10 salas da arena com vaga naquela faixa de nível
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
@@ -99,6 +100,12 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     const pior = (campo: 'tickP95Ms' | 'tickP99Ms') => Math.max(0, ...metricas.map((m) => m[campo] ?? 0));
     const tick = salas.length > 0 ? { p95Ms: pior('tickP95Ms'), p99Ms: pior('tickP99Ms') } : null;
     return resposta(200, { ok: true, versao: versaoDoConteudo(), regiao: o.regiao, salas: salas.length, tick });
+  });
+  // Marco 55 (26/11/2026, D-208): o Mundo contínuo pronto para entrar (o atlas leva uns 20 s para montar ao subir); os
+  // testes e2e esperam por este.
+  const saudeMundo = createEndpoint('/saude/mundo', { method: 'GET' }, () => {
+    const pronto = !coordenador.continuo || coordenador.mundoMontado !== null;
+    return Promise.resolve(resposta(pronto ? 200 : 503, { ok: pronto, continuo: coordenador.continuo }));
   });
   const buscarSala = createEndpoint('/salas/:codigo', { method: 'GET' }, async (ctx) => {
     const origem = ctx.request?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
@@ -229,7 +236,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
       campanha: defineRoom(SalaCampanhaColyseus),
       mundo: defineRoom(SalaMundoColyseus).filterBy(['lugar', 'instancia']),
     },
-    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar, personagensMundo, excluirPersonagemMundo }),
+    routes: createRouter({ saude, saudeMundo, buscarSala, listarSalas, relatorios, metricas, certificar, personagensMundo, excluirPersonagemMundo }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

@@ -3,6 +3,8 @@
 // baixa e alta, e lê o resultado da página. Depois mede a memória em 10 trocas de fase no mesmo documento
 // (`?bench=trocas`): heap depois de coletar o lixo, pelo protocolo do Chromium; critério: sem crescimento monotônico
 // e até +10% da base. Com `--registrar`, acrescenta as linhas em docs/BENCHMARKS.md.
+// Marco 55 (26/11/2026, D-208): e a rota pelo Mundo contínuo cruzando as costuras (`?bench=mundo&rota=`), com o pior
+// quadro em volta de cada costura.
 // Ressalva: o WebGL do Chromium sem tela é por software; números de aparelho real vêm de `?bench=` no aparelho.
 
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -19,6 +21,21 @@ const MARCO = valor('marco', '16');
 const PORTA = 4175;
 const BASE = `http://localhost:${PORTA}/`;
 const TROCAS = Number(valor('trocas', '30'));
+const ROTA = valor('rota', 'vila_do_centro,encosta_do_leste,mar_de_areia,eclipse_almas');
+
+interface MedidaDaRota {
+  rota: string[];
+  p95Ms: number;
+  piorMs: number;
+  acimaDe100: number;
+  costuras: { de: string; para: string; piorMs: number }[];
+}
+
+async function medirRota(pagina: Page): Promise<MedidaDaRota> {
+  await pagina.goto(`${BASE}?bench=mundo&rota=${ROTA}&vel=10`);
+  await pagina.waitForSelector('body[data-bench="pronto"]', { timeout: 300_000 });
+  return JSON.parse((await pagina.locator('#resultado-bench').textContent()) ?? '{}') as MedidaDaRota;
+}
 
 interface ResultadoBench {
   cena: string;
@@ -91,6 +108,11 @@ try {
   const contexto = await navegador.newContext({ viewport: { width: 1280, height: 720 } });
   const heaps = await medirTrocas(await contexto.newPage());
   await contexto.close();
+  const contextoRota = await navegador.newContext({ viewport: { width: 1280, height: 720 } });
+  const rota = args.includes('--so-trocas') ? null : await medirRota(await contextoRota.newPage());
+  await contextoRota.close();
+  const piorCostura = rota ? Math.max(0, ...rota.costuras.map((c) => c.piorMs)) : 0;
+  if (rota) console.log(`rota ${rota.rota.join(' → ')}: p95 ${rota.p95Ms} ms · pior ${rota.piorMs} ms · ${rota.acimaDe100} quadros > 100 ms · costuras ${rota.costuras.map((c) => `${c.piorMs} ms`).join(', ')}`);
   await navegador.close();
   // As primeiras trocas enchem caches limitados (medidas de texto do Pixi, habilidades compiladas): o critério é
   // estabilizar — sem crescimento monotônico e o último terço até +5% do terço do meio.
@@ -114,6 +136,13 @@ try {
     linhas.push(
       `| ${data} | ${MARCO} | \`?bench=trocas\`: ${TROCAS} trocas de fase no mesmo documento (desmontar e montar a cena) | heap depois do GC | estabiliza: sem crescimento monotônico, último terço ≤ terço do meio +5% | base ${br(base)} MB, meio ${br(Math.round(meio * 100) / 100)} MB, último terço ${br(Math.round(fim * 100) / 100)} MB, final ${br(final)} MB | ${memoriaOk ? 'aprovado' : 'reprovado'} (${br(variacao)}%); as primeiras trocas enchem caches limitados |`,
     );
+    if (rota) {
+      const costuras = rota.costuras.map((c) => `${br(c.piorMs)} ms`).join(', ');
+      const veredito = piorCostura <= rota.p95Ms * 1.5 ? 'a costura não pesa mais que a rota' : 'a costura pesa mais que a rota';
+      linhas.push(
+        `| ${data} | ${MARCO} | \`?bench=mundo&rota=\`: ${rota.rota.join(' → ')} a 10 células/s, Chromium sem tela 1280×720 (WebGL por software) | pior quadro em volta de cada costura · p95 e pior da rota | nenhum quadro > 100 ms numa costura (aparelho real) | costuras ${costuras} · p95 ${br(rota.p95Ms)} ms · pior ${br(rota.piorMs)} ms | ${veredito}; sem tela, todo quadro é lento |`,
+      );
+    }
     const doc = readFileSync('docs/BENCHMARKS.md', 'utf8');
     const marcador = '## Medições';
     const inicio = doc.indexOf(marcador);

@@ -1,7 +1,5 @@
-import type { DestinoNoMapa } from '../mundo/orientacao';
-import { direcaoGeografica, proximaEtapa, rumoNaTela } from '../mundo/orientacao';
-import type { Reino } from '../mundo/reino';
-import type { ContextoSimulacao } from '../core/contexto';
+import type { DestinoNoMapa, EtapaDoMapa } from '../mundo/orientacao';
+import { direcaoGeografica, rumoNaTela } from '../mundo/orientacao';
 import type { EstadoJogo } from '../core/estado';
 import { t } from '../i18n';
 import { icone } from './icones';
@@ -53,7 +51,11 @@ export function conferirLapide(guia: OrientacaoMundo, agoraMs: number): void {
   if (guia.lapide && guia.lapide.ateMs <= agoraMs) esquecerLapide(guia);
 }
 
-export function criarGuiaMundo(guia: OrientacaoMundo, reino: Reino, lugar: string, ctx: ContextoSimulacao, idLocal: string, descobertas: () => readonly string[]) {
+/**
+ * Marco 55 (26/11/2026, D-208): a etapa vem de quem chama (`etapaDe`): a da região (`proximaEtapa`) ou a do atlas
+ * (`etapaNoAtlas`, mundo/orientacao-atlas.ts), com o ponto nas coordenadas em que o jogador anda.
+ */
+export function criarGuiaMundo(guia: OrientacaoMundo, etapaDe: (destino: DestinoNoMapa) => EtapaDoMapa | null, idLocal: string, descobertas: () => readonly string[]) {
   const el = document.createElement('aside');
   el.className = 'guia-mundo';
   el.setAttribute('aria-label', t('mundo.guia.titulo'));
@@ -75,7 +77,7 @@ export function criarGuiaMundo(guia: OrientacaoMundo, reino: Reino, lugar: strin
       const destino = guia.destino;
       el.hidden = !destino || !eu;
       if (!destino || !eu) return;
-      const etapa = proximaEtapa(reino, lugar, destino, ctx.fase);
+      const etapa = etapaDe(destino);
       const distancia = etapa?.ponto ? Math.hypot(etapa.ponto.x - eu.x, etapa.ponto.y - eu.y) : null;
       const chegou = etapa?.tipo === 'chegou' || (etapa?.tipo === 'destino' && distancia !== null && distancia <= 2);
       seta.hidden = !etapa?.ponto || chegou;
