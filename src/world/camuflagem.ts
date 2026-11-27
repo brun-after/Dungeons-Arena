@@ -37,7 +37,7 @@ export function esquecerCopas(o: Uint8Array): void {
 
 function blocoDeCopas(o: Uint8Array, largura: number, altura: number, bx: number, by: number): Uint8Array {
   let blocos = COPAS.get(o);
-  if (!blocos) COPAS.set(o, (blocos = new Map()));
+  if (!blocos) COPAS.set(o, (blocos = new Map<number, Uint8Array>()));
   const chave = by * 65_536 + bx;
   const pronto = blocos.get(chave);
   if (pronto) return pronto;

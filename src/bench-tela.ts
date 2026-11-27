@@ -124,7 +124,7 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
   if (pedido === 'mundo' && params.has('rota')) {
     // Marco 55 (26/11/2026, D-208): a rota pelo Mundo contínuo, cruzando as costuras (bench/mundo-rota.ts).
     await (await import('./bench/mundo-rota')).iniciarRotaNoAtlas(raiz, params, (m) => {
-      painel(raiz, [`rota ${m.rota.join(' → ')}: p95 ${m.p95Ms} ms, pior ${m.piorMs} ms, ${m.acimaDe100} quadros > 100 ms`, ...m.costuras.map((c) => `costura ${c.de} → ${c.para}: pior ${c.piorMs} ms`)], m);
+      painel(raiz, [`rota ${m.rota.join(', ')}: p95 ${m.p95Ms} ms, pior ${m.piorMs} ms, ${m.acimaDe100} quadros > 100 ms`, ...m.costuras.map((c) => `costura ${c.de} para ${c.para}: pior ${c.piorMs} ms`)], m);
       document.body.dataset.bench = 'pronto';
     });
     return;

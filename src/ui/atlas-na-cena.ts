@@ -84,8 +84,9 @@ export function desenhoDoAtlas(atlas: AtlasDoCliente): DesenhoDoAtlas {
     faseVazia,
     alturaPx: (xPlano, yPlano) => {
       const r = regiaoDoPonto(Math.floor(xPlano / CELULA_PX), Math.floor(yPlano / CELULA_PX));
-      const relevo = r ? relevoDaFase(r.ctx.fase) : null;
-      return relevo ? relevo.alturaPx(xPlano - r!.area.x * CELULA_PX, yPlano - r!.area.y * CELULA_PX) : 0;
+      if (!r) return 0;
+      const relevo = relevoDaFase(r.ctx.fase);
+      return relevo ? relevo.alturaPx(xPlano - r.area.x * CELULA_PX, yPlano - r.area.y * CELULA_PX) : 0;
     },
     montar: (m) => {
       const camadas = new Map<string, CamadaDaRegiao>();

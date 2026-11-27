@@ -44,7 +44,7 @@ export function criarGeradorDeRegioes(reino: Reino, atlas: Atlas, aoGerar: (regi
     setTimeout(() => {
       if (destruido) return;
       const regiao = reino.regioes.find((r) => r.id === regiaoId);
-      let ex: ExteriorGerado | null = null;
+      let ex: ExteriorGerado | null;
       try {
         ex = regiao ? gerarRegiaoNoAtlas(reino, atlas, regiao) : null;
       } catch {
