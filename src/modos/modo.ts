@@ -85,6 +85,7 @@ export interface ModoDeJogo {
     protecaoS: number;
   };
   entradaEmAndamento: boolean;
+  /** Marco 55 (26/11/2026, D-208): até 128 (o canal do Mundo contínuo leva 100, D-207). */
   maxJogadores: number;
   espectadores: boolean;
   /** null = a ficha é usada como está (campanha). */
@@ -280,7 +281,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     },
     entradaEmAndamento: l.booleano(o, 'entradaEmAndamento'),
     // Marco 29 (D-128): até 64, pelas regiões do Mundo (a arena e o grupo seguem no que os dados dizem).
-    maxJogadores: l.numero(o, 'maxJogadores', { min: 1, max: 64, inteiro: true }),
+    maxJogadores: l.numero(o, 'maxJogadores', { min: 1, max: 128, inteiro: true }),
     espectadores: l.booleano(o, 'espectadores'),
     clamp: lerClamp(l, o.clamp),
     loot: {

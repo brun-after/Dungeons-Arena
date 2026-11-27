@@ -25,7 +25,7 @@ function pontoNoAtlas(area: AreaNoAtlas, regiao: RegiaoDoMundo, destino: Destino
 }
 
 /** O cruzamento da costura do lado da região (o meio do trecho comum), no atlas. */
-function cruzamento(atlas: Atlas, regiaoId: string, lado: LadoDaRegiao): Celula | null {
+export function cruzamento(atlas: Atlas, regiaoId: string, lado: LadoDaRegiao): Celula | null {
   const c = costuraDoLado(atlas, regiaoId, lado);
   if (!c) return null;
   const meio = Math.floor((c.inicio + c.fim) / 2);

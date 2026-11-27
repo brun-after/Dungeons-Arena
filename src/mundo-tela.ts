@@ -255,7 +255,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       };
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });
+        void jogarNoMundo(raiz, servidor, token, { lugar: lugarDaVila(reino.inicio), slot, criar: { classeId, nome } });
       }));
     }
     const seletor = botao(p?.nome ?? t('mundo.selecao.vazio'), () => {

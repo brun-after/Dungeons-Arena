@@ -121,6 +121,14 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
     await iniciarTrocas(raiz);
     return;
   }
+  if (pedido === 'mundo' && params.has('rota')) {
+    // Marco 55 (26/11/2026, D-208): a rota pelo Mundo contínuo, cruzando as costuras (bench/mundo-rota.ts).
+    await (await import('./bench/mundo-rota')).iniciarRotaNoAtlas(raiz, params, (m) => {
+      painel(raiz, [`rota ${m.rota.join(' → ')}: p95 ${m.p95Ms} ms, pior ${m.piorMs} ms, ${m.acimaDe100} quadros > 100 ms`, ...m.costuras.map((c) => `costura ${c.de} → ${c.para}: pior ${c.piorMs} ms`)], m);
+      document.body.dataset.bench = 'pronto';
+    });
+    return;
+  }
   if (pedido === 'mundo') {
     // Marco 43 (15/11/2026, D-177): a região do Mundo na página, sem servidor (bench/mundo-local.ts).
     await (await import('./bench/mundo-local')).iniciarMundoLocal(raiz, params, (m) => { painel(raiz, [`mundo ${m.regiao}: ${m.fps} fps, p95 ${m.p95Ms} ms (${m.quadros} quadros)`], m); });
