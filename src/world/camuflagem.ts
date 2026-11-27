@@ -1,7 +1,7 @@
 // A zona de fácil camuflagem (marco 44, 15/11/2026, D-178). A mata fechada não é mais "sempre noite": cada árvore faz
 // uma sombra no chão, e quem está nela (o monstro ou o jogador) é visto só de perto, como no escuro. Onde as árvores
 // se juntam (a mata fechada), a sombra de cada uma tem `areaNaMata` vezes a área, e as sombras se emendam: é ali que os
-// monstros se escondem. A estrada e a clareira, longe das árvores, ficam ao sol. Mapas calculados uma vez por fase. Puro.
+// monstros se escondem. A estrada e a clareira, longe das árvores, ficam ao sol. Mapas calculados por bloco, quando pedidos. Puro.
 
 import { OBSTACULO } from './geografia';
 
@@ -24,22 +24,36 @@ interface FaseComArvores {
 const RAIO_COPA = 2;
 const COPA_ABRE = 3;
 const COPA_FECHA = 6;
-const COPAS = new WeakMap<Uint8Array, Uint8Array>();
+// Marco 55 (26/11/2026, D-208): a copa por bloco de `BLOCO_COPA`, calculada quando alguém pergunta ali. O mapa inteiro de
+// uma vez custava meio segundo no atlas do Mundo contínuo, e no cliente o atlas é carimbado aos poucos: quem carimba
+// chama `esquecerCopas` e os blocos se refazem na próxima pergunta.
+const BLOCO_COPA = 32;
+const COPAS = new WeakMap<Uint8Array, Map<number, Uint8Array>>();
 
-function mapaDeCopas(o: Uint8Array, largura: number, altura: number): Uint8Array {
-  const pronto = COPAS.get(o);
+/** Esquece as copas calculadas sobre estes obstáculos (o atlas do cliente mudou). */
+export function esquecerCopas(o: Uint8Array): void {
+  COPAS.delete(o);
+}
+
+function blocoDeCopas(o: Uint8Array, largura: number, altura: number, bx: number, by: number): Uint8Array {
+  let blocos = COPAS.get(o);
+  if (!blocos) COPAS.set(o, (blocos = new Map()));
+  const chave = by * 65_536 + bx;
+  const pronto = blocos.get(chave);
   if (pronto) return pronto;
-  const m = new Uint8Array(largura * altura);
-  for (let y = 0; y < altura; y++) {
-    for (let x = 0; x < largura; x++) {
+  const m = new Uint8Array(BLOCO_COPA * BLOCO_COPA);
+  const x0 = bx * BLOCO_COPA;
+  const y0 = by * BLOCO_COPA;
+  for (let y = y0; y < Math.min(altura, y0 + BLOCO_COPA); y++) {
+    for (let x = x0; x < Math.min(largura, x0 + BLOCO_COPA); x++) {
       let n = 0;
       for (let j = Math.max(0, y - RAIO_COPA); j <= Math.min(altura - 1, y + RAIO_COPA); j++) {
         for (let i = Math.max(0, x - RAIO_COPA); i <= Math.min(largura - 1, x + RAIO_COPA); i++) if (o[j * largura + i] === OBSTACULO.arvore || o[j * largura + i] === OBSTACULO.arbusto) n++;
       }
-      m[y * largura + x] = Math.round(255 * Math.max(0, Math.min(1, (n - COPA_ABRE) / (COPA_FECHA - COPA_ABRE))));
+      m[(y - y0) * BLOCO_COPA + (x - x0)] = Math.round(255 * Math.max(0, Math.min(1, (n - COPA_ABRE) / (COPA_FECHA - COPA_ABRE))));
     }
   }
-  COPAS.set(o, m);
+  blocos.set(chave, m);
   return m;
 }
 
@@ -50,7 +64,9 @@ export function copaEm(fase: FaseComArvores, x: number, y: number): number {
   const cx = Math.round(x);
   const cy = Math.round(y);
   if (cx < 0 || cy < 0 || cx >= fase.largura || cy >= fase.altura) return 0;
-  return (mapaDeCopas(o, fase.largura, fase.altura)[cy * fase.largura + cx] ?? 0) / 255;
+  const bx = Math.floor(cx / BLOCO_COPA);
+  const by = Math.floor(cy / BLOCO_COPA);
+  return (blocoDeCopas(o, fase.largura, fase.altura, bx, by)[(cy - by * BLOCO_COPA) * BLOCO_COPA + (cx - bx * BLOCO_COPA)] ?? 0) / 255;
 }
 
 /** O ponto é de mata fechada (a zona de fácil camuflagem)? */
