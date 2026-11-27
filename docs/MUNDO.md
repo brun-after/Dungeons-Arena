@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.9 · **Data:** 26/11/2026
+**Versão:** 1.10 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.10 (26/11/2026)**: marco 55: o cliente contínuo e o `continuo` ligado (uma cena só, regiões do trabalhador, mapa, guia e minimapa no atlas).
 > - **1.9 (26/11/2026)**: marco 54: o Mundo contínuo no servidor (atlas, costuras, zonas pela posição, hibernação), ainda desligado (`continuo`).
 > - **1.8 (25/11/2026)**: D-205: a janela da troca com os dois lados, o ouro com botões próprios, a cobrança, a contraproposta e o chat da troca; o mapa em pergaminho.
 > - **1.7 (20/11/2026)**: D-191: a pé, o muro até 6 níveis se escala e a queda até 10 se desce num pulo curto; a saída das passagens sem muro.
@@ -277,7 +278,7 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 
 ## O Mundo contínuo (marco 54, 26/11/2026)
 
-Atrás de `mundo.json → continuo` (desligado até o cliente contínuo, marco 55; `MUNDO_CONTINUO=1` liga no servidor).
+Ligado em `mundo.json → continuo` desde o marco 55 (D-208), com 100 jogadores por canal.
 - **Uma sala por canal com o atlas inteiro** (2020×888): as regiões encostadas, coluna e linha com o maior tamanho
   (`mundo/atlas.ts`). Onde havia passagem, a costura é aberta: a borda chega ao mesmo chão dos dois lados
   (`world/costura.ts`), e as estradas se encontram no cruzamento.
@@ -291,7 +292,14 @@ Atrás de `mundo.json → continuo` (desligado até o cliente contínuo, marco 5
   `mundo_aquecendo` até acabar.
 - **Medir**: `npm run carga:continuo -- --clientes 40 --segundos 30` (`--juntos` na Vila do Centro, `--hoje` a base
   de uma sala por região).
-- Detalhes em D-207.
+- **No cliente** (marco 55): uma cena só no exterior. As regiões são geradas num trabalhador, a de onde o jogador
+  está primeiro, e carimbadas na fase do atlas (`mundo/atlas-carimbo.ts`, o mesmo do servidor); cada uma é desenhada
+  no lugar dela quando a vista chega perto (`ui/atlas-na-cena.ts`). A cena só troca para entrar num interior.
+- **Mapa e guia**: o mapa do terreno é o da região da zona onde se está; o guia vai ao cruzamento da próxima costura
+  pelo caminho a pé (`mundo/orientacao-atlas.ts`). O minimapa mostra 200 células em volta do jogador.
+- **Medir no cliente**: `?bench=mundo&rota=vila_do_centro,encosta_do_leste,mar_de_areia,eclipse_almas` anda cruzando
+  as costuras e mede o pior quadro em cada uma (também em `npm run bench`).
+- Detalhes em D-207 e D-208.
 
 ## Dia, noite, tocha e relevo (marco 42, 15/11/2026)
 

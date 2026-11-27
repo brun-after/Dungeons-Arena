@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.64 · **Data:** 26/11/2026
+**Versão:** 1.65 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.65 (26/11/2026)**: D-208: o Mundo contínuo no cliente (o carimbo comum, as regiões do trabalhador, uma cena só, mapa, guia e minimapa no atlas) e o `continuo` ligado com 100 por canal.
 > - **1.64 (26/11/2026)**: D-207: o Mundo contínuo no núcleo e no servidor (atlas, costuras, zonas, hibernação, sala única) e a medida da lotação.
 > - **1.63 (26/11/2026)**: D-206: a fusão leva todos os elementos dela, no vínculo e no visual (as ligas: lava, vapor, cristal ígneo, fulgurito…).
 > - **1.62 (25/11/2026)**: D-205, continuação: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório, d20), a troca nova e o botão do ataque automático.
@@ -6875,3 +6876,54 @@ a cada poucos tiques.
 **Fora (marco 55).** O cliente contínuo (geração no Worker, carimbo, camadas por bloco, uma cena só, HUD e mapas),
 ligar `continuo` e apagar passagens, bilhetes e vizinha. Ainda por região no servidor: as escoltas e o lugar ao acaso
 do desvio (convertidos na chegada) e o escuro base da zona.
+
+## D-208 — O Mundo contínuo no cliente, e ligado (26/11/2026)
+
+**Problema.** Com o D-207, o servidor já sabia ser um mapa só, mas o cliente seguia uma cena por região: andar de uma
+região para a outra ainda trocava de sala e de cena, com o pior quadro de 0,4 a 0,8 s na troca (D-202). É o marco 55
+de três: o cliente contínuo, e o `continuo` ligado.
+
+**Decisão.**
+- **O mesmo carimbo nos dois lados** (`mundo/atlas-carimbo.ts`): o servidor carimba as 24 regiões ao subir, e o cliente
+  carimba cada uma quando chega. As listas da fase (spawns, áreas, refúgios, telhados…) saem sempre na ordem canônica
+  (a região de início primeiro, depois a ordem do reino), seja qual for a ordem de chegada; então o índice de uma área
+  fixa é o mesmo nos dois. As células são escritas no lugar; as listas são trocadas por listas novas (quem guarda um
+  índice por lista refaz). O teste confere: carimbar fora de ordem dá as mesmas células e listas do servidor. Os
+  telhados do atlas do servidor vêm do gerador (a leitura da fase não os guardava).
+- **As regiões geradas num trabalhador** (`plataforma/gerar-regiao-trabalhador.ts`, `plataforma/gerador-remoto.ts`): a
+  fila põe primeiro a região de onde o jogador está, depois as que encostam nela e o resto pela distância, e se
+  reordena quando ele muda de área. A página espera só a região de chegada antes da cena; as outras chegam andando.
+  Sem Worker, a página gera uma por vez entre os quadros. A fase do atlas do cliente (`mundo/atlas-cliente.ts`) nasce
+  vazia (o vazio não se anda nem se desenha) e é a mesma do começo ao fim: a predição anda nela.
+- **Uma cena só, com cada região no lugar dela** (`ui/atlas-na-cena.ts`, `render/camada-regiao.ts`): a câmera, quem
+  anda e os efeitos ficam nas coordenadas do atlas; o chão, as paredes, as fachadas, os enfeites, os telhados, o
+  cenário e os penhascos de cada região são desenhados da fase dela, com a projeção deslocada para o canto da área,
+  na mesma camada das entidades (a ordem de desenho segue certa). A região ganha a camada quando a vista chega a 48
+  células dela (uma por quadro) e perde a 96. A altura do chão de cada ponto vem do relevo da região dele. A cena só
+  troca para entrar num interior e voltar.
+- **Mapa, guia, lápide e Portal** (`ui/mundo-continuo-tela.ts`, `mundo/orientacao-atlas.ts`): o mapa do terreno é o
+  da região da zona onde se está, e tudo o que se marca nele fica nas coordenadas da área dela. O guia leva o ponto ao
+  atlas; entre regiões, a etapa é o cruzamento da costura do próximo passo pelos lados abertos (nunca corta uma
+  serra), e o portal só quando não há caminho a pé. A lápide fica na zona onde se morreu. O Portal temporário manda o
+  ponto à sala no local da região (o do reino), que a sala leva ao atlas. Os pontos marcados antes ficam deslocados
+  pelo `dx`/`dy` da área (até 36 células).
+- **Minimapa em janela** (`ui/minimapa.ts`): numa fase maior que 600×600, o minimapa mostra 200 células em volta do
+  jogador, pintadas das células a cada 8 de passo (e quando chega região). **As luzes** das vilas, das janelas e das
+  áreas se refazem quando as listas mudam, e a luz da vila só conta perto.
+- **Entrar e criar** vão ao lugar `mundo` (o servidor põe o personagem ao lado da pedra da vila salva); a entrada
+  espera o servidor que acabou de subir montar o atlas (`mundo_aquecendo`, até 60 s).
+- **Ligado.** `mundo.json → continuo: true` e `maxJogadores: 100` (o teto do modo subiu para 128), como o D-207
+  decidiu.
+- **O que saiu.** No cliente, a vizinha além da borda (`render/vizinha.ts`, `world/recorte-vizinha.ts`) e o vigia da
+  passagem (`ui/passagem-mundo.ts`). No servidor, as salas por região, as passagens de troca e os bilhetes entre
+  regiões ficam como estão, sem uso com o `continuo` ligado: são a volta de um dado só, se o contínuo precisar ser
+  desligado na VM, e saem depois que ele rodar lá.
+
+**Medida** (`?bench=mundo&rota=vila_do_centro,encosta_do_leste,mar_de_areia,eclipse_almas&vel=10`, Chromium sem tela
+1280×720, WebGL por software): o pior quadro em volta de cada costura (1 s antes a 2 s depois) foi 116, 87 e 79 ms,
+com o p95 da rota em 107 ms: sem tela todo quadro é lento, e a costura não pesa mais que o resto. A troca de região
+que saiu custava 0,4 a 0,8 s num aparelho de verdade. No jogo com o servidor, andar da Vila do Centro à Encosta do
+Leste muda a faixa e o guia na hora, sem trocar de cena.
+
+**Fora (marco 56).** As escadas e os andares das masmorras. Também depois: soltar as regiões longe da memória do
+cliente (hoje ficam as 24, uns poucos MB) e apagar o caminho por região do servidor.
