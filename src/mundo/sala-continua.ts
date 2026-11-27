@@ -29,7 +29,7 @@ import { passavel } from '../world/fase';
 import { chaveDoDono, REF_ERRANTE } from './objetos-mundo';
 import { territorioDoLugar, type Reino, type RegiaoDoMundo } from './reino';
 import { SalaMundo, type OpcoesSalaMundo, type Presenca } from './sala-mundo';
-import { zonaEm } from './zonas';
+import { regrasDasZonas, zonaEm } from './zonas';
 
 const PREFIXO_MERCADOR = 'evento-mercador:';
 
@@ -55,15 +55,8 @@ export class SalaMundoContinuo extends SalaMundo {
 
   /** O PvP e o loot de cada zona no modo (o loot com a lua sangrenta da zona, se houver). */
   private aplicarRegrasDasZonas(): void {
-    const z = this.mundo.zonas;
-    const lua = this.ctx.balance.mundo.eventos.luaLootPct;
-    const regras = z.ids.map((id) => {
-      const r = this.reino.regioes.find((x) => x.id === id);
-      const p = r ? this.reino.perigos[r.perigo] : null;
-      const comLua = this.eventos.get(id)?.evento === 'lua_sangrenta';
-      return { pvp: p?.pvp ?? false, lootPct: ((p?.lootPct ?? 100) * (comLua ? lua : 100)) / 100 };
-    });
-    this.ctx = { ...this.ctx, modo: { ...this.ctx.modo, fogoAmigo: false, zonas: { largura: z.largura, altura: z.altura, celulas: z.celulas, pvp: regras.map((r) => r.pvp), lootPct: regras.map((r) => r.lootPct) } } };
+    const zonas = regrasDasZonas(this.reino, this.mundo.zonas, (id) => this.eventos.get(id)?.evento === 'lua_sangrenta', this.ctx.balance.mundo.eventos.luaLootPct);
+    this.ctx = { ...this.ctx, modo: { ...this.ctx.modo, fogoAmigo: false, zonas } };
   }
 
   protected override regiaoDe(p: { x: number; y: number }): RegiaoDoMundo | null {

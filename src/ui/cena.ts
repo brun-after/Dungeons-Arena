@@ -50,7 +50,7 @@ import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
 import { criarTerreno, type SoloDoTerreno } from '../render/terreno';
 import { soloDaFase } from '../render/solo/solo-da-fase';
-import { criarCenaDoMundo, type CenaDoMundo } from './cena-mundo';
+import { criarCenaDoMundo, type CenaDoMundo, type DesenhoDoAtlas } from './cena-mundo';
 import { PintorDeDesenhos } from '../render/pintura';
 import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
@@ -119,8 +119,8 @@ export interface OpcoesCena {
   partyVisaoForcada?: boolean;
   visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
   abrirAnuncios?: () => void; // Marco 38 (08/11/2026, D-142): os anúncios dos jogadores no mercado do Mundo.
-  /** Marco 41 (D-169): na troca de região, onde o jogador estava na vista e as teclas mantidas na cena de antes. */
-  troca?: { desvio: { x: number; y: number } | null; teclas: () => readonly string[] } | null;
+  troca?: { desvio: { x: number; y: number } | null; teclas: () => readonly string[] } | null; // D-169: a vista e as teclas da cena de antes
+  atlas?: DesenhoDoAtlas | null; // Marco 55 (D-208): o Mundo contínuo (o chão e o que fica em pé são de cada região)
 }
 
 export interface QuadroCena {
@@ -194,7 +194,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const encerrarSessaoDeTela = prepararSessaoDeTela(toque);
 
   // Marco 31 (31/10/2026, D-130): o jogo é só isométrico (a vista de cima fica para o editor e a galeria).
-  const camera = new Camera(criarProjecao('iso', fase.largura, fase.altura, relevoDaFase(fase)?.alturaPx ?? null), prefs.camera, toque); // Marco 43 (D-177): o relevo na projeção.
+  const camera = new Camera(criarProjecao('iso', fase.largura, fase.altura, o.atlas?.alturaPx ?? relevoDaFase(fase)?.alturaPx ?? null), prefs.camera, toque); // Marco 43 (D-177): o relevo na projeção.
   let visao: ControleVisao | null = null;
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;
@@ -242,7 +242,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // de pixels no desenho e no envio da textura a cada quadro) e no máximo ~30 redesenhos por segundo.
   const dprVivo = Math.min(toque ? 1.5 : 2, Math.max(1, globalThis.devicePixelRatio || 1));
   const reservaVivos = o.tileset || !webglAcelerado() ? null : reservarPalcoVivo(dprVivo, toque ? 1000 / 30 : 0); // D-202: o mesmo de cena em cena
-  const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual, ap.qualidade().soloEscala, pintor);
+  const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(o.atlas?.faseVazia ?? fase, temaDaFase(ctx), ctx.balance.visual, ap.qualidade().soloEscala, pintor);
   if (solo) await solo.texturas;
   if (personagens) {
     const modelos: string[] = [];
@@ -263,7 +263,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return null;
     }
   }
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis, solo);
+  const terreno = criarTerreno(palco.terreno, o.atlas?.faseVazia ?? fase, o.tileset ?? null, temaDaFase(ctx), quebraveis, solo);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -279,7 +279,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
-    oculto: (x, y) => longeDaVista(vistaAtual, x, y) || (visao?.oculto(x, y) ?? false), // D-202: longe, nem desenha
+    oculto: (x, y) => longeDaVista(vistaAtual, x, y) || (visao?.oculto(x, y) ?? false) || mundo.oculto(x, y), // D-202: longe, nem desenha
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
     armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
@@ -308,7 +308,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
   const temaPorId = (id: string | null | undefined) => (id ? (ctx.conteudo.temas.get(id) ?? null) : null);
-  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), {
+  const portas = new CamadaPortas(palco.chao, o.atlas?.faseVazia ?? fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), {
     emPe: { camada: palco.entidades, projecao },
     destinos: { saida: temaPorId(o.portais?.saida), retorno: temaPorId(o.portais?.retorno), aqui: temaDaFase(ctx) },
     particulas: ap.particulas,
@@ -318,7 +318,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   visao = await montarVisao({
     palco,
     camera,
-    fase,
+    fase: o.atlas?.faseVazia ?? fase,
     corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
     terreno,
     tema: temaDaFase(ctx),
@@ -768,7 +768,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     });
   };
   marcarModais();
-  const mundo: CenaDoMundo = criarCenaDoMundo({ palco, camera, terreno, balance: ctx.balance, escalaSolo: () => ap.qualidade().soloEscala, pintor: o.tileset ? null : pintor, modelos3d: o.tileset ? null : modelos3d, jogador, teclas: () => teclado.mantidas() });
+  const mundo: CenaDoMundo = criarCenaDoMundo({ palco, camera, terreno, atlas: o.atlas ?? null, quebraveis, camuflagem: ctx.balance.mundo.noite.camuflagem, balance: ctx.balance, escalaSolo: () => ap.qualidade().soloEscala, pintor: o.tileset ? null : pintor, modelos3d: o.tileset ? null : modelos3d, jogador, teclas: () => teclado.mantidas() });
   return {
     bus,
     hud,

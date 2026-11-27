@@ -17,7 +17,7 @@ import { buscarEntidade, criarEstado } from './core/estado';
 import { t, type ChaveTexto } from './i18n';
 import type { AcaoDoMundo } from './mundo/acoes';
 import type { AvisoDoMundo } from './mundo/avisos';
-import { lerLugar, montarLugar } from './mundo/lugares';
+import { ID_LUGAR_MUNDO, lerLugar, montarLugar } from './mundo/lugares';
 import { MODO_MUNDO } from './mundo/sala-mundo';
 import { ClienteArena } from './net/cliente';
 import { MonitorDeConexao } from './net/qualidade';
@@ -42,11 +42,10 @@ import { criarGuiaMundo, criarOrientacaoMundo, esquecerLapide, marcarLapide, typ
 import { abrirPortalTemporario } from './ui/portal-mapa';
 import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
 import type { ContextoSimulacao } from './core/contexto';
-import { proximaEtapa } from './mundo/orientacao';
-import { vigiaDaPassagem } from './ui/passagem-mundo';
+import { proximaEtapa, type DestinoNoMapa } from './mundo/orientacao';
+import { etapaNoAtlas } from './mundo/orientacao-atlas';
+import { mundoContinuoNaTela, type MundoContinuoNaTela } from './ui/mundo-continuo-tela';
 import type { CenaDoMundo } from './ui/cena-mundo';
-import { recorteDaVizinha } from './world/recorte-vizinha';
-import { temaDaFase } from './combat/clima';
 import { ENDERECO_DO_MENU } from './ui/menu';
 
 // 09/11/2026 (D-144): 20 s (a sala nova pode estar nascendo: gerar a região leva tempo no servidor).
@@ -57,6 +56,14 @@ const agoraMs = () => relogioDoNavegador.agoraMs();
 const conteudo = conteudoOficial();
 const modo = modoPorId(conteudo, MODO_MUNDO);
 const reino = reinoDoConteudo(conteudo);
+/**
+ * Marco 55 (26/11/2026, D-208): no Mundo contínuo, o exterior é um lugar só (`mundo`): entra-se nele pelo slot (o
+ * servidor põe o personagem ao lado da pedra da vila salva) e só se troca de sala para entrar num interior e voltar.
+ */
+const continuo = modo.continuo === true;
+const lugarDaVila = (vila: string) => (continuo ? ID_LUGAR_MUNDO : `regiao:${vila}`);
+/** Quanto a entrada espera a região de onde o personagem está chegar do trabalhador. */
+const ESPERA_REGIAO_MS = 30_000;
 /** 09/11/2026 (D-143): o terreno das outras regiões para o mapa do Portal temporário (gerado pela mesma semente). */
 const terrenos = new Map<string, ContextoSimulacao>();
 function terrenoDe(id: string): ContextoSimulacao | null {
@@ -190,7 +197,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       resumo.className = 'resumo-slot';
       resumo.textContent = t('mundo.localDoPersonagem', { slot, vila: nomeDaVila(p.vilaSalva) });
       const jogar = botao(t('mundo.jogar'), () => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${p.vilaSalva}`, slot });
+        void jogarNoMundo(raiz, servidor, token, { lugar: lugarDaVila(p.vilaSalva), slot });
       });
       jogar.setAttribute('aria-label', t('mundo.jogarRotulo', { nome: p.nome }));
       const excluir = botao(t('mundo.excluir'), () => {
@@ -248,7 +255,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       };
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });
+        void jogarNoMundo(raiz, servidor, token, { lugar: lugarDaVila(reino.inicio), slot, criar: { classeId, nome } });
       }));
     }
     const seletor = botao(p?.nome ?? t('mundo.selecao.vazio'), () => {
@@ -320,6 +327,18 @@ async function esperarEntrada(eu: ClienteArena): Promise<boolean> {
   return eu.conectado;
 }
 
+/** Marco 55 (D-208): espera o personagem aparecer no estado e a região de onde ele está chegar do trabalhador. */
+async function esperarRegiaoDoJogador(eu: ClienteArena, noAtlas: MundoContinuoNaTela): Promise<boolean> {
+  const inicio = Date.now();
+  const achar = () => (eu.previsto && eu.entidadeId ? buscarEntidade(eu.previsto, eu.entidadeId) : undefined);
+  let e = achar();
+  while (!e && Date.now() - inicio < ESPERA_ENTRADA_MS) {
+    await new Promise((r) => setTimeout(r, 30));
+    e = achar();
+  }
+  return e ? await noAtlas.esperarRegiao(e.x, e.y, ESPERA_REGIAO_MS) : false;
+}
+
 function motivoDoErro(e: unknown): string {
   const texto = e instanceof Error ? e.message : '';
   const conhecido = ['sem_conta', 'ja_jogando', 'sem_personagem', 'fora_da_vila_salva', 'bilhete_invalido'].find((m) => texto.includes(m));
@@ -329,6 +348,7 @@ function motivoDoErro(e: unknown): string {
 /** 09/11/2026 (D-144): as recusas que não melhoram tentando de novo (o resto é rede, sala nascendo ou saindo). */
 const RECUSAS_DEFINITIVAS = ['sem_conta', 'sem_personagem', 'fora_da_vila_salva', 'bilhete_invalido'];
 const TENTATIVAS_DE_ENTRADA = 3;
+const ESPERA_AQUECER_MS = 60_000;
 
 /**
  * 09/11/2026 (D-144): conecta com novas tentativas. A troca de sala caía na tela de erro por uma falha passageira
@@ -336,8 +356,11 @@ const TENTATIVAS_DE_ENTRADA = 3;
  */
 async function conectarComTentativas(servidor: string, token: string, pedido: PedidoDoMundo): Promise<Awaited<ReturnType<typeof conectarMundo>>> {
   let ultimoErro: unknown = null;
-  for (let tentativa = 0; tentativa < TENTATIVAS_DE_ENTRADA; tentativa++) {
-    if (tentativa > 0) await new Promise((r) => setTimeout(r, 600 * tentativa));
+  const inicio = Date.now();
+  // Marco 55 (D-208): o servidor que acabou de subir monta o atlas (~20 s) e responde `mundo_aquecendo` até lá.
+  const aquecendo = () => ultimoErro instanceof Error && ultimoErro.message.includes('mundo_aquecendo') && Date.now() - inicio < ESPERA_AQUECER_MS;
+  for (let tentativa = 0; tentativa < TENTATIVAS_DE_ENTRADA || aquecendo(); tentativa++) {
+    if (tentativa > 0) await new Promise((r) => setTimeout(r, aquecendo() ? 1500 : 600 * tentativa));
     try {
       return await conectarMundo(servidor, token, pedido);
     } catch (e) {
@@ -383,7 +406,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   const voltarPelaVila = (): boolean => {
     if (!pedido.bilhete || pedido.slot === undefined || !vilaSalva) return false;
     camada.remove();
-    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao, null, troca && { tirar: troca.tirar, cena: null });
+    void jogarNoMundo(raiz, servidor, token, { lugar: lugarDaVila(vilaSalva), slot: pedido.slot }, orientacao, null, troca && { tirar: troca.tirar, cena: null });
     return true;
   };
   let conexao: Awaited<ReturnType<typeof conectarMundo>>;
@@ -395,7 +418,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     return;
   }
   // D-169: o mapa da região pode já estar pronto (preparado enquanto se andava pela passagem).
-  const ctx = (lugar.tipo === 'regiao' ? terrenoDe(pedido.lugar) : null) ?? montarLugar(conteudo, reino, lugar, modo).ctx;
+  const noAtlas: MundoContinuoNaTela | null = continuo && lugar.tipo === 'mundo' ? mundoContinuoNaTela(conteudo, reino, modo) : null;
+  const ctx = noAtlas?.atlas.ctx ?? (lugar.tipo === 'regiao' ? terrenoDe(pedido.lugar) : null) ?? montarLugar(conteudo, reino, lugar, modo).ctx;
   const eu = new ClienteArena({ ctx, transporte: conexao.transporte, nome: '', pedidoFicha: null, agoraMs });
   let visoesExternas: Extract<AvisoDoMundo, { tipo: 'visoesParty' }>['visoes'] = [];
   const consultaParty = new ConsultaParty();
@@ -408,6 +432,12 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   if (!(await esperarEntrada(eu))) {
     await conexao.encerrar();
     if (voltarPelaVila()) return;
+    falhar(t('mundo.falha'));
+    return;
+  }
+  // Marco 55 (D-208): a região de onde o personagem está chega antes da cena (as outras vêm andando).
+  if (noAtlas && !(await esperarRegiaoDoJogador(eu, noAtlas))) {
+    await conexao.encerrar();
     falhar(t('mundo.falha'));
     return;
   }
@@ -455,8 +485,21 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     removeEventListener('keydown', teclaMapa);
     document.querySelector('.mapa-expandido')?.remove();
   };
+  const euAgora = () => (eu.previsto ? buscarEntidade(eu.previsto, idDoJogador()) : undefined);
+  /** O lugar de onde se está: a zona da posição, no Mundo contínuo; o da sala, fora dele. */
+  const lugarAgora = (): string => {
+    const e = euAgora();
+    return (noAtlas && e ? noAtlas.zonaDe(e.x, e.y) : null) ?? ultimoLugar?.lugar ?? pedido.lugar;
+  };
+  const etapaDe = (d: DestinoNoMapa) => (noAtlas ? etapaNoAtlas(reino, noAtlas.atlas.atlas, lugarAgora(), d) : proximaEtapa(reino, pedido.lugar, d, ctx.fase));
   const verMapa = () => {
-    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty, orientacao, andar: (p) => { condutor.conduzir({ tipo: 'ponto', x: p.x, y: p.y }); } });
+    if (!ultimoLugar) return;
+    const lugarDoMapa = lugarAgora();
+    // Marco 55 (D-208): no Mundo contínuo, o mapa do terreno é o da região da zona, em coordenadas da área dela.
+    const ctxDoMapa = noAtlas ? noAtlas.ctxDaRegiao(lugarDoMapa) : ctx;
+    const area = noAtlas?.areaDe(lugarDoMapa) ?? { x: 0, y: 0 };
+    const estadoDoMapa = noAtlas ? () => noAtlas.estadoNaRegiao(estadoAtual(), lugarDoMapa) : estadoAtual;
+    abrirMapa(reino, lugarDoMapa, ultimoLugar.descobertas, ultimoLugar.vilaSalva, ctxDoMapa ? { ctx: ctxDoMapa, estado: estadoDoMapa, idLocal: idDoJogador(), membros: membrosParty, orientacao, andar: (p) => { condutor.conduzir({ tipo: 'ponto', x: p.x + area.x, y: p.y + area.y }); } } : undefined);
   };
   const teclaMapa = (ev: KeyboardEvent) => {
     // 19/11/2026 (D-187): a tecla do mapa vem das Configurações (o M, por padrão).
@@ -550,12 +593,17 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   portal.textContent = t('mundo.portalT.botao');
   portal.title = t('mundo.portalT.dica');
   portal.addEventListener('click', () => {
-    const j = eu.previsto ? buscarEntidade(eu.previsto, idDoJogador()) : undefined;
+    const j = euAgora();
     const quantos = j?.bolsa?.mochila.filter((m) => m.itemId === PORTAL_TEMPORARIO).reduce((s, m) => s + m.qtd, 0) ?? 0;
     abrirPortalTemporario({
-      reino, lugar: pedido.lugar, descobertas: ultimoLugar?.descobertas ?? [], orientacao, idLocal: idDoJogador(), estado: estadoAtual, quantos,
-      ctxDe: (id) => (id === pedido.lugar ? ctx : terrenoDe(id)),
-      abrir: (lugar, x, y) => { enviarAcao({ a: 'portal', lugar, x, y }); },
+      reino, lugar: lugarAgora(), descobertas: ultimoLugar?.descobertas ?? [], orientacao, idLocal: idDoJogador(), quantos,
+      estado: noAtlas ? () => noAtlas.estadoNaRegiao(estadoAtual(), lugarAgora()) : estadoAtual,
+      ctxDe: (id) => (noAtlas ? noAtlas.ctxDaRegiao(id) : id === pedido.lugar ? ctx : terrenoDe(id)),
+      // Marco 55 (D-208): o ponto da área vai à sala no local da região (o do reino, que a sala leva ao atlas).
+      abrir: (lugar, x, y) => {
+        const a = noAtlas?.areaDe(lugar);
+        enviarAcao({ a: 'portal', lugar, x: Math.max(0, x - (a?.dx ?? 0)), y: Math.max(0, y - (a?.dy ?? 0)) });
+      },
     });
   });
 
@@ -581,7 +629,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     acoesExtras: [mapa, portal, retorno, sair],
     pausaOJogo: false,
     partyMundo: true,
-    destinoMapa: () => orientacao.destino ? proximaEtapa(reino, pedido.lugar, orientacao.destino, ctx.fase)?.ponto ?? null : null,
+    destinoMapa: () => (orientacao.destino ? (etapaDe(orientacao.destino)?.ponto ?? null) : null),
+    atlas: noAtlas?.desenho ?? null,
     visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
     // Marco 38 (D-142): o mercado é uma loja só; o botão fecha a loja e pede os anúncios do reino.
@@ -597,7 +646,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     return;
   }
   const c = cena;
-  const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
+  const guia = criarGuiaMundo(orientacao, etapaDe, idLocal, () => ultimoLugar?.descobertas ?? []);
   camada.querySelector('.camada-ui')?.append(faixa.elemento, anuncioChefe.elemento, relogio.elemento, social.elemento, guia.elemento);
   // Marco 53 (22/11/2026, D-203): morto fora de dungeon, a escolha de onde renascer.
   const nomeDaRegiao = (id: string | undefined) => reino.regioes.find((r) => r.id === id)?.nome ?? id ?? '';
@@ -634,7 +683,9 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
         if (!ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
         else {
           // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
-          marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
+          // Marco 55 (D-208): no Mundo contínuo, na zona onde morreu, em coordenadas da área dela.
+          const l = noAtlas?.naRegiao(ev.x, ev.y) ?? { lugar: pedido.lugar, x: ev.x, y: ev.y };
+          marcarLapide(orientacao, l.lugar, { x: l.x, y: l.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
           avisar(t('mundo.tumulo'), 6000);
         }
       } else if (ev.t === 'tumuloAberto' && meu) {
@@ -658,7 +709,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     setTimeout(() => {
       desmontar();
       camada.remove();
-      void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vila}`, slot }, orientacao);
+      void jogarNoMundo(raiz, servidor, token, { lugar: lugarDaVila(vila), slot }, orientacao);
     }, 1500);
   });
   // D-169: a cena de antes sai quando o personagem aparece aqui com o chão à vista pronto (ou em poucos segundos).
@@ -673,14 +724,6 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     antes = null;
   };
   if (antes) setTimeout(revelar, REVELAR_EM_MS);
-  // D-169: ao entrar numa passagem, o mapa de lá é preparado e o pedaço dele além da borda é desenhado.
-  let vizinhaAtual = '';
-  const vigia = vigiaDaPassagem(ctx.fase, (area) => {
-    const ctxLa = area.destino ? terrenoDe(area.destino) : null;
-    if (!ctxLa || !area.lado || vizinhaAtual === area.destino) return;
-    vizinhaAtual = area.destino ?? '';
-    c.mundo.vizinha(recorteDaVizinha(ctx.fase.largura, area.lado, ctxLa.fase), temaDaFase(ctxLa));
-  }, (texto) => { avisar(texto, 3500); });
   pararLaco = iniciarLaco({
     simular: () => {
       eu.passo();
@@ -689,9 +732,10 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
       guia.atualizar(eu.previsto, agoraMs());
       if (eu.previsto) anuncioChefe.atualizar(eu.previsto, agoraMs());
       const id = eu.entidadeId ?? idLocal;
-      const euAgora = eu.previsto ? buscarEntidade(eu.previsto, id) : undefined;
-      condutor.atualizar(eu.previsto, euAgora, agoraMs());
-      renascer.atualizar(euAgora?.morto ?? false);
+      const euNoQuadro = eu.previsto ? buscarEntidade(eu.previsto, id) : undefined;
+      condutor.atualizar(eu.previsto, euNoQuadro, agoraMs());
+      renascer.atualizar(euNoQuadro?.morto ?? false);
+      if (noAtlas && euNoQuadro) noAtlas.seguir(euNoQuadro.x, euNoQuadro.y);
       const conectado = eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id));
       if (monitor.atualizar(agoraMs(), eu.rttMs, conectado)) avisar(t('rede.instavel'));
       c.quadro({
@@ -702,7 +746,6 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
           baseTick: eu.baseTick, tempoSemEstadoMs: eu.tempoSemEstadoMs, ressincronizacoes: eu.ressincronizacoes },
       });
       if (conectado && antes && c.mundo.chaoPronto()) revelar();
-      vigia(eu.previsto ? buscarEntidade(eu.previsto, id) : undefined);
     },
     quadroPermitido: c.quadroPermitido,
   });

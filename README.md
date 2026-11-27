@@ -1,9 +1,10 @@
 # Dungeons Dimensions: RPG de ação em tempo real
 
-**Versão do documento:** 3.68 · **Data:** 26/11/2026
+**Versão do documento:** 3.69 · **Data:** 26/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.69 (26/11/2026)**: marco 55: o Mundo contínuo no cliente, e ligado (D-208).
 > - **3.68 (26/11/2026)**: marco 54: o Mundo contínuo no núcleo e no servidor, ainda desligado (D-207).
 > - **3.67 (25/11/2026)**: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório e d20), a troca com cobrança e chat, e o botão do ataque automático, que não religa ao trocar de alvo (D-205).
 > - **3.66 (25/11/2026)**: o jogo passa a se chamar Dungeons Dimensions e ganha a fonte própria, Runas de Filo, nos títulos e nos números (D-205).
@@ -388,6 +389,19 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 55 — o Mundo contínuo, ligado (26/11/2026)
+
+O segundo passo: o jogo passa a ser um mapa só.
+- **Sem troca entre as regiões.** Andar de uma região para a outra não troca de sala nem de cena: a faixa do lugar
+  muda e o mundo segue. A cena só troca para entrar numa masmorra, num covil ou numa casa.
+- **As regiões chegam andando.** O jogo gera a região de onde você está antes de entrar e as outras enquanto você
+  joga, sem travar a tela, e desenha cada uma quando ela chega perto da vista.
+- **Mapa e guia no mapa só.** O mapa mostra a região onde você está; o guia leva ao cruzamento da próxima região pelo
+  caminho a pé, e o minimapa acompanha você.
+- **100 por canal.** Cada canal do Mundo leva até 100 jogadores.
+
+Ainda por vir: as escadas e os andares das masmorras, no 56. Detalhes em D-208.
 
 ### Marco 54 — o Mundo contínuo, no servidor (26/11/2026)
 

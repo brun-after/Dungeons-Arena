@@ -36,9 +36,10 @@ export default defineConfig({
     {
       // Servidor da arena para os testes online (o lobby em localhost usa ws://localhost:2567).
       command: 'npm run servidor',
-      url: 'http://localhost:2567/saude',
+      // Marco 55 (D-208): espera o Mundo contínuo montar (o atlas, ao subir).
+      url: 'http://localhost:2567/saude/mundo',
       reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
+      timeout: 180_000,
     },
   ],
 });

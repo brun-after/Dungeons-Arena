@@ -5,22 +5,20 @@
 
 import type { Conteudo } from '../core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from '../core/contexto';
-import type { Celula } from '../core/comandos';
 import type { ModoDeJogo } from '../modos/modo';
 import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
-import { codigoDeTipo, type Fase } from '../world/fase';
-import type { ExteriorGerado, PontoDoExterior } from '../world/gerador-exterior';
-import type { Refugio } from '../world/refugio';
-import { copaEm } from '../world/camuflagem';
+import type { ExteriorGerado } from '../world/gerador-exterior';
 import { areasEfetivasEm } from '../world/terrenos-vivos';
 import { montarAtlas, paraOAtlas, type AreaNoAtlas, type Atlas } from './atlas';
+import { carimbarCelulas, carimbarNoAtlas, emOrdemCanonica, faseVaziaDoAtlas, moverNoAtlas, moverPonto, type RegiaoCarimbada } from './atlas-carimbo';
 import { gerarRegiaoNoAtlas } from './atlas-fase';
 import { comMateriais, type LugarMontado } from './lugares';
 import { objetosDoExterior } from './objetos-mundo';
 import { territorioDoLugar, type MaterialDeInimigo, type Reino, type RegiaoDoMundo } from './reino';
 import { mapaDeZonas, type MapaDeZonas } from './zonas';
 
-export const ID_DO_MUNDO = 'mundo_atlas';
+import { ID_DO_MUNDO } from './atlas-carimbo';
+export { ID_DO_MUNDO };
 
 export interface MundoMontado extends LugarMontado {
   atlas: Atlas;
@@ -38,12 +36,6 @@ export function regiaoNoAtlas(r: RegiaoDoMundo, a: AreaNoAtlas): RegiaoDoMundo {
     estruturas: r.estruturas.map((e) => ({ ...e, ...paraOAtlas(a, e.x, e.y) })),
     ...(r.matas && { matas: r.matas.map((m) => ({ ...m, ...paraOAtlas(a, m.x, m.y) })) }),
   };
-}
-
-const mover = <T extends { x: number; y: number }>(o: T, a: AreaNoAtlas): T => ({ ...o, x: o.x + a.x, y: o.y + a.y });
-
-function moverPonto(p: PontoDoExterior, a: AreaNoAtlas): PontoDoExterior {
-  return p.tipo === 'estrutura' ? { ...p, porta: mover(p.porta, a), frente: mover(p.frente, a) } : mover(p, a);
 }
 
 /** Os materiais que os monstros deixam, de todos os reinos do atlas. */
@@ -74,81 +66,27 @@ export function montarMundoContinuo(conteudo: Conteudo, reino: Reino, modoBase: 
  */
 export function* etapasDoMundoContinuo(conteudo: Conteudo, reino: Reino, modoBase: ModoDeJogo): Generator<string, MundoMontado> {
   const atlas = montarAtlas(reino);
-  const L = atlas.largura;
-  const total = L * atlas.altura;
-  const celulas = new Uint8Array(total).fill(codigoDeTipo('vazio'));
-  const alturas = new Uint8Array(total);
-  const obstaculos = new Uint8Array(total);
-  const partes: { fase: Fase; area: AreaNoAtlas; ex: ExteriorGerado; regiaoId: string }[] = [];
+  // Marco 55 (D-208): o carimbo é o mesmo do cliente (mundo/atlas-carimbo.ts).
+  const fase = faseVaziaDoAtlas(reino, atlas);
+  const partes: RegiaoCarimbada[] = [];
   for (const regiao of reino.regioes) {
     const area = atlas.areas.get(regiao.id);
     if (!area) continue;
     const ex = gerarRegiaoNoAtlas(reino, atlas, regiao);
     const r = contextoDaFase(conteudo, ex.fase, modoBase);
     if (!r.ok) throw new Error(`região ${regiao.id} inválida no atlas: ${r.erro}`);
-    const f = r.ctx.fase;
-    for (let y = 0; y < f.altura; y++) {
-      const de = y * f.largura;
-      const para = (area.y + y) * L + area.x;
-      celulas.set(f.celulas.subarray(de, de + f.largura), para);
-      alturas.set(ex.alturas.subarray(de, de + f.largura), para);
-      obstaculos.set(ex.obstaculos.subarray(de, de + f.largura), para);
-    }
-    partes.push({ fase: f, area, ex, regiaoId: regiao.id });
+    const parte = { fase: r.ctx.fase, area, ex, regiaoId: regiao.id };
+    carimbarCelulas(fase, parte);
+    partes.push(parte);
     yield regiao.id;
   }
-  // A região de início primeiro: o primeiro spawn da fase é a Vila do Centro.
-  partes.sort((p, q) => Number(q.regiaoId === reino.inicio) - Number(p.regiaoId === reino.inicio));
-  const refugios: Refugio[] = [];
-  const pontos: PontoDoExterior[] = [];
-  const rotas: Celula[][] = [];
-  for (const { area, ex } of partes) {
-    if (ex.vila) refugios.push({ x: ex.vila.x + area.x, y: ex.vila.y + area.y, raio: ex.vila.raio + 0.5 });
-    if (ex.abrigo) refugios.push({ x: ex.abrigo.x + area.x, y: ex.abrigo.y + area.y, raio: ex.abrigo.raio + 0.5 });
-    pontos.push(...ex.pontos.map((p) => moverPonto(p, area)));
-    rotas.push(...ex.rotas.map((rota) => rota.map((c) => mover(c, area))));
-  }
-  const fase: Fase = {
-    id: ID_DO_MUNDO,
-    nome: reino.nome,
-    ordem: 0,
-    largura: L,
-    altura: atlas.altura,
-    celulas,
-    tipo: 'campanha',
-    spawns: partes.flatMap(({ fase: f, area }) => f.spawns.map((s) => mover(s, area))),
-    inimigos: partes.flatMap(({ fase: f, area }) => f.inimigos.map((i) => mover(i, area))),
-    objetos: partes.flatMap(({ fase: f, area }) => f.objetos.map((o) => mover(o, area))),
-    portaSaida: null,
-    portasInternas: [],
-    matizGraus: 0,
-    tilesetId: null,
-    pecas: {},
-    eventos: [],
-    ambientes: partes.flatMap(({ fase: f, area }) => (f.ambientes ?? []).map((a) => mover(a, area))),
-    tema: null,
-    refugios,
-    estruturas: reino.regioes.flatMap((r) => {
-      const a = atlas.areas.get(r.id);
-      return a ? r.estruturas.map((e) => ({ ...paraOAtlas(a, e.x, e.y), tipo: e.tipo })) : [];
-    }),
-    exterior: true,
-    matas: reino.regioes.flatMap((r) => {
-      const a = atlas.areas.get(r.id);
-      return a ? (r.matas ?? []).map((m) => ({ ...m, ...paraOAtlas(a, m.x, m.y) })) : [];
-    }),
-    ninhos: partes.flatMap(({ ex, area }) => ex.ninhos.map((n) => mover(n, area))),
-    alturas,
-    obstaculos,
-    cenario: partes.flatMap(({ ex, area }) => ex.pecas.map((p) => mover(p, area))),
-    telhados: partes.flatMap(({ fase: f, area }) => (f.telhados ?? []).map((t) => mover(t, area))),
-  };
+  const { pontos, rotas } = carimbarNoAtlas(reino, fase, partes, []);
   const ctx: ContextoSimulacao = { fase, balance: BALANCE_PADRAO, conteudo, modo: comTodosOsMateriais(modoBase, reino) };
   const estado = estadoInicialDaFase(ctx);
   // Os objetos de cada região (lojas pelo reino dela), com a id da região na frente; os errantes, na ordem das rotas.
   let errante = 0;
-  for (const { ex, area, regiaoId } of partes) {
-    const deslocado: ExteriorGerado = { ...ex, pontos: ex.pontos.map((p) => moverPonto(p, area)), rotas: ex.rotas.map((rota) => rota.map((c) => mover(c, area))) };
+  for (const { ex, area, regiaoId } of emOrdemCanonica(reino, partes)) {
+    const deslocado: ExteriorGerado = { ...ex, pontos: ex.pontos.map((p) => moverPonto(p, area)), rotas: ex.rotas.map((rota) => rota.map((c) => moverNoAtlas(c, area))) };
     for (const o of objetosDoExterior(territorioDoLugar(reino, regiaoId), deslocado)) {
       estado.objetos.push({ ...o, objetoId: o.objetoId.startsWith('errante-') ? `errante-${String(errante++)}` : `${regiaoId}:${o.objetoId}` });
     }
@@ -162,8 +100,8 @@ export function* etapasDoMundoContinuo(conteudo: Conteudo, reino: Reino, modoBas
     vila: null,
     abrigo: null,
     rotas,
-    alturas,
-    obstaculos,
+    alturas: fase.alturas ?? new Uint8Array(0),
+    obstaculos: fase.obstaculos ?? new Uint8Array(0),
     pecas: fase.cenario ?? [],
     ninhos: fase.ninhos ?? [],
   };
@@ -176,10 +114,9 @@ export function* etapasDoMundoContinuo(conteudo: Conteudo, reino: Reino, modoBas
   if (!inicio) throw new Error('atlas sem regiões');
   // As estruturas de todas as regiões numa só (as escoltas e as escondidas procuram por id e posição).
   const regiaoDoAtlas: RegiaoDoMundo = { ...inicio, estruturas: [...regioesNoAtlas.values()].flatMap((r) => r.estruturas) };
-  // O que o tique só calcularia na primeira vez (as copas do atlas, o índice das áreas fixas) sai daqui, numa etapa
-  // própria, para não travar o primeiro tique da sala.
-  yield 'copas';
-  copaEm(ctx.fase, 0, 0);
+  // O que o tique só calcularia na primeira vez (o índice das áreas fixas) sai daqui, numa etapa própria, para não
+  // travar o primeiro tique da sala. As copas são por bloco (world/camuflagem.ts, D-208).
+  yield 'areas';
   areasEfetivasEm(estado, ctx.fase.ambientes ?? [], 0, 0);
   return { ctx, estado, exterior, atlas, zonas: mapaDeZonas(reino, atlas), regioesNoAtlas, regiaoDoAtlas };
 }

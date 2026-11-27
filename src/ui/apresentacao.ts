@@ -371,14 +371,26 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const luzesDeMagia = criarLuzesDeMagia(ctx, o.bus, o.estado, corDoElemento, vis.raioMagia);
   const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
   // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
-  const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
+  let luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
   // Marco 42 (15/11/2026, D-176): no Mundo, a luz em volta é a da tocha; sem ela, só um halo curto.
   // Marco 43 (D-177): com a tocha, a luz é quente e forte; sem ela, só um halo frio e fraco nos pés (o luar).
   // Marco 44 (15/11/2026, D-178): à noite, a vila não fica no breu: cada casa tem a janela acesa na frente (luz quente,
   // fraca e curta, como a de uma vela atrás do vidro), além das lanternas dos portões e do poste da praça.
-  const janelas = ctx.fase.exterior ? (ctx.fase.telhados ?? []).map((t) => ({ x: t.x + t.largura / 2, y: t.y + t.altura + 0.4 })) : [];
+  const janelasDa = () => ctx.fase.exterior ? (ctx.fase.telhados ?? []).map((t) => ({ x: t.x + t.largura / 2, y: t.y + t.altura + 0.4 })) : [];
   // E o clarão das ruas: a luz de todas as janelas e lanternas somada, fraca, mais forte no centro e sumindo nos muros.
-  const vilas = ctx.fase.exterior ? (ctx.fase.refugios ?? []).filter((r) => r.raio >= 8) : [];
+  const vilasDa = () => ctx.fase.exterior ? (ctx.fase.refugios ?? []).filter((r) => r.raio >= 8) : [];
+  let janelas = janelasDa();
+  let vilas = vilasDa();
+  // Marco 55 (26/11/2026, D-208): no Mundo contínuo, as listas da fase do atlas são trocadas quando chega uma região;
+  // as luzes delas se refazem na hora.
+  let listasDasLuzes: unknown = ctx.fase.refugios;
+  const conferirListas = () => {
+    if (listasDasLuzes === ctx.fase.refugios) return;
+    listasDasLuzes = ctx.fase.refugios;
+    luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
+    janelas = janelasDa();
+    vilas = vilasDa();
+  };
   const semTocha = (e: Entidade) => Boolean(ctx.modo.luzSoComTocha) && !temLuzPropria(e);
   const luzDoJogador = (e: Entidade): { raio: number; cor: number; intensidade: number } => {
     if (semTocha(e)) return { raio: vis.raioSemTocha, cor: 0x9fb4d8, intensidade: vis.intensidadeSemTocha };
@@ -387,6 +399,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   };
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
+    conferirListas();
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
@@ -403,7 +416,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       }
       // As tochas, velas e fendas de lava do tema perto do jogador.
       for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
-      for (const v of vilas) pontos.push({ x: v.x, y: v.y, cor: 0xffbe80, semente: v.x + v.y * 3, intensidade: vis.intensidadeVila, raio: v.raio * 1.1 });
+      for (const v of vilas) if (Math.abs(v.x - p.x) < v.raio + 30 && Math.abs(v.y - p.y) < v.raio + 30) pontos.push({ x: v.x, y: v.y, cor: 0xffbe80, semente: v.x + v.y * 3, intensidade: vis.intensidadeVila, raio: v.raio * 1.1 });
       for (const j of janelas) if (Math.abs(j.x - p.x) < 16 && Math.abs(j.y - p.y) < 12) pontos.push({ x: j.x, y: j.y, cor: 0xffb466, semente: j.x * 5 + j.y, intensidade: vis.intensidadeJanela, raio: vis.raioJanela });
       for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
     }

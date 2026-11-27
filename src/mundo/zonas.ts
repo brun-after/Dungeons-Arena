@@ -3,6 +3,7 @@
 // segue a costura, mas ondula (world/costura.ts, `desvioDaZona`), para não parecer uma linha reta. Puro.
 
 import { desvioDaZona } from '../world/costura';
+import type { RegrasPorZona } from '../modos/regras-por-zona';
 import type { Atlas } from './atlas';
 import type { Reino } from './reino';
 
@@ -44,4 +45,17 @@ export function zonaEm(m: MapaDeZonas, x: number, y: number): string | null {
   const cy = Math.round(y);
   if (cx < 0 || cy < 0 || cx >= m.largura || cy >= m.altura) return null;
   return m.ids[(m.celulas[cy * m.largura + cx] ?? 0) - 1] ?? null;
+}
+
+/**
+ * Marco 55 (26/11/2026, D-208): o PvP e o loot de cada zona (`modo.zonas`), pelo perigo da região; `comLua` diz em que
+ * zona a lua sangrenta multiplica o loot. A sala do servidor e a predição do cliente usam a mesma.
+ */
+export function regrasDasZonas(reino: Reino, z: MapaDeZonas, comLua: (regiaoId: string) => boolean, luaLootPct: number): RegrasPorZona {
+  const regras = z.ids.map((id) => {
+    const r = reino.regioes.find((x) => x.id === id);
+    const p = r ? reino.perigos[r.perigo] : null;
+    return { pvp: p?.pvp ?? false, lootPct: ((p?.lootPct ?? 100) * (comLua(id) ? luaLootPct : 100)) / 100 };
+  });
+  return { largura: z.largura, altura: z.altura, celulas: z.celulas, pvp: regras.map((r) => r.pvp), lootPct: regras.map((r) => r.lootPct) };
 }

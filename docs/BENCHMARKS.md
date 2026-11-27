@@ -1,8 +1,9 @@
 # Benchmarks
 
-**Versão:** 0.9 · **Data:** 31/10/2026
+**Versão:** 1.0 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.0 (26/11/2026)**: marco 55 (D-208): a rota pelo Mundo contínuo cruzando três costuras (`?bench=mundo&rota=`), também em `npm run bench`.
 > - **0.9 (31/10/2026)**: marco 31 (D-130): o visual sombrio (chão texturizado, escuridão, paredes altas, telhados, isométrico como padrão), medido junto com a base (main) na mesma máquina, em seguida.
 > - **0.8 (25/10/2026)**: marco 26 (D-104): carga da arena com o movimento livre (posição contínua em milésimos no patch).
 > - **0.7 (22/10/2026)**: marco 20 (D-087): o app Android e o medidor de desempenho (Configurações → Gráficos) para medir no aparelho; a linha do Android real fica pendente até a medição no celular do usuário.
@@ -51,3 +52,4 @@ As metas da §5.6 são critérios a validar; nada aqui foi medido até o marco 7
 | 2026-10-31 | 31 | `?bench=padrao`, qualidade baixo, 30 s, Chromium sem tela 1280×720 @1 (WebGL por software), visão padrão (iso) | fps · p50/p95/p99 · pausas > 100 ms · heap | 60 fps · p95 ≤ 16,7 ms · 0 | 10,31 · 96,9/118,3/132,2 ms · 100 · 42,63 MB | base: 9,29 fps · 105,1/133,1/155,2 ms |
 | 2026-10-31 | 31 | `?bench=padrao`, qualidade alto, 30 s, Chromium sem tela 1280×720 @1 (WebGL por software), visão padrão (iso) | fps · p50/p95/p99 · pausas > 100 ms · heap | 60 fps · p95 ≤ 16,7 ms · 0 | 8,31 · 116,7/156/209,3 ms · 230 · 48,07 MB | base: 7,79 fps · 125/163,5/212,2 ms |
 | 2026-10-31 | 31 | `?bench=trocas`: 30 trocas de fase no mesmo documento | heap depois do GC | estabiliza: último terço ≤ terço do meio +5% | último terço 3,5% acima do meio, sem crescimento monotônico | aprovado; os canvases do chão são soltos ao trocar de fase |
+| 2026-11-26 | 55 | `?bench=mundo&rota=`: vila_do_centro → encosta_do_leste → mar_de_areia → eclipse_almas a 10 células/s, Chromium sem tela 1280×720 (WebGL por software) | pior quadro em volta de cada costura · p95 e pior da rota | nenhum quadro > 100 ms numa costura (aparelho real) | costuras 116, 87 e 79 ms · p95 107 ms · pior 337 ms | a costura não pesa mais que a rota; sem tela, todo quadro é lento (a troca de região que saiu custava 0,4 a 0,8 s num aparelho, D-202) |
