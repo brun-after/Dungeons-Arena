@@ -12,7 +12,7 @@
   "fim": { "tipo": "nenhum", "alvo": null, "tempoLimiteS": null },
   "respawn": { "ativo": true, "atrasoS": 3, "atrasoCrescenteS": 0, "local": "base_da_equipe", "protecaoS": 5 },
   "entradaEmAndamento": true,
-  "maxJogadores": 40,
+  "maxJogadores": 100,
   "espectadores": false,
   "clamp": null,
   "loot": { "politica": "individual", "janelaParticipacaoS": 20, "itens": true, "economiaDoSpawner": false },
@@ -40,7 +40,7 @@
   "pvp": { "danoClassePct": 60 },
   "areaDeInteresse": { "raio": 24 },
   "iaRaioAtivacao": 32,
-  "continuo": false,
+  "continuo": true,
   "tumuloNaMorte": true,
   "dropsDeRenascido": true
 }

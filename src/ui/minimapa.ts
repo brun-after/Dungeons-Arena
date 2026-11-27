@@ -9,13 +9,49 @@ import type { Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { alfaNoEscuro } from './visao-no-escuro';
 import { t } from '../i18n';
-import { tipoEm, type Fase } from '../world/fase';
+import { codigoDeTipo, tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { ligarZoomMapa } from './zoom-mapa';
 import { cartografia, rosaDosVentos } from './cartografia';
 import { desenharMarco, marcosDaFase, marcosDoEstado } from './marcos-do-mapa';
 
 // Marco 29 (D-128): o exterior do Mundo (mato, estrada, água e fachadas).
 const COR_TERRENO: Readonly<Record<string, string>> = { piso: '#3a3546', saida: '#c98a1a', parede: '#15131b', mato: '#3d5a2e', estrada: '#7a6448', agua: '#2b5f86', fachada: '#5a4a3c' };
+
+/**
+ * Marco 55 (26/11/2026, D-208): a fase maior que isto (o atlas do Mundo contínuo) vai no minimapa numa janela de
+ * `JANELA` células em volta do jogador, pintada das células a cada passo de `PASSO_JANELA` (e quando chega região).
+ */
+const LIMITE_FASE_INTEIRA = 600 * 600;
+const JANELA = 200;
+const PASSO_JANELA = 8;
+
+/** As cores do terreno por código de célula, em RGBA (para a pintura da janela). */
+const COR_POR_CODIGO = (() => {
+  const t = new Uint32Array(256);
+  for (const [tipo, cor] of Object.entries(COR_TERRENO)) {
+    const n = parseInt(cor.slice(1), 16);
+    // ImageData em little-endian: A B G R.
+    t[codigoDeTipo(tipo as TipoCelula)] = (0xff << 24) | ((n & 0xff) << 16) | (n & 0xff00) | ((n >> 16) & 0xff);
+  }
+  return t;
+})();
+
+function pintarJanela(fase: Fase, x0: number, y0: number, c: HTMLCanvasElement): void {
+  const g = c.getContext('2d');
+  if (!g) return;
+  const img = g.createImageData(JANELA, JANELA);
+  const px = new Uint32Array(img.data.buffer);
+  for (let y = 0; y < JANELA; y++) {
+    const fy = y0 + y;
+    if (fy < 0 || fy >= fase.altura) continue;
+    for (let x = 0; x < JANELA; x++) {
+      const fx = x0 + x;
+      if (fx < 0 || fx >= fase.largura) continue;
+      px[y * JANELA + x] = COR_POR_CODIGO[fase.celulas[fy * fase.largura + fx] ?? 0] ?? 0;
+    }
+  }
+  g.putImageData(img, 0, 0);
+}
 
 export interface Minimapa {
   elemento: HTMLCanvasElement;
@@ -108,19 +144,36 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
   const g = canvas.getContext('2d');
   const fase = ctx.fase;
   canvas.classList.toggle('minimapa-mundo', mundo);
-  const mapa = cartografia(fase.largura, fase.altura, canvas.width, canvas.height, 3);
-  const fundo = terrenoEmCanvas(fase);
+  const janela = mundo && fase.largura * fase.altura > LIMITE_FASE_INTEIRA;
+  const mapa = janela ? cartografia(JANELA, JANELA, canvas.width, canvas.height, 3) : cartografia(fase.largura, fase.altura, canvas.width, canvas.height, 3);
+  const fundo = janela ? document.createElement('canvas') : terrenoEmCanvas(fase);
+  if (janela) fundo.width = fundo.height = JANELA;
+  /** O canto da janela no atlas (0, 0 fora dela) e as listas da fase quando ela foi pintada (mudam quando chega região). */
+  const origem = { x: 0, y: 0 };
+  let pintadaCom: unknown = null;
+  const ajustarJanela = (eu: { x: number; y: number } | undefined) => {
+    if (!janela || !eu) return;
+    const x0 = Math.floor(eu.x) - JANELA / 2;
+    const y0 = Math.floor(eu.y) - JANELA / 2;
+    if (pintadaCom === fase.spawns && Math.abs(x0 - origem.x) < PASSO_JANELA && Math.abs(y0 - origem.y) < PASSO_JANELA) return;
+    if (pintadaCom !== fase.spawns) marcosFixos = marcosDaFase(fase);
+    origem.x = x0;
+    origem.y = y0;
+    pintadaCom = fase.spawns;
+    pintarJanela(fase, x0, y0, fundo);
+  };
   const escala = Math.min(lado / fase.largura, lado / fase.altura);
   const ox = (lado - fase.largura * escala) / 2;
   const oy = (lado - fase.altura * escala) / 2;
-  const px = (cx: number, cy: number) => mundo ? mapa.ponto(cx, cy).x : ox + (cx + 0.5) * escala;
-  const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx, cy).y : oy + (cy + 0.5) * escala;
+  const px = (cx: number, cy: number) => mundo ? mapa.ponto(cx - origem.x, cy - origem.y).x : ox + (cx + 0.5) * escala;
+  const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx - origem.x, cy - origem.y).y : oy + (cy + 0.5) * escala;
+  const dentro = (x: number, y: number) => !janela || (x >= origem.x && y >= origem.y && x < origem.x + JANELA && y < origem.y + JANELA);
   let ultimo = -Infinity;
   let zoom = 1;
   // Marco 53 (22/11/2026, D-203): ampliado, o minimapa se arrasta (o desvio, em px do canvas, a partir do jogador);
   // o clique sem arrastar segue abrindo o mapa grande. Os marcos (portões, casas, serviços) vêm da fase.
   const desvio = { x: 0, y: 0 };
-  const marcosFixos = mundo ? marcosDaFase(fase) : [];
+  let marcosFixos = mundo && !janela ? marcosDaFase(fase) : [];
   if (mundo) {
     ligarZoomMapa(canvas, fator => {
       zoom = Math.max(1, Math.min(4, zoom * fator));
@@ -153,9 +206,10 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       ultimo = agoraMs;
       g.clearRect(0, 0, canvas.width, canvas.height);
       const eu = estado.entidades.find(e => e.id === idLocal);
+      ajustarJanela(eu);
       g.save();
       if (mundo && zoom > 1) {
-        const base = eu ? mapa.ponto(eu.x, eu.y) : { x: canvas.width / 2, y: canvas.height / 2 };
+        const base = eu ? { x: px(eu.x, eu.y), y: py(eu.y, eu.x) } : { x: canvas.width / 2, y: canvas.height / 2 };
         const centro = { x: base.x + desvio.x, y: base.y + desvio.y };
         g.translate(canvas.width / 2, canvas.height / 2);
         g.scale(zoom, zoom);
@@ -174,8 +228,8 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       if (mundo) {
         const lado = 7 / Math.sqrt(zoom);
         for (const m of [...marcosFixos, ...marcosDoEstado(estado)]) {
-          const q = mapa.ponto(m.x, m.y);
-          desenharMarco(g, m.tipo, q.x, q.y, lado);
+          if (!dentro(m.x, m.y)) continue;
+          desenharMarco(g, m.tipo, px(m.x, m.y), py(m.y, m.x), lado);
         }
       }
       // Portas e saída: pontos fixos, para a orientação.
@@ -195,7 +249,7 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       for (const o of estado.objetos) if (o.tipo === 'bau' && o.abertoTick === 0) ponto(o.x, o.y, 2, '#d4a017');
       for (const a of estado.armadilhas) if (a.runa || a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');
       // O jogador por último, por cima de todos.
-      for (const e of [...estado.entidades].sort((a, b) => Number(a.id === idLocal) - Number(b.id === idLocal))) {
+      for (const e of [...estado.entidades].filter((x) => dentro(x.x, x.y)).sort((a, b) => Number(a.id === idLocal) - Number(b.id === idLocal))) {
         const c = marcadorDaEntidade(ctx, idLocal, e, eu, estado);
         if (c) ponto(e.x, e.y, c.r, c.cor);
       }
