@@ -108,6 +108,9 @@ export function naRampa(rampa: readonly number[], claridade: number): number {
   return (c(16) << 16) | (c(8) << 8) | c(0);
 }
 
+/** D-206: as matérias de corpo (que a luz não atravessa): trocadas para elas, deixam de somar e ganham a crosta. */
+const OPACAS: ReadonlySet<string> = new Set(['rocha', 'gelo', 'estilhaco', 'gota_viva', 'espinho', 'lasca', 'cristal']);
+
 /** As emissões da assinatura, feitas do elemento da runa. */
 export function emissoesTrocadas(lista: readonly Emissao[], troca: Troca): Emissao[] {
   return lista.flatMap((e) => {
@@ -125,11 +128,13 @@ export function emissoesTrocadas(lista: readonly Emissao[], troca: Troca): Emiss
     };
     // D-206: na liga incandescente, a matéria opaca leva junto um brilho somado (a pedra que é lava, o cristal ígneo).
     const rampa = troca.liga?.brilho ? troca.liga.rampa : null;
-    if (!rampa || e.aditivo || !(['corpo', 'leve'] as const).some((p) => MATERIA[troca.de][p].includes(e.textura))) return [trocada];
+    // A matéria que a liga pôs no lugar (a chama que virou pedra) deixa de ser luz somada: é corpo, com o brilho junto.
+    const trocouMateria = textura !== e.textura && OPACAS.has(textura);
+    if (!rampa || (e.aditivo && !trocouMateria) || !(['corpo', 'leve'] as const).some((p) => MATERIA[troca.de][p].includes(e.textura))) return [trocada];
     const brilho: Emissao = { ...trocada };
     delete brilho.aoMorrer;
     delete brilho.cores;
-    return [trocada, { ...brilho, quantidade: Math.max(1, Math.ceil(e.quantidade / 2)), aditivo: true, cor: rampa[rampa.length - 2] ?? 0xffffff, alpha: [Math.min(1, e.alpha[0]) * 0.7, 0] }];
+    return [{ ...trocada, aditivo: false }, { ...brilho, quantidade: Math.max(1, Math.ceil(e.quantidade / 2)), aditivo: true, cor: rampa[rampa.length - 2] ?? 0xffffff, alpha: [Math.min(1, e.alpha[0]) * 0.7, 0] }];
   });
 }
 
@@ -152,16 +157,20 @@ function pincelTrocado(p: Pincel, troca: Troca): Pincel {
     if (textura === null) return;
     // D-206: a liga incandescente (lava, plasma, cristal ígneo): a silhueta opaca sai na crosta escura da rampa e o
     // brilho somado pulsa por cima, como a lava que respira.
-    const rampa = troca.liga?.brilho && !t?.aditivo ? troca.liga.rampa : null;
+    const rampa = troca.liga?.brilho && (!t?.aditivo || (textura !== nome && OPACAS.has(textura))) ? troca.liga.rampa : null;
     if (!rampa) {
       p.desenhar(textura, x, y, t?.cor === undefined ? t : { ...t, cor: corTrocada(t.cor, troca) });
       return;
     }
     const cor = t?.cor ?? 0xffffff;
     const claridade = (Math.max(cor >> 16, (cor >> 8) & 255, cor & 255) + Math.min(cor >> 16, (cor >> 8) & 255, cor & 255)) / 510;
-    p.desenhar(textura, x, y, { ...t, cor: naRampa(rampa, claridade * 0.45) });
-    const pulso = 0.55 + 0.3 * Math.sin(performance.now() / 140 + x * 0.05);
-    p.desenhar(textura, x, y, { ...t, cor: naRampa(rampa, 0.8), aditivo: true, alpha: (t?.alpha ?? 1) * pulso });
+    // A crosta: escura, opaca; o miolo: a mesma silhueta menor, somada e pulsando, para a borda ficar escura e o
+    // centro aceso (o espinho de lava, a pedra em brasa, o cristal com fogo dentro).
+    p.desenhar(textura, x, y, { ...t, aditivo: false, cor: naRampa(rampa, 0.12 + claridade * 0.25) });
+    const pulso = 0.6 + 0.35 * Math.sin(performance.now() / 130 + x * 0.05);
+    const miolo = 0.74;
+    p.desenhar(textura, x, y, { ...t, sx: (t?.sx ?? 1) * miolo, sy: (t?.sy ?? 1) * miolo, cor: naRampa(rampa, 0.92), aditivo: true, alpha: (t?.alpha ?? 1) * pulso });
+    p.desenhar(textura, x, y, { ...t, sx: (t?.sx ?? 1) * 1.08, sy: (t?.sy ?? 1) * 1.08, cor: naRampa(rampa, 0.6), aditivo: true, alpha: (t?.alpha ?? 1) * 0.22 });
   };
   return new Proxy(p, {
     get(alvo, chave) {

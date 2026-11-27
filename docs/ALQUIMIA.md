@@ -1,8 +1,9 @@
 # Alquimia: fusões, runas e materiais
 
-**Versão:** 1.5 · **Data:** 26/11/2026
+**Versão:** 1.6 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.6 (26/11/2026)**: D-206, continuação. A assinatura do núcleo é refeita na matéria da liga.
 > - **1.5 (26/11/2026)**: D-206. A fusão enche o vínculo de todos os elementos e mostra a mescla deles (as ligas).
 > - **1.4 (22/11/2026)**: marco 53 (D-203). A compreensão conta o acerto em inimigo de qualquer nível.
 > - **1.3 (21/11/2026)**: D-198, adendo. Reaprender de graça e na hora, e a chance que sobe a cada tentativa.
@@ -116,7 +117,10 @@ A fusão guarda todos os elementos dela (`Habilidade.elementosFusao`: os das par
 novas; a parte sem elemento conta como Físico).
 
 - **Vínculo.** Cada uso soma o uso de todos esses elementos. Na barra, a tecla se divide entre eles.
-- **Visual.** Por cima da assinatura do núcleo (`render/vfx/manifestacao-mistura.ts`):
+- **A skill feita da liga.** A assinatura do núcleo é refeita na liga do elemento dela (`render/vfx/ligas-materia.ts`):
+  as cores caem na rampa da liga, a matéria troca (a chama vira pedra de magma na lava) e as ligas incandescentes
+  desenham a crosta escura com o miolo aceso. As Raízes com fogo brotam como espinhos de lava.
+- **Visual por cima** (`render/vfx/manifestacao-mistura.ts`):
   - a matéria de cada elemento, na mão, no rastro, no acerto e na área;
   - a liga de cada par (`render/vfx/ligas.ts`), até três por skill, primeiro as do núcleo;
   - com três elementos ou mais, a trança, em que a peça de cada um gira em volta do acerto.

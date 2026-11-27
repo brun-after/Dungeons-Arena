@@ -16,7 +16,7 @@ const LAVA = [0x140603, 0x3a0c04, 0x8a1c06, 0xd8400a, 0xff7a14, 0xffb838] as con
 
 export const MATERIA_DAS_LIGAS: Readonly<Record<string, Transmuta>> = {
   // Fogo
-  'Lava': t(0xff6a1a, LAVA, { fogo: { corpo: ['gota_viva'], fumo: ['fumaca1'] }, terra: { leve: ['brasa'], fumo: ['fumaca1'], marca: ['queimado'] } }, true),
+  'Lava': t(0xff6a1a, LAVA, { fogo: { corpo: ['rocha'], leve: ['gota_viva'], fumo: ['fumaca1'] }, terra: { leve: ['brasa'], fumo: ['fumaca1'], marca: ['queimado'] } }, true),
   'Pedra em brasa': t(0xff7a2a, LAVA, { fogo: { corpo: ['rocha'], leve: ['brasa'] }, terra: { leve: ['brasa'], fumo: ['fumaca1'] } }, true),
   'Vapor': t(0xeef6ff, [0x5a6a78, 0xa8c0d0, 0xe0eef8, 0xffffff], { fogo: { corpo: ['fumaca2'], leve: ['gota'], fumo: ['fumaca2'], marca: ['geada'] }, gelo: { corpo: ['fumaca2'], leve: ['gota'] } }),
   'Cristal ígneo': t(0xffa050, [0x5a1a08, 0xb03a10, 0xff8a30, 0xffd48a, 0xffffff], { fogo: { corpo: ['gelo'], leve: ['brasa'] }, gelo: { leve: ['brasa'], fumo: ['fumaca1'] } }, true),
