@@ -79,27 +79,19 @@ test('dois clientes entram por código e preservam mapas e configurações pesso
         // O mapa não é um dialog: Esc também pode abrir a pausa e bloquear o movimento deste roteiro.
         await q.locator('.mapa-expandido').getByRole('button', { name: 'Fechar', exact: true }).click();
         await expect(q.locator('dialog[open]')).toHaveCount(0);
-        // Marco 38 (08/11/2026, D-142): com os prédios novos na praça, a diagonal da grade (o D sozinho no isométrico)
-        // bate num prédio antes de separar as câmeras; D+S anda para o leste da grade, pela rua da praça, que fica livre.
-        await q.keyboard.down('d');
-        await q.keyboard.down('s');
-        try {
-            await expect(p.locator('.camera-party:visible')).toHaveCount(2, { timeout: 25000 });
-        }
-        finally {
-            await q.keyboard.up('s');
-            await q.keyboard.up('d');
-        }
+        // Marco 55 (26/11/2026, D-208): no Mundo contínuo, chega-se ao lado da pedra de save, e a diagonal pelo teclado bate
+        // na barraca da praça. O condutor leva até o ponto marcado no mapa da região, pelo caminho.
+        const andarAte = async (fx: number, fy: number) => {
+            await q.locator('.minimapa').click();
+            const canvas = q.locator('.mapa-expandido .mapa-terreno');
+            await canvas.click({ position: await canvas.evaluate((c, f) => ({ x: c.getBoundingClientRect().width * f.x, y: c.getBoundingClientRect().height * f.y }), { x: fx, y: fy }) });
+            await q.locator('.mapa-expandido').getByRole('button', { name: 'Fechar', exact: true }).click();
+        };
+        await andarAte(0.68, 0.64);
+        await expect(p.locator('.camera-party:visible')).toHaveCount(2, { timeout: 40000 });
         await p.screenshot({ path: testInfo.outputPath('party-duas-cameras.png') });
-        await q.keyboard.down('a');
-        await q.keyboard.down('w');
-        try {
-            await expect(p.locator('.camera-party:visible')).toHaveCount(1, { timeout: 25000 });
-        }
-        finally {
-            await q.keyboard.up('w');
-            await q.keyboard.up('a');
-        }
+        await andarAte(0.5, 0.5);
+        await expect(p.locator('.camera-party:visible')).toHaveCount(1, { timeout: 40000 });
     }
     finally {
         await a.close();
