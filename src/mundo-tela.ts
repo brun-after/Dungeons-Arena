@@ -372,7 +372,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   }
   const token = (await tokenDaConta().catch(() => null)) ?? tokenAntigo;
   if (!anterior) raiz.textContent = '';
-  const nomeDoLugar = lugar.tipo === 'regiao' ? lugar.regiao.nome : lugar.tipo === 'masmorra' ? lugar.masmorra.nome : lugar.covil.nome;
+  const nomeDoLugar = lugar.tipo === 'regiao' ? lugar.regiao.nome : lugar.tipo === 'masmorra' ? lugar.masmorra.nome : lugar.tipo === 'covil' ? lugar.covil.nome : reino.nome;
   // A camada desta cena: escondida até o personagem chegar, por cima da de antes.
   const camada = document.createElement('div');
   camada.className = 'camada-mundo';

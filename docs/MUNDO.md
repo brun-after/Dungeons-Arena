@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.8 · **Data:** 25/11/2026
+**Versão:** 1.9 · **Data:** 26/11/2026
 
 > **Histórico**
+> - **1.9 (26/11/2026)**: marco 54: o Mundo contínuo no servidor (atlas, costuras, zonas pela posição, hibernação), ainda desligado (`continuo`).
 > - **1.8 (25/11/2026)**: D-205: a janela da troca com os dois lados, o ouro com botões próprios, a cobrança, a contraproposta e o chat da troca; o mapa em pergaminho.
 > - **1.7 (20/11/2026)**: D-191: a pé, o muro até 6 níveis se escala e a queda até 10 se desce num pulo curto; a saída das passagens sem muro.
 > - **1.6 (16/11/2026)**: marco 45: as criaturas de Filo, as fendas, as reações aos terrenos e o monstruário.
@@ -273,6 +274,24 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - Perto da passagem, a região de lá aparece além da borda (`world/recorte-vizinha.ts`, `render/vizinha.ts`). O chão
   assado é guardado entre as cenas (`render/solo/assados-guardados.ts`), e as teclas mantidas seguem para a cena nova.
 - Detalhes em D-169.
+
+## O Mundo contínuo (marco 54, 26/11/2026)
+
+Atrás de `mundo.json → continuo` (desligado até o cliente contínuo, marco 55; `MUNDO_CONTINUO=1` liga no servidor).
+- **Uma sala por canal com o atlas inteiro** (2020×888): as regiões encostadas, coluna e linha com o maior tamanho
+  (`mundo/atlas.ts`). Onde havia passagem, a costura é aberta: a borda chega ao mesmo chão dos dois lados
+  (`world/costura.ts`), e as estradas se encontram no cruzamento.
+- **A região é a zona da posição** (`mundo/zonas.ts → zonaEm`), com o limite ondulado. PvP só com os dois em zona com
+  PvP; loot, evento, noite, focos e o chat da região pela zona.
+- **Viajar não troca de sala**: pedra, portal, retorno e renascer reposicionam. A ficha segue em coordenadas da
+  região (`paraOAtlas` converte).
+- **Longe de todos, dorme**: além de 40 células de qualquer jogador, monstros, objetos e respawns saem do estado por
+  bloco de 16 e voltam quando alguém chega a 30 (`mundo/hibernacao.ts`, `balance.mundo.hibernacao`).
+- **Montagem ao subir**: o coordenador monta o atlas em etapas (`etapasDoMundoContinuo`, ~20 s) e responde
+  `mundo_aquecendo` até acabar.
+- **Medir**: `npm run carga:continuo -- --clientes 40 --segundos 30` (`--juntos` na Vila do Centro, `--hoje` a base
+  de uma sala por região).
+- Detalhes em D-207.
 
 ## Dia, noite, tocha e relevo (marco 42, 15/11/2026)
 

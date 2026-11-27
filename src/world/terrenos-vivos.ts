@@ -42,6 +42,45 @@ export function areasEfetivas(estado: Pick<EstadoJogo, 'terrenos' | 'tick'>, fix
   return saida;
 }
 
+// Marco 54 (26/11/2026, D-207): o atlas do Mundo contínuo tem as áreas fixas das 24 regiões (perto de mil), e a
+// pergunta "que terreno há neste ponto" vinha a cada tique por criatura. As fixas ganham um índice por bloco (feito
+// uma vez por lista) e a consulta no ponto só olha as do bloco dele, na mesma ordem de `areasEfetivas`.
+const LADO_DAS_AREAS = 16;
+const INDICES_DAS_FIXAS = new WeakMap<readonly AreaAmbiente[], Map<number, number[]>>();
+const chaveDoBloco = (bx: number, by: number) => by * 65_536 + bx;
+
+function indiceDasFixas(fixas: readonly AreaAmbiente[]): Map<number, number[]> {
+  const pronto = INDICES_DAS_FIXAS.get(fixas);
+  if (pronto) return pronto;
+  const m = new Map<number, number[]>();
+  fixas.forEach((a, i) => {
+    for (let by = Math.floor((a.y - a.raio) / LADO_DAS_AREAS); by <= Math.floor((a.y + a.raio) / LADO_DAS_AREAS); by++) {
+      for (let bx = Math.floor((a.x - a.raio) / LADO_DAS_AREAS); bx <= Math.floor((a.x + a.raio) / LADO_DAS_AREAS); bx++) {
+        const k = chaveDoBloco(bx, by);
+        const lista = m.get(k);
+        if (lista) lista.push(i);
+        else m.set(k, [i]);
+      }
+    }
+  });
+  INDICES_DAS_FIXAS.set(fixas, m);
+  return m;
+}
+
+/** As áreas valendo agora que podem cobrir o ponto (um subconjunto de `areasEfetivas`, na mesma ordem). */
+export function areasEfetivasEm(estado: Pick<EstadoJogo, 'terrenos' | 'tick'>, fixas: readonly AreaAmbiente[], x: number, y: number): AreaEfetiva[] {
+  if (fixas.length < 32) return areasEfetivas(estado, fixas);
+  const vivos = (estado.terrenos ?? []).filter((t) => t.ateTick > estado.tick);
+  const cobertas = new Set(vivos.flatMap((t) => (t.cobre === undefined ? [] : [t.cobre])));
+  const saida: AreaEfetiva[] = [];
+  for (const i of indiceDasFixas(fixas).get(chaveDoBloco(Math.floor(x / LADO_DAS_AREAS), Math.floor(y / LADO_DAS_AREAS))) ?? []) {
+    const a = fixas[i];
+    if (a && !cobertas.has(i)) saida.push({ tipo: a.tipo, x: a.x, y: a.y, raio: a.raio, fixa: i, viva: null });
+  }
+  for (const t of vivos) if (t.tipo !== 'seco') saida.push({ tipo: t.tipo, x: t.x, y: t.y, raio: t.raio, fixa: null, viva: t });
+  return saida;
+}
+
 /** O que a área vira com o elemento (null: não reage; `seco`: some por um tempo). */
 export function reacaoDoTerreno(ctx: Pick<ContextoSimulacao, 'balance'>, tipo: TipoTerrenoVivo, elemento: Elemento): { vira: TipoTerrenoVivo; conduz: boolean } | null {
   const r = ctx.balance.terrenos.reacoes.find((x) => x.sobre === tipo && x.elemento === elemento);

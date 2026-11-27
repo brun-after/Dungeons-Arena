@@ -18,18 +18,25 @@ import { territorioDoLugar, vizinha } from './reino';
 import { estoqueDeDungeon } from './lojas-mundo';
 import type { CovilDoMundo, MasmorraDoMundo, MaterialDeInimigo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
 
+/** Marco 54 (D-207): o id do lugar do Mundo contínuo. */
+export const ID_LUGAR_MUNDO = 'mundo';
+
 export type Lugar =
   | { tipo: 'regiao'; regiao: RegiaoDoMundo }
+  /** Marco 54 (26/11/2026, D-207): o Mundo contínuo, o atlas inteiro numa sala (mundo/mundo-continuo.ts). */
+  | { tipo: 'mundo' }
   | { tipo: 'masmorra'; masmorra: MasmorraDoMundo }
   | { tipo: 'covil'; covil: CovilDoMundo };
 
 /** O id do lugar em texto: `regiao:<id>`, `masmorra:<id>` ou `covil:<id>`. */
 export function idDoLugar(l: Lugar): string {
+  if (l.tipo === 'mundo') return ID_LUGAR_MUNDO;
   return l.tipo === 'regiao' ? `regiao:${l.regiao.id}` : l.tipo === 'masmorra' ? `masmorra:${l.masmorra.id}` : `covil:${l.covil.id}`;
 }
 
 export function lerLugar(reino: Reino, texto: unknown): Lugar | null {
   if (typeof texto !== 'string') return null;
+  if (texto === ID_LUGAR_MUNDO) return { tipo: 'mundo' };
   const [tipo, id] = texto.split(':');
   if (tipo === 'regiao') {
     const regiao = reino.regioes.find((r) => r.id === id);
@@ -55,7 +62,7 @@ export function modoDaRegiao(modo: ModoDeJogo, perigo: RegrasDePerigo): ModoDeJo
  * Marco 30 (D-129): o modo em todo lugar do reino leva os materiais que os monstros deixam. Marco 38 (08/11/2026,
  * D-142): os do atlas (os troféus dos chefes valem em todo reino) somados aos do reino do lugar.
  */
-function comMateriais(modo: ModoDeJogo, reino: Reino, lugarId: string): ModoDeJogo {
+export function comMateriais(modo: ModoDeJogo, reino: Reino, lugarId: string): ModoDeJogo {
   const proprio = territorioDoLugar(reino, lugarId).materiais;
   const materiais: Record<string, MaterialDeInimigo[]> = {};
   for (const fonte of proprio === reino.materiais ? [reino.materiais] : [reino.materiais, proprio]) {
@@ -75,6 +82,8 @@ export interface LugarMontado {
   estado: EstadoJogo;
   /** Só nas regiões: o exterior gerado (passagens, vila, pontos). */
   exterior: ExteriorGerado | null;
+  /** Marco 54 (D-207): no Mundo contínuo, as estruturas de todas as regiões em coordenadas do atlas. */
+  regiaoDoAtlas?: RegiaoDoMundo;
 }
 
 /** O interior de uma masmorra ou covil: fase gerada com os inimigos e o chefe do reino. */
@@ -92,6 +101,8 @@ function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDo
 
 /** Monta o contexto e o estado inicial do lugar (com os objetos do exterior, nas regiões). */
 export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modoBase: ModoDeJogo): LugarMontado {
+  // Marco 54 (D-207): o atlas inteiro leva ~20 s; quem o monta é o servidor, em etapas (mundo/mundo-continuo.ts).
+  if (lugar.tipo === 'mundo') throw new Error('o Mundo contínuo é montado por etapasDoMundoContinuo');
   if (lugar.tipo === 'regiao') {
     const exterior = gerarExterior(reino, lugar.regiao);
     const r = contextoDaFase(conteudo, exterior.fase, comMateriais(modoDaRegiao(modoBase, reino.perigos[lugar.regiao.perigo]), reino, lugar.regiao.id));

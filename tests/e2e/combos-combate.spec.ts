@@ -45,6 +45,8 @@ test('Estaca, Névoa e Abalo concluem Prisão pestilenta e o diário persiste', 
   if (isMobile) await page.getByRole('button', { name:/Abrir a mochila/ }).click(); else await page.keyboard.press('KeyI');
   const mochila = page.getByRole('dialog', { name:'Mochila' });
   await mochila.getByRole('button', { name:/Habilidades/ }).click();
+  // D-205 (25/11/2026): a ultimate, a sintonia e os combos ficam recolhidos; abre a seção antes.
+  await mochila.getByText('Ultimate, sintonia e combos', { exact: true }).click();
   await mochila.locator('.catalogo-combos summary').click();
   await expect(mochila.locator('[data-combo="prisao_pestilenta"]')).toContainText('Estaca de pedra › Névoa venenosa › Abalo sísmico');
   await page.keyboard.press('Escape');

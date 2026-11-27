@@ -21,7 +21,9 @@ import type { AvisoDoMundo } from '../../src/mundo/avisos';
 import { depositarNoBanco } from '../../src/mundo/banco';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { GruposDoMundo } from '../../src/mundo/grupos';
-import { idDoLugar, lerLugar, montarLugar, type Lugar, type LugarMontado } from '../../src/mundo/lugares';
+import { ID_LUGAR_MUNDO, idDoLugar, lerLugar, montarLugar, type Lugar, type LugarMontado } from '../../src/mundo/lugares';
+import { etapasDoMundoContinuo, montarMundoContinuo, type MundoMontado } from '../../src/mundo/mundo-continuo';
+import { SalaMundoContinuo } from '../../src/mundo/sala-continua';
 import { modoPorId } from '../../src/core/conteudo';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
 import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
@@ -52,6 +54,8 @@ interface Bilhete {
   instancia: string | null;
   /** 09/11/2026 (D-144): as invocações que viajam com o personagem. */
   comitiva?: InvocacaoQueViaja[];
+  /** Marco 54 (D-207): no Mundo contínuo, a região do destino (a chegada vem em coordenadas dela). */
+  regiao?: string;
   /** Marco 41 (14/11/2026, D-169): o estado que vivia só na entidade e quando o bilhete saiu (o tempo da viagem). */
   viagem?: EstadoQueViaja;
   emitido?: number;
@@ -160,6 +164,21 @@ export class CoordenadorDoMundo {
    * entrada em cada região não travar quem já está jogando.
    */
   aquecer(intervaloMs = 250): void {
+    if (this.continuo) {
+      // Marco 54 (D-207): o atlas inteiro, uma região por vez (cada uma de 0,4 a 0,9 s de CPU).
+      const etapas = etapasDoMundoContinuo(this.conteudo, this.reino, modoPorId(this.conteudo, MODO_MUNDO));
+      const passo = () => {
+        const r = etapas.next();
+        if (r.done) {
+          this.mundoMontado = r.value;
+          registrarLog('mundo_continuo_pronto', { largura: r.value.atlas.largura, altura: r.value.atlas.altura, entidades: r.value.estado.entidades.length });
+          return;
+        }
+        setTimeout(passo, intervaloMs).unref();
+      };
+      setTimeout(passo, intervaloMs).unref();
+      return;
+    }
     const ids = this.reino.regioes.map((r) => `regiao:${r.id}`);
     const proxima = () => {
       const id = ids.shift();
@@ -169,6 +188,24 @@ export class CoordenadorDoMundo {
       setTimeout(proxima, intervaloMs).unref();
     };
     setTimeout(proxima, intervaloMs).unref();
+  }
+
+  /**
+   * Marco 54 (26/11/2026, D-207): o Mundo contínuo (`continuo` no modo, ou MUNDO_CONTINUO=1 no servidor). As regiões
+   * viram uma sala só por canal, montada ao subir; até ficar pronta, a entrada espera.
+   */
+  readonly continuo: boolean;
+  mundoMontado: MundoMontado | null = null;
+
+  /** Monta o atlas de uma vez (os testes; o servidor usa o `aquecer`, em etapas). */
+  montarMundoAgora(): MundoMontado {
+    this.mundoMontado ??= montarMundoContinuo(this.conteudo, this.reino, modoPorId(this.conteudo, MODO_MUNDO));
+    return this.mundoMontado;
+  }
+
+  /** A sala de um destino: no Mundo contínuo, toda região é o atlas. */
+  lugarDaSala(lugar: string): string {
+    return this.continuo && lugar.startsWith('regiao:') ? ID_LUGAR_MUNDO : lugar;
   }
 
   /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
@@ -182,6 +219,7 @@ export class CoordenadorDoMundo {
     readonly mercado: LojaDoMercado = new MercadoEmMemoria(),
   ) {
     this.reino = reinoDoMundo(conteudo);
+    this.continuo = modoPorId(conteudo, MODO_MUNDO).continuo === true || process.env.MUNDO_CONTINUO === '1';
     const g = BALANCE_PADRAO.mundo.grupo;
     this.grupos = new GruposDoMundo(g.max, g.conviteS * 1000);
   }
@@ -418,15 +456,23 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     const lugar = lerLugar(this.coordenador.reino, o.lugar);
     if (!lugar) throw new ServerError(400, 'lugar_invalido');
     this.instancia = typeof o.instancia === 'string' ? o.instancia.slice(0, 120) : '';
-    this.mundo = new SalaMundo(this.coordenador.reino, lugar, this.coordenador.conteudo, {
-      molde: this.coordenador.moldeDe(lugar),
+    const opcoesDaSala = {
       semente: Math.floor(Math.random() * 2 ** 31),
       canal: this.canal,
       // Marco 42 (D-176): MUNDO_HORA_MIN desloca a hora do Mundo (para ver a noite sem esperar).
       agora: () => Date.now() + (Number(process.env.MUNDO_HORA_MIN ?? 0) || 0) * 60_000,
       versaoConteudo: versaoDoConteudo(),
       portais: this.coordenador.portais,
-    });
+    };
+    // Marco 54 (D-207): o Mundo contínuo só depois de montado (a entrada tenta de novo, mundo-tela.ts).
+    if (lugar.tipo === 'mundo') {
+      if (!this.coordenador.continuo) throw new ServerError(400, 'lugar_invalido');
+      const m = this.coordenador.mundoMontado;
+      if (!m) throw new ServerError(503, 'mundo_aquecendo');
+      this.mundo = new SalaMundoContinuo(this.coordenador.reino, this.coordenador.conteudo, m, opcoesDaSala);
+    } else {
+      this.mundo = new SalaMundo(this.coordenador.reino, lugar, this.coordenador.conteudo, { ...opcoesDaSala, molde: this.coordenador.moldeDe(lugar) });
+    }
     this.clock.setInterval(() => {
       this.processarPendencias();
     }, INTERVALO_PENDENCIAS_MS);
@@ -547,7 +593,8 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       this.coordenador.sair(`${conta}#${String(b.slot)}`);
       // D-169: as contagens seguem durante a viagem (o tempo entre o bilhete e a entrada, em ticks).
       const decorridoTicks = b.emitido ? Math.max(0, Math.round((Date.now() - b.emitido) / MS_POR_TICK)) : 0;
-      return { slot: b.slot, ficha: b.ficha, chegada: b.chegada, comitiva: b.comitiva ?? [], viagem: b.viagem ?? null, decorridoTicks };
+      const chegada = this.mundo instanceof SalaMundoContinuo && b.regiao ? this.mundo.chegadaNoAtlas(b.regiao, b.chegada) : b.chegada;
+      return { slot: b.slot, ficha: b.ficha, chegada, comitiva: b.comitiva ?? [], viagem: b.viagem ?? null, decorridoTicks };
     }
     if (!slotValido(o.slot)) throw new ServerError(400, 'slot_invalido');
     const slot = o.slot;
@@ -558,6 +605,8 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       if (ficha) await this.coordenador.persistencia.gravar(conta, slot, ficha);
     }
     if (!ficha) throw new ServerError(404, 'sem_personagem');
+    // Marco 54 (D-207): no Mundo contínuo, entra-se na sala do atlas, ao lado da pedra da vila salva.
+    if (this.mundo instanceof SalaMundoContinuo) return { slot, ficha, chegada: this.mundo.chegadaNoAtlas(ficha.vilaSalva, null), comitiva: [], viagem: null, decorridoTicks: 0 };
     if (this.mundo.idLugar !== `regiao:${ficha.vilaSalva}`) throw new ServerError(409, 'fora_da_vila_salva');
     return { slot, ficha, chegada: null, comitiva: [], viagem: null, decorridoTicks: 0 };
   }
@@ -584,8 +633,9 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     if (p.tipo === 'gravar') return;
     const destino = lerLugar(this.coordenador.reino, p.destino);
     if (!destino) return;
-    const lugar = idDoLugar(destino);
-    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia, comitiva: p.comitiva, ...(p.viagem && { viagem: p.viagem }) });
+    const lugar = this.coordenador.lugarDaSala(idDoLugar(destino));
+    const regiao = destino.tipo === 'regiao' && lugar === ID_LUGAR_MUNDO ? destino.regiao.id : undefined;
+    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia, comitiva: p.comitiva, ...(p.viagem && { viagem: p.viagem }), ...(regiao && { regiao }) });
     this.mundo.despedir(p.sessaoId, { tipo: 'trocarSala', lugar, bilhete, instancia: p.instancia });
     registrarLog('mundo_troca', { de: this.mundo.idLugar, para: lugar });
   }

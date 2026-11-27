@@ -40,6 +40,7 @@
   "pvp": { "danoClassePct": 60 },
   "areaDeInteresse": { "raio": 24 },
   "iaRaioAtivacao": 32,
+  "continuo": false,
   "tumuloNaMorte": true,
   "dropsDeRenascido": true
 }

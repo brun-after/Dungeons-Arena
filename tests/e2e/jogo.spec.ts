@@ -547,6 +547,8 @@ test.describe('desktop', () => {
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Habilidades' }).click();
+    // D-205 (25/11/2026): a ultimate, a sintonia e os combos ficam recolhidos; abre a seção antes.
+    await mochila.getByText('Ultimate, sintonia e combos', { exact: true }).click();
     await expect(mochila.getByTestId('painel-sintonia')).toBeVisible();
     // Ajuste de 16/10/2026 (D-067): o botão da carta põe direto na tecla (aqui, a 4).
     await mochila.locator('[data-chave="tecla-maldicao_trevas-3"]').click();

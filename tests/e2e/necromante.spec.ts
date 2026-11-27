@@ -62,6 +62,8 @@ test('passiva, reanimado e eco funcionam e persistem no save', async ({ page }, 
   await page.getByRole('button', { name: /Abrir a mochila/ }).click();
   const mochila = page.getByRole('dialog', { name: 'Mochila' });
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
+  // D-205 (25/11/2026): a ultimate, a sintonia e os combos ficam recolhidos; abre a seção antes.
+  await mochila.getByText('Ultimate, sintonia e combos', { exact: true }).click();
   await mochila.getByText('Combos da sua build', { exact: true }).click();
   // Marco 26 (D-111): os combos saem da barra, não das conhecidas; as skills do combo só foram aprendidas, então
   // o painel pede para equipá-las, e nenhum nome de combo não descoberto aparece.

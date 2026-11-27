@@ -159,14 +159,25 @@ function nascer(estado: EstadoJogo, ctx: ContextoSimulacao, id: string, preset: 
 }
 
 /**
+ * Marco 54 (26/11/2026, D-207): no Mundo contínuo, a conferência é por zona: só os jogadores, as matas e os monstros
+ * dela contam, os ids levam a zona, e o acampamento (que não é de zona) é conferido uma vez só.
+ */
+export interface ZonaDaConferencia {
+  naZona?: (p: { x: number; y: number }) => boolean;
+  semAcampamentos?: boolean;
+}
+
+/**
  * Uma conferência (a cada segundo): `escuro` é o da região inteira agora (a noite, ou 1 na floresta densa).
  * Devolve quantos monstros nasceram (para o teste e o log).
  */
-export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, escuro: number): number {
+export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, escuro: number, zona: ZonaDaConferencia = {}): number {
   const r = ctx.balance.mundo.noite;
   const rng = criarRng(hashTexto(`${regiao.id}/noite/${String(estado.tick)}`));
   const sorte = () => aleatorio(rng);
-  const jogadores = estado.entidades.filter((e) => vivo(e) && e.arquetipo === 'jogador' && !e.invocacao && !emRefugio(ctx.fase, e.x, e.y));
+  const naZona = zona.naZona ?? (() => true);
+  const sufixo = zona.naZona ? `@${regiao.id}` : '';
+  const jogadores = estado.entidades.filter((e) => vivo(e) && e.arquetipo === 'jogador' && !e.invocacao && !emRefugio(ctx.fase, e.x, e.y) && naZona(e));
   const presets = regiao.inimigos.length > 0 ? regiao.inimigos : r.presetsDaMata;
   const nivel = (c: Celula) => nivelDaNoite(ctx, regiao, c, sorte);
   const vivos = estado.entidades.filter((e) => vivo(e) && e.id.startsWith(PREFIXO_NOITE));
@@ -176,7 +187,7 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
 
   // As matas fechadas: sempre os seus, quando alguém está por perto (ninguém por perto, ninguém nasce).
   for (const [i, m] of (ctx.fase.matas ?? []).entries()) {
-    if (!jogadores.some((j) => Math.hypot(j.x - m.x, j.y - m.y) <= m.raio + 24)) continue;
+    if (!naZona(m) || !jogadores.some((j) => Math.hypot(j.x - m.x, j.y - m.y) <= m.raio + 24)) continue;
     for (let k = 0; k < r.porMata && cabe(); k++) {
       const id = `${PREFIXO_NOITE}mata${String(i)}:${String(k)}`;
       if (estado.entidades.some((e) => e.id === id)) continue;
@@ -186,9 +197,9 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
   }
 
   // A horda da noite: só nas regiões com monstros, proporcional ao escuro.
-  const base = regiao.inimigos.length > 0 ? estado.entidades.filter((e) => vivo(e) && e.arquetipo !== 'jogador' && !e.invocacao && !e.id.startsWith(PREFIXO_NOITE)).length : 0;
+  const base = regiao.inimigos.length > 0 ? estado.entidades.filter((e) => vivo(e) && e.arquetipo !== 'jogador' && !e.invocacao && !e.id.startsWith(PREFIXO_NOITE) && naZona(e)).length : 0;
   const alvo = Math.min(r.maxExtras, Math.floor((base * r.densidadePct * escuro) / 100));
-  const extras = vivos.filter((e) => !e.id.includes(':mata') && e.id !== ID_CHEFE);
+  const extras = vivos.filter((e) => !e.id.includes(':mata') && e.id !== ID_CHEFE && naZona(e));
   if (escuro > 0 && jogadores.length > 0) {
     for (let k = 0; k < r.porConferencia && extras.length + k < alvo && cabe(); k++) {
       const quem = jogadores[Math.floor(sorte() * jogadores.length)];
@@ -196,7 +207,7 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
       // Marco 44 (15/11/2026, D-178): a caça noturna: parte da horda é dos que só saem à noite.
       const noturno = sorte() * 100 < r.noturnosPct ? r.noturnos[Math.floor(sorte() * r.noturnos.length)] : undefined;
       const preset = noturno ?? regiao.inimigos[Math.floor(sorte() * regiao.inimigos.length)];
-      if (c && preset && nascer(estado, ctx, `${PREFIXO_NOITE}${String(estado.tick)}:${String(k)}`, preset, c, nivel(c))) nasceram++;
+      if (c && preset && nascer(estado, ctx, `${PREFIXO_NOITE}${String(estado.tick)}:${String(k)}${sufixo}`, preset, c, nivel(c))) nasceram++;
     }
   }
 
@@ -223,10 +234,10 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
  * A conferência da sala a cada segundo: os focos (mundo/focos.ts) e a noite. Devolve o contexto com o escuro da região
  * no modo (o mesmo objeto se nada mudou).
  */
-export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, agoraMs: number): ContextoSimulacao {
+export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao: RegiaoDoMundo, agoraMs: number, zona: ZonaDaConferencia = {}): ContextoSimulacao {
   for (const foco of regiao.focos ?? []) {
     const aceso = focoAceso(regiao.id, foco, agoraMs);
-    if (aceso) acenderFoco(estado, ctx, regiao, foco, aceso, agoraMs);
+    if (aceso) acenderFoco(estado, ctx, regiao, foco, aceso, agoraMs, zona.naZona);
     else apagarFoco(estado, foco);
   }
   const hora = horaDoMundo(agoraMs, ctx.balance.mundo.ciclo);
@@ -236,7 +247,8 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
   conferirVilaANoite(estado, novo, regiao);
   // Marco 47 (20/11/2026, D-190): a vitrine do ferreiro renova a cada dia do Mundo.
   marcarVitrinesDaVila(estado.objetos, novo, diaDoCiclo(agoraMs, ctx.balance.mundo.ciclo), regiao.nivel);
-  conferirNoite(estado, novo, regiao, escuro);
+  conferirNoite(estado, novo, regiao, escuro, zona);
+  if (zona.semAcampamentos) return novo;
   conferirSonoDoCovil(estado, novo, agoraMs, new Set(ctx.balance.mundo.noite.noturnos));
   // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo e os monstros que o fogo de acampamento chama.
   const r = ctx.balance.mundo.noite;

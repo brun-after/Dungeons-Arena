@@ -86,7 +86,7 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
   const nomeDoLugar = (lugar: string | null) => {
     if (!lugar) return t('mundo.grupo.foraDoJogo');
     const l = lerLugar(o.reino, lugar);
-    return !l ? lugar : l.tipo === 'regiao' ? l.regiao.nome : l.tipo === 'masmorra' ? l.masmorra.nome : l.covil.nome;
+    return !l ? lugar : l.tipo === 'regiao' ? l.regiao.nome : l.tipo === 'masmorra' ? l.masmorra.nome : l.tipo === 'covil' ? l.covil.nome : o.reino.nome;
   };
   const desenharGrupo = () => {
     secaoGrupo.textContent = '';
