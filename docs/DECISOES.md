@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.66 · **Data:** 26/11/2026
+**Versão:** 1.67 · **Data:** 27/11/2026
 
 > **Histórico**
+> - **1.67 (27/11/2026)**: D-209: as escadas e os andares das masmorras do Mundo (um andar por sala, o chefe no último, o grupo desce junto, a descida na tela).
 > - **1.66 (26/11/2026)**: D-206, continuação: a fusão refaz a assinatura do núcleo na matéria da liga (o espinho de terra com fogo é lava incandescente).
 > - **1.65 (26/11/2026)**: D-208: o Mundo contínuo no cliente (o carimbo comum, as regiões do trabalhador, uma cena só, mapa, guia e minimapa no atlas) e o `continuo` ligado com 100 por canal.
 > - **1.64 (26/11/2026)**: D-207: o Mundo contínuo no núcleo e no servidor (atlas, costuras, zonas, hibernação, sala única) e a medida da lotação.
@@ -6946,3 +6947,38 @@ Leste muda a faixa e o guia na hora, sem trocar de cena.
 
 **Fora (marco 56).** As escadas e os andares das masmorras. Também depois: soltar as regiões longe da memória do
 cliente (hoje ficam as 24, uns poucos MB) e apagar o caminho por região do servidor.
+
+## D-209 — As escadas e os andares das masmorras do Mundo (27/11/2026)
+
+**Problema.** Com o Mundo contínuo (D-207, D-208), entrar numa masmorra ainda era um portal para uma fase só, com
+todas as salas num andar. O terceiro marco do Mundo contínuo pede que se entre descendo, e que as masmorras grandes
+tenham andares ligados por escadas.
+
+**Decisão.**
+- **Um andar por sala** (a forma A). O lugar de um andar é `masmorra:<id>:<n>` para n de 2 em diante; o andar 1
+  segue `masmorra:<id>`, com a mesma semente de antes. Cada andar é uma sala do servidor na mesma instância
+  (`OpcoesSalaMundo.instancia`), e a troca de andar é a troca de sala que o interior já usava (D-169: a cena nova monta
+  escondida). Descobertas e o aviso `lugar` usam o id sem o andar (`idBaseDoLugar`). Fica de fora trocar a fase
+  dentro de uma sala só (o `novaFase` do cooperativo): a troca de sala já não trava, e com ela o grupo, a recompensa
+  e a recarga seguem como eram.
+- **Quantos andares** (`mundo/andares.ts`): `andares` da masmorra no JSON do reino (1 a 6), ou as salas divididas
+  por `balance.mundo.andares.salasPorAndar` (6), com pelo menos 3 salas por andar. As salas se repartem entre os
+  andares (`salasDoAndar`), e cada andar n > 1 usa a semente `prefixo:id:n`.
+- **O chefe e a recompensa só no último.** Os andares de cima saem sem chefe (`semChefe`) e com a saída livre (a
+  escada para baixo); a loja fica no primeiro (`semLoja` nos outros). A recompensa e a recarga continuam por
+  masmorra, pagas ao sair do último.
+- **As escadas** (`mundo/escadas.ts → passoDaEscada`): a escada para cima fica ao lado da chegada (`escadaPerto`); no
+  andar 1 ela sai à frente da porta da estrutura, nos outros volta ao andar de cima, ao lado da escada para baixo dele.
+  A escada para baixo leva ao próximo andar. Pedem E e a espera na porta, como os portais. **O grupo desce junto**:
+  quem está a até `balance.mundo.andares.raioDoGrupo` (8) células de quem usou vai na mesma instância; quem está
+  longe fica. A torre sobe em vez de descer (o sentido inverte na tela e no texto).
+- **Na tela.** Com `fase.andar`, a saída e o retorno são desenhados como escadas (`render/escadas.ts`: o poço de
+  pedra com os degraus no escuro, ou os degraus em pé), no lugar dos portais. Ao entrar, trocar de andar ou sair, os
+  degraus escurecem por cima da cena que sai com o nome de para onde se vai (`ui/escada-tela.ts`), e a nova aparece
+  saindo do escuro (`chegada-escada`). O andar vai na faixa do lugar (« · andar 2 de 3 ») e no minimapa
+  (« Andar 2/3 »); as dicas dizem para onde a escada leva. O `?bench=mundo` abre um interior com `&lugar=masmorra:<id>[:<n>]`.
+- **Correção do D-208.** No mapa do lugar, a entrada das masmorras vinha sem o desvio da área (`dx`/`dy`): a fase
+  da região está deslocada dentro da área dela no atlas.
+
+**Fora.** A fachada da estrutura no exterior continua a porta de antes (a escada aparece já dentro, ao lado da
+chegada). O caminho por região do servidor (D-208) segue sem uso, até o contínuo rodar na VM.

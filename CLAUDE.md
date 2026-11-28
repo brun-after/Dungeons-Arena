@@ -1,6 +1,6 @@
 # Dungeons Dimensions: guia para quem trabalha no código
 
-**Versão:** 0.23 · **Data:** 26/11/2026
+**Versão:** 0.24 · **Data:** 27/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -10,7 +10,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 - `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot (`&slot=0&skills=a,b` põe essas skills na barra, marco 49), `?arena=online`, `?arena=loopback`,
   `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?jogo=mundo` o Mundo (marco 29, guia em docs/MUNDO.md),
-  `?bench=carga|padrao|trocas` benchmarks, `?bench=mundo&regiao=<id>&x=&y=&tocha=1` o Mundo local sem servidor (marco 43; `&troca=<id>[,<id>]` mede a troca de região, D-202; `&rota=<id>,<id>` anda pelo Mundo contínuo cruzando as costuras, D-208); no Mundo, `?hora=N` adianta o relógio do dia N minutos e
+  `?bench=carga|padrao|trocas` benchmarks, `?bench=mundo&regiao=<id>&x=&y=&tocha=1` o Mundo local sem servidor (marco 43; `&troca=<id>[,<id>]` mede a troca de região, D-202; `&lugar=masmorra:<id>[:<n>]` abre um interior, D-209; `&rota=<id>,<id>` anda pelo Mundo contínuo cruzando as costuras, D-208); no Mundo, `?hora=N` adianta o relógio do dia N minutos e
   `MUNDO_HORA_MIN` faz o mesmo no servidor, marco 42)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
 - `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`);
@@ -79,6 +79,9 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   vazia e as regiões chegam do trabalhador (`plataforma/gerador-remoto.ts`) e são carimbadas por `mundo/atlas-carimbo.ts`
   (o mesmo do servidor, na ordem canônica); a cena desenha cada região no lugar dela (`ui/atlas-na-cena.ts`). Mapa,
   guia, lápide e Portal falam em coordenadas da área da zona (`ui/mundo-continuo-tela.ts` converte).
+- **Andares no id do lugar** (marco 56, D-209): o andar n > 1 de uma masmorra é `masmorra:<id>:<n>`, uma sala por andar
+  na mesma instância; quantos e quantas salas vêm de `mundo/andares.ts`, e as escadas (subir, descer, o grupo junto) de
+  `mundo/escadas.ts`. Descoberta e aviso usam `idBaseDoLugar`; nada de campo novo na ficha para o andar.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.
