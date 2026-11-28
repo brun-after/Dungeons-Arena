@@ -29,13 +29,12 @@ import { vivo, type Entidade, type ItemNaMochila } from '../entities/entidade';
 import { equipeDeEntrada } from '../modos/regras';
 import { concederXpDeProgressao } from '../progression/nivel';
 import { guardarItem } from '../progression/inventario';
-import { tipoEm } from '../world/fase';
+import { passoDaEscada, quemVaiJunto } from './escadas';
 import { novoObjeto } from '../world/objeto-novo';
 import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
 import { conferirFocosENoite, conferirSonoDoCovil } from './noite';
 import type { ModoDeJogo } from '../modos/modo';
 import { largarItem, largarPerto } from '../world/objetos';
-import { esperouNaPorta, naSaidaAberta } from '../world/portas';
 import type { AcaoDoMundo } from './acoes';
 import type { AvisoDoMundo, DestinoDePortal, MotivoDoMundo } from './avisos';
 import { atenderBanco, atenderMissao, avisoDoBanco, avisoDoQuadro, missoesPorId, type Balcao } from './balcao';
@@ -53,10 +52,10 @@ import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendenc
 import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Participante, type SalaSocial } from './sala-social';
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
-import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
+import { idBaseDoLugar, idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { chaveDoDono, REF_ERRANTE } from './objetos-mundo';
 import { aplicarEstoqueDaDungeon, semanaDaLoja } from './lojas-mundo';
-import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, portaDa, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
+import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
 export const MODO_MUNDO = 'mundo';
@@ -75,6 +74,7 @@ export interface OpcoesSalaMundo {
   versaoConteudo?: string;
   /** 09/11/2026 (D-143): os Portais temporários do processo (o coordenador passa o mesmo a todas as salas). */
   portais?: PortaisTemporarios;
+  instancia?: string; // Marco 56 (D-209): a instância da masmorra (as escadas levam o grupo aos outros andares dela).
 }
 
 export type { PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
@@ -404,8 +404,9 @@ export class SalaMundo extends SalaArena {
 
   /** O lugar como o aviso o mostra (no Mundo contínuo, a zona onde a entidade está). */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean } {
-    return { lugar: this.idLugar, nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo };
+  protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean; andar?: { numero: number; total: number } } {
+    const andar = this.ctx.fase.andar; // Marco 56 (D-209): o andar vai junto, e o lugar é o da masmorra (sem o andar).
+    return { lugar: idBaseDoLugar(this.lugar), nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo, ...(andar && andar.total > 1 && { andar: { numero: andar.numero, total: andar.total } }) };
   }
 
   /** A região onde o ponto está (a da sala; no Mundo contínuo, a zona dele). Marco 54 (D-207). */
@@ -538,16 +539,16 @@ export class SalaMundo extends SalaArena {
     return t !== null;
   }
 
-  /** Na saída aberta do interior, volta à frente da porta da estrutura (e a masmorra concluída entrega a recompensa). */
+  /** As escadas e a saída do interior, com o E (D-138); marco 56 (27/11/2026, D-209): mundo/escadas.ts. */
   private conferirSaidaDoInterior(s: Sessao, e: Entidade, p: Presenca): void {
-    // 08/11/2026 (D-138): só com o E na saída (a espera completa vem de `usarPortal`).
-    if (this.lugar.tipo === 'regiao' || this.lugar.tipo === 'mundo' || tipoEm(this.ctx.fase, e.x, e.y) !== 'saida' || !naSaidaAberta(this.estado, this.ctx, e) || !esperouNaPorta(this.estado, this.ctx, e)) return;
-    const id = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.id : this.lugar.covil.id;
-    const porta = estruturaDoDestino(this.reino, id);
-    if (!porta) return;
-    if (this.lugar.tipo === 'masmorra') this.recompensar(s, e, p, this.lugar.masmorra.nome, this.lugar.masmorra.id, this.lugar.masmorra.recompensa, this.lugar.masmorra.recargaH);
-    p.ficha = fichaAtualizada(p.ficha, e);
-    this.trocar(s, p, `regiao:${porta.regiao.id}`, portaDa(porta.estrutura).frente, null);
+    const passo = passoDaEscada(this.reino, this.lugar, this.estado, this.ctx, e);
+    if (!passo) return;
+    if (passo.concluir && this.lugar.tipo === 'masmorra') this.recompensar(s, e, p, this.lugar.masmorra.nome, this.lugar.masmorra.id, this.lugar.masmorra.recompensa, this.lugar.masmorra.recargaH);
+    const todos = [...this.sessoes.values()].flatMap((s2) => { const e2 = buscarEntidade(this.estado, s2.entidadeId), p2 = this.presencas.get(s2.entidadeId); return e2 && p2 ? [{ s: s2, e: e2, p: p2 }] : []; });
+    for (const j of passo.grupo ? quemVaiJunto(todos, e, this.ctx.balance.mundo.andares.raioDoGrupo) : [{ s, e, p }]) {
+      j.p.ficha = fichaAtualizada(j.p.ficha, j.e);
+      this.trocar(j.s, j.p, passo.destino, passo.chegada, passo.grupo ? (this.opcoesMundo.instancia ?? null) : null);
+    }
   }
 
   private dar(e: Entidade, itemId: string): void {

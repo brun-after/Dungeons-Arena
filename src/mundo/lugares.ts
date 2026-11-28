@@ -16,6 +16,7 @@ import { gerarExterior, type ExteriorGerado } from '../world/gerador-exterior';
 import { FRAGMENTO_DE_PORTAL, objetosDoExterior, PORTAL_TEMPORARIO } from './objetos-mundo';
 import { territorioDoLugar, vizinha } from './reino';
 import { estoqueDeDungeon } from './lojas-mundo';
+import { andaresDe, escadaPerto, salasDoAndar } from './andares';
 import type { CovilDoMundo, MasmorraDoMundo, MaterialDeInimigo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
 
 /** Marco 54 (D-207): o id do lugar do Mundo contínuo. */
@@ -25,11 +26,19 @@ export type Lugar =
   | { tipo: 'regiao'; regiao: RegiaoDoMundo }
   /** Marco 54 (26/11/2026, D-207): o Mundo contínuo, o atlas inteiro numa sala (mundo/mundo-continuo.ts). */
   | { tipo: 'mundo' }
-  | { tipo: 'masmorra'; masmorra: MasmorraDoMundo }
+  /** Marco 56 (27/11/2026, D-209): o andar (1, o de cima, quando ausente). */
+  | { tipo: 'masmorra'; masmorra: MasmorraDoMundo; andar?: number }
   | { tipo: 'covil'; covil: CovilDoMundo };
 
-/** O id do lugar em texto: `regiao:<id>`, `masmorra:<id>` ou `covil:<id>`. */
+/** O id do lugar em texto: `regiao:<id>`, `masmorra:<id>` (`masmorra:<id>:<andar>` do segundo andar em diante) ou `covil:<id>`. */
 export function idDoLugar(l: Lugar): string {
+  if (l.tipo === 'mundo') return ID_LUGAR_MUNDO;
+  if (l.tipo === 'masmorra' && (l.andar ?? 1) > 1) return `masmorra:${l.masmorra.id}:${String(l.andar)}`;
+  return idBaseDoLugar(l);
+}
+
+/** Marco 56 (D-209): o id sem o andar (o que se descobre, se marca no mapa e se mostra ao grupo). */
+export function idBaseDoLugar(l: Lugar): string {
   if (l.tipo === 'mundo') return ID_LUGAR_MUNDO;
   return l.tipo === 'regiao' ? `regiao:${l.regiao.id}` : l.tipo === 'masmorra' ? `masmorra:${l.masmorra.id}` : `covil:${l.covil.id}`;
 }
@@ -37,14 +46,17 @@ export function idDoLugar(l: Lugar): string {
 export function lerLugar(reino: Reino, texto: unknown): Lugar | null {
   if (typeof texto !== 'string') return null;
   if (texto === ID_LUGAR_MUNDO) return { tipo: 'mundo' };
-  const [tipo, id] = texto.split(':');
+  const [tipo, id, andar] = texto.split(':');
   if (tipo === 'regiao') {
     const regiao = reino.regioes.find((r) => r.id === id);
     return regiao ? { tipo, regiao } : null;
   }
   if (tipo === 'masmorra') {
     const masmorra = reino.masmorras.find((m) => m.id === id);
-    return masmorra ? { tipo, masmorra } : null;
+    if (!masmorra) return null;
+    if (andar === undefined) return { tipo, masmorra };
+    const n = Number(andar);
+    return Number.isInteger(n) && n >= 2 && n <= andaresDe(masmorra) ? { tipo, masmorra, andar: n } : null;
   }
   if (tipo === 'covil') {
     const covil = reino.covis.find((c) => c.id === id);
@@ -86,13 +98,17 @@ export interface LugarMontado {
   regiaoDoAtlas?: RegiaoDoMundo;
 }
 
-/** O interior de uma masmorra ou covil: fase gerada com os inimigos e o chefe do reino. */
-function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDoMundo, prefixo: string) {
+/**
+ * O interior de uma masmorra ou covil: fase gerada com os inimigos e o chefe do reino. Marco 56 (27/11/2026, D-209):
+ * um andar por vez; o primeiro mantém a semente de antes, e só o último tem o chefe.
+ */
+function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDoMundo, prefixo: string, andar = 1, total = 1) {
   const catalogo = { ...catalogoDeGeracao(conteudo, estoqueDeDungeon(conteudo, territorioDoLugar(reino,d.id), d.nivel)), comuns: [...d.inimigos], boss: d.boss };
   // 07/11/2026 (D-135): no Mundo, nenhuma masmorra em espiral (o corredor sem fim era só andar); todas são de salas,
   // no tamanho que as salas pedem.
   return gerarFase(
-    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }),
+    { id: `mundo_${prefixo}_${d.id}${andar > 1 ? `_a${String(andar)}` : ''}`, nome: d.nome, semente: hashTexto(andar > 1 ? `${prefixo}:${d.id}:${String(andar)}` : `${prefixo}:${d.id}`), salas: salasDoAndar(d.salas, andar, total), nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }),
+      ...(andar < total && { semChefe: true }), ...(andar > 1 && { semLoja: true }),
       // 06/11/2026 (D-135): no Mundo, as armadilhas são parte do perigo de cada sala.
       armadilhasPorSala: BALANCE_PADRAO.armadilhas.mundoPorSala },
     catalogo,
@@ -131,7 +147,12 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
   // A masmorra não deixa túmulo; o covil segue a regra do Mundo (conta como fora).
   // Marco 47 (D-190): o chefe da masmorra e do covil é maior (mais peças de armadura).
   const modo = comMateriais(masmorra ? { ...modoBase, tumuloNaMorte: false, chefeMaior: true } : { ...modoBase, chefeMaior: true }, reino, dados.id);
-  const r = contextoDaFase(conteudo, interior(conteudo, reino, dados, lugar.tipo), modo);
+  const andar = lugar.tipo === 'masmorra' ? (lugar.andar ?? 1) : 1;
+  const total = lugar.tipo === 'masmorra' ? andaresDe(lugar.masmorra) : 1;
+  const r = contextoDaFase(conteudo, interior(conteudo, reino, dados, lugar.tipo, andar, total), modo);
   if (!r.ok) throw new Error(`${lugar.tipo} ${dados.id} inválida: ${r.erro}`);
-  return { ctx: r.ctx, estado: estadoInicialDaFase(r.ctx), exterior: null };
+  // Marco 56 (D-209): a escada para cima ao lado de onde se chega, e o andar (a tela desenha as escadas e o mostra).
+  const spawn = r.ctx.fase.spawns[0];
+  const ctx = { ...r.ctx, fase: { ...r.ctx.fase, andar: { numero: andar, total }, ...(spawn && { portaRetorno: escadaPerto(r.ctx.fase, spawn) }) } };
+  return { ctx, estado: estadoInicialDaFase(ctx), exterior: null };
 }

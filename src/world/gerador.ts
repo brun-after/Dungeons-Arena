@@ -50,6 +50,10 @@ export interface ParametrosGeracao {
   armadilhasPorSala?: number;
   /** Marco 23 (D-092): o tema da fase (data/temas.json); ausente nas fases geradas antes dele. */
   tema?: string;
+  /** Marco 56 (27/11/2026, D-209): o andar de cima de uma masmorra: sem chefe (a saída é livre, a escada para baixo). */
+  semChefe?: boolean;
+  /** Marco 56 (D-209): sem a loja da primeira sala (os andares de baixo da masmorra). */
+  semLoja?: boolean;
 }
 
 /** O que o gerador precisa do catálogo: presets comuns e de chefe, e o estoque da loja. */
@@ -200,14 +204,14 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
   ocupar(spawn);
   const objetos: ObjetoPosicionadoJson[] = [];
   const loja = { x: primeira.x, y: primeira.y };
-  if (livre(loja)) {
+  if (!p.semLoja && livre(loja)) {
     ocupar(loja);
     objetos.push({ tipo: 'loja', x: normalizado(loja.x, largura), y: normalizado(loja.y, altura), estoque: [...catalogo.estoque] });
   }
 
   const inimigos: InimigoPosicionado[] = [];
   const ultima = salas.length > 1 ? salas[salas.length - 1] : undefined;
-  const comBoss = salas.length > 2 && ultima !== undefined;
+  const comBoss = !p.semChefe && salas.length > 2 && ultima !== undefined;
   let portaSaida: FaseJson['portaSaida'];
   if (ultima) {
     const s = { x: ultima.x + ultima.l - 1, y: ultima.y + ultima.a - 1 };

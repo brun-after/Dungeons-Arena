@@ -172,6 +172,8 @@ export interface MasmorraDoMundo {
   recompensa: readonly string[];
   /** Horas até a recompensa valer de novo para o mesmo personagem. */
   recargaH: number;
+  /** Marco 56 (27/11/2026, D-209): quantos andares; ausente, um a cada `balance.mundo.andares.salasPorAndar` salas. */
+  andares?: number;
 }
 
 /** Covil de boss: compartilhado; o boss renasce e quem lutou leva o próprio sorteio do drop exclusivo. */
@@ -387,6 +389,7 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
         boss: l.texto(m, 'boss'),
         recompensa: l.listaDeTextos(m, 'recompensa'),
         recargaH: l.numero(m, 'recargaH', { min: 0, max: 24 * 14 }),
+        ...(m.andares !== undefined && { andares: l.numero(m, 'andares', { min: 1, max: 6, inteiro: true }) }),
       };
     }),
     covis: l.lista(o, 'covis').map((x) => {
