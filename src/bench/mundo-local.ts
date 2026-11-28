@@ -1,5 +1,6 @@
 // A vista local do Mundo (marco 43, 15/11/2026, D-177): `?bench=mundo&regiao=<id>[&x=..&y=..][&segundos=..][&hora=..]`
-// e, desde o D-202 (22/11/2026), `&troca=<id>` para medir a troca de região.
+// e, desde o D-202 (22/11/2026), `&troca=<id>` para medir a troca de região. Marco 56 (27/11/2026, D-209):
+// `&lugar=masmorra:<id>[:<andar>]` (ou `covil:<id>`) abre um interior, para ver as escadas e o andar.
 // Monta a região do Mundo na própria página, sem servidor (a mesma geração e a mesma cena do jogo), com o jogador
 // local controlável no ponto pedido (ou na chegada). Serve para ver o relevo, os objetos e a luz de cada região e
 // para medir os quadros no exterior (a medida sai no painel depois de `segundos`, como os outros benchmarks).
@@ -9,7 +10,7 @@ import { modoPorId } from '../core/conteudo';
 import type { Comando, ComandoDoTick } from '../core/comandos';
 import { simular, type EventoSimulacao } from '../core/simulacao';
 import { criarJogador } from '../entities/fabrica';
-import { montarLugar } from '../mundo/lugares';
+import { lerLugar, montarLugar } from '../mundo/lugares';
 import { reinoDoConteudo } from '../mundo/reino';
 import { iniciarLaco } from '../plataforma/laco-navegador';
 import { Interpolador } from '../render/interpolacao';
@@ -29,7 +30,8 @@ export async function iniciarMundoLocal(raiz: HTMLElement, params: URLSearchPara
   const id = params.get('regiao') ?? 'vila_do_centro';
   const regiao = reino.regioes.find((r) => r.id === id) ?? reino.regioes[0];
   if (!regiao) return;
-  const { ctx, estado } = montarLugar(conteudo, reino, { tipo: 'regiao', regiao }, modoPorId(conteudo, 'mundo'));
+  const pedido = lerLugar(reino, params.get('lugar'));
+  const { ctx, estado } = montarLugar(conteudo, reino, pedido && pedido.tipo !== 'mundo' ? pedido : { tipo: 'regiao', regiao }, modoPorId(conteudo, 'mundo'));
   const classe = conteudo.classes.get(params.get('classe') ?? 'guerreiro') ?? [...conteudo.classes.values()][0];
   if (!classe) return;
   const chegada = ctx.fase.spawns[0] ?? { x: 2, y: 2 };

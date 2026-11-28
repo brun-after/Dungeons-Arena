@@ -376,4 +376,12 @@ export const textosMundo = {
   'mundo.mapa.desconhecida': 'Região desconhecida',
   'mundo.mapa.vila': 'Vila salva',
   'mundo.mapa.fechar': 'Fechar o mapa',
+  // Marco 56 (27/11/2026, D-209): os andares das masmorras e as escadas.
+  'mundo.andar': 'andar {numero} de {total}',
+  'mundo.andarCurto': 'Andar {numero}/{total}',
+  'mundo.escada.descer': 'Descendo para {nome}',
+  'mundo.escada.subir': 'Subindo para {nome}',
+  'mundo.escada.descerAndar': 'Descendo ao andar {numero} de {nome}',
+  'mundo.escada.subirAndar': 'Subindo ao andar {numero} de {nome}',
+  'mundo.escada.sair': 'Saindo de {nome}',
 };

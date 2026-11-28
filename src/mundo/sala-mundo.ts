@@ -404,9 +404,9 @@ export class SalaMundo extends SalaArena {
 
   /** O lugar como o aviso o mostra (no Mundo contínuo, a zona onde a entidade está). */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean; andar?: { numero: number; total: number } } {
+  protected descreverLugar(_e: Entidade | undefined): { lugar: string; nome: string; perigo: RegiaoDoMundo['perigo'] | 'dungeon'; pvp: boolean; andar?: { numero: number; total: number; torre?: boolean } } {
     const andar = this.ctx.fase.andar; // Marco 56 (D-209): o andar vai junto, e o lugar é o da masmorra (sem o andar).
-    return { lugar: idBaseDoLugar(this.lugar), nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo, ...(andar && andar.total > 1 && { andar: { numero: andar.numero, total: andar.total } }) };
+    return { lugar: idBaseDoLugar(this.lugar), nome: this.nomeDoLugar(), perigo: this.lugar.tipo === 'regiao' ? this.lugar.regiao.perigo : 'dungeon', pvp: this.ctx.modo.fogoAmigo, ...(andar && andar.total > 1 && { andar: { ...andar } }) };
   }
 
   /** A região onde o ponto está (a da sala; no Mundo contínuo, a zona dele). Marco 54 (D-207). */

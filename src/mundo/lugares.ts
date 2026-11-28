@@ -14,7 +14,7 @@ import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { gerarExterior, type ExteriorGerado } from '../world/gerador-exterior';
 import { FRAGMENTO_DE_PORTAL, objetosDoExterior, PORTAL_TEMPORARIO } from './objetos-mundo';
-import { territorioDoLugar, vizinha } from './reino';
+import { estruturaDoDestino, territorioDoLugar, vizinha } from './reino';
 import { estoqueDeDungeon } from './lojas-mundo';
 import { andaresDe, escadaPerto, salasDoAndar } from './andares';
 import type { CovilDoMundo, MasmorraDoMundo, MaterialDeInimigo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
@@ -153,6 +153,7 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
   if (!r.ok) throw new Error(`${lugar.tipo} ${dados.id} inválida: ${r.erro}`);
   // Marco 56 (D-209): a escada para cima ao lado de onde se chega, e o andar (a tela desenha as escadas e o mostra).
   const spawn = r.ctx.fase.spawns[0];
-  const ctx = { ...r.ctx, fase: { ...r.ctx.fase, andar: { numero: andar, total }, ...(spawn && { portaRetorno: escadaPerto(r.ctx.fase, spawn) }) } };
+  const torre = estruturaDoDestino(reino, dados.id)?.estrutura.tipo === 'torre';
+  const ctx = { ...r.ctx, fase: { ...r.ctx.fase, andar: { numero: andar, total, ...(torre && { torre }) }, ...(spawn && { portaRetorno: escadaPerto(r.ctx.fase, spawn) }) } };
   return { ctx, estado: estadoInicialDaFase(ctx), exterior: null };
 }

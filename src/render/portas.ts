@@ -11,6 +11,8 @@
 // Ajuste de 31/10/2026 (D-130): no isométrico, a saída, o retorno e a porta do chefe ficam num arco de pedra
 // pré-renderizado de modelos 3D CC0 (render/objetos-3d.ts, `portal`), tingido de leve na cor do tema de destino, com o
 // vórtice no vão; sem a imagem, a moldura desenhada de antes.
+// Marco 56 (27/11/2026, D-209): nos andares das masmorras do Mundo, a porta de retorno e a saída para o próximo andar
+// são escadas (render/escadas.ts); a saída do último andar segue o portal.
 
 import { Graphics, Sprite, type Container } from 'pixi.js';
 import type { EstadoJogo } from '../core/estado';
@@ -21,6 +23,7 @@ import { ALTURA, corDoPar, portalDeCima, portalEmPe, trancas, vortice, type Dese
 import type { OpcoesEmPe } from './objetos';
 import type { ObjetosPreRenderizados } from './objetos-3d';
 import type { SistemaParticulas } from './particulas';
+import { escadaDeCima, escadaEmPe, type SentidoDaEscada } from './escadas';
 import { centroDaCelula } from './projecao';
 import { paletaDe } from './terreno';
 
@@ -57,6 +60,8 @@ interface Portal {
   /** Portal interno: o vórtice oval sem moldura. */
   par: boolean;
   trancado: boolean;
+  /** Marco 56 (D-209): a escada no lugar do portal. */
+  escada?: SentidoDaEscada;
 }
 
 export class CamadaPortas {
@@ -90,12 +95,15 @@ export class CamadaPortas {
       const cor = corDoPar(porta.numero);
       for (const c of [porta.a, porta.b]) lista.push({ x: c.x, y: c.y, par: true, trancado: false, desenho: { estilo: 'pedra', cor, tMs, aceso: true } });
     }
+    // Marco 56 (D-209): a escada de volta e a do próximo andar (a torre sobe: os sentidos trocam).
+    const andar = this.fase.andar;
+    const proximo: SentidoDaEscada = andar?.torre ? 'subir' : 'descer';
     const volta = this.fase.portaRetorno;
-    if (volta) lista.push({ x: volta.x, y: volta.y, par: false, trancado: false, desenho: { ...this.estiloDe(d?.retorno ?? null), tMs, aceso: true } });
+    if (volta) lista.push({ x: volta.x, y: volta.y, par: false, trancado: false, desenho: { ...this.estiloDe(d?.retorno ?? null), tMs, aceso: true }, ...(andar && { escada: proximo === 'descer' ? 'subir' : 'descer' }) });
     const s = this.fase.portaSaida;
     if (s) {
       const trancada = s.tranca !== 'livre' && !estado.saidaAberta;
-      lista.push({ x: s.x, y: s.y, par: false, trancado: trancada, desenho: { ...this.estiloDe(d?.saida ?? null), tMs, aceso: !trancada } });
+      lista.push({ x: s.x, y: s.y, par: false, trancado: trancada, desenho: { ...this.estiloDe(d?.saida ?? null), tMs, aceso: !trancada }, ...(andar && andar.numero < andar.total && { escada: proximo }) });
     }
     for (const o of estado.objetos) {
       if (o.tipo !== 'saida') continue;
@@ -119,7 +127,8 @@ export class CamadaPortas {
       // O anel de espera do portal interno fica no chão, na cor do par.
       if (p.par) g.circle(cx, cy, 17).fill({ color: p.desenho.cor, alpha: 0.18 }).stroke({ width: 2.5, color: p.desenho.cor, alpha: 0.5 + 0.4 * pulso });
       if (!emPe || proj?.visao !== 'iso') {
-        if (p.par) vortice(g, cx, cy, 12, 12, p.desenho.cor, tMs, true);
+        if (p.escada) escadaDeCima(g, cx, cy, P, p.escada, p.desenho.cor);
+        else if (p.par) vortice(g, cx, cy, 12, 12, p.desenho.cor, tMs, true);
         else portalDeCima(g, cx, cy, p.desenho);
         if (p.trancado) trancas(g, cx, cy, false);
         continue;
@@ -137,7 +146,8 @@ export class CamadaPortas {
       alta.position.set(pt.x, pt.y);
       alta.zIndex = pt.z;
       alta.clear();
-      if (p.par) {
+      if (p.escada) escadaEmPe(alta, p.escada, p.desenho.cor);
+      else if (p.par) {
         // O portal interno de pé: um vórtice oval flutuando sobre o anel, sem moldura.
         alta.ellipse(0, 0, 14, 5).fill({ color: 0x000000, alpha: 0.25 });
         vortice(alta, 0, -ALTURA * 0.45, 11, ALTURA * 0.38, p.desenho.cor, tMs, true);
@@ -189,7 +199,7 @@ export class CamadaPortas {
     if (!particulas || reduzido || particulas.limite <= 0 || agoraMs - this.ultimoArMs < AR_MS) return;
     this.ultimoArMs = agoraMs;
     for (const p of portais) {
-      if (!p.desenho.aceso) continue;
+      if (!p.desenho.aceso || p.escada) continue;
       particulas.emitir(p.par ? 'portal_par' : `portal_${p.desenho.estilo}`, p.x, p.y, p.desenho.cor);
     }
   }

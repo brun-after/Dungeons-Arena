@@ -242,3 +242,36 @@ body .minimapa.minimapa-mundo {
   body.toque .barra-consumiveis { top: calc(122px + var(--seguro-topo)); }
   body.toque .camada-mundo .painel-social, body.toque .painel-social { top: calc(186px + var(--seguro-topo)); max-height: calc(100dvh - 196px - var(--seguro-topo)); }
 }
+
+/* Marco 56 (27/11/2026, D-209): a descida (ou a subida) pela escada: os degraus passam escurecendo por cima da cena que
+   sai, com o nome de para onde se vai; a cena nova sai do escuro. */
+.descida-escada {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, #0000 0 34px, #0007 34px 46px),
+    radial-gradient(ellipse at center, #0b080dcc, #050307f5);
+  background-size: 100% 92px, 100% 100%;
+  animation: descida-escurece .7s ease-in forwards, descida-degraus .9s linear infinite;
+}
+.descida-escada[data-sentido='subir'] { animation: descida-escurece .7s ease-in forwards, subida-degraus .9s linear infinite; }
+.descida-escada span {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.1rem, 3.2vw, 1.8rem);
+  color: #ffe1a0;
+  text-shadow: 0 2px 6px #000;
+  letter-spacing: .04em;
+}
+@keyframes descida-escurece { from { opacity: 0; } to { opacity: 1; } }
+@keyframes descida-degraus { from { background-position: 0 0, 0 0; } to { background-position: 0 92px, 0 0; } }
+@keyframes subida-degraus { from { background-position: 0 92px, 0 0; } to { background-position: 0 0, 0 0; } }
+.camada-mundo.chegada-escada { animation: chegada-escada .8s ease-out; }
+@keyframes chegada-escada { from { filter: brightness(0); } to { filter: brightness(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .descida-escada, .descida-escada[data-sentido='subir'] { animation: descida-escurece .2s ease-in forwards; }
+  .camada-mundo.chegada-escada { animation: none; }
+}
