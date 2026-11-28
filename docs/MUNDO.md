@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.10 · **Data:** 26/11/2026
+**Versão:** 1.11 · **Data:** 27/11/2026
 
 > **Histórico**
+> - **1.11 (27/11/2026)**: marco 56: os andares das masmorras e as escadas (o grupo desce junto, o chefe no último).
 > - **1.10 (26/11/2026)**: marco 55: o cliente contínuo e o `continuo` ligado (uma cena só, regiões do trabalhador, mapa, guia e minimapa no atlas).
 > - **1.9 (26/11/2026)**: marco 54: o Mundo contínuo no servidor (atlas, costuras, zonas pela posição, hibernação), ainda desligado (`continuo`).
 > - **1.8 (25/11/2026)**: D-205: a janela da troca com os dois lados, o ouro com botões próprios, a cobrança, a contraproposta e o chat da troca; o mapa em pergaminho.
@@ -299,7 +300,11 @@ Ligado em `mundo.json → continuo` desde o marco 55 (D-208), com 100 jogadores 
   pelo caminho a pé (`mundo/orientacao-atlas.ts`). O minimapa mostra 200 células em volta do jogador.
 - **Medir no cliente**: `?bench=mundo&rota=vila_do_centro,encosta_do_leste,mar_de_areia,eclipse_almas` anda cruzando
   as costuras e mede o pior quadro em cada uma (também em `npm run bench`).
-- Detalhes em D-207 e D-208.
+- **Andares das masmorras** (marco 56): masmorra com mais de 6 salas tem andares (`andares` no reino, ou
+  `balance.mundo.andares.salasPorAndar`), um por sala (`masmorra:<id>:<n>`). Entra-se descendo (a torre sobe); a escada
+  para baixo leva ao próximo andar com quem está a até 8 células, a para cima volta. O chefe e a recompensa ficam no
+  último andar, a loja no primeiro. Ver um andar sem servidor: `?bench=mundo&lugar=masmorra:toca_dos_goblins:2`.
+- Detalhes em D-207, D-208 e D-209.
 
 ## Dia, noite, tocha e relevo (marco 42, 15/11/2026)
 

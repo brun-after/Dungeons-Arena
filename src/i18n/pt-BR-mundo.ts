@@ -68,6 +68,10 @@ export const textosMundo = {
   'prompt.mundo.npc.missoes': '{tecla}: falar com a balconista da taverna',
   'prompt.mundo.npc.andarilho': '{tecla}: conversar',
   'prompt.mundo.npc.banco': '{tecla}: abrir o banco',
+  'prompt.escada.subir': '{tecla}: subir a escada ao andar {numero}',
+  'prompt.escada.descer': '{tecla}: descer a escada ao andar {numero}',
+  'prompt.escada.sairSubindo': '{tecla}: subir a escada e sair',
+  'prompt.escada.sairDescendo': '{tecla}: descer a escada e sair',
   'prompt.mundo.npc.mercado': '{tecla}: ver o mercado do reino',
   'prompt.mundo.coleta': '{tecla}: coletar (fique parado; um golpe interrompe)',
   'prompt.mundo.tumulo': '{tecla}: abrir o túmulo',
@@ -376,4 +380,12 @@ export const textosMundo = {
   'mundo.mapa.desconhecida': 'Região desconhecida',
   'mundo.mapa.vila': 'Vila salva',
   'mundo.mapa.fechar': 'Fechar o mapa',
+  // Marco 56 (27/11/2026, D-209): os andares das masmorras e as escadas.
+  'mundo.andar': 'andar {numero} de {total}',
+  'mundo.andarCurto': 'Andar {numero}/{total}',
+  'mundo.escada.descer': 'Descendo para {nome}',
+  'mundo.escada.subir': 'Subindo para {nome}',
+  'mundo.escada.descerAndar': 'Descendo ao andar {numero} de {nome}',
+  'mundo.escada.subirAndar': 'Subindo ao andar {numero} de {nome}',
+  'mundo.escada.sair': 'Saindo de {nome}',
 };

@@ -95,7 +95,7 @@ export interface VisaoExternaParty { lugar: string; idLocal: string; estado: Est
 export type AvisoDoMundo =
   | { tipo: 'visoesParty'; visoes: VisaoExternaParty[] }
   /** Onde a sessão está: o nome, o perigo, se há PvP e o canal (a mesma região pode ter mais de uma sala). */
-  | { tipo: 'lugar'; lugar: string; nome: string; perigo: Perigo | 'dungeon'; pvp: boolean; canal: number; vilaSalva: string; descobertas: string[] }
+  | { tipo: 'lugar'; lugar: string; nome: string; perigo: Perigo | 'dungeon'; pvp: boolean; canal: number; vilaSalva: string; descobertas: string[]; andar?: { numero: number; total: number; torre?: boolean } }
   | { tipo: 'salvo'; vila: string }
   | { tipo: 'portais'; destinos: DestinoDePortal[]; livreEm: number; temPergaminho: boolean }
   | { tipo: 'descoberta'; lugar: string; nome: string }

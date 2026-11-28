@@ -34,6 +34,10 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   const reino = reinoDoConteudo(ctx.conteudo);
   const regiao = reino.regioes.find(r => lugar === `regiao:${r.id}`);
   const entradas = regiao?.estruturas.filter(e => !e.escondida || descobertas.includes(`${e.destino.tipo}:${e.destino.id}`)) ?? [];
+  // 27/11/2026 (D-208): no Mundo contínuo, a fase da região está na área dela (as estruturas deslocadas por dx/dy).
+  const e0 = regiao?.estruturas[0];
+  const f0 = fase.estruturas?.[0];
+  const desvio = e0 && f0 ? { x: f0.x - e0.x, y: f0.y - e0.y } : { x: 0, y: 0 };
   const chave = `mapa:pontos:${lugar}`;
   let pontos: { x: number; y: number }[] = [];
   try {
@@ -88,7 +92,7 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   };
   const destinos: MarcoDoMapa[] = [
     ...marcosDaFase(fase, nomeDoDestino),
-    ...entradas.map((estrutura): MarcoDoMapa => ({ tipo: 'masmorra', ...portaDa(estrutura).porta, rotulo: estrutura.nome })),
+    ...entradas.map((estrutura): MarcoDoMapa => { const p = portaDa(estrutura).porta; return { tipo: 'masmorra', x: p.x + desvio.x, y: p.y + desvio.y, rotulo: estrutura.nome }; }),
     ...marcosDeCaca(ctx),
   ];
   const seguir = (marco: MarcoDoMapa) => {

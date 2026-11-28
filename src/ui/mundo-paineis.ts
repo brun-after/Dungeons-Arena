@@ -68,14 +68,17 @@ export function criarFaixaDoLugar(): { elemento: HTMLElement; mostrar: (aviso: E
   return {
     elemento: el,
     mostrar: (a) => {
-      if (lugarAnterior === a.lugar) return;
-      lugarAnterior = a.lugar;
+      // Marco 56 (27/11/2026, D-209): cada andar mostra a faixa de novo, com o andar.
+      const chave = `${a.lugar}:${String(a.andar?.numero ?? 0)}`;
+      if (lugarAnterior === chave) return;
+      lugarAnterior = chave;
       el.getAnimations().forEach(animacao => { animacao.cancel(); });
       el.style.opacity = '1';
       const animacao = el.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: 0.4 }, { opacity: 0, offset: 1 }], { duration: 5000, fill: 'forwards' });
       // Finaliza também por tempo de apresentação quando o navegador reduz os quadros.
       window.setTimeout(() => { animacao.cancel(); el.style.opacity = '0'; }, 5000);
-      nome.textContent = a.canal > 1 ? t('mundo.lugarCanal', { nome: a.nome, canal: a.canal }) : t('mundo.lugar', { nome: a.nome });
+      const nomeDoLugar = a.andar ? `${a.nome} · ${t('mundo.andar', { numero: a.andar.numero, total: a.andar.total })}` : a.nome;
+      nome.textContent = a.canal > 1 ? t('mundo.lugarCanal', { nome: nomeDoLugar, canal: a.canal }) : t('mundo.lugar', { nome: nomeDoLugar });
       perigo.textContent = textoDoPerigo(a);
       el.dataset.pvp = a.pvp ? '1' : '0';
     },

@@ -174,6 +174,7 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
   // o clique sem arrastar segue abrindo o mapa grande. Os marcos (portões, casas, serviços) vêm da fase.
   const desvio = { x: 0, y: 0 };
   let marcosFixos = mundo && !janela ? marcosDaFase(fase) : [];
+  const andarTexto = fase.andar && fase.andar.total > 1 ? t('mundo.andarCurto', { numero: fase.andar.numero, total: fase.andar.total }) : '';
   if (mundo) {
     ligarZoomMapa(canvas, fator => {
       zoom = Math.max(1, Math.min(4, zoom * fator));
@@ -255,6 +256,17 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       }
       g.restore();
       if (mundo) rosaDosVentos(g, 17, 13, 12);
+      // Marco 56 (27/11/2026, D-209): o andar da masmorra, no canto.
+      if (andarTexto) {
+        g.font = `600 ${toque ? 9 : 10}px sans-serif`;
+        g.textAlign = 'right';
+        g.textBaseline = 'bottom';
+        g.lineWidth = 3;
+        g.strokeStyle = 'rgba(0,0,0,.75)';
+        g.strokeText(andarTexto, canvas.width - 4, canvas.height - 3);
+        g.fillStyle = '#ffe1a0';
+        g.fillText(andarTexto, canvas.width - 4, canvas.height - 3);
+      }
       canvas.dataset.atualizado = String(estado.tick);
     },
   };

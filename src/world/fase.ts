@@ -242,6 +242,11 @@ export interface Fase {
   /** Marco 10A-1: porta de saída (null = toda célula `S` é saída livre) e portas internas. */
   readonly portaRetorno?: Celula;
   readonly portaSaida: PortaSaida | null;
+  /**
+   * Marco 56 (27/11/2026, D-209): o andar da masmorra do Mundo (1 é o de cima). A porta de retorno é a escada para cima
+   * e, antes do último, a saída é a escada para baixo.
+   */
+  readonly andar?: { readonly numero: number; readonly total: number; /** A torre sobe a cada andar (as escadas trocam de lado). */ readonly torre?: boolean };
   readonly portasInternas: readonly PortaInterna[];
   readonly matizGraus: number;
   /** Marco 11A: o atlas da fase (já com a herança resolvida por quem carrega) e as peças à mão. */

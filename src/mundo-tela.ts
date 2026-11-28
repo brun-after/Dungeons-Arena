@@ -45,6 +45,7 @@ import type { ContextoSimulacao } from './core/contexto';
 import { proximaEtapa, type DestinoNoMapa } from './mundo/orientacao';
 import { etapaNoAtlas } from './mundo/orientacao-atlas';
 import { mundoContinuoNaTela, type MundoContinuoNaTela } from './ui/mundo-continuo-tela';
+import { descidaDaTroca, mostrarDescida } from './ui/escada-tela';
 import type { CenaDoMundo } from './ui/cena-mundo';
 import { ENDERECO_DO_MENU } from './ui/menu';
 
@@ -316,6 +317,8 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
 interface TrocaDeCena {
   tirar: () => void;
   cena: CenaDoMundo | null;
+  /** Marco 56 (D-209): veio por uma escada (a cena nova sai do escuro). */
+  escada?: boolean;
 }
 
 /** Espera o bemVindo (ou a recusa) da sala. */
@@ -556,9 +559,12 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
         desmontar();
         camada.remove();
       };
+      // Marco 56 (27/11/2026, D-209): entrar, trocar de andar ou sair de uma masmorra: os degraus na tela.
+      const escada = descidaDaTroca(reino, pedido.lugar, a.lugar);
+      if (escada) mostrarDescida(camada, escada);
       // A sala de antes já soltou o personagem: a nova conecta sem esperar o fechamento desta.
       void conexao.encerrar();
-      void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva, { tirar, cena: cena?.mundo ?? null });
+      void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva, { tirar, cena: cena?.mundo ?? null, escada: escada !== null });
     } else {
       const texto = textoDoAviso(a);
       if (texto) avisar(texto, 4000);
@@ -719,6 +725,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     if (!antes && camada.style.visibility !== 'hidden') return;
     const desvio = troca?.cena?.desvio();
     if (desvio) c.mundo.recentrar(desvio);
+    if (troca?.escada) camada.classList.add('chegada-escada');
     camada.style.visibility = '';
     antes?.();
     antes = null;

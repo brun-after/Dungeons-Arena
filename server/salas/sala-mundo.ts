@@ -463,6 +463,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       agora: () => Date.now() + (Number(process.env.MUNDO_HORA_MIN ?? 0) || 0) * 60_000,
       versaoConteudo: versaoDoConteudo(),
       portais: this.coordenador.portais,
+      ...(this.instancia && { instancia: this.instancia }), // Marco 56 (D-209): as escadas levam o grupo na mesma instância.
     };
     // Marco 54 (D-207): o Mundo contínuo só depois de montado (a entrada tenta de novo, mundo-tela.ts).
     if (lugar.tipo === 'mundo') {

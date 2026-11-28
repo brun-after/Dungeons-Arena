@@ -231,7 +231,8 @@ describe('sala do Mundo', () => {
     expect(ida?.instancia).toMatch(/^u1:/);
     expect(ida?.ficha.descobertas).toContain('masmorra:toca_dos_goblins');
 
-    const dentro = sala('masmorra:toca_dos_goblins');
+    // Marco 56 (D-209): a recompensa sai pelo fim do último andar (a toca tem 3).
+    const dentro = sala('masmorra:toca_dos_goblins:3');
     expect(dentro.ctx.modo.tumuloNaMorte).toBe(false);
     const d = entrar(dentro, 'u1', obter(ida, 'ida').ficha);
     // O chefe cai e a saída abre.

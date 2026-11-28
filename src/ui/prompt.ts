@@ -59,8 +59,14 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     // 08/11/2026 (D-138): os portais pedem o E (o atalho, a saída aberta e a porta de retorno).
     if (destinoDaPorta(ctx.fase.portasInternas, eu.x, eu.y)) return t('prompt.portal', { tecla: tecla() });
     const volta = ctx.fase.portaRetorno;
-    if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) return t('prompt.retorno', { tecla: tecla() });
-    if (naSaidaAberta(estado, ctx, eu)) return t('prompt.saida', { tecla: tecla() });
+    // Marco 56 (27/11/2026, D-209): nos andares das masmorras do Mundo, as portas são escadas (a torre sobe).
+    const andar = ctx.fase.andar;
+    const escada = (numero: number, subindo: boolean) => t(subindo ? 'prompt.escada.subir' : 'prompt.escada.descer', { tecla: tecla(), numero });
+    if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) {
+      if (!andar) return t('prompt.retorno', { tecla: tecla() });
+      return andar.numero > 1 ? escada(andar.numero - 1, !andar.torre) : t(andar.torre ? 'prompt.escada.sairDescendo' : 'prompt.escada.sairSubindo', { tecla: tecla() });
+    }
+    if (naSaidaAberta(estado, ctx, eu)) return andar && andar.numero < andar.total ? escada(andar.numero + 1, !!andar.torre) : t('prompt.saida', { tecla: tecla() });
     const s = ctx.fase.portaSaida;
     if (s && s.x === eu.x && s.y === eu.y && s.tranca !== 'livre' && !estado.saidaAberta) {
       return t(s.tranca === 'chave' ? 'prompt.saidaChave' : 'prompt.saidaBoss');

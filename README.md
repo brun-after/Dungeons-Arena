@@ -1,9 +1,10 @@
 # Dungeons Dimensions: RPG de ação em tempo real
 
-**Versão do documento:** 3.69 · **Data:** 26/11/2026
+**Versão do documento:** 3.70 · **Data:** 27/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.70 (27/11/2026)**: marco 56: as escadas e os andares das masmorras do Mundo (D-209).
 > - **3.69 (26/11/2026)**: marco 55: o Mundo contínuo no cliente, e ligado (D-208).
 > - **3.68 (26/11/2026)**: marco 54: o Mundo contínuo no núcleo e no servidor, ainda desligado (D-207).
 > - **3.67 (25/11/2026)**: a entrega visual portada (landing, menu, seleção do Mundo, mapa, grimório e d20), a troca com cobrança e chat, e o botão do ataque automático, que não religa ao trocar de alvo (D-205).
@@ -389,6 +390,18 @@ formas novas (a bola de fogo em parábola, o trovão do céu, o sopro gélido em
 aterrorizado (foge), iludido (as skills caem nele mesmo) ou sem visão (ninguém é alvo; na tela, os outros somem).
 
 Detalhes em D-194 e D-195.
+
+### Marco 56 — escadas e andares nas masmorras (27/11/2026)
+
+O último passo do Mundo contínuo.
+- **Entrar descendo.** Ao entrar numa masmorra, os degraus passam escurecendo e ela aparece saindo do escuro; nas
+  torres, se sobe.
+- **Andares.** As masmorras grandes têm andares (a Toca dos Goblins, três). A escada para baixo leva ao próximo, a para
+  cima volta. O chefe e a recompensa ficam no último andar.
+- **O grupo desce junto.** Quem está perto de quem usou a escada vai junto para o mesmo andar.
+- **Onde você está.** O andar aparece na faixa do lugar e no minimapa, e a dica diz para onde a escada leva.
+
+Detalhes em D-209.
 
 ### Marco 55 — o Mundo contínuo, ligado (26/11/2026)
 
