@@ -24,7 +24,8 @@ export function atlasDoReino(reino: Reino, lugar: string, descobertas: readonly 
     texto.textContent = vista ? r.nome : t('mundo.mapa.desconhecida');
     const detalhe = document.createElementNS(ns, 'text');
     detalhe.setAttribute('x', String(p.x)); detalhe.setAttribute('y', String(p.y + 17)); detalhe.classList.add('atlas-detalhe');
-    detalhe.textContent = grupo.dataset.atual === 'true' ? t('mundo.mapa.aqui') : vista ? `${r.nivel[0]}–${r.nivel[1]}${r.perigo === 'perigoso' ? ' · PvP' : ''}` : '· · ·';
+    // 27/11/2026: sem a faixa de nível da região (o mapa não ensina onde caçar); fica o aviso de PvP.
+    detalhe.textContent = grupo.dataset.atual === 'true' ? t('mundo.mapa.aqui') : vista ? (r.perigo === 'perigoso' ? 'PvP' : '') : '· · ·';
     grupo.append(texto, detalhe);
     if (vista) {
       grupo.setAttribute('role', 'button'); grupo.setAttribute('tabindex', '0');

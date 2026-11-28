@@ -149,7 +149,8 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       celula.dataset.vista = vista ? '1' : '0';
       celula.dataset.perigo = vista ? r.perigo : 'desconhecido';
       const nome = document.createElement('span');
-      nome.textContent = vista ? `${r.nome} · ${r.nivel[0]}–${r.nivel[1]}` : t('mundo.mapa.desconhecida');
+      // 27/11/2026: sem a faixa de nível da região (o mapa não ensina onde caçar).
+      nome.textContent = vista ? r.nome : t('mundo.mapa.desconhecida');
       celula.append(nome);
       const marcas: string[] = [];
       for (const m of terreno?.membros ?? []) if (m.lugar === `regiao:${r.id}` || r.estruturas.some(e => m.lugar === `${e.destino.tipo}:${e.destino.id}`)) marcas.push(m.nome);
