@@ -250,10 +250,6 @@ export const ptBR = {
   'prompt.converter': '{tecla}: converter armadilha para sua equipe',
   'prompt.retorno': 'Porta azul: aperte {tecla} em cima dela para voltar à fase anterior',
   // Marco 56 (27/11/2026, D-209): as escadas dos andares das masmorras do Mundo.
-  'prompt.escada.subir': '{tecla}: subir a escada ao andar {numero}',
-  'prompt.escada.descer': '{tecla}: descer a escada ao andar {numero}',
-  'prompt.escada.sairSubindo': '{tecla}: subir a escada e sair',
-  'prompt.escada.sairDescendo': '{tecla}: descer a escada e sair',
   'prompt.portal': '{tecla}: atravessar o portal',
   'prompt.saida': '{tecla}: sair pela porta',
   'prompt.acabouDeSoltar': 'Acabou de soltar',

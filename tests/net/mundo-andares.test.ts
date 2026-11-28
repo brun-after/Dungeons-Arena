@@ -140,7 +140,8 @@ describe('andares das masmorras', () => {
     rodar(s1, 4);
     const fora = s1.retirarPendencias().find((x) => x.tipo === 'trocar');
     const estrutura = obter(REINO.regioes.flatMap((r) => r.estruturas).find((e) => e.destino.id === 'toca_dos_goblins'), 'estrutura');
-    expect(fora).toMatchObject({ destino: expect.stringMatching(/^regiao:/), chegada: portaDa(estrutura).frente, instancia: null });
+    expect(fora).toMatchObject({ chegada: portaDa(estrutura).frente, instancia: null });
+    expect(fora?.destino).toMatch(/^regiao:/);
     expect(b.avisos().some((x) => x.tipo === 'recompensa')).toBe(false);
   });
 });
